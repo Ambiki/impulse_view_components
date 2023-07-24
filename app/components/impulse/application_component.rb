@@ -1,5 +1,7 @@
 module Impulse
   class ApplicationComponent < ViewComponent::Base
+    include Helpers::AttributesHelper
+
     def self.generate_id
       "#{name.demodulize.underscore.dasherize}-#{SecureRandom.uuid}"
     end

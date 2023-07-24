@@ -1,0 +1,153 @@
+import type {
+  FlipOptions,
+  Middleware,
+  OffsetOptions,
+  Placement,
+  ReferenceElement,
+  ShiftOptions,
+  Strategy,
+} from '@floating-ui/dom';
+import { arrow, autoUpdate, computePosition, flip, offset, shift, size } from '@floating-ui/dom';
+import type { ImpulseElement } from 'src/impulse';
+
+export type UseFloatingUIType = {
+  start: () => void;
+  update: () => Promise<void>;
+  stop: () => Promise<void>;
+};
+
+type Options = {
+  referenceElement: ReferenceElement;
+  popupElement: HTMLElement;
+  arrowElement?: HTMLElement;
+  arrowPadding?: number;
+  middleware?: Middleware[];
+  offsetOptions?: OffsetOptions;
+  placement?: Placement;
+  flipOptions?: FlipOptions;
+  shiftOptions?: ShiftOptions;
+  strategy?: Strategy;
+  sync?: 'height' | 'width' | 'both';
+};
+
+export default function useFloatingUI(
+  element: ImpulseElement & { open: boolean },
+  {
+    referenceElement,
+    popupElement,
+    arrowElement,
+    arrowPadding = 0,
+    middleware = [],
+    offsetOptions = 0,
+    placement = 'bottom-start',
+    flipOptions,
+    shiftOptions,
+    strategy = 'fixed',
+    sync,
+  }: Options
+): UseFloatingUIType {
+  let cleanup: ReturnType<typeof autoUpdate> | undefined;
+
+  async function reposition(): Promise<void> {
+    if (!element.open || !referenceElement) return;
+
+    // Middlewares are order dependent: https://floating-ui.com/docs/middleware
+    const _middleware: Middleware[] = [offset(offsetOptions)];
+
+    if (sync) {
+      _middleware.push(
+        size({
+          apply: ({ rects }) => {
+            const syncWidth = sync === 'width' || sync === 'both';
+            const syncHeight = sync === 'height' || sync === 'both';
+            popupElement.style.width = syncWidth ? `${rects.reference.width}px` : '';
+            popupElement.style.height = syncHeight ? `${rects.reference.height}px` : '';
+          },
+        })
+      );
+    } else {
+      popupElement.style.width = '';
+      popupElement.style.height = '';
+    }
+
+    _middleware.push(flip(flipOptions));
+    _middleware.push(shift(shiftOptions));
+
+    if (arrowElement) {
+      _middleware.push(
+        arrow({
+          element: arrowElement,
+          padding: arrowPadding,
+        })
+      );
+    }
+
+    _middleware.concat(middleware);
+
+    const {
+      x,
+      y,
+      placement: _placement,
+      strategy: _strategy,
+      middlewareData,
+    } = await computePosition(referenceElement, popupElement, {
+      placement,
+      middleware: _middleware,
+      strategy,
+    });
+    Object.assign(popupElement.style, {
+      left: `${x}px`,
+      top: `${y}px`,
+      position: _strategy,
+    });
+
+    if (middlewareData.arrow && arrowElement) {
+      const { x, y } = middlewareData.arrow;
+      Object.assign(arrowElement.style, {
+        left: typeof x === 'number' ? `${x}px` : '',
+        top: typeof y === 'number' ? `${y}px` : '',
+      });
+    }
+
+    // Bootstrap's arrow depends on this attribute.
+    popupElement.setAttribute('x-placement', _placement);
+  }
+
+  function start(): void {
+    // Fix floatingUI
+    popupElement.style.position = strategy;
+    popupElement.style.top = '0px';
+    popupElement.style.left = '0px';
+
+    if (!referenceElement) return;
+    cleanup = autoUpdate(referenceElement, popupElement, reposition);
+  }
+
+  async function update() {
+    await reposition();
+  }
+
+  async function stop(): Promise<void> {
+    return new Promise((resolve) => {
+      if (cleanup) {
+        cleanup();
+        cleanup = undefined;
+        requestAnimationFrame(() => resolve());
+      } else {
+        resolve();
+      }
+    });
+  }
+
+  start();
+
+  const disconnectedCallback = () => element.disconnected.bind(element);
+  Object.assign(element, {
+    disconnected() {
+      stop();
+      disconnectedCallback();
+    },
+  });
+
+  return { start, update, stop } as const;
+}
