@@ -1,0 +1,48 @@
+{
+  "name": "@impulse/view-components",
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "build": "concurrently \"yarn build:js\" \"yarn build:css && yarn prefix:css\"",
+    "build:css": "node-sass --include-path node_modules --output-style compressed --source-map true --source-map-contents true --precision 6 src/index.scss app/assets/dist/impulse_view_components.css",
+    "build:js": "rollup --config rollup.config.js",
+    "build:prod": "NODE_ENV=production yarn build",
+    "build:watch": "concurrently \"yarn build:js --watch\" \"yarn build:css --watch\"",
+    "clean": "rm -rf dist app/assets/dist",
+    "lint": "eslint 'src/**/*.ts'",
+    "prefix:css": "postcss --replace ./app/assets/dist/impulse_view_components.css --use autoprefixer --map",
+    "prepublishOnly": "yarn clean && yarn build:prod",
+    "prettier": "prettier --write --loglevel warn .",
+    "prettier:check": "prettier --check --loglevel warn ."
+  },
+  "keywords": [
+    "view-components",
+    "rails",
+    "components"
+  ],
+  "dependencies": {
+    "@ambiki/combobox": "^2.0.1",
+    "@floating-ui/dom": "^1.4.5"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.2",
+    "@rollup/plugin-typescript": "^11.1.2",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "autoprefixer": "^10.4.14",
+    "bootstrap": "4.6",
+    "concurrently": "^8.2.0",
+    "eslint": "^8.45.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "node-sass": "^9.0.0",
+    "postcss": "^8.4.27",
+    "postcss-cli": "^10.1.0",
+    "prettier": "^3.0.0",
+    "rollup": "^3.26.2",
+    "rollup-plugin-uglify": "^6.0.4",
+    "typescript": "^5.1.6"
+  },
+  "license": "MIT"
+}

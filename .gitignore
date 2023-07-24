@@ -14,11 +14,8 @@
 # build files
 /pkg/
 /build/*
-!/build/.keep
 /dist/*
-!/dist/.keep
 /app/assets/dist/*
-!/app/assets/dist/.keep
 
 # editor config
 /.idea/

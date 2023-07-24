@@ -1,0 +1,47 @@
+import resolve from '@rollup/plugin-node-resolve';
+import typescript from '@rollup/plugin-typescript';
+import { uglify } from 'rollup-plugin-uglify';
+
+const isProd = process.env.NODE_ENV === 'production';
+
+/**
+ * @type {import('rollup').RollupOptions}
+ */
+export default [
+  {
+    input: 'src/index.ts',
+    output: [
+      {
+        name: 'ImpulseViewComponents',
+        file: 'dist/index.js',
+        format: 'es',
+      },
+    ],
+    external: ['@ambiki/combobox', '@floating-ui/dom'],
+    plugins: [resolve(), typescript()],
+  },
+  {
+    input: 'src/index.ts',
+    external: ['@floating-ui/dom'],
+    output: [
+      {
+        name: 'ImpulseViewComponents',
+        file: 'app/assets/dist/impulse_view_components.js',
+        format: 'umd',
+        globals: {
+          '@floating-ui/dom': 'FloatingUIDOM',
+        },
+      },
+    ],
+    plugins: [
+      resolve({ browser: true }),
+      typescript({
+        compilerOptions: {
+          declaration: false, // iife bundles don't need types
+          declarationMap: false,
+        },
+      }),
+      ...(isProd ? [uglify()] : []),
+    ],
+  },
+];
