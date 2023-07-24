@@ -1,0 +1,24 @@
+/.byebug_history
+/.bundle/
+/.yardoc
+/_yardoc/
+/coverage/
+/doc/
+/spec/reports/
+/tmp/
+/node_modules/
+
+# rspec failure tracking
+.rspec_status
+
+# build files
+/pkg/
+/build/*
+!/build/.keep
+/dist/*
+!/dist/.keep
+/app/assets/dist/*
+!/app/assets/dist/.keep
+
+# editor config
+/.idea/
