@@ -7,7 +7,15 @@ import { stripCSSUnit } from 'src/impulse/helpers/string';
 
 @registerElement('awc-popover')
 export default class AwcPopoverElement extends ImpulseElement {
+  /**
+   * Whether the popover is open or not.
+   */
   @property({ type: Boolean }) open = false;
+
+  /**
+   * The placement of the popover. The actual placement will vary to keep the popover inside the viewport.
+   * @see https://floating-ui.com/docs/computePosition#placement for a comprehensive list of all available placements.
+   */
   @property() placement: Placement = 'bottom';
 
   @target() button: HTMLButtonElement;
