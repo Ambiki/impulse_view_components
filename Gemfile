@@ -1,12 +1,21 @@
 source "https://rubygems.org"
 
-# Specify your gem's dependencies in impulse_view_components.gemspec
 gemspec
 
-gem "rake", "~> 13.0"
+rails_version = ">= 6.1"
 
-group :test do
-  gem "minitest", "~> 5.0"
+gem "actionview", rails_version
+gem "activesupport", rails_version
+gem "activerecord", rails_version
+gem "bootsnap", require: false
+gem "lookbook", "~> 2.0", ">= 2.0.5"
+gem "puma", "~> 6.3"
+gem "rake", "~> 13.0"
+gem "railties", rails_version
+gem "sqlite3", "~> 1.4"
+
+group :development, :test do
+  gem "rspec", "~> 3.0"
 end
 
 group :development do
