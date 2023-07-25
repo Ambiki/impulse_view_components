@@ -115,3 +115,9 @@ export default class AwcPopoverElement extends ImpulseElement {
     return stripCSSUnit(borderRadius) || 2;
   }
 }
+
+declare global {
+  interface Window {
+    AwcPopoverElement: typeof AwcPopoverElement;
+  }
+}

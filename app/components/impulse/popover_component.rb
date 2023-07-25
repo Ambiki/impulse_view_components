@@ -2,6 +2,7 @@ module Impulse
   class PopoverComponent < ApplicationComponent
     renders_one :button, lambda { |**system_args|
       system_args[:tag] ||= :button
+      system_args[:type] = system_args.fetch(:type, "button")
       system_args[:role] = :button
       system_args[:"aria-haspopup"] = :dialog
       system_args[:"aria-expanded"] = false
@@ -40,6 +41,10 @@ module Impulse
         system_args[:data],
         action: "keydown->awc-popover#handleKeydown"
       )
+    end
+
+    def render?
+      button.present?
     end
   end
 end
