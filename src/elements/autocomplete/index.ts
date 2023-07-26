@@ -35,6 +35,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   constructor() {
     super();
     this.remoteSearch = debounce(this.remoteSearch.bind(this), 300);
+    this.handleFormReset = this.handleFormReset.bind(this);
   }
 
   connected() {
@@ -54,6 +55,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     this.combobox = new Combobox(this.input, this.listbox, { multiple: this.multiple });
     this.selectVariant = this.multiple ? this.multipleSelect : this.singleSelect;
     this.selectVariant.connected();
+    this.form?.addEventListener('reset', this.handleFormReset);
   }
 
   disconnected(): void {
@@ -62,6 +64,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     this.firstFocus = true;
     this.selectVariant.disconnected();
     this.abortController = undefined;
+    this.form?.removeEventListener('reset', this.handleFormReset);
   }
 
   async openChanged(newValue: boolean) {
@@ -220,12 +223,22 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     this.multipleSelect.removeValue(getValue(tag));
   }
 
+  handleFormReset() {
+    this.open = false;
+    this.reset();
+  }
+
   activate(option: HTMLElement, { scroll = true } = {}) {
     this.combobox.activate(option, { scroll: scroll });
   }
 
   clear() {
     this.selectVariant.clear();
+    this.currentQuery = undefined;
+  }
+
+  reset() {
+    this.selectVariant.reset();
     this.currentQuery = undefined;
   }
 
@@ -306,6 +319,13 @@ export default class AwcAutocompleteElement extends ImpulseElement {
 
   get options() {
     return this.combobox.options;
+  }
+
+  /**
+   * Returns the parent form element.
+   */
+  get form() {
+    return this.closest('form');
   }
 }
 

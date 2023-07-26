@@ -18,7 +18,7 @@ module Impulse
     end
 
     test "renders options from a pair of choices" do
-      render_inline(Impulse::SelectComponent.new(:user, :fruit_id, ["Apple", "apple"]))
+      render_inline(Impulse::SelectComponent.new(:user, :fruit_id, [["Apple", "apple"]]))
 
       assert_selector "[role='option'][value='apple']", visible: false
       assert_selector "[role='option'][data-text='Apple']", visible: false

@@ -14,6 +14,15 @@ module Impulse
           app.config.assets.precompile += %w[impulse_view_components.js impulse_view_components.css]
         end
       end
+
+      initializer "impulse_view_components.helpers" do
+        ActiveSupport.on_load :action_controller do
+          require "impulse/helpers/form_helper"
+          helper Impulse::Helpers::FormHelper
+
+          ViewComponent::Base.prepend(Impulse::Helpers::FormHelper)
+        end
+      end
     end
   end
 end

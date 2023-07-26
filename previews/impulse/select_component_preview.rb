@@ -17,6 +17,29 @@ module Impulse
       )
     end
 
+    class User
+      include ActiveModel::Model
+
+      attr_reader :fruit_id, :fruit_ids
+
+      def initialize(fruit_id: nil, fruit_ids: [])
+        @fruit_id = fruit_id
+        @fruit_ids = fruit_ids
+      end
+    end
+
+    # @!group form_with_single_select
+    # @label Select
+    def form_with_single_select
+      render_with_template
+    end
+
+    # @label Block options
+    def form_with_single_select_block_options
+      render_with_template
+    end
+    # @!endgroup form_with_single_select
+
     # @param size select ["sm", "md", "lg"]
     # @param placeholder text
     # @param disabled toggle
@@ -33,6 +56,10 @@ module Impulse
           disabled: disabled
         )
       )
+    end
+
+    def form_with_multiple_select
+      render_with_template
     end
 
     def block_options

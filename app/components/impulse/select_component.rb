@@ -9,7 +9,6 @@ module Impulse
       @choices = choices
       @selected = selected
       @system_args = system_args
-      @system_args[:selected] = value
     end
 
     private
@@ -21,6 +20,7 @@ module Impulse
     end
 
     def options_from_choices
+      return [] if @choices.nil?
       @choices.map do |choice|
         tuple = option_text_and_value(choice)
         OpenStruct.new(value: tuple.last, text: tuple.first)

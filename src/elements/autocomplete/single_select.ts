@@ -2,16 +2,23 @@ import { getText, getValue } from './helpers';
 import type AwcAutocompleteElement from './index';
 
 export default class SingleSelect {
+  private defaultValue: string = '';
+  private defaultText: string = '';
+
   constructor(private readonly autocomplete: AwcAutocompleteElement) {
     this.autocomplete = autocomplete;
   }
 
   connected() {
-    //
+    // Store value and text attribute so that we can restore it when the parent form fires a `reset` event.
+    this.defaultValue = this.hiddenField.value;
+    this.defaultText = this.hiddenField.getAttribute('data-text') || '';
   }
 
   disconnected() {
     this.clear();
+    this.defaultValue = '';
+    this.defaultText = '';
   }
 
   start() {
@@ -28,18 +35,35 @@ export default class SingleSelect {
   commit(option: HTMLElement) {
     const value = getValue(option);
     const text = getText(option);
-    this.autocomplete.value = value;
-    this.autocomplete.input.value = text;
-    this.hiddenField.value = value;
-    this.hiddenField.setAttribute('data-text', text);
+    this.setValue(value, text);
     this.autocomplete.open = false;
   }
 
   clear() {
-    this.autocomplete.value = '';
-    this.autocomplete.input.value = '';
-    this.hiddenField.value = '';
-    this.hiddenField.removeAttribute('data-text');
+    this.setValue('', '');
+  }
+
+  reset() {
+    this.setValue(this.defaultValue, this.defaultText);
+
+    // Only select if the listbox is open because all options are deselected when it is hidden.
+    if (this.autocomplete.open) {
+      const option = this.autocomplete.options.find((option) => getValue(option) === this.defaultValue);
+      if (option) {
+        this.autocomplete.combobox.select(option);
+      }
+    }
+  }
+
+  setValue(value: string, text: string) {
+    this.autocomplete.value = value;
+    this.autocomplete.input.value = text;
+    this.hiddenField.value = value;
+    if (!text) {
+      this.hiddenField.removeAttribute('data-text');
+      return;
+    }
+    this.hiddenField.setAttribute('data-text', text);
   }
 
   get firstActiveOption(): HTMLElement | undefined {

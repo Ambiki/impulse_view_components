@@ -1,4 +1,4 @@
-<%= render(Impulse::AutocompleteComponent.new(@object_name, @method_name, **@system_args)) do |c| %>
+<%= render(Impulse::AutocompleteComponent.new(@object_name, @method_name, selected: value, **@system_args)) do |c| %>
   <% if options? %>
     <% options.each do |option| %>
       <%= c.with_option(value: option.value, text: option.text, **option.system_args) %>

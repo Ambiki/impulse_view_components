@@ -3,6 +3,7 @@ import type AwcAutocompleteElement from './index';
 
 export default class MultipleSelect {
   private selectedValues = new Set<string>();
+  private defaultSelectedValues: Array<{ value: string; text: string }> = [];
 
   constructor(private readonly autocomplete: AwcAutocompleteElement) {
     this.autocomplete = autocomplete;
@@ -11,10 +12,12 @@ export default class MultipleSelect {
   connected() {
     const values = parseJSON(this.autocomplete.value);
     values.forEach((value) => this.selectedValues.add(value));
+    this.defaultSelectedValues = this.persistedTags.map((tag) => ({ value: getValue(tag), text: getText(tag) }));
   }
 
   disconnected() {
     this.clear();
+    this.defaultSelectedValues.length = 0;
   }
 
   start() {
@@ -62,10 +65,15 @@ export default class MultipleSelect {
     this.selectedValues.forEach((value) => this.removeValue(value));
   }
 
-  setValue(value: string, text: string) {
+  reset() {
+    this.clear();
+    this.defaultSelectedValues.forEach(({ value, text }) => this.setValue(value, text, { persisted: true }));
+  }
+
+  setValue(value: string, text: string, { persisted = false } = {}) {
     if (this.selectedValues.has(value)) return;
     this.selectedValues.add(value);
-    this.insertTag(value, text);
+    this.insertTag(value, text, { persisted });
     this.updateElementValue();
 
     // Only select if the listbox is open because all options are deselected when it is hidden.
@@ -125,6 +133,10 @@ export default class MultipleSelect {
 
   get tags() {
     return Array.from(this.autocomplete.querySelectorAll<HTMLElement>('[data-behavior="tag"]'));
+  }
+
+  get persistedTags() {
+    return this.tags.filter((tag) => tag.hasAttribute('data-persisted'));
   }
 
   private get template() {
