@@ -67,6 +67,9 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     this.handleFormReset = this.handleFormReset.bind(this);
   }
 
+  /**
+   * Called when the element is connected to the DOM.
+   */
   connected() {
     this.floatingUI = useFloatingUI(this, {
       referenceElement: this.control,
@@ -88,7 +91,10 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     this.selectVariant.setRequiredAttribute(this.required);
   }
 
-  disconnected(): void {
+  /**
+   * Called when the element is removed from the DOM.
+   */
+  disconnected() {
     this.open = false;
     this.removeAttribute('data-focus');
     this.firstFocus = true;
@@ -97,6 +103,9 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     this.form?.removeEventListener('reset', this.handleFormReset);
   }
 
+  /**
+   * Called when the `open` attribute changes.
+   */
   async openChanged(newValue: boolean) {
     if (newValue) {
       this.combobox.start();
@@ -128,10 +137,16 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     }
   }
 
+  /**
+   * Called when the `value` attribute changes.
+   */
   valueChanged(newValue: string) {
     this.classList.toggle('awc-autocomplete--selected', newValue !== '' && newValue !== '[]');
   }
 
+  /**
+   * Called when the `disabled` attribute changes.
+   */
   disabledChanged(newValue: boolean) {
     this.input.disabled = newValue;
     this.clearBtn.disabled = newValue;
@@ -143,6 +158,9 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     }
   }
 
+  /**
+   * Called when the `required` attribute changes.
+   */
   requiredChanged(newValue: boolean) {
     this.selectVariant.setRequiredAttribute(newValue);
   }
@@ -262,15 +280,55 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     this.reset();
   }
 
+  /**
+   * Sets the value of the element.
+   * @param value - The value of the option.
+   * @param text - The text of the option.
+   */
+  setValue(value: string, text: string) {
+    this.selectVariant.setValue(value, text);
+  }
+
+  /**
+   * Removes a value of the element.
+   * @param value - The value of the option (you do not need to provide the value arg for a single select).
+   */
+  removeValue(value?: string) {
+    if (this.multiple && value) {
+      this.multipleSelect.removeValue(value);
+      return;
+    }
+
+    this.singleSelect.removeValue();
+  }
+
+  /**
+   * Activates an option by setting the `data-active` attribute.
+   * @param option - The option you want to activate.
+   * @param scroll - When true, it scrolls the option to view (by default, it is true).
+   */
   activate(option: HTMLElement, { scroll = true } = {}) {
     this.combobox.activate(option, { scroll: scroll });
   }
 
+  /**
+   * Deactivates the active option by removing the `data-active` attribute.
+   */
+  deactivate() {
+    this.combobox.deactivate();
+  }
+
+  /**
+   * Deselects all the selected options.
+   */
   clear() {
     this.selectVariant.clear();
     this.currentQuery = undefined;
   }
 
+  /**
+   * Resets the autocomplete element to its initial state.
+   */
   reset() {
     this.selectVariant.reset();
     this.currentQuery = undefined;
@@ -347,10 +405,23 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     this.toggleAttribute('no-options', this.visibleOptions.length === 0);
   }
 
+  /**
+   * Returns the option that has the `data-active` attribute.
+   */
+  get activeOption() {
+    return this.combobox.activeOption;
+  }
+
+  /**
+   * Returns all the visible options of the autocomplete element.
+   */
   get visibleOptions() {
     return this.options.filter((o) => !o.hidden);
   }
 
+  /**
+   * Returns all the options of the autocomplete element.
+   */
   get options() {
     return this.combobox.options;
   }

@@ -66,6 +66,11 @@ export default class SingleSelect {
     this.hiddenField.setAttribute('data-text', text);
   }
 
+  // Just to make the API similar to the multiple select.
+  removeValue() {
+    this.clear();
+  }
+
   setRequiredAttribute(value: boolean) {
     this.autocomplete.input.required = value;
   }
