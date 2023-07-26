@@ -9,12 +9,40 @@ import SingleSelect from './single_select';
 
 @registerElement('awc-autocomplete')
 export default class AwcAutocompleteElement extends ImpulseElement {
+  /**
+   * Shows/hides the listbox element.
+   */
   @property({ type: Boolean }) open = false;
+
+  /**
+   * The current value of the autocomplete element.
+   */
   @property() value: string;
+
+  /**
+   * Disables the autocomplete element.
+   */
   @property({ type: Boolean }) disabled = false;
+
+  /**
+   * Makes the autocomplete element a required field.
+   */
   @property({ type: Boolean }) required = false;
+
+  /**
+   * Whether multiple values can be selected or not.
+   */
   @property({ type: Boolean }) multiple = false;
+
+  /**
+   * The endpoint to fetch the options from.
+   */
   @property() src: string;
+
+  /**
+   * The param that is appended when making a network request.
+   * Example: /users?q=john
+   */
   @property() param = 'q';
 
   @target() input: HTMLInputElement;
@@ -219,8 +247,8 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   }
 
   handleClear() {
-    this.clear();
     this.open = false;
+    this.clear();
   }
 
   handleTagRemove(event: Event) {
