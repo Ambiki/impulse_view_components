@@ -1,0 +1,325 @@
+.awc-autocomplete {
+  position: relative;
+  display: block;
+}
+
+.awc-autocomplete-control {
+  display: flex;
+  align-items: center;
+  position: relative;
+  cursor: text;
+  padding-right: 2.5rem;
+  height: 100%;
+  min-height: var(--awc-autocomplete-control-min-height);
+}
+
+// https://github.com/twbs/bootstrap/blob/v4.6.0/scss/mixins/_forms.scss#L13
+// Mimic input focus state.
+.awc-autocomplete[data-focus] .awc-autocomplete-control {
+  color: var(--awc-autocomplete-control-focus-color);
+  background-color: $input-focus-bg;
+  border-color: var(--awc-autocomplete-control-focus-border-color);
+  outline: 0;
+
+  @if $enable-shadows {
+    @include box-shadow(var(--awc-autocomplete-control-box-shadow), var(--awc-autocomplete-control-focus-box-shadow));
+  } @else {
+    box-shadow: var(--awc-autocomplete-control-focus-box-shadow);
+  }
+}
+
+.awc-autocomplete[disabled] {
+  .awc-autocomplete-control {
+    cursor: default;
+    background-color: var(--awc-autocomplete-control-disabled-bg-color);
+  }
+
+  .awc-autocomplete-clear-btn {
+    background-color: var(--awc-autocomplete-control-disabled-bg-color);
+    border-color: var(--awc-autocomplete-control-disabled-bg-color);
+  }
+}
+
+.awc-autocomplete-input {
+  display: block;
+  min-width: var(--awc-autocomplete-input-min-width);
+  height: var(--awc-autocomplete-input-height);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  flex: 1 1 0%;
+  font: inherit;
+  letter-spacing: inherit;
+  background: none;
+  color: currentColor;
+  border: 0;
+  outline: none;
+  background-clip: padding-box;
+}
+
+.awc-autocomplete-end-adornment {
+  flex-shrink: 0;
+  position: absolute;
+  right: $input-padding-x;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  margin-right: calc(#{$input-padding-x} / 2 * -1);
+}
+
+.awc-autocomplete-adornment-btn,
+.awc-autocomplete-adornment-decorator {
+  width: var(--awc-autocomplete-adornment-item-size);
+  height: var(--awc-autocomplete-adornment-item-size);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.125rem;
+}
+
+// Hide clear btn when there are no selections
+.awc-autocomplete-clear-btn {
+  display: none;
+  background-color: var(--awc-autocomplete-input-bg-color);
+}
+
+.awc-autocomplete-adornment-decorator {
+  pointer-events: none;
+}
+
+.awc-autocomplete-listbox {
+  font-size: var(--awc-autocomplete-listbox-font-size);
+  max-height: var(--awc-autocomplete-listbox-max-height);
+  overflow-y: auto;
+
+  // Use native [hidden] attribute to show/hide listbox.
+  &.dropdown-menu {
+    display: block;
+  }
+}
+
+.awc-autocomplete-options {
+  margin: 0;
+  padding: 0;
+}
+
+// Group header
+.awc-autocomplete-group-header {
+  padding: var(--awc-autocomplete-group-header-padding-y) var(--awc-autocomplete-group-header-padding-x);
+  background-color: var(--awc-autocomplete-group-header-bg-color);
+  line-height: var(--awc-autocomplete-group-header-lh);
+  font-size: var(--awc-autocomplete-group-header-font-size);
+  font-weight: var(--awc-autocomplete-group-header-fw);
+  color: var(--awc-autocomplete-group-header-color);
+  @include text-truncate();
+}
+
+.awc-autocomplete-option-check {
+  color: var(--awc-autocomplete-option-check-color);
+  flex-shrink: 0;
+  visibility: hidden;
+}
+
+.awc-autocomplete-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--awc-autocomplete-option-padding-y) var(--awc-autocomplete-option-padding-x);
+  line-height: var(--awc-autocomplete-option-lh);
+  cursor: pointer;
+  user-select: none;
+  text-decoration: none;
+  font-size: var(--awc-autocomplete-option-font-size);
+
+  // https://github.com/twbs/bootstrap/blob/v4.6.0/scss/_dropdown.scss#L148C27-L148C27
+  // Mimic dropdown-item hover state.
+  &[data-active],
+  &:active,
+  .active {
+    color: $dropdown-link-hover-color;
+    @include gradient-bg(var(--awc-autocomplete-option-hover-bg-color));
+  }
+
+  // Enable hover state.
+  // TODO: Disabled options cannot be activated. Need to fix this in the combobox package.
+  &.disabled {
+    pointer-events: auto;
+  }
+
+  // https://github.com/twbs/bootstrap/blob/v4.6.0/scss/_dropdown.scss#L161
+  // Mimic dropdown-item disabled state.
+  &[data-active].disabled {
+    color: $dropdown-link-disabled-color;
+  }
+
+  &.disabled .awc-autocomplete-option-check {
+    color: var(--awc-autocomplete-option-check-disabled-color);
+  }
+}
+
+.awc-autocomplete-option[aria-selected='true'] .awc-autocomplete-option-check {
+  visibility: visible;
+}
+
+.awc-autocomplete-option-text {
+  display: block;
+  flex: 1 1 0%;
+  margin-right: 0.25rem;
+  @include text-truncate();
+}
+
+// Tag
+.awc-autocomplete-tag {
+  display: flex;
+  align-items: center;
+  column-gap: 0.25rem;
+  padding-inline: var(--awc-autocomplete-tag-padding-x);
+  min-width: 0;
+  max-width: var(--awc-autocomplete-tag-max-width);
+  height: var(--awc-autocomplete-input-height);
+  vertical-align: middle;
+  background-color: var(--awc-autocomplete-tag-bg-color);
+  border-radius: var(--awc-autocomplete-tag-border-radius);
+  border: 1px solid var(--awc-autocomplete-tag-border-color);
+  user-select: none;
+}
+
+.awc-autocomplete-tag-text {
+  display: block;
+  line-height: var(--awc-autocomplete-tag-btn-size);
+  font-size: var(--awc-autocomplete-tag-font-size);
+  text-decoration: none;
+  flex: 1 1 0%;
+  @include text-truncate();
+}
+
+.awc-autocomplete-tag-end-adornment {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: calc(var(--awc-autocomplete-tag-padding-x) / 2 * -1);
+}
+
+.awc-autocomplete-tag-dismiss-btn {
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--awc-autocomplete-tag-btn-size);
+  width: var(--awc-autocomplete-tag-btn-size);
+  border-radius: 0.125rem;
+
+  &:hover {
+    background-color: var(--awc-autocomplete-tag-btn-bg-hover-color);
+    color: $white;
+  }
+
+  &[disabled] {
+    background-color: transparent;
+    color: inherit;
+  }
+}
+
+// Blankslate
+.awc-autocomplete-blankslate {
+  display: none;
+  text-align: center;
+  padding: var(--awc-autocomplete-blankslate-padding-y) var(--awc-autocomplete-blankslate-padding-x);
+  color: var(--awc-autocomplete-blankslate-color);
+}
+
+// Error
+.awc-autocomplete-error {
+  display: none;
+  text-align: center;
+  padding: var(--awc-autocomplete-blankslate-padding-y) var(--awc-autocomplete-blankslate-padding-x);
+  color: var(--awc-autocomplete-error-color);
+}
+
+// Spinner
+.awc-autocomplete-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--awc-autocomplete-blankslate-padding-y) var(--awc-autocomplete-blankslate-padding-x);
+}
+
+/** States **/
+
+// Selected
+.awc-autocomplete--selected .awc-autocomplete-adornment-decorator {
+  display: none;
+}
+
+// Show clear btn
+.awc-autocomplete--selected .awc-autocomplete-clear-btn {
+  display: inline-flex;
+}
+
+// No options
+.awc-autocomplete[no-options] {
+  .awc-autocomplete-options {
+    display: none;
+  }
+
+  &:not([error]) .awc-autocomplete-blankslate {
+    display: block;
+  }
+}
+
+// Error
+.awc-autocomplete[error] {
+  .awc-autocomplete-error {
+    display: block;
+  }
+
+  .awc-autocomplete-spinner {
+    display: none;
+  }
+}
+
+// Multiple
+.awc-autocomplete[multiple] .awc-autocomplete-control {
+  flex-wrap: wrap;
+  gap: var(--awc-autocomplete-tag-gap);
+}
+
+/** Sizes **/
+
+// sm
+// https://github.com/twbs/bootstrap/blob/v4.6.0/scss/_forms.scss#L152
+.awc-autocomplete--sm {
+  --awc-autocomplete-input-height: var(--awc-autocomplete-input-height-sm);
+  --awc-autocomplete-tag-btn-size: 1rem;
+
+  .awc-autocomplete-control {
+    min-height: var(--awc-autocomplete-control-min-height-sm);
+    padding-right: 2.25rem;
+  }
+
+  .awc-autocomplete-end-adornment {
+    right: $input-padding-x-sm;
+    margin-right: calc(#{$input-padding-x-sm} / 2 * -1);
+  }
+}
+
+// lg
+// https://github.com/twbs/bootstrap/blob/v4.6.0/scss/_forms.scss#L160
+.awc-autocomplete--lg {
+  --awc-autocomplete-input-height: var(--awc-autocomplete-input-height-lg);
+  --awc-autocomplete-tag-font-size: var(--awc-autocomplete-tag-font-size-lg);
+  --awc-autocomplete-tag-gap: var(--awc-autocomplete-tag-gap-lg);
+
+  .awc-autocomplete-control {
+    min-height: var(--awc-autocomplete-control-min-height-lg);
+    padding-right: 2.75rem;
+  }
+
+  .awc-autocomplete-end-adornment {
+    right: $input-padding-x-lg;
+    margin-right: calc(#{$input-padding-x-lg} / 2 * -1);
+  }
+}

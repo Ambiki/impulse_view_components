@@ -3,5 +3,67 @@
 @import 'bootstrap/scss/mixins';
 @import 'bootstrap/scss/root';
 
+// Variables
+:root {
+  /** Autocomplete */
+  --awc-autocomplete-control-min-height: #{$input-height};
+  --awc-autocomplete-control-min-height-sm: #{$input-height-sm};
+  --awc-autocomplete-control-min-height-lg: #{$input-height-lg};
+  --awc-autocomplete-control-focus-color: #{$input-focus-color};
+  --awc-autocomplete-control-focus-border-color: #{$input-focus-border-color};
+  --awc-autocomplete-control-disabled-bg-color: #eef4ff; // n20
+  --awc-autocomplete-control-box-shadow: #{$input-box-shadow};
+  --awc-autocomplete-control-focus-box-shadow: #{$input-focus-box-shadow};
+  --awc-autocomplete-input-min-width: 2rem;
+  --awc-autocomplete-input-height: calc(#{$input-height} - (#{$input-padding-y} * 2) - (#{$input-border-width} * 2));
+  --awc-autocomplete-input-bg-color: #{$input-bg};
+  --awc-autocomplete-adornment-item-size: 1.5rem;
+  --awc-autocomplete-listbox-font-size: 0.875rem;
+  --awc-autocomplete-listbox-max-height: 256px;
+  --awc-autocomplete-option-padding-x: 1rem;
+  --awc-autocomplete-option-padding-y: 0.5rem;
+  --awc-autocomplete-option-font-size: 0.875rem;
+  --awc-autocomplete-option-lh: 1.25rem;
+  --awc-autocomplete-option-hover-bg-color: #{$dropdown-link-hover-bg};
+  --awc-autocomplete-option-check-color: #38b57c; // green-light-500
+  --awc-autocomplete-option-check-disabled-color: #afe1cb; // green-light-200
+  --awc-autocomplete-group-header-padding-x: var(--awc-autocomplete-option-padding-x);
+  --awc-autocomplete-group-header-padding-y: 0.25rem;
+  --awc-autocomplete-group-header-color: #384b6e; // n600
+  --awc-autocomplete-group-header-bg-color: #eef4ff; // n20
+  --awc-autocomplete-group-header-font-size: 0.75rem;
+  --awc-autocomplete-group-header-lh: 18px;
+  --awc-autocomplete-group-header-fw: 400;
+  --awc-autocomplete-tag-padding-x: 0.5rem;
+  --awc-autocomplete-tag-btn-size: 1.25rem;
+  --awc-autocomplete-tag-btn-bg-hover-color: #627291; // n300
+  --awc-autocomplete-tag-gap: 0.25rem;
+  --awc-autocomplete-tag-max-width: 24rem;
+  --awc-autocomplete-tag-bg-color: #e0e7f7; // n30
+  --awc-autocomplete-tag-border-color: #c4cdde; // n50
+  --awc-autocomplete-tag-border-radius: 0.125rem;
+  --awc-autocomplete-tag-font-size: 0.75rem;
+  --awc-autocomplete-blankslate-color: #384b6e; // n600
+  --awc-autocomplete-blankslate-padding-x: 1rem;
+  --awc-autocomplete-blankslate-padding-y: 0.5rem;
+  --awc-autocomplete-error-color: #c01303; // red-500
+  // sm
+  --awc-autocomplete-input-height-sm: calc(
+    #{$input-height-sm} - (#{$input-padding-y-sm} * 2) - (#{$input-border-width} * 2)
+  );
+  // lg
+  --awc-autocomplete-input-height-lg: calc(
+    #{$input-height-lg} - (#{$input-padding-y-lg} * 2) - (#{$input-border-width} * 2)
+  );
+  --awc-autocomplete-tag-font-size-lg: 0.875rem;
+  --awc-autocomplete-tag-gap-lg: 0.375rem;
+}
+
+// Reset
+[hidden][hidden] {
+  display: none !important;
+}
+
 // Components
+@import './elements/autocomplete/index';
 @import './elements/popover/index';

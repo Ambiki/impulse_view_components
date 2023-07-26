@@ -1,0 +1,84 @@
+<%= render(Impulse::BaseRenderer.new(**@system_args)) do %>
+  <%= content_tag :div, class: class_names("awc-autocomplete-control form-control", "form-control-sm": @size == "sm", "form-control-lg": @size == "lg"), data: { target: "awc-autocomplete.control" } do %>
+    <% if multiple? %>
+      <%= hidden_field @object_name, @method_name, id: nil, multiple: true, value: nil, data: { behavior: "hidden-field" }, **hidden_field_args if @include_hidden %>
+      <% @selected&.each do |selected| %>
+        <div class="awc-autocomplete-tag" value="<%= selected.value %>" data-behavior="tag" data-persisted>
+          <span class="awc-autocomplete-tag-text" data-behavior="text"><%= selected.text %></span>
+          <span class="awc-autocomplete-tag-end-adornment">
+            <%= content_tag :button, type: :button, class: "awc-autocomplete-tag-dismiss-btn btn", tabindex: "-1", title: "Remove", disabled: @disabled, data: { action: "click->awc-autocomplete#handleTagRemove", target: "awc-autocomplete.tagDismissBtns" } do %>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path fill="none" d="M0 0h24v24H0z"></path><path d="M12.0007 10.5865L16.9504 5.63672L18.3646 7.05093L13.4149 12.0007L18.3646 16.9504L16.9504 18.3646L12.0007 13.4149L7.05093 18.3646L5.63672 16.9504L10.5865 12.0007L5.63672 7.05093L7.05093 5.63672L12.0007 10.5865Z"></path>
+              </svg>
+            <% end %>
+          </span>
+          <%= hidden_field @object_name, @method_name, id: nil, value: selected.value, multiple: true, data: { behavior: "hidden-field" }, **hidden_field_args %>
+        </div>
+      <% end %>
+
+      <template data-behavior="tag-template">
+        <div class="awc-autocomplete-tag" data-behavior="tag">
+          <span class="awc-autocomplete-tag-text" data-behavior="text"></span>
+          <span class="awc-autocomplete-tag-end-adornment">
+            <%= content_tag :button, type: :button, class: "awc-autocomplete-tag-dismiss-btn btn", tabindex: "-1", title: "Remove", data: { action: "click->awc-autocomplete#handleTagRemove", target: "awc-autocomplete.tagDismissBtns" } do %>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path fill="none" d="M0 0h24v24H0z"></path><path d="M12.0007 10.5865L16.9504 5.63672L18.3646 7.05093L13.4149 12.0007L18.3646 16.9504L16.9504 18.3646L12.0007 13.4149L7.05093 18.3646L5.63672 16.9504L10.5865 12.0007L5.63672 7.05093L7.05093 5.63672L12.0007 10.5865Z"></path>
+              </svg>
+            <% end %>
+          </span>
+          <%= hidden_field @object_name, @method_name, id: nil, value: nil, multiple: true, data: { behavior: "hidden-field" }, **hidden_field_args %>
+        </div>
+      </template>
+    <% else %>
+      <%= hidden_field @object_name, @method_name, id: nil, value: @selected&.value, data: { behavior: "hidden-field", text: @selected&.text }, **hidden_field_args %>
+    <% end %>
+
+    <%= text_field @object_name,
+      @method_name,
+      class: "awc-autocomplete-input",
+      value: multiple? ? nil : @selected&.text,
+      name: nil,
+      autocomplete: "off",
+      spellcheck: false,
+      autocapitalize: "none",
+      disabled: @disabled,
+      data: {
+        target: "awc-autocomplete.input",
+        action: "mousedown->awc-autocomplete#handleInputMousedown focus->awc-autocomplete#handleInputFocus blur->awc-autocomplete#handleInputBlur keydown->awc-autocomplete#handleInputKeydown input->awc-autocomplete#handleInput"
+      },
+      **search_field_args %>
+    <div class="awc-autocomplete-end-adornment">
+      <%= content_tag :button, type: :button, class: "awc-autocomplete-adornment-btn awc-autocomplete-clear-btn btn btn-light", title: "Clear", disabled: @disabled, data: { action: "click->awc-autocomplete#handleClear", target: "awc-autocomplete.clearBtn" } do %>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path fill="none" d="M0 0h24v24H0z"></path><path d="M12.0007 10.5865L16.9504 5.63672L18.3646 7.05093L13.4149 12.0007L18.3646 16.9504L16.9504 18.3646L12.0007 13.4149L7.05093 18.3646L5.63672 16.9504L10.5865 12.0007L5.63672 7.05093L7.05093 5.63672L12.0007 10.5865Z"></path></svg>
+      <% end %>
+
+      <div aria-hidden="true" class="awc-autocomplete-adornment-decorator">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path fill="none" d="M0 0h24v24H0z"></path><path d="M12 16L6 10H18L12 16Z"></path></svg>
+      </div>
+    </div>
+  <% end %>
+
+  <div role="listbox" class="awc-autocomplete-listbox dropdown-menu" tabindex="-1" data-target="awc-autocomplete.listbox" hidden>
+    <div role="presentation" class="awc-autocomplete-options" data-target="awc-autocomplete.optionsContainer">
+      <% if ajax? %>
+        <div role="presentation" class="awc-autocomplete-spinner">
+          <%= render(Impulse::SpinnerComponent.new(role: :none)) %>
+        </div>
+      <% else %>
+        <% options.each do |option| %>
+          <%= option %>
+        <% end %>
+      <% end %>
+    </div>
+
+    <div role="presentation" class="awc-autocomplete-blankslate">
+      <%= blankslate.presence || "We couldn't find that!" %>
+    </div>
+
+    <% if ajax? %>
+      <div role="presentation" class="awc-autocomplete-error">
+        <%= error.presence || "An error occurred. Please try again!" %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

@@ -1,0 +1,3 @@
+<% @users.each do |user| %>
+  <%= render(Impulse::Autocomplete::OptionComponent.new(value: user[:name].parameterize(separator: "_"), text: user[:name])) %>
+<% end %>
