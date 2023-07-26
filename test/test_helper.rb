@@ -13,6 +13,10 @@ class ApplicationTest < ViewComponent::TestCase
   class User
     include ActiveModel::Model
 
+    def self.model_name
+      ActiveModel::Name.new(self.class, nil, "User")
+    end
+
     attr_reader :fruit_id, :fruit_ids
 
     def initialize(fruit_id: nil, fruit_ids: [])

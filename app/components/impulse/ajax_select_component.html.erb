@@ -1,0 +1,4 @@
+<%= render(Impulse::AutocompleteComponent.new(@object_name, @method_name, selected: value, **@system_args)) do |c| %>
+  <%= c.with_blankslate_content(blankslate.presence || "We couldn't find that!") %>
+  <%= c.with_error_content(error.presence || "An error occurred. Please try again!") %>
+<% end %>
