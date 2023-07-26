@@ -66,6 +66,10 @@ export default class SingleSelect {
     this.hiddenField.setAttribute('data-text', text);
   }
 
+  setRequiredAttribute(value: boolean) {
+    this.autocomplete.input.required = value;
+  }
+
   get firstActiveOption(): HTMLElement | undefined {
     return this.selectedOption || this.autocomplete.visibleOptions[0];
   }

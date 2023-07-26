@@ -1,6 +1,6 @@
 <%= impulse_form_with model: Impulse::SelectComponentPreview::User.new(fruit_id: 1), url: "/users" do |f| %>
   <%= f.label :fruit_id, "Select a fruit" %>
-  <%= f.select :fruit_id do |c| %>
+  <%= f.select :fruit_id, required: local_assigns[:required] do |c| %>
     <% [["Apple", 1], ["Mango", 2]].each do |fruit| %>
       <%= c.with_option(value: fruit.last, text: fruit.first) %>
     <% end %>

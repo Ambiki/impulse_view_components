@@ -75,6 +75,7 @@ export default class MultipleSelect {
     this.selectedValues.add(value);
     this.insertTag(value, text, { persisted });
     this.updateElementValue();
+    this.setRequiredAttribute(this.autocomplete.required);
 
     // Only select if the listbox is open because all options are deselected when it is hidden.
     if (this.autocomplete.open) {
@@ -90,11 +91,21 @@ export default class MultipleSelect {
     this.selectedValues.delete(value);
     this.removeTag(value);
     this.updateElementValue();
+    this.setRequiredAttribute(this.autocomplete.required);
 
     const option = this.autocomplete.options.find((option) => getValue(option) === value);
     if (option) {
       this.autocomplete.combobox.deselect(option);
     }
+  }
+
+  setRequiredAttribute(value: boolean) {
+    if (!value || (value && this.selectedValues.size > 0)) {
+      this.autocomplete.input.required = false;
+      return;
+    }
+
+    this.autocomplete.input.required = true;
   }
 
   private insertTag(value: string, text: string, { persisted = false } = {}): void {

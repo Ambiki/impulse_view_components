@@ -13,8 +13,9 @@ module Impulse
       )
     end
 
-    def form_with_single_select
-      render_with_template
+    # @param required toggle
+    def form_with_single_select(required: false)
+      render_with_template(locals: {required: required})
     end
 
     def multiple_select
@@ -31,8 +32,9 @@ module Impulse
       )
     end
 
-    def form_with_multiple_select
-      render_with_template
+    # @param required toggle
+    def form_with_multiple_select(required: false)
+      render_with_template(locals: {required: required})
     end
   end
 end

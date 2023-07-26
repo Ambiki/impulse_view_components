@@ -12,6 +12,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   @property({ type: Boolean }) open = false;
   @property() value: string;
   @property({ type: Boolean }) disabled = false;
+  @property({ type: Boolean }) required = false;
   @property({ type: Boolean }) multiple = false;
   @property() src: string;
   @property() param = 'q';
@@ -56,6 +57,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     this.selectVariant = this.multiple ? this.multipleSelect : this.singleSelect;
     this.selectVariant.connected();
     this.form?.addEventListener('reset', this.handleFormReset);
+    this.selectVariant.setRequiredAttribute(this.required);
   }
 
   disconnected(): void {
@@ -111,6 +113,10 @@ export default class AwcAutocompleteElement extends ImpulseElement {
         btn.disabled = newValue;
       }
     }
+  }
+
+  requiredChanged(newValue: boolean) {
+    this.selectVariant.setRequiredAttribute(newValue);
   }
 
   handleMousedown(event: Event) {
@@ -309,7 +315,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     }
   }
 
-  private checkIfListIsEmpty(): void {
+  private checkIfListIsEmpty() {
     this.toggleAttribute('no-options', this.visibleOptions.length === 0);
   }
 
@@ -330,7 +336,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
 }
 
 function filterOptions(query: string) {
-  return (target: HTMLElement): void => {
+  return (target: HTMLElement) => {
     if (query) {
       const value = getText(target);
       const match = value?.toLowerCase().includes(query.toLowerCase());

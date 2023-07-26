@@ -1,6 +1,6 @@
 <%= impulse_form_with model: Impulse::SelectComponentPreview::User.new(fruit_ids: [2, 3]), url: "/events" do |f| %>
   <%= f.label :fruit_ids, "Select your fruits" %>
-  <%= f.select :fruit_ids, [["Mango", 1], ["Banana", 2], ["Kiwi", 3]], multiple: true %>
+  <%= f.select :fruit_ids, [["Mango", 1], ["Banana", 2], ["Kiwi", 3]], required: local_assigns[:required], multiple: true %>
 
   <div class="mt-3 d-flex align-items-center justify-content-end">
     <button type="reset" class="btn btn-secondary">Reset</button>

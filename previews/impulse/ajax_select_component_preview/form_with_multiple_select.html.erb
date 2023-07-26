@@ -1,6 +1,6 @@
 <%= impulse_form_with url: "/events" do |f| %>
   <%= f.label :fruit_ids, "Select your fruits" %>
-  <%= f.ajax_select :fruit_ids, :id, :name, selected: [OpenStruct.new(id: "connway_hathway", name: "Connway Hathway")], multiple: true, src: "/users" %>
+  <%= f.ajax_select :fruit_ids, :id, :name, selected: [OpenStruct.new(id: "connway_hathway", name: "Connway Hathway")], multiple: true, src: "/users", required: local_assigns[:required] %>
 
   <div class="mt-3 d-flex align-items-center justify-content-end">
     <button type="reset" class="btn btn-secondary">Reset</button>
