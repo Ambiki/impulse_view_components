@@ -73,6 +73,7 @@ module Impulse
 
     test "clears a selected option by pressing on the clear button" do
       visit_preview(:single_select)
+      assert_selector ".awc-autocomplete--selected"
       assert_equal "Banana", page.find_field("user_fruit_id").value
       page.find(".awc-autocomplete-control").click
 
@@ -83,10 +84,12 @@ module Impulse
       assert page.find("[data-behavior='hidden-field']", visible: false)["data-text"].blank?
       # Closes the listbox
       refute_selector "[role='listbox']"
+      refute_selector ".awc-autocomplete--selected"
     end
 
     test "clears multiple selected options by pressing on the clear button" do
       visit_preview(:multiple_select)
+      assert_selector ".awc-autocomplete--selected"
       assert_selector "[data-behavior='tag']", count: 2
       page.find(".awc-autocomplete-control").click
 
@@ -95,6 +98,7 @@ module Impulse
       refute_selector "[data-behavior='tag']"
       # Closes the listbox
       refute_selector "[role='listbox']"
+      refute_selector ".awc-autocomplete--selected"
     end
 
     test "filters options" do
@@ -105,6 +109,17 @@ module Impulse
 
       fill_in "user_fruit_id", with: "kiwi"
       assert_selector "[role='option']", count: 1
+    end
+
+    test "no-options attribute is added if query does not match the options" do
+      visit_preview(:single_select)
+      page.find(".awc-autocomplete-control").click
+
+      assert_selector "[role='option']"
+
+      fill_in "user_fruit_id", with: "query-query"
+      refute_selector "[role='option']"
+      assert_selector "awc-autocomplete[no-options]"
     end
   end
 end

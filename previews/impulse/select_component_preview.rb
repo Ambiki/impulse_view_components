@@ -28,19 +28,15 @@ module Impulse
       end
     end
 
-    # @!group form_with_single_select
-    # @label Select
     # @param required toggle
     def form_with_single_select(required: false)
       render_with_template(locals: {required: required})
     end
 
-    # @label Block options
     # @param required toggle
     def form_with_single_select_block_options(required: false)
       render_with_template(locals: {required: required})
     end
-    # @!endgroup form_with_single_select
 
     # @param size select ["sm", "md", "lg"]
     # @param placeholder text
