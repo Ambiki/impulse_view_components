@@ -108,6 +108,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
    */
   async openChanged(newValue: boolean) {
     if (newValue) {
+      this.emit('show');
       this.combobox.start();
       this.listbox.hidden = false;
       this.floatingUI.start();
@@ -120,7 +121,9 @@ export default class AwcAutocompleteElement extends ImpulseElement {
       if (this.selectVariant.firstActiveOption) {
         this.activate(this.selectVariant.firstActiveOption);
       }
+      this.emit('shown');
     } else {
+      this.emit('hide');
       this.listbox.hidden = true;
       this.abortController?.abort();
       this.selectVariant.stop();
@@ -134,6 +137,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
       this.removeAttribute('error');
       this.currentQuery = undefined;
       await this.floatingUI.stop();
+      this.emit('hidden');
     }
   }
 
@@ -214,7 +218,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
       case 'Escape':
         if (this.open) {
           event.preventDefault();
-          // Prevent modals from accidentally closing.
+          // Prevent modals from closing accidentally.
           event.stopPropagation();
           this.open = false;
         }
@@ -262,22 +266,26 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     if (!(option instanceof HTMLElement)) return;
 
     await this.selectVariant.commit(option);
+    this.emit('commit', { detail: { target: option } });
   }
 
   handleClear() {
     this.open = false;
     this.clear();
+    this.emit('clear');
   }
 
   handleTagRemove(event: Event) {
     const tag = (event.target as HTMLElement).closest<HTMLElement>('[data-behavior="tag"]');
     if (!tag) return;
     this.multipleSelect.removeValue(getValue(tag));
+    this.emit('remove', { detail: { target: tag } });
   }
 
   handleFormReset() {
     this.open = false;
     this.reset();
+    this.emit('reset');
   }
 
   /**
@@ -363,6 +371,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
       this.abortController.abort();
     } else {
       this.setAttribute('loading', '');
+      this.emit('loadstart', { bubbles: false, prefix: false });
     }
 
     this.removeAttribute('error');
@@ -388,6 +397,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
         this.abortController = undefined;
         // Update listbox position after adding options from the server.
         await this.floatingUI.update();
+        this.emit('load', { bubbles: false, prefix: false });
       } else {
         throw new Error();
       }
@@ -395,9 +405,11 @@ export default class AwcAutocompleteElement extends ImpulseElement {
       if (error instanceof Error && error.name !== 'AbortError') {
         this.abortController = undefined;
         this.setAttribute('error', '');
+        this.emit('error', { bubbles: false, prefix: false });
       }
     } finally {
       this.removeAttribute('loading');
+      this.emit('loadend', { bubbles: false, prefix: false });
     }
   }
 
