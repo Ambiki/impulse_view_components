@@ -1,5 +1,7 @@
 import resolve from '@rollup/plugin-node-resolve';
 import typescript from '@rollup/plugin-typescript';
+import { copy } from '@web/rollup-plugin-copy';
+import { globby } from 'globby';
 import { uglify } from 'rollup-plugin-uglify';
 
 const isProd = process.env.NODE_ENV === 'production';
@@ -9,16 +11,37 @@ const isProd = process.env.NODE_ENV === 'production';
  */
 export default [
   {
-    input: 'src/index.ts',
+    input: [
+      './src/index.ts',
+      // Need to export these in package.json
+      ...(await globby('./src/elements/**/!(*.test).ts')),
+      ...(await globby('./src/hooks/**/*.ts')),
+      ...(await globby('./src/helpers/**/*.ts')),
+    ],
     output: [
       {
-        name: 'ImpulseViewComponents',
-        file: 'dist/index.js',
+        dir: 'dist',
+        entryFileNames: '[name].js',
         format: 'es',
+        preserveModules: true,
+        preserveModulesRoot: 'src',
       },
     ],
-    external: ['@ambiki/combobox', '@floating-ui/dom'],
-    plugins: [resolve(), typescript()],
+    external: ['@ambiki/combobox', '@floating-ui/dom', 'tabbable'],
+    plugins: [
+      resolve(),
+      typescript(),
+      ...(isProd
+        ? [
+            // Copy styles
+            copy({
+              patterns: '**/*.scss',
+              rootDir: './src',
+              exclude: ['node_modules', 'index.scss'],
+            }),
+          ]
+        : []),
+    ],
   },
   {
     input: 'src/index.ts',

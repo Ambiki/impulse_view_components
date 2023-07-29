@@ -2,6 +2,20 @@
   "name": "@impulse/view-components",
   "version": "0.0.1",
   "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./dist/elements/*": "./dist/elements/*",
+    "./dist/hooks/*": "./dist/hooks/*",
+    "./dist/helpers/*": "./dist/helpers/*",
+    "./dist/styles/*": "./dist/styles/*"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "concurrently \"yarn build:js\" \"yarn build:css && yarn prefix:css\"",
     "build:css": "node-sass --include-path node_modules --output-style compressed --source-map true --source-map-contents true --precision 6 src/index.scss app/assets/dist/impulse_view_components.css",
@@ -31,12 +45,14 @@
     "@rollup/plugin-typescript": "^11.1.2",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
+    "@web/rollup-plugin-copy": "^0.4.0",
     "autoprefixer": "^10.4.14",
     "bootstrap": "4.6",
     "concurrently": "^8.2.0",
     "eslint": "^8.45.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^5.0.0",
+    "globby": "^13.2.2",
     "node-sass": "^9.0.0",
     "postcss": "^8.4.27",
     "postcss-cli": "^10.1.0",
