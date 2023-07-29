@@ -40,7 +40,45 @@ jobs:
       - name: Run standardrb
         run: bundle exec standardrb
 
-  test_ruby:
+  test_system:
+    needs:
+      - lint_js
+      - lint_ruby
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - uses: actions/cache@v3
+        id: yarn-cache
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-yarn-cache-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarn-cache-${{ hashFiles('**/yarn.lock') }}
+      - run: |
+          yarn install --frozen-lockfile
+          yarn build
+      - uses: ruby/setup-ruby@v1
+      - uses: actions/cache@v3
+        with:
+          path: vendor/bundle
+          key: gems-build-impulse-view-components-v1-main-ruby-3.1.4-${{ hashFiles('**/Gemfile.lock') }}
+      - name: Install dependencies
+        run: |
+          gem install bundler:2.4.1
+          bundle install --jobs 4 --retry 3 --path=vendor/bundle
+      - name: Run test
+        run: bundle exec rake test:system
+      - uses: actions/upload-artifact@v3
+        if: ${{ failure() }}
+        with:
+          path: |
+            /home/runner/work/view_components/view_components/demo/tmp/capybara/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  test_components:
     needs:
       - lint_js
       - lint_ruby
@@ -57,4 +95,4 @@ jobs:
           gem install bundler:2.4.1
           bundle install --jobs 4 --retry 3 --path=vendor/bundle
       - name: Run test
-        run: bundle exec rake test
+        run: bundle exec rake test:components

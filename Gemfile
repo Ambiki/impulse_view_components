@@ -12,6 +12,8 @@ gem "lookbook", "~> 2.0", ">= 2.0.5"
 gem "puma", "~> 6.3"
 gem "rake", "~> 13.0"
 gem "railties", rails_version
+gem "sprockets"
+gem "sprockets-rails"
 gem "sqlite3", "~> 1.4"
 
 group :development, :test do

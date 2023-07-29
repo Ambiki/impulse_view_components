@@ -228,8 +228,6 @@ GEM
       railties (>= 6.0.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
-    tzinfo-data (1.2023.3)
-      tzinfo (>= 1.0.0)
     unicode-display_width (2.4.2)
     view_component (3.4.0)
       activesupport (>= 5.2.0, < 8.0)
@@ -258,6 +256,7 @@ DEPENDENCIES
   lookbook (~> 2.0, >= 2.0.5)
   puma (~> 5.0)
   rails (= 6.1.7)
+  sprockets
   sprockets-rails
   sqlite3 (~> 1.4)
   standard (~> 1.3)

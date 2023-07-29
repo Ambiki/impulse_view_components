@@ -40,11 +40,23 @@ export default class SingleSelect {
   }
 
   clear() {
-    this.setValue('', '');
+    this.setValue(null, null);
   }
 
   reset() {
     this.setValue(this.defaultValue, this.defaultText);
+  }
+
+  setValue(value: string | null, text: string | null) {
+    this.autocomplete.value = value || '';
+    this.autocomplete.input.value = text || '';
+    this.hiddenField.value = value || '';
+    this.hiddenField.setAttribute('data-text', text || '');
+
+    if (value === null) {
+      this.autocomplete.combobox.deselectAll();
+      return;
+    }
 
     // Only select if the listbox is open because all options are deselected when it is hidden.
     if (this.autocomplete.open) {
@@ -53,17 +65,6 @@ export default class SingleSelect {
         this.autocomplete.combobox.select(option);
       }
     }
-  }
-
-  setValue(value: string, text: string) {
-    this.autocomplete.value = value;
-    this.autocomplete.input.value = text;
-    this.hiddenField.value = value;
-    if (!text) {
-      this.hiddenField.removeAttribute('data-text');
-      return;
-    }
-    this.hiddenField.setAttribute('data-text', text);
   }
 
   // Just to make the API similar to the multiple select.
