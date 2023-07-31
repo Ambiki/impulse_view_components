@@ -1,3 +1,4 @@
+import type { ImpulseElement } from '@ambiki/impulse';
 import type {
   FlipOptions,
   Middleware,
@@ -8,7 +9,6 @@ import type {
   Strategy,
 } from '@floating-ui/dom';
 import { arrow, autoUpdate, computePosition, flip, offset, shift, size } from '@floating-ui/dom';
-import type { ImpulseElement } from 'src/impulse';
 
 export type UseFloatingUIType = {
   start: () => void;
