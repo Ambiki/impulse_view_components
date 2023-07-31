@@ -76,7 +76,7 @@ export default function useFocusTrap(element: ImpulseElement, { trap }: { trap: 
     document.removeEventListener('focusin', handleFocusin, true);
   }
 
-  const disconnectedCallback = () => element.disconnected.bind(element);
+  const disconnectedCallback = element.disconnected.bind(element);
   Object.assign(element, {
     disconnected() {
       destroy();

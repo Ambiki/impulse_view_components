@@ -36,7 +36,7 @@
   ],
   "dependencies": {
     "@ambiki/combobox": "^2.0.1",
-    "@ambiki/impulse": "^0.1.0",
+    "@ambiki/impulse": "^0.1.1",
     "@floating-ui/dom": "^1.4.5",
     "tabbable": "^6.2.0"
   },
