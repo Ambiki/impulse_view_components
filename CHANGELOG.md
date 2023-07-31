@@ -7,9 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2023-07-31
+
 ### Fixed
 
-- Bump impulse version
+- Bump impulse version ([#4](https://github.com/Ambiki/impulse_view_components/pull/4))
 
 ## [0.1.0] - 2023-07-31
 
@@ -17,5 +19,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Everything!
 
-[unreleased]: https://github.com/Ambiki/impulse_view_components/compare/v0.1.0...HEAD
+[unreleased]: https://github.com/Ambiki/impulse_view_components/compare/v0.1.1...HEAD
+[0.1.0]: https://github.com/Ambiki/impulse_view_components/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/Ambiki/impulse_view_components/releases/tag/v0.1.0
