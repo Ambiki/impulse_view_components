@@ -200,7 +200,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-right: calc(var(--awc-autocomplete-tag-padding-x) / 2 * -1);
+  margin-right: calc(#{var(--awc-autocomplete-tag-padding-x)} / 2 * -1);
 }
 
 .awc-autocomplete-tag-dismiss-btn {
