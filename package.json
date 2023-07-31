@@ -1,6 +1,22 @@
 {
-  "name": "@impulse/view-components",
-  "version": "0.0.1",
+  "name": "@ambiki/impulse-view-components",
+  "version": "0.1.0",
+  "description": "A set of JavaScript patterns and Web Components meant to used with the ImpulseViewComponents gem.",
+  "author": "Ambitious Idea Labs <info@ambiki.com> (https://ambiki.com/)",
+  "contributors": [
+    "Abeid Ahmed <aahmed@mysidekicktherapy.com>"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ambiki/impulse_view_components.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Ambiki/impulse_view_components/issues"
+  },
+  "homepage": "https://github.com/Ambiki/impulse_view_components#readme",
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -16,6 +32,11 @@
   "files": [
     "dist"
   ],
+  "keywords": [
+    "view-components",
+    "rails",
+    "components"
+  ],
   "scripts": {
     "build": "concurrently \"yarn build:js\" \"yarn build:css && yarn prefix:css\"",
     "build:css": "node-sass --include-path node_modules --output-style compressed --source-map true --source-map-contents true --precision 6 src/index.scss app/assets/dist/impulse_view_components.css",
@@ -29,11 +50,6 @@
     "prettier": "prettier --write --loglevel warn .",
     "prettier:check": "prettier --check --loglevel warn ."
   },
-  "keywords": [
-    "view-components",
-    "rails",
-    "components"
-  ],
   "dependencies": {
     "@ambiki/combobox": "^2.0.1",
     "@ambiki/impulse": "^0.1.1",

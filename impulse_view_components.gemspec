@@ -4,17 +4,15 @@ Gem::Specification.new do |spec|
   spec.name = "impulse_view_components"
   spec.version = Impulse::ViewComponents::VERSION
   spec.authors = ["abeidahmed"]
-  spec.email = ["abeidahmed92@gmail.com"]
+  spec.email = ["info@ambiki.com"]
 
-  spec.summary = "ImpulseViewComponents"
-  spec.description = "ImpulseViewComponents"
-  spec.homepage = "https://github.com/impulsejs/view_components"
+  spec.summary = "View components for Ruby on Rails"
+  spec.homepage = "https://github.com/Ambiki/impulse_view_components"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.1.4"
 
-  spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = spec.homepage
-  spec.metadata["changelog_uri"] = spec.homepage
+  spec.metadata["changelog_uri"] = "https://github.com/Ambiki/impulse_view_components/blob/main/CHANGELOG.md"
 
   spec.files = Dir["CHANGELOG.md", "LICENSE.txt", "README.md", "lib/**/*", "app/**/*"]
   spec.require_paths = ["lib"]
