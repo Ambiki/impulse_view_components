@@ -1,8 +1,8 @@
 import Combobox from '@ambiki/combobox';
+import { ImpulseElement, property, registerElement, target, targets } from '@ambiki/impulse';
 import debounce from 'src/helpers/debounce';
 import useFloatingUI, { UseFloatingUIType } from 'src/hooks/use_floating_ui';
 import useOutsideClick from 'src/hooks/use_outside_click';
-import { ImpulseElement, property, registerElement, target, targets } from 'src/impulse';
 import { getText, getValue } from './helpers';
 import MultipleSelect from './multiple_select';
 import SingleSelect from './single_select';

@@ -1,5 +1,5 @@
+import type { ImpulseElement } from '@ambiki/impulse';
 import { cycle } from 'src/helpers/array';
-import type { ImpulseElement } from 'src/impulse';
 import { FocusableElement, focusable, tabbable } from 'tabbable';
 
 export type UseFocusTrap = {

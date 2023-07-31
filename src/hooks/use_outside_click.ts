@@ -1,4 +1,4 @@
-import type { ImpulseElement } from 'src/impulse';
+import type { ImpulseElement } from '@ambiki/impulse';
 
 export type Boundary = Element | null;
 
