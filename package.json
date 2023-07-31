@@ -52,7 +52,7 @@
   },
   "dependencies": {
     "@ambiki/combobox": "^2.0.1",
-    "@ambiki/impulse": "^0.1.2",
+    "@ambiki/impulse": "^0.1.3",
     "@floating-ui/dom": "^1.4.5",
     "tabbable": "^6.2.0"
   },

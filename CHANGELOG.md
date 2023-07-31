@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Drop build target to `2017`
+- Bump impulse version
+
 ## [0.1.1] - 2023-07-31
 
 ### Fixed
