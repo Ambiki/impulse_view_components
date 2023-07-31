@@ -141,7 +141,7 @@ export default function useFloatingUI(
 
   start();
 
-  const disconnectedCallback = () => element.disconnected.bind(element);
+  const disconnectedCallback = element.disconnected.bind(element);
   Object.assign(element, {
     disconnected() {
       stop();

@@ -44,7 +44,7 @@ export default function useOutsideClick(
     document.removeEventListener('click', (event) => handleOutsideClick(event, () => initialClickTarget), true);
   }
 
-  const disconnectedCallback = () => element.disconnected.bind(element);
+  const disconnectedCallback = element.disconnected.bind(element);
   Object.assign(element, {
     disconnected() {
       destroy();
