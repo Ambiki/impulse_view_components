@@ -3,6 +3,8 @@ module Impulse
     renders_one :blankslate
     renders_many :options, Impulse::Autocomplete::OptionComponent
 
+    OptionStruct = Struct.new(:value, :text, :html_attributes)
+
     def initialize(object_name, method_name, choices = [], selected: nil, **system_args)
       @object_name = object_name
       @method_name = method_name
@@ -22,8 +24,9 @@ module Impulse
     def options_from_choices
       return [] if @choices.nil?
       @choices.map do |choice|
-        tuple = option_text_and_value(choice)
-        OpenStruct.new(value: tuple.last, text: tuple.first)
+        html_attributes = option_html_attributes(choice)
+        text, value = option_text_and_value(choice)
+        OptionStruct.new(value, text, html_attributes)
       end
     end
 

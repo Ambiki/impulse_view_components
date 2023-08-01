@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Pass HTML attributes to select choices
+
 ## [0.1.2] - 2023-07-31
 
 ### Changed

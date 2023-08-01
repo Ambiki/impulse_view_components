@@ -5,7 +5,7 @@
     <% end %>
   <% else %>
     <% options_from_choices.each do |option| %>
-      <%= c.with_option(value: option.value, text: option.text) %>
+      <%= c.with_option(value: option.value, text: option.text, **option.html_attributes) %>
     <% end %>
   <% end %>
 

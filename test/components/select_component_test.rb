@@ -18,10 +18,18 @@ module Impulse
     end
 
     test "renders options from a pair of choices" do
-      render_inline(Impulse::SelectComponent.new(:user, :fruit_id, [["Apple", "apple"]]))
+      render_inline(Impulse::SelectComponent.new(:user, :fruit_id, [["Apple", "apple"], ["Banana", "banana", {disabled: true, class: "custom-class"}]]))
 
       assert_selector "[role='option'][value='apple']", visible: false
       assert_selector "[role='option'][data-text='Apple']", visible: false
+      assert_selector ".custom-class[role='option'][value='banana'][data-text='Banana'][disabled]", visible: false
+    end
+
+    test "renders options from a hash" do
+      render_inline(Impulse::SelectComponent.new(:user, :fruit_id, {Basic: "$20", Plus: "$40"}))
+
+      assert_selector "[role='option'][value='$20'][data-text='Basic']", visible: false
+      assert_selector "[role='option'][value='$40'][data-text='Plus']", visible: false
     end
 
     test "renders options from a block" do
