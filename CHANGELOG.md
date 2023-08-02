@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Pass HTML attributes to select choices
 
+### Fixed
+
+- Remove `nil` values from `value` array for multiple select
+
 ## [0.1.2] - 2023-07-31
 
 ### Changed
