@@ -24,6 +24,10 @@ export default defineConfig({
         collapsed: false,
         items: [
           {
+            text: 'Ajax select',
+            link: '/components/ajax-select',
+          },
+          {
             text: 'Select',
             link: '/components/select',
           },
