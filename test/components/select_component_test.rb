@@ -61,5 +61,14 @@ module Impulse
 
       assert_selector ".awc-autocomplete-blankslate", text: "Nothing found!", visible: false
     end
+
+    test "does not throw an error if selected has value that does not match the options value" do
+      assert_nothing_raised do
+        render_inline(Impulse::SelectComponent.new(:user, :fruit_id, ["Apple", "Guava"], selected: ""))
+        render_inline(Impulse::SelectComponent.new(:user, :fruit_id, ["Apple", "Guava"], selected: "Invalid"))
+        render_inline(Impulse::SelectComponent.new(:user, :fruit_id, ["Apple", "Guava"], selected: ["", "Apple"], multiple: true))
+        render_inline(Impulse::SelectComponent.new(:user, :fruit_id, ["Apple", "Guava"], selected: ["Invalid", "Apple"], multiple: true))
+      end
+    end
   end
 end
