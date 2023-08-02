@@ -3,23 +3,13 @@
 layout: home
 
 hero:
-  name: "ImpulseViewComponents"
-  text: "View components for Ruby on Rails."
-  tagline: My great project tagline
+  name: "Impulse ViewComponents"
+  tagline: View components for Ruby on Rails.
   actions:
     - theme: brand
-      text: Markdown Examples
-      link: /markdown-examples
+      text: Get Started
+      link: /introduction/getting-started
     - theme: alt
-      text: API Examples
-      link: /api-examples
-
-features:
-  - title: Feature A
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature B
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature C
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
+      text: View on GitHub
+      link: https://github.com/Ambiki/impulse_view_components
 ---
-
