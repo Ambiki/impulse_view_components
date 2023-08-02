@@ -48,7 +48,10 @@
     "prefix:css": "postcss --replace ./app/assets/dist/impulse_view_components.css --use autoprefixer --map",
     "prepublishOnly": "yarn clean && yarn build:prod",
     "prettier": "prettier --write --loglevel warn .",
-    "prettier:check": "prettier --check --loglevel warn ."
+    "prettier:check": "prettier --check --loglevel warn .",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "dependencies": {
     "@ambiki/combobox": "^2.0.1",
@@ -76,7 +79,8 @@
     "prettier": "^3.0.0",
     "rollup": "^3.26.2",
     "rollup-plugin-uglify": "^6.0.4",
-    "typescript": "^5.1.6"
+    "typescript": "^5.1.6",
+    "vitepress": "^1.0.0-beta.7"
   },
   "license": "MIT"
 }
