@@ -2,6 +2,7 @@ import { defineConfig } from 'vitepress';
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
+  base: '/impulse_view_components/',
   title: 'Impulse ViewComponents',
   description: 'View components for Ruby on Rails.',
   lastUpdated: true,
@@ -39,10 +40,10 @@ export default defineConfig({
         items: [
           {
             text: 'Autocomplete',
-            link: '/js-api/autocomplete'
-          }
-        ]
-      }
+            link: '/js-api/autocomplete',
+          },
+        ],
+      },
     ],
     footer: {
       message: 'Released under the MIT License.',
