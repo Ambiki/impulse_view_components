@@ -8,7 +8,7 @@ module Impulse
         Impulse::SelectComponent.new(
           :user,
           :fruit_id,
-          %w[Apple Banana Guava Kiwi Litchi Mango Pomegranate],
+          ["Apple", "Banan", "Guava", "Kiwi", "Litchi", "Mango", "Pomegranate"],
           selected: "Kiwi",
           size: size,
           placeholder: placeholder,
@@ -46,7 +46,7 @@ module Impulse
         Impulse::SelectComponent.new(
           :user,
           :fruit_ids,
-          %w[Apple Banana Guava Kiwi Litchi Mango Pomegranate],
+          ["Apple", "Banan", "Guava", "Kiwi", "Litchi", "Mango", "Pomegranate"],
           selected: ["Kiwi", "Mango"],
           multiple: true,
           size: size,
