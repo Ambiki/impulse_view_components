@@ -51,3 +51,7 @@ Wrap your `select` tag with the `impulse_form_with` method. Accepts the same [ar
   <%= f.select :person_id, Person.all.collect { |p| [p.name, p.id] } %>
 <% end %>
 ```
+
+## JS API
+
+[Read here](../js-api/autocomplete.md).

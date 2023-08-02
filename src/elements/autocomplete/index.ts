@@ -298,8 +298,8 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   }
 
   /**
-   * Removes a value of the element.
-   * @param value - The value of the option (you do not need to provide the value arg for a single select).
+   * Removes a value from the element.
+   * @param value - The value of the option (you do not have to provide the value arg for a single select).
    */
   removeValue(value?: string) {
     if (this.multiple && value) {

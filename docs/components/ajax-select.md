@@ -73,3 +73,7 @@ Wrap your `ajax_select` tag with the `impulse_form_with` method. Accepts the sam
   <%= f.ajax_select :fruit_id, :id, :name, selected: f.object.fruit, src: "/fruits" %>
 <% end %>
 ```
+
+## JS API
+
+[Read here](../js-api/autocomplete.md).

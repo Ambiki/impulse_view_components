@@ -33,6 +33,16 @@ export default defineConfig({
           },
         ],
       },
+      {
+        text: 'JS API',
+        collapsed: false,
+        items: [
+          {
+            text: 'Autocomplete',
+            link: '/js-api/autocomplete'
+          }
+        ]
+      }
     ],
     footer: {
       message: 'Released under the MIT License.',
