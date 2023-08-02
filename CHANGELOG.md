@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Remove `nil` values from `value` array for multiple select
+- Make autocomplete clear button border color same as input's background color
 
 ## [0.1.2] - 2023-07-31
 
