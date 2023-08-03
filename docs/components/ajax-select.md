@@ -34,6 +34,7 @@ Ajax select allows users to fetch a list of options from the server.
 | disabled       | `false`   | Disables the select control.                                                                                                                     |
 | required       | `false`   | Makes the select control a required field.                                                                                                       |
 | multiple       | `false`   | Whether multiple values can be selected or not.                                                                                                  |
+| clearable      | `true`    | Whether the clear button should be shown or not.                                                                                                 |
 
 ::: tip Note
 The server response should include the options that matched the search query.

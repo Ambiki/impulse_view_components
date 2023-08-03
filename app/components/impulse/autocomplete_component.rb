@@ -11,7 +11,7 @@ module Impulse
       :lg => "awc-autocomplete--lg"
     }.freeze
 
-    def initialize(object_name, method_name, selected: nil, size: DEFAULT_SIZE, name: nil, input_id: nil, placeholder: nil, include_hidden: true, disabled: false, **system_args)
+    def initialize(object_name, method_name, selected: nil, size: DEFAULT_SIZE, name: nil, input_id: nil, placeholder: nil, include_hidden: true, disabled: false, clearable: true, **system_args)
       @object_name = object_name
       @method_name = method_name
       @selected = selected
@@ -21,6 +21,7 @@ module Impulse
       @placeholder = placeholder
       @include_hidden = include_hidden
       @disabled = disabled
+      @clearable = clearable
       @system_args = system_args
       @system_args[:tag] = :"awc-autocomplete"
       @system_args[:value] = sanitized_value
@@ -30,7 +31,8 @@ module Impulse
         system_args[:class],
         SIZE_MAPPINGS[fetch_or_fallback(SIZE_MAPPINGS.keys, size, DEFAULT_SIZE)],
         "awc-autocomplete",
-        "awc-autocomplete--selected": @selected.present?
+        "awc-autocomplete--selected": @selected.present?,
+        "awc-autocomplete--clearable": @clearable
       )
 
       @system_args[:data] = merge_attributes(

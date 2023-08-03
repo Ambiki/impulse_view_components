@@ -10,6 +10,7 @@ module Impulse
       end
 
       assert_selector "awc-autocomplete.awc-autocomplete"
+      assert_selector ".awc-autocomplete--clearable"
       assert_selector "[data-behavior='hidden-field'][name='user[fruit_id]']", visible: false
       assert_selector "[role='listbox']", visible: false do
         assert_selector "[role='option']", count: 7, visible: false
@@ -23,6 +24,7 @@ module Impulse
       render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_id, selected: OpenStruct.new(value: "apple", text: "Apple")))
 
       assert_selector "awc-autocomplete.awc-autocomplete--selected"
+      assert_selector ".awc-autocomplete-clear-btn"
       assert_selector "awc-autocomplete[value='apple']"
       assert_selector "[data-behavior='hidden-field'][value='apple']", visible: false
       assert_selector "[data-behavior='hidden-field'][data-text='Apple']", visible: false
@@ -46,6 +48,14 @@ module Impulse
       render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_ids, multiple: true, include_hidden: false))
 
       refute_selector "[data-behavior='hidden-field']", visible: false
+    end
+
+    test "does not render the clear button" do
+      render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_ids, multiple: true, selected: OpenStruct.new(value: "apple", text: "Apple"), clearable: false))
+
+      refute_selector ".awc-autocomplete--clearable"
+      assert_selector ".awc-autocomplete-adornment-decorator"
+      assert_selector ".awc-autocomplete--selected"
     end
 
     test "renders small size" do

@@ -3,16 +3,18 @@ module Impulse
     # @param size select ["sm", "md", "lg"]
     # @param placeholder text
     # @param disabled toggle
-    def single_select(size: :md, placeholder: "Select a fruit", disabled: false)
+    # @param clearable toggle
+    def single_select(size: :md, placeholder: "Select a fruit", disabled: false, clearable: true)
       render(
         Impulse::SelectComponent.new(
           :user,
           :fruit_id,
-          ["Apple", "Banan", "Guava", "Kiwi", "Litchi", "Mango", "Pomegranate"],
+          ["Apple", "Banana", "Guava", "Kiwi", "Litchi", "Mango", "Pomegranate"],
           selected: "Kiwi",
           size: size,
           placeholder: placeholder,
-          disabled: disabled
+          disabled: disabled,
+          clearable: clearable
         )
       )
     end
@@ -41,17 +43,19 @@ module Impulse
     # @param size select ["sm", "md", "lg"]
     # @param placeholder text
     # @param disabled toggle
-    def multiple_select(size: :md, placeholder: "Select fruits", disabled: false)
+    # @param clearable toggle
+    def multiple_select(size: :md, placeholder: "Select fruits", disabled: false, clearable: true)
       render(
         Impulse::SelectComponent.new(
           :user,
           :fruit_ids,
-          ["Apple", "Banan", "Guava", "Kiwi", "Litchi", "Mango", "Pomegranate"],
+          ["Apple", "Banana", "Guava", "Kiwi", "Litchi", "Mango", "Pomegranate"],
           selected: ["Kiwi", "Mango"],
           multiple: true,
           size: size,
           placeholder: placeholder,
-          disabled: disabled
+          disabled: disabled,
+          clearable: clearable
         )
       )
     end

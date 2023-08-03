@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Pass HTML attributes to select choices
+- Ability to hide the autocomplete clear button using the `clearable` argument
 
 ### Fixed
 
