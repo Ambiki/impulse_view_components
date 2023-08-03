@@ -3,8 +3,9 @@ module Impulse
     # @param size select ["sm", "md", "lg"]
     # @param placeholder text
     # @param disabled toggle
-    def single_select(size: :md, placeholder: "Select a fruit", disabled: false)
-      render(Impulse::AutocompleteComponent.new(:user, :fruit_id, selected: OpenStruct.new(value: "banana", text: "Banana"), size: size, placeholder: placeholder, disabled: disabled)) do |c|
+    # @param clearable toggle
+    def single_select(size: :md, placeholder: "Select a fruit", disabled: false, clearable: true)
+      render(Impulse::AutocompleteComponent.new(:user, :fruit_id, selected: OpenStruct.new(value: "banana", text: "Banana"), size: size, placeholder: placeholder, disabled: disabled, clearable: clearable)) do |c|
         %w[Apple Banana Guava Kiwi Litchi Mango Pomegranate].each_with_index do |fruit, index|
           c.with_option(value: fruit.downcase, text: fruit, disabled: (index % 4) == 0 && index != 0)
         end

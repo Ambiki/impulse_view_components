@@ -251,13 +251,15 @@
 /** States **/
 
 // Selected
-.awc-autocomplete--selected .awc-autocomplete-adornment-decorator {
-  display: none;
-}
+.awc-autocomplete--selected {
+  &.awc-autocomplete--clearable .awc-autocomplete-adornment-decorator {
+    display: none;
+  }
 
-// Show clear btn
-.awc-autocomplete--selected .awc-autocomplete-clear-btn {
-  display: inline-flex;
+  // Show clear btn
+  .awc-autocomplete-clear-btn {
+    display: inline-flex;
+  }
 }
 
 // No options

@@ -49,7 +49,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   @target() listbox: HTMLElement;
   @target() control: HTMLElement;
   @target() optionsContainer: HTMLElement;
-  @target() clearBtn: HTMLButtonElement;
+  @target() clearBtn?: HTMLButtonElement;
   @targets() tagDismissBtns?: HTMLButtonElement[];
 
   combobox: Combobox;
@@ -153,7 +153,10 @@ export default class AwcAutocompleteElement extends ImpulseElement {
    */
   disabledChanged(newValue: boolean) {
     this.input.disabled = newValue;
-    this.clearBtn.disabled = newValue;
+
+    if (this.clearBtn) {
+      this.clearBtn.disabled = newValue;
+    }
 
     if (this.multiple && this.tagDismissBtns) {
       for (const btn of this.tagDismissBtns) {
