@@ -11,14 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Pass HTML attributes to select choices
-- Ability to hide the autocomplete clear button using the `clearable` argument
+- Pass HTML attributes to select choices ([#6](https://github.com/Ambiki/impulse_view_components/pull/6))
+- Ability to hide the autocomplete clear button using the `clearable` argument ([#13](https://github.com/Ambiki/impulse_view_components/pull/13))
 
 ### Fixed
 
-- Remove `nil` values from `value` array for multiple select
-- Make autocomplete clear button border color same as input's background color
-- Autocomplete values should not be cleared when element is removed from the DOM
+- Remove `nil` values from `value` array for multiple select ([#8](https://github.com/Ambiki/impulse_view_components/pull/8))
+- Make autocomplete clear button border color same as input's background color ([#9](https://github.com/Ambiki/impulse_view_components/pull/9))
+- Autocomplete values should not be cleared when element is removed from the DOM ([#12](https://github.com/Ambiki/impulse_view_components/pull/12))
 
 ## [0.1.2] - 2023-07-31
 
