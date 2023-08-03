@@ -16,9 +16,7 @@ export default class SingleSelect {
   }
 
   disconnected() {
-    this.clear();
-    this.defaultValue = '';
-    this.defaultText = '';
+    //
   }
 
   start() {
