@@ -31,6 +31,7 @@ Select allows a user to filter through a list of pre-defined sets of options and
 | disabled       | `false`   | Disables the select control.                                                                                                                     |
 | required       | `false`   | Makes the select control a required field.                                                                                                       |
 | multiple       | `false`   | Whether multiple values can be selected or not.                                                                                                  |
+| clearable      | `true`    | Whether the clear button should be shown or not.                                                                                                 |
 
 ## Blankslate
 
