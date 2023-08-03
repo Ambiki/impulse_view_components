@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Set `initialClickTarget` to `null` when element gets destroyed
+
 ## [0.1.3] - 2023-08-03
 
 ### Added
