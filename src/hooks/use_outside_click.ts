@@ -40,6 +40,7 @@ export default function useOutsideClick(
   document.addEventListener('click', (event) => handleOutsideClick(event, () => initialClickTarget), true);
 
   function destroy() {
+    initialClickTarget = null;
     document.removeEventListener('mousedown', setInitialClickTarget, true);
     document.removeEventListener('click', (event) => handleOutsideClick(event, () => initialClickTarget), true);
   }
