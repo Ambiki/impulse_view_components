@@ -55,7 +55,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   combobox: Combobox;
   private singleSelect = new SingleSelect(this);
   private multipleSelect = new MultipleSelect(this);
-  private selectVariant: SingleSelect | MultipleSelect;
+  private selectVariant?: SingleSelect | MultipleSelect;
   private floatingUI: UseFloatingUIType;
   private firstFocus = true;
   private abortController?: AbortController;
@@ -98,7 +98,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     this.open = false;
     this.removeAttribute('data-focus');
     this.firstFocus = true;
-    this.selectVariant.disconnected();
+    this.selectVariant?.disconnected();
     this.abortController = undefined;
     this.form?.removeEventListener('reset', this.handleFormReset);
   }
@@ -117,8 +117,8 @@ export default class AwcAutocompleteElement extends ImpulseElement {
       } else {
         this.checkIfListIsEmpty();
       }
-      this.selectVariant.start();
-      if (this.selectVariant.firstActiveOption) {
+      this.selectVariant?.start();
+      if (this.selectVariant?.firstActiveOption) {
         this.activate(this.selectVariant.firstActiveOption);
       }
       this.emit('shown');
@@ -126,7 +126,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
       this.emit('hide');
       this.listbox.hidden = true;
       this.abortController?.abort();
-      this.selectVariant.stop();
+      this.selectVariant?.stop();
       this.combobox.stop();
       if (!this.src) {
         for (const option of this.options) {
@@ -166,7 +166,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
    * Called when the `required` attribute changes.
    */
   requiredChanged(newValue: boolean) {
-    this.selectVariant.setRequiredAttribute(newValue);
+    this.selectVariant?.setRequiredAttribute(newValue);
   }
 
   handleMousedown(event: Event) {
@@ -265,7 +265,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     const option = event.target;
     if (!(option instanceof HTMLElement)) return;
 
-    await this.selectVariant.commit(option);
+    await this.selectVariant?.commit(option);
     this.emit('commit', { detail: { target: option } });
   }
 
@@ -294,7 +294,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
    * @param text - The text of the option.
    */
   setValue(value: string, text: string) {
-    this.selectVariant.setValue(value, text);
+    this.selectVariant?.setValue(value, text);
   }
 
   /**
@@ -330,7 +330,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
    * Deselects all the selected options.
    */
   clear() {
-    this.selectVariant.clear();
+    this.selectVariant?.clear();
     this.currentQuery = undefined;
   }
 
@@ -338,7 +338,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
    * Resets the autocomplete element to its initial state.
    */
   reset() {
-    this.selectVariant.reset();
+    this.selectVariant?.reset();
     this.currentQuery = undefined;
   }
 
@@ -356,7 +356,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   private async remoteSearch(query: string) {
     this.open = true;
     await this.makeRequest(query);
-    this.selectVariant.start();
+    this.selectVariant?.start();
     // Activate the first visible option after making the request.
     if (this.visibleOptions[0]) {
       this.activate(this.visibleOptions[0]);

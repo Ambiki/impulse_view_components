@@ -16,8 +16,7 @@ export default class MultipleSelect {
   }
 
   disconnected() {
-    this.clear();
-    this.defaultSelectedValues.length = 0;
+    //
   }
 
   start() {

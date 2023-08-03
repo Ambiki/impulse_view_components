@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Remove `nil` values from `value` array for multiple select
 - Make autocomplete clear button border color same as input's background color
+- Autocomplete values should not be cleared when element is removed from the DOM
 
 ## [0.1.2] - 2023-07-31
 
