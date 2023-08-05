@@ -51,7 +51,9 @@
     "prettier:check": "prettier --check --loglevel warn .",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:preview": "vitepress preview docs",
+    "test": "web-test-runner",
+    "test:watch": "yarn test --watch"
   },
   "dependencies": {
     "@ambiki/combobox": "^2.0.1",
@@ -60,12 +62,16 @@
     "tabbable": "^6.2.0"
   },
   "devDependencies": {
+    "@open-wc/testing": "^3.2.0",
     "@rollup/plugin-commonjs": "^25.0.0",
     "@rollup/plugin-node-resolve": "^15.0.2",
     "@rollup/plugin-typescript": "^11.1.2",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
+    "@web/dev-server-esbuild": "^0.4.1",
     "@web/rollup-plugin-copy": "^0.4.0",
+    "@web/test-runner": "^0.17.0",
+    "@web/test-runner-playwright": "^0.10.1",
     "autoprefixer": "^10.4.14",
     "bootstrap": "4.6",
     "concurrently": "^8.2.0",

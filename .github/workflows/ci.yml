@@ -96,3 +96,27 @@ jobs:
           bundle install --jobs 4 --retry 3 --path=vendor/bundle
       - name: Run test
         run: bundle exec rake test:components
+
+  test_js:
+    needs:
+      - lint_js
+      - lint_ruby
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - uses: actions/cache@v3
+        id: yarn-cache
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-yarn-cache-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarn-cache-${{ hashFiles('**/yarn.lock') }}
+      - name: Install playwright
+        run: npx playwright install --with-deps
+      - name: Run test
+        run: |
+          yarn install --frozen-lockfile
+          yarn build:js
+          yarn test

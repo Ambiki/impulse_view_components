@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `focusTrap` helper
+
 ### Fixed
 
 - Set `initialClickTarget` to `null` when element gets destroyed

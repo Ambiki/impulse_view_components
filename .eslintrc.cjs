@@ -21,7 +21,7 @@ module.exports = {
       },
     },
     {
-      files: ['.eslintrc.cjs', '.prettierrc.cjs', 'rollup.config.js'],
+      files: ['.eslintrc.cjs', '.prettierrc.cjs', 'rollup.config.js', 'web-test-runner.config.js'],
       env: {
         node: true,
       },
