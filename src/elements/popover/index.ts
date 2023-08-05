@@ -1,7 +1,7 @@
 import { ImpulseElement, property, registerElement, target } from '@ambiki/impulse';
 import type { Placement } from '@floating-ui/dom';
+import focusTrap from 'src/helpers/focus_trap';
 import useFloatingUI, { UseFloatingUIType } from 'src/hooks/use_floating_ui';
-import useFocusTrap from 'src/hooks/use_focus_trap';
 import useOutsideClick from 'src/hooks/use_outside_click';
 import { stripCSSUnit } from '../../helpers/string';
 
@@ -23,7 +23,7 @@ export default class AwcPopoverElement extends ImpulseElement {
   @target() arrow?: HTMLElement;
 
   private floatingUI: UseFloatingUIType;
-  private focusTrap?: AbortController;
+  private _focusTrap?: AbortController;
 
   connected() {
     this.floatingUI = useFloatingUI(this, {
@@ -62,12 +62,12 @@ export default class AwcPopoverElement extends ImpulseElement {
       this.panel.hidden = false;
       this.button.setAttribute('aria-expanded', 'true');
       this.floatingUI.start();
-      this.focusTrap = useFocusTrap(this.panel);
+      this._focusTrap = focusTrap(this.panel);
     } else {
       this.panel.hidden = true;
       this.button.setAttribute('aria-expanded', 'false');
       await this.floatingUI.stop();
-      this.focusTrap?.abort();
+      this._focusTrap?.abort();
     }
   }
 

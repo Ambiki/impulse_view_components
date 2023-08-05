@@ -2,7 +2,7 @@ import { FocusableElement, focusable, isFocusable, tabbable } from 'tabbable';
 
 const containerStack: Set<HTMLElement> = new Set();
 
-export default function useFocusTrap(container: HTMLElement, { abortSignal }: { abortSignal?: AbortSignal } = {}) {
+export default function focusTrap(container: HTMLElement, { abortSignal }: { abortSignal?: AbortSignal } = {}) {
   const controller = new AbortController();
   const signal = abortSignal || controller.signal;
 
@@ -29,13 +29,13 @@ export default function useFocusTrap(container: HTMLElement, { abortSignal }: { 
 
   const sentinelStart = createSentinel();
   sentinelStart.onfocus = () => {
-    const lastFocusableElement = tabbableElements[tabbableElements.length - 1];
+    const lastFocusableElement = tabbableElements[tabbableElements.length - 1] as FocusableElement | undefined;
     lastFocusableElement?.focus();
   };
 
   const sentinelEnd = createSentinel();
   sentinelEnd.onfocus = () => {
-    const firstFocusableElement = tabbableElements[0];
+    const firstFocusableElement = tabbableElements[0] as FocusableElement | undefined;
     firstFocusableElement?.focus();
   };
 
