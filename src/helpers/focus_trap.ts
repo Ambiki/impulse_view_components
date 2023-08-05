@@ -25,16 +25,16 @@ export default function focusTrap(container: HTMLElement, { abortSignal }: { abo
 
   containerStack.add(container);
 
-  const tabbableElements = tabbable(container).filter((element) => !element.hasAttribute('data-sentinel'));
-
   const sentinelStart = createSentinel();
   sentinelStart.onfocus = () => {
+    const tabbableElements = tabbable(container).filter((element) => !element.hasAttribute('data-sentinel'));
     const lastFocusableElement = tabbableElements[tabbableElements.length - 1] as FocusableElement | undefined;
     lastFocusableElement?.focus();
   };
 
   const sentinelEnd = createSentinel();
   sentinelEnd.onfocus = () => {
+    const tabbableElements = tabbable(container).filter((element) => !element.hasAttribute('data-sentinel'));
     const firstFocusableElement = tabbableElements[0] as FocusableElement | undefined;
     firstFocusableElement?.focus();
   };
@@ -76,7 +76,7 @@ export default function focusTrap(container: HTMLElement, { abortSignal }: { abo
     }
   }
 
-  function tryFocus(element?: HTMLElement | FocusableElement | null) {
+  function tryFocus(element: HTMLElement | FocusableElement | null | undefined) {
     if (!element) {
       tryFocus(container);
       return;
