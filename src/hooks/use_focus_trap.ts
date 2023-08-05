@@ -1,20 +1,19 @@
-import { tabbable, focusable, FocusableElement, isFocusable } from 'tabbable';
+import { FocusableElement, focusable, isFocusable, tabbable } from 'tabbable';
 
-const trappedContainers: Set<HTMLElement> = new Set();
+const containerStack: Set<HTMLElement> = new Set();
 
-export type UseFocusTrap = {
-  start: () => void;
-  stop: () => void;
-};
+export default function useFocusTrap(container: HTMLElement, { abortSignal }: { abortSignal?: AbortSignal } = {}) {
+  const controller = new AbortController();
+  const signal = abortSignal || controller.signal;
 
-export default function useFocusTrap(container: HTMLElement): UseFocusTrap {
-  let focusedElementBeforeActivation: HTMLElement | null;
+  let focusedElementBeforeActivation: HTMLElement | null = document.activeElement as HTMLElement;
   let recentlyFocused: HTMLElement | FocusableElement | null;
 
+  // Ensure focus remains inside the container or inside one of the container stack.
   function handleFocusin(event: Event) {
     const target = (event.composedPath?.()?.[0] || event.target) as HTMLElement;
 
-    for (const element of trappedContainers) {
+    for (const element of containerStack) {
       if (element.contains(target)) {
         recentlyFocused = target;
         return;
@@ -24,50 +23,38 @@ export default function useFocusTrap(container: HTMLElement): UseFocusTrap {
     tryFocus(recentlyFocused);
   }
 
-  function start() {
-    focusedElementBeforeActivation = document.activeElement as HTMLElement;
-    trappedContainers.add(container);
+  containerStack.add(container);
 
-    const tabbableElements = tabbable(container);
+  const tabbableElements = tabbable(container).filter((element) => !element.hasAttribute('data-sentinel'));
 
-    const sentinelStart = document.createElement('span');
-    sentinelStart.setAttribute('tabindex', '0');
-    sentinelStart.setAttribute('aria-hidden', 'true');
-    sentinelStart.setAttribute('data-sentinel', '');
-    sentinelStart.classList.add('sentinel');
-    sentinelStart.onfocus = () => {
-      const lastFocusableElement = tabbableElements[tabbableElements.length - 1];
-      lastFocusableElement?.focus();
-    };
+  const sentinelStart = createSentinel();
+  sentinelStart.onfocus = () => {
+    const lastFocusableElement = tabbableElements[tabbableElements.length - 1];
+    lastFocusableElement?.focus();
+  };
 
-    const sentinelEnd = document.createElement('span');
-    sentinelEnd.setAttribute('tabindex', '0');
-    sentinelEnd.setAttribute('aria-hidden', 'true');
-    sentinelEnd.setAttribute('data-sentinel', '');
-    sentinelEnd.classList.add('sentinel');
-    sentinelEnd.onfocus = () => {
-      const firstFocusableElement = tabbableElements[0];
-      firstFocusableElement?.focus();
-    };
+  const sentinelEnd = createSentinel();
+  sentinelEnd.onfocus = () => {
+    const firstFocusableElement = tabbableElements[0];
+    firstFocusableElement?.focus();
+  };
 
-    insertBefore(sentinelStart, container);
-    insertAfter(sentinelEnd, container);
+  insertBefore(sentinelStart, container);
+  insertAfter(sentinelEnd, container);
 
-    tryFocus(getFirstFocusableElement(container));
+  tryFocus(getFirstFocusableElement(container));
 
-    document.addEventListener('focusin', handleFocusin, true);
-  }
+  document.addEventListener('focusin', handleFocusin, { signal, capture: true });
 
-  function stop() {
+  signal.addEventListener('abort', () => {
     const sentinels = container.parentNode?.querySelectorAll('[data-sentinel]');
     sentinels?.forEach((sentinel) => sentinel.remove());
 
-    trappedContainers.delete(container);
-    document.removeEventListener('focusin', handleFocusin, true);
+    containerStack.delete(container);
     tryFocus(focusedElementBeforeActivation);
     focusedElementBeforeActivation = null;
     recentlyFocused = null;
-  }
+  });
 
   function getFirstFocusableElement(container: HTMLElement) {
     if (container.hasAttribute('data-autofocus') && isFocusable(container)) {
@@ -79,7 +66,7 @@ export default function useFocusTrap(container: HTMLElement): UseFocusTrap {
       return element;
     }
 
-    const focusableElements = focusable(container);
+    const focusableElements = focusable(container).filter((element) => !element.hasAttribute('data-sentinel'));
     if (focusableElements[0]) {
       return focusableElements[0];
     }
@@ -100,7 +87,26 @@ export default function useFocusTrap(container: HTMLElement): UseFocusTrap {
     recentlyFocused = element;
   }
 
-  return { start, stop };
+  return controller;
+}
+
+function createSentinel() {
+  const sentinel = document.createElement('span');
+  sentinel.setAttribute('tabindex', '0');
+  sentinel.setAttribute('aria-hidden', 'true');
+  sentinel.setAttribute('data-sentinel', '');
+  sentinel.style.position = 'fixed';
+  sentinel.style.top = '1px';
+  sentinel.style.left = '1px';
+  sentinel.style.width = '1px';
+  sentinel.style.height = '0px';
+  sentinel.style.padding = '0px';
+  sentinel.style.margin = '-1px';
+  sentinel.style.overflow = 'hidden';
+  sentinel.style.clip = 'rect(0px, 0px, 0px, 0px)';
+  sentinel.style.whiteSpace = 'nowrap';
+  sentinel.style.borderWidth = '0px';
+  return sentinel;
 }
 
 function insertBefore(newNode: HTMLElement, container: HTMLElement) {
