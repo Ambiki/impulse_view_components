@@ -157,6 +157,12 @@ describe('focus_trap', () => {
 
     trap2.abort();
     expect(document.activeElement).to.equal(button1);
+
+    await sendKeys({ press: 'Tab' });
+    expect(document.activeElement).to.equal(button2);
+    // Make sure trap exists on the first container.
+    await sendKeys({ press: 'Tab' });
+    expect(document.activeElement).to.equal(button1);
   });
 
   it('should be able to handle dynamic contents', async () => {

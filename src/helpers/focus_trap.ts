@@ -1,4 +1,5 @@
 import { FocusableElement, focusable, isFocusable, tabbable } from 'tabbable';
+import uniqueId from './unique_id';
 
 const containerStack: Set<HTMLElement> = new Set();
 
@@ -23,18 +24,20 @@ export default function focusTrap(container: HTMLElement, { abortSignal }: { abo
     tryFocus(recentlyFocused);
   }
 
+  const id = uniqueId();
+  container.setAttribute('data-focus-trap-id', id);
   containerStack.add(container);
 
-  const sentinelStart = createSentinel();
+  const sentinelStart = createSentinel(id);
   sentinelStart.onfocus = () => {
-    const tabbableElements = tabbable(container).filter((element) => !element.hasAttribute('data-sentinel'));
+    const tabbableElements = tabbable(container).filter((element) => !element.hasAttribute('data-sentinel-for'));
     const lastFocusableElement = tabbableElements[tabbableElements.length - 1] as FocusableElement | undefined;
     lastFocusableElement?.focus();
   };
 
-  const sentinelEnd = createSentinel();
+  const sentinelEnd = createSentinel(id);
   sentinelEnd.onfocus = () => {
-    const tabbableElements = tabbable(container).filter((element) => !element.hasAttribute('data-sentinel'));
+    const tabbableElements = tabbable(container).filter((element) => !element.hasAttribute('data-sentinel-for'));
     const firstFocusableElement = tabbableElements[0] as FocusableElement | undefined;
     firstFocusableElement?.focus();
   };
@@ -47,7 +50,7 @@ export default function focusTrap(container: HTMLElement, { abortSignal }: { abo
   document.addEventListener('focusin', handleFocusin, { signal, capture: true });
 
   signal.addEventListener('abort', () => {
-    const sentinels = container.parentNode?.querySelectorAll('[data-sentinel]');
+    const sentinels = container.parentNode?.querySelectorAll(`[data-sentinel-for="${id}"]`);
     sentinels?.forEach((sentinel) => sentinel.remove());
 
     containerStack.delete(container);
@@ -66,7 +69,7 @@ export default function focusTrap(container: HTMLElement, { abortSignal }: { abo
       return element;
     }
 
-    const focusableElements = focusable(container).filter((element) => !element.hasAttribute('data-sentinel'));
+    const focusableElements = focusable(container).filter((element) => !element.hasAttribute('data-sentinel-for'));
     if (focusableElements[0]) {
       return focusableElements[0];
     }
@@ -90,11 +93,11 @@ export default function focusTrap(container: HTMLElement, { abortSignal }: { abo
   return controller;
 }
 
-function createSentinel() {
+function createSentinel(id: string) {
   const sentinel = document.createElement('span');
   sentinel.setAttribute('tabindex', '0');
   sentinel.setAttribute('aria-hidden', 'true');
-  sentinel.setAttribute('data-sentinel', '');
+  sentinel.setAttribute('data-sentinel-for', id);
   sentinel.style.position = 'fixed';
   sentinel.style.top = '1px';
   sentinel.style.left = '1px';
