@@ -1,88 +1,112 @@
-import type { ImpulseElement } from '@ambiki/impulse';
-import { cycle } from 'src/helpers/array';
-import { FocusableElement, focusable, tabbable } from 'tabbable';
+import { tabbable, focusable, FocusableElement, isFocusable } from 'tabbable';
+
+const trappedContainers: Set<HTMLElement> = new Set();
 
 export type UseFocusTrap = {
   start: () => void;
   stop: () => void;
 };
 
-const elements: HTMLElement[] = [];
-
-export default function useFocusTrap(element: ImpulseElement, { trap }: { trap: HTMLElement }): UseFocusTrap {
+export default function useFocusTrap(container: HTMLElement): UseFocusTrap {
   let focusedElementBeforeActivation: HTMLElement | null;
-  let recentlyFocused: HTMLElement | FocusableElement;
-
-  function handleKeydown(event: KeyboardEvent) {
-    if (event.key !== 'Tab') return;
-    event.preventDefault();
-
-    const tabbableElements = tabbable(trap) as HTMLElement[];
-    const activeElement = trap.contains(document.activeElement) ? (document.activeElement as HTMLElement) : null;
-    const nextActiveElement = cycle(tabbableElements, activeElement, event.shiftKey ? -1 : 1);
-    tryFocus(nextActiveElement);
-  }
+  let recentlyFocused: HTMLElement | FocusableElement | null;
 
   function handleFocusin(event: Event) {
     const target = (event.composedPath?.()?.[0] || event.target) as HTMLElement;
 
-    for (const element of elements) {
+    for (const element of trappedContainers) {
       if (element.contains(target)) {
         recentlyFocused = target;
         return;
       }
     }
 
-    tryFocus(recentlyFocused || trap);
-  }
-
-  function tryFocus(item?: HTMLElement | FocusableElement | null) {
-    if (!item) {
-      tryFocus(trap);
-      return;
-    }
-
-    if (item === document.activeElement) return;
-
-    item.focus({ preventScroll: true });
-    recentlyFocused = item;
-  }
-
-  function getFirstFocusableElement(trap: HTMLElement) {
-    if (trap.hasAttribute('data-autofocus')) {
-      return trap;
-    }
-    return trap.querySelector<HTMLElement>('[data-autofocus]') || focusable(trap)[0] || trap;
+    tryFocus(recentlyFocused);
   }
 
   function start() {
     focusedElementBeforeActivation = document.activeElement as HTMLElement;
-    elements.push(trap);
-    tryFocus(getFirstFocusableElement(trap));
+    trappedContainers.add(container);
+
+    const tabbableElements = tabbable(container);
+
+    const sentinelStart = document.createElement('span');
+    sentinelStart.setAttribute('tabindex', '0');
+    sentinelStart.setAttribute('aria-hidden', 'true');
+    sentinelStart.setAttribute('data-sentinel', '');
+    sentinelStart.classList.add('sentinel');
+    sentinelStart.onfocus = () => {
+      const lastFocusableElement = tabbableElements[tabbableElements.length - 1];
+      lastFocusableElement?.focus();
+    };
+
+    const sentinelEnd = document.createElement('span');
+    sentinelEnd.setAttribute('tabindex', '0');
+    sentinelEnd.setAttribute('aria-hidden', 'true');
+    sentinelEnd.setAttribute('data-sentinel', '');
+    sentinelEnd.classList.add('sentinel');
+    sentinelEnd.onfocus = () => {
+      const firstFocusableElement = tabbableElements[0];
+      firstFocusableElement?.focus();
+    };
+
+    insertBefore(sentinelStart, container);
+    insertAfter(sentinelEnd, container);
+
+    tryFocus(getFirstFocusableElement(container));
+
+    document.addEventListener('focusin', handleFocusin, true);
   }
 
   function stop() {
-    const index = elements.indexOf(trap);
-    if (index === -1) return;
-    elements.splice(index, 1);
-    tryFocus(focusedElementBeforeActivation);
-  }
+    const sentinels = container.parentNode?.querySelectorAll('[data-sentinel]');
+    sentinels?.forEach((sentinel) => sentinel.remove());
 
-  trap.addEventListener('keydown', handleKeydown, true);
-  document.addEventListener('focusin', handleFocusin, true);
-
-  function destroy() {
-    trap.removeEventListener('keydown', handleKeydown, true);
+    trappedContainers.delete(container);
     document.removeEventListener('focusin', handleFocusin, true);
+    tryFocus(focusedElementBeforeActivation);
+    focusedElementBeforeActivation = null;
+    recentlyFocused = null;
   }
 
-  const disconnectedCallback = element.disconnected.bind(element);
-  Object.assign(element, {
-    disconnected() {
-      destroy();
-      disconnectedCallback();
-    },
-  });
+  function getFirstFocusableElement(container: HTMLElement) {
+    if (container.hasAttribute('data-autofocus') && isFocusable(container)) {
+      return container;
+    }
+
+    const element = container.querySelector<HTMLElement>('[data-autofocus]');
+    if (element && isFocusable(element)) {
+      return element;
+    }
+
+    const focusableElements = focusable(container);
+    if (focusableElements[0]) {
+      return focusableElements[0];
+    }
+
+    if (isFocusable(container)) {
+      return container;
+    }
+  }
+
+  function tryFocus(element?: HTMLElement | FocusableElement | null) {
+    if (!element) {
+      tryFocus(container);
+      return;
+    }
+
+    if (element === document.activeElement) return;
+    element.focus({ preventScroll: true });
+    recentlyFocused = element;
+  }
 
   return { start, stop };
+}
+
+function insertBefore(newNode: HTMLElement, container: HTMLElement) {
+  container.parentNode?.insertBefore(newNode, container);
+}
+
+function insertAfter(newNode: HTMLElement, container: HTMLElement) {
+  container.parentNode?.insertBefore(newNode, container.nextSibling);
 }
