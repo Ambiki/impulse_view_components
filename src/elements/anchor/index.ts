@@ -84,6 +84,10 @@ export default class AwcAnchorElement extends ImpulseElement {
     this.start();
   }
 
+  disconnected() {
+    this.stop();
+  }
+
   async activeChanged(newValue: boolean) {
     if (newValue) {
       this.start();
