@@ -5,6 +5,7 @@ module Impulse
     def initialize(tag:, **system_args)
       @tag = tag
       @system_args = system_args
+      @system_args = @system_args.transform_keys { |key| key.to_s.dasherize }
       @system_args[:"data-impulse-view-component"] = ""
     end
 

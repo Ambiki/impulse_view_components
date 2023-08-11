@@ -1,0 +1,16 @@
+<button type="button" id="awc-button" class="btn btn-primary">Anchor</button>
+<%= render(
+  Impulse::AnchorComponent.new(
+    anchor_id: "awc-button",
+    placement: local_assigns[:placement],
+    distance: local_assigns[:distance],
+    skidding: local_assigns[:skidding],
+    active: true,
+    class: "popover bs-popover-auto"
+  )
+) do %>
+  <div class="arrow" data-arrow></div>
+  <div class="popover-body">
+    I am anchored to the button!
+  </div>
+<% end %>
