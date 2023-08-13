@@ -88,6 +88,13 @@ export default class AwcAnchorElement extends ImpulseElement {
     this.stop();
   }
 
+  async anchorIdChanged(newValue: string) {
+    await this.stop();
+    if (newValue && this.anchorElement) {
+      this.start();
+    }
+  }
+
   async activeChanged(newValue: boolean) {
     if (newValue) {
       this.start();
