@@ -1,0 +1,60 @@
+.awc-dialog {
+  border: 0;
+  border-radius: var(--rounded-md);
+  max-width: 32rem;
+  width: 100%;
+  background-color: var(--white);
+  padding: 0;
+  color: inherit;
+
+  &:focus-visible {
+    outline: none;
+  }
+}
+
+.awc-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem 0.5rem 0 0.5rem;
+}
+
+.awc-dialog-title {
+  margin: 0;
+  flex: 1 1 0%;
+  padding: 0.5rem 0 0.5rem 0.5rem;
+  font-size: var(--fs-lg);
+  font-weight: 500;
+  line-height: 21px;
+}
+
+.awc-dialog-close-btn {
+  flex-shrink: 0;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  font-size: 1.25rem;
+  line-height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &:not(:hover) {
+    background-color: var(--white);
+    border-color: var(--white);
+  }
+
+  &:focus {
+    box-shadow: none;
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+
+  i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
