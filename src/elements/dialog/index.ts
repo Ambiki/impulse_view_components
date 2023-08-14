@@ -30,7 +30,16 @@ export default class AwcDialogElement extends ImpulseElement {
     this.dialog.showModal();
   }
 
-  hide() {
+  hide(event?: Event) {
+    if (event) {
+      event.stopPropagation();
+      const target = event.target as HTMLElement;
+      // Fix for nested dialogs.
+      if (target.closest(this.identifier) !== this) {
+        return;
+      }
+    }
+
     this.dialog.close();
   }
 

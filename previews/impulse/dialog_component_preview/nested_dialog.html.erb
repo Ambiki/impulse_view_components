@@ -1,0 +1,15 @@
+<%= render(Impulse::DialogComponent.new(title: "Edit your profile")) do |c| %>
+  <%= c.with_trigger { "Edit profile" } %>
+  <%= c.with_body do %>
+    Open another dialog by clicking on the button.
+    <div>
+      <%= render(Impulse::DialogComponent.new(title: "Nested dialog")) do |s| %>
+        <%= s.with_trigger(class: "btn btn-primary btn-sm") { "Open dialog" } %>
+        <%= s.with_body { "This is a nested dialog." } %>
+        <%= s.with_footer do %>
+          <button type="button" class="btn btn-primary btn-sm" data-action="click->awc-dialog#hide">Close</button>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>
