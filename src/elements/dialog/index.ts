@@ -34,6 +34,12 @@ export default class AwcDialogElement extends ImpulseElement {
     this.dialog.close();
   }
 
+  checkBodyScroll(event: Event) {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    this.toggleAttribute('data-scroll', !!target.scrollTop);
+  }
+
   get trigger() {
     return document.getElementById(this.triggerId);
   }

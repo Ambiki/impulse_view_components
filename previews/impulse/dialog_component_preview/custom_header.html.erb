@@ -1,0 +1,7 @@
+<%= render(Impulse::DialogComponent.new(title: "Edit your profile")) do |c| %>
+  <%= c.with_trigger { "Edit profile" } %>
+  <%= c.with_header(divider: true) do %>
+    <input type="text" class="form-control form-control-sm">
+  <% end %>
+  <%= c.with_body { "Make changes to your profile here. Click save when you're done." } %>
+<% end %>
