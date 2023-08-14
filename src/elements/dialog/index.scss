@@ -1,5 +1,7 @@
-.awc-dialog[data-scroll] {
-  --awc-dialog-border: var(--color-border-default);
+.awc-dialog[data-scroll] > .awc-dialog-dialog {
+  > .awc-dialog-header {
+    border-color: var(--color-border-default);
+  }
 }
 
 .awc-dialog-dialog {
@@ -35,7 +37,7 @@
   align-items: flex-start;
   gap: 0.5rem;
   padding: 0.5rem 0.5rem 0 0.5rem;
-  border-bottom: 1px solid var(--awc-dialog-border, transparent);
+  border-bottom: 1px solid transparent;
 }
 
 .awc-dialog-header--divider {
