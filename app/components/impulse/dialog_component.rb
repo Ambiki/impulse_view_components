@@ -41,13 +41,28 @@ module Impulse
       Impulse::BaseRenderer.new(**system_args)
     }
 
-    def initialize(id: self.class.generate_id, title:, **system_args)
+    DEFAULT_FULLSCREEN = :none
+    FULLSCREEN_MAPPINGS = {
+      DEFAULT_FULLSCREEN => "",
+      :always => "awc-dialog--fullscreen",
+      :sm_down => "awc-dialog--fullscreen-sm-down",
+      :md_down => "awc-dialog--fullscreen-md-down",
+      :lg_down => "awc-dialog--fullscreen-lg-down",
+      :xl_down => "awc-dialog--fullscreen-xl-down"
+    }
+
+    def initialize(title:, id: self.class.generate_id, fullscreen: DEFAULT_FULLSCREEN, **system_args)
       @id = id
       @title = title
       @system_args = system_args
       @system_args[:tag] = :"awc-dialog"
       @system_args[:id] = @id
       @system_args[:trigger_id] = trigger_id
+      @system_args[:class] = class_names(
+        system_args[:class],
+        FULLSCREEN_MAPPINGS[fetch_or_fallback(FULLSCREEN_MAPPINGS.keys, fullscreen, DEFAULT_FULLSCREEN)],
+        "awc-dialog"
+      )
     end
 
     private

@@ -1,7 +1,7 @@
 <%= trigger %>
 
 <%= render(Impulse::BaseRenderer.new(**@system_args)) do %>
-  <dialog id="<%= dialog_id %>" class="awc-dialog" aria-labelledby="<%= trigger_id %>" data-action="close->awc-dialog#handleClose" data-target="awc-dialog.dialog">
+  <dialog id="<%= dialog_id %>" class="awc-dialog-dialog" aria-labelledby="<%= trigger_id %>" data-action="close->awc-dialog#handleClose" data-target="awc-dialog.dialog">
     <%= header %>
     <%= body %>
     <%= footer %>
