@@ -49,6 +49,22 @@ export default class AwcDialogElement extends ImpulseElement {
     this.toggleAttribute('data-scroll', !!target.scrollTop);
   }
 
+  handleOutsideClick(event: MouseEvent) {
+    const target = event.target;
+    // Fix for nested dialogs.
+    if (!(target instanceof HTMLElement) || target !== this.dialog) return;
+    const rect = target.getBoundingClientRect();
+    if (
+      rect.top <= event.clientY &&
+      event.clientY <= rect.top + rect.height &&
+      rect.left <= event.clientX &&
+      event.clientX <= rect.left + rect.width
+    ) {
+      return;
+    }
+    this.hide();
+  }
+
   get trigger() {
     return document.getElementById(this.triggerId);
   }
