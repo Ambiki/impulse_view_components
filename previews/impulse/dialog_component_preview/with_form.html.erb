@@ -2,8 +2,8 @@
   <% c.with_trigger { "Edit profile" } %>
   <form>
     <%= render(Impulse::Dialog::BodyComponent.new) do %>
-      <label for="email">Email address</label>
-      <input type="email" id="email" class="form-control form-control-sm">
+      <label for="name">Full name</label>
+      <input type="text" id="name" class="form-control form-control-sm" autocomplete="off">
     <% end %>
     <%= render(Impulse::Dialog::FooterComponent.new) do %>
       <button type="reset" class="btn btn-secondary btn-sm" data-action="click->awc-dialog#hide">Cancel</button>

@@ -6,16 +6,34 @@
   --color-border-default: #e0e7f7;
 
   /** Border radii */
-  --rounded-sm: 0.125rem;
-  --rounded-default: 0.25rem;
-  --rounded-md: 0.375rem;
-  --rounded-lg: 0.5rem;
+  --rounded-sm: 2px;
+  --rounded-default: 4px;
+  --rounded-md: 6px;
+  --rounded-lg: 8px;
   --rounded-full: 9999px;
 
   /** Font sizes */
   --fs-sm: 0.8125rem;
   --fs-default: 0.875rem;
   --fs-lg: 1rem;
+
+  /** Font weights */
+  --fw-default: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /** Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-default: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  /** Spacings **/
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
 
   /** Autocomplete */
   --awc-autocomplete-control-min-height: #{$input-height};
