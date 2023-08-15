@@ -41,7 +41,7 @@
   <% floating_ui = params.dig(:lookbook, :display, :floating_ui) %>
   <% center = params.dig(:lookbook, :display, :center) %>
 
-  <%= content_tag :body, class: class_names("p-3 d-flex flex-column", "justify-content-center align-items-center": center), style: "min-height: 100vh" do %>
+  <%= content_tag :body, class: class_names("p-3 d-flex flex-column", "justify-content-center align-items-center": center, "align-items-start": !center), style: "min-height: 100vh" do %>
     <% if floating_ui %>
       <div style="flex: 1 1 0%; min-height: 200vh; min-width: 200vw; overflow: auto; display: flex; align-items: center; justify-content: center">
         <%= yield %>
