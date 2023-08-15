@@ -104,7 +104,8 @@
 }
 
 .awc-dialog-body {
-  flex: 1 1 0%;
+  // Cannot flex-shrink: 0 on iOS.
+  flex-grow: 1;
   overflow-y: auto;
   padding: 0 var(--space-3) var(--space-3) var(--space-3);
   font-size: var(--fs-default);
