@@ -15,6 +15,7 @@ export default class AwcDialogElement extends ImpulseElement {
   }
 
   disconnected() {
+    this.hide();
     this.controller.abort();
   }
 
