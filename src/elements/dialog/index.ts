@@ -3,6 +3,7 @@ import { ImpulseElement, property, registerElement, target } from '@ambiki/impul
 @registerElement('awc-dialog')
 export default class AwcDialogElement extends ImpulseElement {
   @property() triggerId: string;
+  @property({ type: Boolean }) hideOnOutsideClick = true;
   @target() dialog: HTMLDialogElement;
 
   private controller = new AbortController();
@@ -53,6 +54,7 @@ export default class AwcDialogElement extends ImpulseElement {
   }
 
   handleOutsideClick(event: MouseEvent) {
+    if (!this.hideOnOutsideClick) return;
     const target = event.target;
     // Fix for nested dialogs.
     if (!(target instanceof HTMLElement) || target !== this.dialog) return;

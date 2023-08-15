@@ -48,7 +48,7 @@ module Impulse
       :lg => "awc-dialog--lg"
     }.freeze
 
-    DEFAULT_FULLSCREEN = :none
+    DEFAULT_FULLSCREEN = :never
     FULLSCREEN_MAPPINGS = {
       DEFAULT_FULLSCREEN => "",
       :always => "awc-dialog--fullscreen",
