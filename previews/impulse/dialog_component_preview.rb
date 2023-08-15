@@ -30,5 +30,10 @@ module Impulse
     def nested_dialog
       render_with_template
     end
+
+    # @display center true
+    def with_form
+      render_with_template
+    end
   end
 end

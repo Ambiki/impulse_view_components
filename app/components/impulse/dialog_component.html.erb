@@ -3,7 +3,11 @@
 <%= render(Impulse::BaseRenderer.new(**@system_args)) do %>
   <dialog id="<%= dialog_id %>" class="awc-dialog-dialog" aria-labelledby="<%= trigger_id %>" data-action="close->awc-dialog#handleClose click->awc-dialog#handleOutsideClick" data-target="awc-dialog.dialog">
     <%= header %>
-    <%= body %>
-    <%= footer %>
+    <% if content.present? %>
+      <%= content %>
+    <% else %>
+      <%= body %>
+      <%= footer %>
+    <% end %>
   </dialog>
 <% end %>

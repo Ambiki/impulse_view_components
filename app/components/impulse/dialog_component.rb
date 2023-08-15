@@ -15,31 +15,8 @@ module Impulse
       Impulse::Dialog::HeaderComponent.new(title: @title, **system_args)
     }
 
-    renders_one :body, lambda { |**system_args|
-      system_args[:tag] = :div
-      system_args[:class] = class_names(
-        system_args[:class],
-        "awc-dialog-body"
-      )
-
-      system_args[:data] = merge_attributes(
-        system_args[:data],
-        action: "scroll->awc-dialog#checkBodyScroll"
-      )
-
-      Impulse::BaseRenderer.new(**system_args)
-    }
-
-    renders_one :footer, lambda { |divider: false, **system_args|
-      system_args[:tag] = :div
-      system_args[:class] = class_names(
-        system_args[:class],
-        "awc-dialog-footer",
-        "awc-dialog-footer--divider": divider
-      )
-
-      Impulse::BaseRenderer.new(**system_args)
-    }
+    renders_one :body, Impulse::Dialog::BodyComponent
+    renders_one :footer, Impulse::Dialog::FooterComponent
 
     DEFAULT_SIZE = :md
     SIZE_MAPPINGS = {
