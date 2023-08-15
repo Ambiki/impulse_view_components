@@ -40,6 +40,11 @@
   border-bottom: 1px solid transparent;
 }
 
+.awc-dialog-title-container {
+  flex: 1 1 0%;
+  padding: 0.5rem 0 0.5rem 0.5rem;
+}
+
 .awc-dialog-header--divider {
   padding-bottom: 0.5rem;
   border-color: var(--color-border-default);
@@ -51,14 +56,13 @@
 
 .awc-dialog-title {
   margin: 0;
-  flex: 1 1 0%;
-  padding: 0.5rem 0 0.5rem 0.5rem;
   font-size: var(--fs-lg);
   font-weight: 500;
   line-height: 21px;
 }
 
 .awc-dialog-close-btn {
+  position: relative;
   flex-shrink: 0;
   padding: 0;
   width: 32px;
@@ -86,6 +90,11 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    font-style: normal;
+
+    &::before {
+      line-height: inherit;
+    }
   }
 }
 
