@@ -2,8 +2,16 @@ import { ImpulseElement, property, registerElement, target } from '@ambiki/impul
 
 @registerElement('awc-dialog')
 export default class AwcDialogElement extends ImpulseElement {
+  /**
+   * The `id` of the trigger element (generally the open button).
+   */
   @property() triggerId: string;
+
+  /**
+   * Whether or not to hide the dialog when clicking outside of its region.
+   */
   @property({ type: Boolean }) hideOnOutsideClick = true;
+
   @target() dialog: HTMLDialogElement;
 
   private controller = new AbortController();
