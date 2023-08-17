@@ -2,8 +2,14 @@
   <% c.with_trigger { "Edit profile" } %>
   <form>
     <%= render(Impulse::Dialog::BodyComponent.new) do %>
-      <label for="name">Full name</label>
-      <input type="text" id="name" class="form-control form-control-sm" autocomplete="off">
+      <div class="form-group">
+        <label for="name">Full name</label>
+        <input type="text" id="name" class="form-control form-control-sm" autocomplete="off">
+      </div>
+      <div>
+        <label for="user_fruit_id">Favorite fruit</label>
+        <%= render(Impulse::SelectComponent.new(:user, :fruit_id, ["Mango", "Banana", "Apple"], size: :sm)) %>
+      </div>
     <% end %>
     <%= render(Impulse::Dialog::FooterComponent.new) do %>
       <button type="reset" class="btn btn-secondary btn-sm" data-action="click->awc-dialog#hide">Cancel</button>

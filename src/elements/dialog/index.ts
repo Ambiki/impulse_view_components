@@ -63,7 +63,7 @@ export default class AwcDialogElement extends ImpulseElement {
   }
 
   handleOutsideClick(event: MouseEvent) {
-    if (!this.hideOnOutsideClick) return;
+    if (!this.hideOnOutsideClick || event.defaultPrevented) return;
     const target = event.target;
     // Fix for nested dialogs.
     if (!(target instanceof HTMLElement) || target !== this.dialog) return;
