@@ -35,5 +35,9 @@ module Impulse
     def with_form
       render_with_template
     end
+
+    def long_scrolling_content
+      render_with_template
+    end
   end
 end
