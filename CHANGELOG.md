@@ -11,14 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add `focusTrap` helper
-- Add `AnchorComponent`
-- Add `DialogComponent`
+- Add `focusTrap` helper ([#17](https://github.com/Ambiki/impulse_view_components/pull/17))
+- Add `AnchorComponent` ([#18](https://github.com/Ambiki/impulse_view_components/pull/18))
+- Add `DialogComponent` ([#19](https://github.com/Ambiki/impulse_view_components/pull/19))
 
 ### Fixed
 
-- Set `initialClickTarget` to `null` when element gets destroyed
-- Avoid closing the dialog element when there are nested autocomplete elements which are still open
+- Set `initialClickTarget` to `null` when element gets destroyed ([#16](https://github.com/Ambiki/impulse_view_components/pull/16))
+- Avoid closing the dialog element when there are nested autocomplete elements which are still open ([#20](https://github.com/Ambiki/impulse_view_components/pull/20))
 
 ## [0.1.3] - 2023-08-03
 
