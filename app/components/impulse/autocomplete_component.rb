@@ -37,7 +37,7 @@ module Impulse
 
       @system_args[:data] = merge_attributes(
         system_args[:data],
-        action: "mousedown->awc-autocomplete#handleMousedown click->awc-autocomplete#handleClick combobox:commit->awc-autocomplete#handleCommit focusin@window->awc-autocomplete#handleFocusin"
+        action: "mousedown->awc-autocomplete#handleMousedown click->awc-autocomplete#handleClick combobox:commit->awc-autocomplete#handleCommit"
       )
     end
 
