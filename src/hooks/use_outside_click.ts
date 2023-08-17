@@ -7,10 +7,7 @@ type UseOutsideClickOptions = {
   callback: (event: Event, element: HTMLElement) => void;
 };
 
-export default function useOutsideClick(
-  element: ImpulseElement & { open: boolean },
-  { boundaries, callback }: UseOutsideClickOptions
-) {
+export default function useOutsideClick(element: ImpulseElement, { boundaries, callback }: UseOutsideClickOptions) {
   let initialClickTarget: HTMLElement | null = null;
 
   function setInitialClickTarget(event: Event) {
@@ -18,7 +15,7 @@ export default function useOutsideClick(
   }
 
   function handleOutsideClick(event: Event, resolveTarget: (event: Event) => HTMLElement | null) {
-    if (!initialClickTarget || !element.open) return;
+    if (!initialClickTarget) return;
     if (event.defaultPrevented) return;
 
     const target = resolveTarget(event);

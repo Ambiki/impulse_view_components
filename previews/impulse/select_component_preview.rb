@@ -1,5 +1,7 @@
 module Impulse
   class SelectComponentPreview < ViewComponent::Preview
+    # @display center true
+    # @display max_width true
     # @param size select ["sm", "md", "lg"]
     # @param placeholder text
     # @param disabled toggle
@@ -30,16 +32,22 @@ module Impulse
       end
     end
 
+    # @display center true
+    # @display max_width true
     # @param required toggle
     def form_with_single_select(required: false)
       render_with_template(locals: {required: required})
     end
 
+    # @display center true
+    # @display max_width true
     # @param required toggle
     def form_with_single_select_block_options(required: false)
       render_with_template(locals: {required: required})
     end
 
+    # @display center true
+    # @display max_width true
     # @param size select ["sm", "md", "lg"]
     # @param placeholder text
     # @param disabled toggle
@@ -60,11 +68,15 @@ module Impulse
       )
     end
 
+    # @display center true
+    # @display max_width true
     # @param required toggle
     def form_with_multiple_select(required: false)
       render_with_template(locals: {required: required})
     end
 
+    # @display center true
+    # @display max_width true
     def block_options
       render(Impulse::SelectComponent.new(:user, :fruit_id, selected: "kiwi")) do |c|
         %w[Apple Banana Guava Kiwi Litchi Mango Pomegranate].each do |fruit|
@@ -73,6 +85,8 @@ module Impulse
       end
     end
 
+    # @display center true
+    # @display max_width true
     def custom_blankslate
       render(Impulse::SelectComponent.new(:user, :fruit_id)) do |c|
         c.with_blankslate { "Nothing found" }

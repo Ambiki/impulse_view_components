@@ -60,6 +60,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   private firstFocus = true;
   private abortController?: AbortController;
   private currentQuery?: string;
+  private inputPristine = false;
 
   constructor() {
     super();
@@ -80,8 +81,16 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     });
     useOutsideClick(this, {
       boundaries: [this.control, this.listbox],
-      callback: () => {
-        this.open = false;
+      callback: (event: Event) => {
+        // Since the blur event fires before the click event, we need to conditionally prevent the event so that the
+        // dialog element remains open when there are nested autocomplete elements inside it which are still open.
+        if (this.inputPristine) {
+          event.preventDefault();
+        } else if (this.open) {
+          this.open = false;
+        }
+
+        this.inputPristine = false;
       },
     });
     this.combobox = new Combobox(this.input, this.listbox, { multiple: this.multiple });
@@ -135,6 +144,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
       }
       this.removeAttribute('no-options');
       this.removeAttribute('error');
+      this.inputPristine = false;
       this.currentQuery = undefined;
       await this.floatingUI.stop();
       this.emit('hidden');
@@ -205,7 +215,10 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   }
 
   handleInputBlur() {
-    this.open = false;
+    if (this.open) {
+      this.open = false;
+      this.inputPristine = true;
+    }
     this.removeAttribute('data-focus');
     this.firstFocus = true;
   }

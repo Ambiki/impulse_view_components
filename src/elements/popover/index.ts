@@ -41,7 +41,9 @@ export default class AwcPopoverElement extends ImpulseElement {
     useOutsideClick(this, {
       boundaries: [this.button, this.panel],
       callback: () => {
-        this.open = false;
+        if (this.open) {
+          this.open = false;
+        }
       },
     });
 

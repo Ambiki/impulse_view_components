@@ -1,5 +1,7 @@
 module Impulse
   class AutocompleteComponentPreview < ViewComponent::Preview
+    # @display center true
+    # @display max_width true
     # @param size select ["sm", "md", "lg"]
     # @param placeholder text
     # @param disabled toggle
@@ -12,10 +14,14 @@ module Impulse
       end
     end
 
+    # @display center true
+    # @display max_width true
     def single_ajax_select
       render(Impulse::AutocompleteComponent.new(:user, :fruit_id, src: "/users"))
     end
 
+    # @display center true
+    # @display max_width true
     # @param size select ["sm", "md", "lg"]
     # @param placeholder text
     # @param disabled toggle
@@ -27,14 +33,20 @@ module Impulse
       end
     end
 
+    # @display center true
+    # @display max_width true
     def multiple_ajax_select
       render(Impulse::AutocompleteComponent.new(:user, :fruit_ids, src: "/users", selected: [OpenStruct.new(value: "arnold_winnie", text: "Arnold Winnie")], multiple: true))
     end
 
+    # @display center true
+    # @display max_width true
     def ajax_error
       render(Impulse::AutocompleteComponent.new(:user, :fruit_ids, src: "/invalid"))
     end
 
+    # @display center true
+    # @display max_width true
     def custom_blankslate
       render(Impulse::AutocompleteComponent.new(:user, :fruit_id)) do |c|
         c.with_blankslate { "There aren't any fruits in the basket!" }
