@@ -53,7 +53,9 @@ module Impulse
       page.find(".awc-autocomplete-control").click
       page.find("[role='option'][value='1']").click
       assert_selector "[data-behavior='tag']", count: 3
-      page.find("body").click # Trigger a blur event to close the listbox.
+
+      page.find("input[type='text']").native.send_key(:escape)
+      refute_selector "awc-autocomplete[open]"
 
       click_button "Reset"
       assert_selector "[data-behavior='tag']", count: 2
