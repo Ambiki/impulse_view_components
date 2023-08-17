@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
     <%= stylesheet_link_tag "impulse_view_components" %>
     <script src="https://cdn.jsdelivr.net/npm/@floating-ui/core@1.3.1" defer></script>
@@ -19,19 +20,8 @@
     <style>
       body {
         font-family: 'Roboto', sans-serif;
-      }
-
-      awc-autocomplete,
-      form {
-        max-width: 396px;
-        width: 100%;
-        margin-left: auto;
-        margin-right: auto;
-      }
-
-      awc-popover {
-        margin-left: auto;
-        margin-right: auto;
+        color: var(--color-fg-default);
+        font-size: 0.875rem;
       }
     </style>
   </head>
@@ -39,7 +29,7 @@
   <% floating_ui = params.dig(:lookbook, :display, :floating_ui) %>
   <% center = params.dig(:lookbook, :display, :center) %>
 
-  <%= content_tag :body, class: class_names("p-3 d-flex flex-column", "justify-content-center align-items-center": center), style: "min-height: 100vh" do %>
+  <%= content_tag :body, class: class_names("p-3 d-flex flex-column", "justify-content-center align-items-center": center, "align-items-start": !center), style: "min-height: 100vh" do %>
     <% if floating_ui %>
       <div style="flex: 1 1 0%; min-height: 200vh; min-width: 200vw; overflow: auto; display: flex; align-items: center; justify-content: center">
         <%= yield %>

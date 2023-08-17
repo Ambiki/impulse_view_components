@@ -29,6 +29,10 @@ export default defineConfig({
             link: '/components/ajax-select',
           },
           {
+            text: 'Dialog',
+            link: '/components/dialog',
+          },
+          {
             text: 'Select',
             link: '/components/select',
           },

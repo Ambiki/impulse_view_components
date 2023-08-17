@@ -1,0 +1,8 @@
+<%= render(Impulse::DialogComponent.new(title: "Edit your profile")) do |c| %>
+  <% c.with_trigger { "Edit profile" } %>
+  <% c.with_body { "Make changes to your profile here. Click save when you're done." } %>
+  <% c.with_footer do %>
+    <button type="button" class="btn btn-secondary btn-sm" data-action="click->awc-dialog#hide">Cancel</button>
+    <button type="button" class="btn btn-primary btn-sm">Save</button>
+  <% end %>
+<% end %>
