@@ -205,9 +205,16 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   }
 
   handleInputBlur() {
-    this.open = false;
     this.removeAttribute('data-focus');
     this.firstFocus = true;
+  }
+
+  handleFocusin(event: Event) {
+    const { target } = event;
+    if (!(target instanceof HTMLElement)) return;
+    if (this.contains(target) || this.listbox.contains(target)) return;
+
+    this.open = false;
   }
 
   handleInputKeydown(event: KeyboardEvent) {
