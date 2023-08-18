@@ -12,7 +12,7 @@
   background-color: var(--white);
   padding: 0;
   color: inherit;
-  max-height: 80vh;
+  max-height: calc(100vh - 2rem);
   box-shadow: var(--shadow-lg);
   animation: dialog-show 150ms cubic-bezier(0.16, 1, 0.3, 1);
 
