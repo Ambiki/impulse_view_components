@@ -1,13 +1,12 @@
 module Impulse
   module Dialog
     class FooterComponent < ApplicationComponent
-      def initialize(divider: false, **system_args)
+      def initialize(**system_args)
         @system_args = system_args
         @system_args[:tag] = :div
         @system_args[:class] = class_names(
           system_args[:class],
-          "awc-dialog-footer",
-          "awc-dialog-footer--divider": divider
+          "awc-dialog-footer"
         )
       end
 

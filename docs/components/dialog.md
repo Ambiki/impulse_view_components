@@ -39,12 +39,6 @@ You should not use the `with_header` slot if you just want to change the `title`
 the `title` argument directly to the component.
 :::
 
-### Arguments
-
-| Name    | Default   | Description                      |
-| ------  | --------- | -------------                    |
-| divider | `false`   | If `true`, adds a bottom border. |
-
 ## Body
 
 ```erb
@@ -67,12 +61,6 @@ the `title` argument directly to the component.
 <% end %>
 ```
 
-### Arguments
-
-| Name    | Default   | Description                      |
-| ------  | --------- | -------------                    |
-| divider | `false`   | If `true`, adds a bottom border. |
-
 ## Form
 
 You can render any arbitrary content inside the dialog and use the `Impulse::Dialog::BodyComponent` and
@@ -81,7 +69,7 @@ You can render any arbitrary content inside the dialog and use the `Impulse::Dia
 ```erb
 <%= render(Impulse::DialogComponent.new(title: "Edit profile")) do |c| %>
   <% c.with_trigger { "Edit profile" } %>
-  <form>
+  <form class="awc-dialog-body-container">
     <%= render(Impulse::Dialog::BodyComponent.new) do %>
       <div>
         <label for="name">Full name</label>
@@ -119,7 +107,7 @@ You can render any arbitrary content inside the dialog and use the `Impulse::Dia
 
 ## Closing the dialog
 
-Add the `data-action="click->awc-dialog#hide"` attribute on the `button` element to close the parent dialog.
+Add the `data-action="click->awc-dialog#hide"` attribute on the `button` element to close the closest parent dialog.
 
 ```erb{4}
 <%= render(Impulse::DialogComponent.new(title: "Edit your profile")) do |c| %>
