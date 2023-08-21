@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `DialogComponent` styles should be similar to Bootstrap's modal component
 
+### Fixed
+
+- Accept `null` as `arrowElement`
+
 ## [0.2.0] - 2023-08-17
 
 ### Added
