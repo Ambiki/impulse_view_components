@@ -19,7 +19,7 @@ export type UseFloatingUIType = {
 type Options = {
   referenceElement: ReferenceElement;
   popupElement: HTMLElement;
-  arrowElement?: HTMLElement;
+  arrowElement?: HTMLElement | null;
   arrowPadding?: number;
   middleware?: Middleware[];
   offsetOptions?: OffsetOptions;
