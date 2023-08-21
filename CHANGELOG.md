@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- `DialogComponent` styles should be similar to Bootstrap's modal component
+
 ## [0.2.0] - 2023-08-17
 
 ### Added
