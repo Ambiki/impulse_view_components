@@ -7,7 +7,7 @@ gem "bootsnap", require: false
 gem "impulse_view_components", path: "../"
 gem "jsbundling-rails"
 gem "lookbook", "~> 2.0", ">= 2.0.5"
-gem "puma", "~> 5.0"
+gem "puma", "~> 5.6"
 gem "rails", "6.1.7"
 gem "sprockets"
 gem "sprockets-rails"

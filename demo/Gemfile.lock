@@ -140,7 +140,7 @@ GEM
       ast (~> 2.4.1)
       racc
     public_suffix (5.0.3)
-    puma (5.6.6)
+    puma (5.6.7)
       nio4r (~> 2.0)
     racc (1.7.1)
     rack (2.2.7)
@@ -254,7 +254,7 @@ DEPENDENCIES
   impulse_view_components!
   jsbundling-rails
   lookbook (~> 2.0, >= 2.0.5)
-  puma (~> 5.0)
+  puma (~> 5.6)
   rails (= 6.1.7)
   sprockets
   sprockets-rails
