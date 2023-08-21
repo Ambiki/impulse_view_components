@@ -23,22 +23,6 @@ Dialog uses the native HTML `<dialog>` element under the hood which provides ful
 | fullscreen            | `:never`                 | Whether or not to render the dialog fullscreen. One of `:never`, `:always`, `:sm_down`, `:md_down`, `:lg_down`, or `:xl_down`. |
 | hide_on_outside_click | `true`                   | Whether or not to hide the dialog element when clicked outside.                                                                |
 
-## Header
-
-```erb
-<%= render(Impulse::DialogComponent.new(title: "My dialog")) do |c| %>
-  <% c.with_trigger { "Open dialog" } %>
-  <% c.with_header do %>
-    <button type="button">Header button</button>
-  <% end %>
-<% end %>
-```
-
-::: tip Note
-You should not use the `with_header` slot if you just want to change the `title` of the dialog element. Instead, pass
-the `title` argument directly to the component.
-:::
-
 ## Body
 
 ```erb
