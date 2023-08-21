@@ -8,11 +8,6 @@ module Impulse
           system_args[:class],
           "awc-dialog-body"
         )
-
-        @system_args[:data] = merge_attributes(
-          system_args[:data],
-          action: "scroll->awc-dialog#checkBodyScroll"
-        )
       end
 
       def call

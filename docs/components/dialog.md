@@ -23,28 +23,6 @@ Dialog uses the native HTML `<dialog>` element under the hood which provides ful
 | fullscreen            | `:never`                 | Whether or not to render the dialog fullscreen. One of `:never`, `:always`, `:sm_down`, `:md_down`, `:lg_down`, or `:xl_down`. |
 | hide_on_outside_click | `true`                   | Whether or not to hide the dialog element when clicked outside.                                                                |
 
-## Header
-
-```erb
-<%= render(Impulse::DialogComponent.new(title: "My dialog")) do |c| %>
-  <% c.with_trigger { "Open dialog" } %>
-  <% c.with_header do %>
-    <button type="button">Header button</button>
-  <% end %>
-<% end %>
-```
-
-::: tip Note
-You should not use the `with_header` slot if you just want to change the `title` of the dialog element. Instead, pass
-the `title` argument directly to the component.
-:::
-
-### Arguments
-
-| Name    | Default   | Description                      |
-| ------  | --------- | -------------                    |
-| divider | `false`   | If `true`, adds a bottom border. |
-
 ## Body
 
 ```erb
@@ -67,12 +45,6 @@ the `title` argument directly to the component.
 <% end %>
 ```
 
-### Arguments
-
-| Name    | Default   | Description                      |
-| ------  | --------- | -------------                    |
-| divider | `false`   | If `true`, adds a bottom border. |
-
 ## Form
 
 You can render any arbitrary content inside the dialog and use the `Impulse::Dialog::BodyComponent` and
@@ -81,7 +53,7 @@ You can render any arbitrary content inside the dialog and use the `Impulse::Dia
 ```erb
 <%= render(Impulse::DialogComponent.new(title: "Edit profile")) do |c| %>
   <% c.with_trigger { "Edit profile" } %>
-  <form>
+  <form class="awc-dialog-body-container">
     <%= render(Impulse::Dialog::BodyComponent.new) do %>
       <div>
         <label for="name">Full name</label>
@@ -119,7 +91,7 @@ You can render any arbitrary content inside the dialog and use the `Impulse::Dia
 
 ## Closing the dialog
 
-Add the `data-action="click->awc-dialog#hide"` attribute on the `button` element to close the parent dialog.
+Add the `data-action="click->awc-dialog#hide"` attribute on the `button` element to close the closest parent dialog.
 
 ```erb{4}
 <%= render(Impulse::DialogComponent.new(title: "Edit your profile")) do |c| %>

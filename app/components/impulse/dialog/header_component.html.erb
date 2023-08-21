@@ -1,10 +1,6 @@
 <%= render(Impulse::BaseRenderer.new(**@system_args)) do %>
   <div class="awc-dialog-title-container">
-    <% if content.present? %>
-      <%= content %>
-    <% else %>
-      <h2 class="awc-dialog-title"><%= @title %></h2>
-    <% end %>
+    <h2 class="awc-dialog-title"><%= @title %></h2>
   </div>
 
   <button type="button" class="btn btn-light awc-dialog-close-btn" data-action="click->awc-dialog#hide" aria-label="Close dialog">

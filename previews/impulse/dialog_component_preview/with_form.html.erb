@@ -1,6 +1,6 @@
 <%= render(Impulse::DialogComponent.new(title: "Edit profile")) do |c| %>
   <% c.with_trigger { "Edit profile" } %>
-  <form>
+  <form class="awc-dialog-body-container">
     <%= render(Impulse::Dialog::BodyComponent.new) do %>
       <div class="form-group">
         <label for="name">Full name</label>

@@ -20,23 +20,6 @@ module Impulse
       assert_selector "h2", text: "Edit your profile"
     end
 
-    test "renders the header" do
-      render_inline(Impulse::DialogComponent.new(title: "Edit your profile")) do |c|
-        c.with_header { "Dialog header" }
-      end
-
-      assert_selector ".awc-dialog-header", text: "Dialog header"
-      refute_selector ".awc-dialog-header--divider"
-    end
-
-    test "renders the header with a divider" do
-      render_inline(Impulse::DialogComponent.new(title: "Edit your profile")) do |c|
-        c.with_header(divider: true) { "Dialog header" }
-      end
-
-      assert_selector ".awc-dialog-header--divider"
-    end
-
     test "renders the body" do
       render_inline(Impulse::DialogComponent.new(title: "Edit your profile")) do |c|
         c.with_body { "Dialog body" }
@@ -51,15 +34,6 @@ module Impulse
       end
 
       assert_selector ".awc-dialog-footer", text: "Dialog footer"
-      refute_selector ".awc-dialog-footer--divider"
-    end
-
-    test "renders the footer with a divider" do
-      render_inline(Impulse::DialogComponent.new(title: "Edit your profile")) do |c|
-        c.with_footer(divider: true) { "Dialog footer" }
-      end
-
-      assert_selector ".awc-dialog-footer.awc-dialog-footer--divider"
     end
 
     test "dialog id can be changed" do
