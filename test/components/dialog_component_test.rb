@@ -20,14 +20,6 @@ module Impulse
       assert_selector "h2", text: "Edit your profile"
     end
 
-    test "renders the header" do
-      render_inline(Impulse::DialogComponent.new(title: "Edit your profile")) do |c|
-        c.with_header { "Dialog header" }
-      end
-
-      assert_selector ".awc-dialog-header", text: "Dialog header"
-    end
-
     test "renders the body" do
       render_inline(Impulse::DialogComponent.new(title: "Edit your profile")) do |c|
         c.with_body { "Dialog body" }

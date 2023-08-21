@@ -22,11 +22,6 @@ module Impulse
     end
 
     # @display center true
-    def custom_header
-      render_with_template
-    end
-
-    # @display center true
     def nested_dialog
       render_with_template
     end
