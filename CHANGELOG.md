@@ -11,11 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `DialogComponent` styles should be similar to Bootstrap's modal component
+- `DialogComponent` styles should be similar to Bootstrap's modal component ([#25](https://github.com/Ambiki/impulse_view_components/pull/25))
 
 ### Fixed
 
-- Accept `null` as `arrowElement`
+- Accept `null` as `arrowElement` ([#26](https://github.com/Ambiki/impulse_view_components/pull/26))
 
 ## [0.2.0] - 2023-08-17
 
