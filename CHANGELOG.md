@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Remove overflow and padding when dialog is closed via escape key
+
 ## [0.2.1] - 2023-08-22
 
 ### Changed
