@@ -37,6 +37,12 @@ export default class AwcDialogElement extends ImpulseElement {
   handleClose(event: Event) {
     if (event.target !== this.dialog) return;
     this.trigger?.setAttribute('aria-expanded', 'false');
+
+    // If the parent dialog is still open, do not remove the styles.
+    if (!this.closest('dialog[open]')) {
+      document.body.style.removeProperty('padding-right');
+      document.body.style.removeProperty('overflow');
+    }
   }
 
   show() {
@@ -56,12 +62,6 @@ export default class AwcDialogElement extends ImpulseElement {
     }
 
     this.dialog.close();
-
-    // If the parent dialog is still open, do not remove the styles.
-    if (!this.closest('dialog[open]')) {
-      document.body.style.removeProperty('padding-right');
-      document.body.style.removeProperty('overflow');
-    }
   }
 
   handleOutsideClick(event: MouseEvent) {
