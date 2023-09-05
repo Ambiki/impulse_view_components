@@ -4,7 +4,9 @@
 const autocomplete = document.querySelector('awc-autocomplete');
 ```
 
-## `open`
+## Examples
+
+### `open`
 
 Whether the listbox is visible or not.
 
@@ -13,7 +15,7 @@ autocomplete.open;
 // => false
 ```
 
-## `open=`
+### `open=`
 
 Shows/hides the listbox.
 
@@ -23,7 +25,7 @@ autocomplete.open;
 // => true;
 ```
 
-## `value`
+### `value`
 
 Returns all the selected values.
 
@@ -32,7 +34,7 @@ autocomplete.value;
 // => ['1', '2']
 ```
 
-## `setValue`
+### `setValue`
 
 Sets the value of the element.
 
@@ -42,7 +44,7 @@ autocomplete.value;
 // => ['apple']
 ```
 
-## `removeValue`
+### `removeValue`
 
 Removes a value from the element.
 
@@ -56,7 +58,7 @@ autocomplete.value;
 You do not have to provide the argument to `removeValue` if the element is a single select.
 :::
 
-## `activate`
+### `activate`
 
 Activates an option by setting the `data-active` attribute.
 
@@ -65,7 +67,7 @@ const option = autocomplete.options[0];
 autocomplete.activate(option, { scroll: true });
 ```
 
-## `deactivate`
+### `deactivate`
 
 Deactivates the active option by removing the `data-active` attribute.
 
@@ -73,7 +75,7 @@ Deactivates the active option by removing the `data-active` attribute.
 autocomplete.deactivate();
 ```
 
-## `clear`
+### `clear`
 
 Deselects all the selected options.
 
@@ -81,7 +83,7 @@ Deselects all the selected options.
 autocomplete.clear();
 ```
 
-## `reset`
+### `reset`
 
 Resets the autocomplete value to its initial state.
 
@@ -89,7 +91,7 @@ Resets the autocomplete value to its initial state.
 autocomplete.reset();
 ```
 
-## `activeOption`
+### `activeOption`
 
 Returns the option that has the `data-active` attribute.
 
@@ -97,7 +99,7 @@ Returns the option that has the `data-active` attribute.
 autocomplete.activeOption;
 ```
 
-## `visibleOptions`
+### `visibleOptions`
 
 Returns all the visible options of the autocomplete element.
 
@@ -105,7 +107,7 @@ Returns all the visible options of the autocomplete element.
 autocomplete.visibleOptions;
 ```
 
-## `options`
+### `options`
 
 Returns all the options of the autocomplete element.
 
@@ -113,7 +115,7 @@ Returns all the options of the autocomplete element.
 autocomplete.options;
 ```
 
-## `form`
+### `form`
 
 Returns the parent form element.
 
