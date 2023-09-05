@@ -1,3 +1,13 @@
+.awc-popover {
+  .popover {
+    display: none;
+  }
+
+  &[open] .popover {
+    display: block;
+  }
+}
+
 .popover {
   outline: none;
 }

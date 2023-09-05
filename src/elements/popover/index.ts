@@ -49,7 +49,6 @@ export default class AwcPopoverElement extends ImpulseElement {
 
     // Don't start focus trap.
     if (this.open) {
-      this.panel.hidden = false;
       this.button.setAttribute('aria-expanded', 'true');
       this.floatingUI.start();
     }
@@ -61,12 +60,10 @@ export default class AwcPopoverElement extends ImpulseElement {
 
   async openChanged(newValue: boolean) {
     if (newValue) {
-      this.panel.hidden = false;
       this.button.setAttribute('aria-expanded', 'true');
       this.floatingUI.start();
       this._focusTrap = focusTrap(this.panel);
     } else {
-      this.panel.hidden = true;
       this.button.setAttribute('aria-expanded', 'false');
       await this.floatingUI.stop();
       this._focusTrap?.abort();

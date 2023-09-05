@@ -1,0 +1,12 @@
+<%= render(Impulse::BaseRenderer.new(**@system_args)) do %>
+  <% if content.present? %>
+    <%= content %>
+  <% else %>
+    <%= @title %>
+    <% if @dismissible %>
+      <button type="button" class="close" aria-label="Close popover" data-action="click->awc-popover#hide">
+        &times;
+      </button>
+    <% end %>
+  <% end %>
+<% end %>
