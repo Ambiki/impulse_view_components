@@ -30,10 +30,6 @@ export default defineConfig({
             link: '/components/ajax-select',
           },
           {
-            text: 'Dialog',
-            link: '/components/dialog',
-          },
-          {
             text: 'Popover',
             link: '/components/popover',
           },
