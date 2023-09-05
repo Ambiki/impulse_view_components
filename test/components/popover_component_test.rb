@@ -16,7 +16,7 @@ module Impulse
       assert_selector "[data-test-id='btn'][type='button']"
 
       assert_selector ".popover-header", text: "Activity feed"
-      assert_selector "button.close[aria-label='Close popover']"
+      assert_selector "button.close[aria-label='Close']"
 
       assert_selector ".popover-body", text: "Popover body"
 
