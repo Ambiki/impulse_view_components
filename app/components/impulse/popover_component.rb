@@ -1,7 +1,7 @@
 module Impulse
   class PopoverComponent < ApplicationComponent
     renders_one :trigger, lambda { |**system_args|
-      system_args[:tag] ||= :button
+      system_args[:tag] = :button
       system_args[:type] = system_args.fetch(:type, "button")
       system_args[:role] = :button
       system_args[:"aria-haspopup"] = :dialog

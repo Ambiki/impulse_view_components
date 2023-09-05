@@ -77,7 +77,7 @@ export default class AwcPopoverElement extends ImpulseElement {
   }
 
   handleButtonClick() {
-    if (this.button.hasAttribute('disabled') || this.button.getAttribute('aria-disabled') === 'true') return;
+    if (this.button.disabled || this.button.getAttribute('aria-disabled') === 'true') return;
     this.toggle();
   }
 
