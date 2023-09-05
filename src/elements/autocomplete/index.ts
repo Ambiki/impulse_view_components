@@ -258,6 +258,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
           if (lastTag) {
             event.preventDefault();
             this.multipleSelect.removeValue(getValue(lastTag));
+            this.emit('remove', { detail: { target: lastTag } });
           }
         }
         break;

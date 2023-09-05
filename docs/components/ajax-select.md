@@ -45,7 +45,30 @@ The server response should include the options that matched the search query.
 ```
 :::
 
-## Blankslate
+## Examples
+
+### Selecting an option
+
+Pass an object that responds to the `value_method` and the `text_method`.
+
+```erb{8}
+<%= render(
+  Impulse::AjaxSelectComponent.new(
+    :post,
+    :person_id,
+    :id,
+    :name,
+    src: "/persons",
+    selected: OpenStruct.new(value: "john_doe", text: "John Doe")
+  )
+) %>
+```
+
+::: tip
+In case of multiple select, pass an array of objects to the `selected` argument.
+:::
+
+### Custom blankslate
 
 A blankslate is displayed when the input's text does not match any of the options that are returned from the server.
 
@@ -55,7 +78,7 @@ A blankslate is displayed when the input's text does not match any of the option
 <% end %>
 ```
 
-## Error
+### Custom error
 
 An error is displayed when the network request fails.
 
@@ -65,15 +88,46 @@ An error is displayed when the network request fails.
 <% end %>
 ```
 
-## Integrating with `form_with`
+### Integrating with `form_with`
 
-Wrap your `ajax_select` tag with the `impulse_form_with` method. Accepts the same [arguments](#arguments).
+Wrap your `ajax_select` tag with the `impulse_form_with` method. The `f.ajax_select` tag accepts the same
+[arguments](#arguments).
 
 ```erb
 <%= impulse_form_with model: @user do |f| %>
   <%= f.ajax_select :fruit_id, :id, :name, selected: f.object.fruit, src: "/fruits" %>
 <% end %>
 ```
+
+## Slots
+
+### `with_blankslate`
+
+Overwrite the default blankslate message by passing a custom block.
+
+| Name          | Default   | Description                                                               |
+| ------        | --------- | -------------                                                             |
+| `system_args` | `{}`      | HTML attributes that should be passed to the Rails' `content_tag` method. |
+
+### `with_error`
+
+Overwrite the default error message by passing a custom block.
+
+| Name          | Default   | Description                                                               |
+| ------        | --------- | -------------                                                             |
+| `system_args` | `{}`      | HTML attributes that should be passed to the Rails' `content_tag` method. |
+
+## Imports
+
+::: code-group
+```js
+import '@ambiki/impulse-view-components/dist/elements/autocomplete';
+```
+
+```scss
+@import '~@ambiki/impulse-view-components/dist/elements/autocomplete';
+```
+:::
 
 ## JS API
 
