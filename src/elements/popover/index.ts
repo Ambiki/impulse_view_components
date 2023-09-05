@@ -66,13 +66,17 @@ export default class AwcPopoverElement extends ImpulseElement {
 
   async openChanged(newValue: boolean) {
     if (newValue) {
+      this.emit('show');
       this.button.setAttribute('aria-expanded', 'true');
       this.floatingUI.start();
       this._focusTrap = focusTrap(this.panel);
+      this.emit('shown');
     } else {
+      this.emit('hide');
       this.button.setAttribute('aria-expanded', 'false');
       await this.floatingUI.stop();
       this._focusTrap?.abort();
+      this.emit('hidden');
     }
   }
 
@@ -108,7 +112,7 @@ export default class AwcPopoverElement extends ImpulseElement {
     }
   }
 
-  async updatePosition() {
+  async reposition() {
     await this.floatingUI.update();
   }
 
