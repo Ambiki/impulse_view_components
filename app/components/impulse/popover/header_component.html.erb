@@ -3,10 +3,8 @@
     <%= content %>
   <% else %>
     <%= @title %>
-    <% if @dismissible %>
-      <button type="button" class="close" aria-label="Close popover" data-action="click->awc-popover#hide">
-        &times;
-      </button>
-    <% end %>
+    <button type="button" class="close" aria-label="Close popover" data-action="click->awc-popover#hide">
+      &times;
+    </button>
   <% end %>
 <% end %>

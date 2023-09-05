@@ -19,7 +19,7 @@ module Impulse
     }
 
     renders_one :header, lambda { |**system_args|
-      Impulse::Popover::HeaderComponent.new(title: @title, dismissible: @dismissible, **system_args)
+      Impulse::Popover::HeaderComponent.new(title: @title, **system_args)
     }
 
     renders_one :body, lambda { |**system_args|
@@ -29,11 +29,11 @@ module Impulse
       Impulse::BaseRenderer.new(**system_args)
     }
 
-    def initialize(title:, dismissible: true, **system_args)
+    def initialize(title:, click_boundaries: [], **system_args)
       @title = title
-      @dismissible = dismissible
       @system_args = system_args
       @system_args[:tag] = :"awc-popover"
+      @system_args[:"click-boundaries"] = click_boundaries.to_json
       @panel_id = self.class.generate_id
 
       @system_args[:class] = class_names(

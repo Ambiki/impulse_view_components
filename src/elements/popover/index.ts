@@ -18,6 +18,11 @@ export default class AwcPopoverElement extends ImpulseElement {
    */
   @property() placement: Placement = 'bottom';
 
+  /**
+   * The CSS selector of the element that should avoid closing the popover when clicked inside.
+   */
+  @property({ type: Array }) clickBoundaries: string[] = [];
+
   @target() button: HTMLButtonElement;
   @target() panel: HTMLElement;
   @target() arrow?: HTMLElement;
@@ -39,9 +44,10 @@ export default class AwcPopoverElement extends ImpulseElement {
     });
 
     useOutsideClick(this, {
-      boundaries: [this.button, this.panel],
-      callback: () => {
+      boundaries: this.boundaries,
+      callback: (event: Event) => {
         if (this.open) {
+          event.preventDefault();
           this.open = false;
         }
       },
@@ -109,6 +115,11 @@ export default class AwcPopoverElement extends ImpulseElement {
   private get arrowPadding() {
     const borderRadius = getComputedStyle(this.panel).borderRadius;
     return stripCSSUnit(borderRadius) || 2;
+  }
+
+  private get boundaries() {
+    const elements = this.clickBoundaries.map((s) => document.querySelector<HTMLElement>(s));
+    return elements.concat([this.button, this.panel]);
   }
 }
 
