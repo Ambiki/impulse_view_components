@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Remove overflow and padding when dialog is closed via escape key
 
+### Added
+
+- Add `PopoverComponent`
+
 ## [0.2.1] - 2023-08-22
 
 ### Changed
