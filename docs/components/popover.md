@@ -17,7 +17,7 @@ A popover is a floating panel that can display rich content like navigation menu
 
 | Name             | Default   | Description                                                                                                    |
 | ------           | --------- | -------------                                                                                                  |
-| title            | `nil`     | The title of the popover.                                                                                      |
+| title            | N/A       | The title of the popover.                                                                                      |
 | open             | `false`   | Whether the popover is open or not.                                                                            |
 | placement        | `bottom`  | The preferred placement of the popover. The actual placement may vary to keep the element inside the viewport. |
 | click_boundaries | `[]`      | The CSS selector of the element that should avoid closing the popover when clicked inside.                     |
