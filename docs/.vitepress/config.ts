@@ -9,6 +9,7 @@ export default defineConfig({
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [{ text: 'Home', link: '/' }],
+    outline: 'deep',
     sidebar: [
       {
         text: 'Introduction',
@@ -33,6 +34,10 @@ export default defineConfig({
             link: '/components/dialog',
           },
           {
+            text: 'Popover',
+            link: '/components/popover',
+          },
+          {
             text: 'Select',
             link: '/components/select',
           },
@@ -45,6 +50,10 @@ export default defineConfig({
           {
             text: 'Autocomplete',
             link: '/js-api/autocomplete',
+          },
+          {
+            text: 'Popover',
+            link: '/js-api/popover',
           },
         ],
       },

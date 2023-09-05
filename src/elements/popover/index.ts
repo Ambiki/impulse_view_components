@@ -18,6 +18,11 @@ export default class AwcPopoverElement extends ImpulseElement {
    */
   @property() placement: Placement = 'bottom';
 
+  /**
+   * The CSS selector of the element that should avoid closing the popover when clicked inside.
+   */
+  @property({ type: Array }) clickBoundaries: string[] = [];
+
   @target() button: HTMLButtonElement;
   @target() panel: HTMLElement;
   @target() arrow?: HTMLElement;
@@ -39,9 +44,10 @@ export default class AwcPopoverElement extends ImpulseElement {
     });
 
     useOutsideClick(this, {
-      boundaries: [this.button, this.panel],
-      callback: () => {
+      boundaries: this.boundaries,
+      callback: (event: Event) => {
         if (this.open) {
+          event.preventDefault();
           this.open = false;
         }
       },
@@ -49,7 +55,6 @@ export default class AwcPopoverElement extends ImpulseElement {
 
     // Don't start focus trap.
     if (this.open) {
-      this.panel.hidden = false;
       this.button.setAttribute('aria-expanded', 'true');
       this.floatingUI.start();
     }
@@ -61,20 +66,22 @@ export default class AwcPopoverElement extends ImpulseElement {
 
   async openChanged(newValue: boolean) {
     if (newValue) {
-      this.panel.hidden = false;
+      this.emit('show');
       this.button.setAttribute('aria-expanded', 'true');
       this.floatingUI.start();
       this._focusTrap = focusTrap(this.panel);
+      this.emit('shown');
     } else {
-      this.panel.hidden = true;
+      this.emit('hide');
       this.button.setAttribute('aria-expanded', 'false');
       await this.floatingUI.stop();
       this._focusTrap?.abort();
+      this.emit('hidden');
     }
   }
 
   handleButtonClick() {
-    if (this.button.hasAttribute('disabled') || this.button.getAttribute('aria-disabled') === 'true') return;
+    if (this.button.disabled || this.button.getAttribute('aria-disabled') === 'true') return;
     this.toggle();
   }
 
@@ -105,13 +112,18 @@ export default class AwcPopoverElement extends ImpulseElement {
     }
   }
 
-  async updatePosition() {
+  async reposition() {
     await this.floatingUI.update();
   }
 
   private get arrowPadding() {
     const borderRadius = getComputedStyle(this.panel).borderRadius;
     return stripCSSUnit(borderRadius) || 2;
+  }
+
+  private get boundaries() {
+    const elements = this.clickBoundaries.map((s) => document.querySelector<HTMLElement>(s));
+    return elements.concat([this.button, this.panel]);
   }
 }
 

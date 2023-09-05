@@ -1,5 +1,12 @@
+.awc-popover {
+  &[open] .popover {
+    display: block;
+  }
+}
+
 .popover {
   outline: none;
+  display: none;
 }
 
 // FloatingUI changes
