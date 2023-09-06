@@ -3,6 +3,7 @@ import { ImpulseElement, property, registerElement, target, targets } from '@amb
 import debounce from 'src/helpers/debounce';
 import useFloatingUI, { UseFloatingUIType } from 'src/hooks/use_floating_ui';
 import useOutsideClick from 'src/hooks/use_outside_click';
+import { isFocusable } from 'tabbable';
 import { getText, getValue } from './helpers';
 import MultipleSelect from './multiple_select';
 import SingleSelect from './single_select';
@@ -81,10 +82,10 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     });
     useOutsideClick(this, {
       boundaries: [this.control, this.listbox],
-      callback: (event: Event) => {
+      callback: (event: Event, target: HTMLElement) => {
         // Since the blur event fires before the click event, we need to conditionally prevent the event so that the
         // dialog element remains open when there are nested autocomplete elements inside it which are still open.
-        if (this.inputPristine) {
+        if (this.inputPristine && !isFocusable(target)) {
           event.preventDefault();
         } else if (this.open) {
           this.open = false;
