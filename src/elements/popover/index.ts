@@ -4,6 +4,7 @@ import focusTrap from 'src/helpers/focus_trap';
 import useFloatingUI, { UseFloatingUIType } from 'src/hooks/use_floating_ui';
 import useOutsideClick from 'src/hooks/use_outside_click';
 import { stripCSSUnit } from '../../helpers/string';
+import { isFocusable } from 'tabbable';
 
 @registerElement('awc-popover')
 export default class AwcPopoverElement extends ImpulseElement {
@@ -45,10 +46,13 @@ export default class AwcPopoverElement extends ImpulseElement {
 
     useOutsideClick(this, {
       boundaries: this.boundaries,
-      callback: (event: Event) => {
+      callback: (event: Event, target: HTMLElement) => {
         if (this.open) {
-          event.preventDefault();
           this.open = false;
+          // Prevent modals from closing accidentally.
+          if (!isFocusable(target)) {
+            event.preventDefault();
+          }
         }
       },
     });

@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Remove overflow and padding when dialog is closed via escape key
+- Only prevent outside click event if target is not focusable
 
 ### Added
 
