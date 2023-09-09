@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add `PopoverComponent`
 - Add `focus` and `blur` methods to the autocomplete element
+- Add `show` and `hide` methods to the autocomplete element
 
 ## [0.2.1] - 2023-08-22
 
