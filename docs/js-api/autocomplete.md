@@ -91,6 +91,22 @@ Resets the autocomplete value to its initial state.
 autocomplete.reset();
 ```
 
+### `focus`
+
+Sets the focus on the input element. This method also accepts a list of focus [options](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/focus#parameters).
+
+```js
+autocomplete.focus();
+```
+
+### `blur`
+
+Removes keyboard focus from the input element.
+
+```js
+autocomplete.blur();
+```
+
 ### `activeOption`
 
 Returns the option that has the `data-active` attribute.

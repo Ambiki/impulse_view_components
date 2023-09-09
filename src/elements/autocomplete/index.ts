@@ -360,6 +360,23 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     this.currentQuery = undefined;
   }
 
+  /**
+   * Sets the focus on the input element.
+   * @param options - https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/focus#parameters
+   */
+  focus(options?: FocusOptions) {
+    // Do not add the `data-focus` attribute. Behave like a native input element.
+    this.input.focus(options);
+  }
+
+  /**
+   * Removes keyboard focus from the input element.
+   */
+  blur() {
+    this.input.blur();
+    this.removeAttribute('data-focus');
+  }
+
   private search(query: string) {
     this.open = true;
     this.options.forEach(filterOptions(query));
