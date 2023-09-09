@@ -15,14 +15,20 @@ autocomplete.open;
 // => false
 ```
 
-### `open=`
+### `show`
 
-Shows/hides the listbox.
+Shows the listbox.
 
 ```js
-autocomplete.open = true;
-autocomplete.open;
-// => true;
+autocomplete.show();
+```
+
+### `hide`
+
+Hides the listbox.
+
+```js
+autocomplete.hide();
 ```
 
 ### `value`

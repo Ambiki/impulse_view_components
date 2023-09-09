@@ -377,6 +377,22 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     this.removeAttribute('data-focus');
   }
 
+  /**
+   * Shows the listbox.
+   */
+  show() {
+    if (this.open) return;
+    this.open = true;
+  }
+
+  /**
+   * Hides the listbox.
+   */
+  hide() {
+    if (!this.open) return;
+    this.open = false;
+  }
+
   private search(query: string) {
     this.open = true;
     this.options.forEach(filterOptions(query));
