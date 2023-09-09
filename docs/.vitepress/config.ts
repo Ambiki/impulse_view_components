@@ -53,6 +53,20 @@ export default defineConfig({
           },
         ],
       },
+      {
+        text: 'Hooks',
+        collapsed: false,
+        items: [
+          {
+            text: 'Introduction',
+            link: '/hooks/introduction',
+          },
+          {
+            text: 'useOutsideClick',
+            link: '/hooks/use-outside-click',
+          },
+        ],
+      },
     ],
     footer: {
       message: 'Released under the MIT License.',
