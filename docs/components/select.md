@@ -55,8 +55,8 @@ You can pass the `value` of the option to the `selected` argument and it will be
 ```erb{6}
 <%= render(
   Impulse::SelectComponent.new(
-    :post,
-    :person_id,
+    :user,
+    :fruit_id,
     ["Apple", "Mango"],
     selected: "Mango"
   )
@@ -65,6 +65,25 @@ You can pass the `value` of the option to the `selected` argument and it will be
 
 ::: tip
 In case of multiple select, pass an array of values to the `selected` argument, e.g. `["Apple", "Mango"]`.
+:::
+
+### Add inline attributes to options
+
+You can optionally provide HTML attributes as the last element of the array.
+
+```erb{5}
+<%= render(
+  Impulse::SelectComponent.new(
+    :user,
+    :country_id,
+    ["Denmark", ["USA", { class: "bold", disabled: true }], "Sweden"]
+  )
+) %>
+```
+
+::: warning
+Do not add "aria-selected" attribute to an option. If you want to select an option, pass the option's value to the
+[`selected`](#selecting-an-option) argument.
 :::
 
 ### Custom blankslate
