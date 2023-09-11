@@ -1,7 +1,7 @@
 <%= render(Impulse::BaseRenderer.new(**@system_args)) do %>
   <%= trigger %>
 
-  <div id="<%= @panel_id %>" role="dialog" class="popover bs-popover-auto" tabindex="-1" data-target="awc-popover.panel">
+  <div id="<%= @panel_id %>" role="dialog" class="awc-popover-container popover bs-popover-auto" tabindex="-1" data-target="awc-popover.panel">
     <div class="arrow" data-target="awc-popover.arrow"></div>
     <%= header %>
     <%= body %>

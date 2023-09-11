@@ -1,12 +1,17 @@
 .awc-popover {
-  &[open] .popover {
+  > .popover {
+    display: none;
+  }
+
+  &[open] > .popover {
     display: block;
   }
 }
 
-.popover {
+.awc-popover-container {
   outline: none;
-  display: none;
+  border-radius: var(--rounded-default);
+  box-shadow: var(--shadow-md);
 }
 
 // FloatingUI changes

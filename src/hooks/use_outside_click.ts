@@ -20,8 +20,8 @@ export default function useOutsideClick(element: ImpulseElement, { boundaries, c
 
     const target = resolveTarget(event);
     if (!target) return;
-
-    if (!target.getRootNode().contains(target)) return;
+    // Return if the target is not present in the DOM anymore.
+    if (!target.getRootNode().contains(target) || !target.isConnected) return;
 
     for (const boundary of boundaries) {
       if (boundary === null) continue;
