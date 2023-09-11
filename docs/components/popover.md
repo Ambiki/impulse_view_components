@@ -15,12 +15,13 @@ A popover is a floating panel that can display rich content like navigation menu
 
 ## Arguments
 
-| Name             | Default   | Description                                                                                                    |
-| ------           | --------- | -------------                                                                                                  |
-| title            | N/A       | The title of the popover.                                                                                      |
-| open             | `false`   | Whether the popover is open or not.                                                                            |
-| placement        | `bottom`  | The preferred placement of the popover. The actual placement may vary to keep the element inside the viewport. |
-| click_boundaries | `[]`      | The CSS selector of the element that should avoid closing the popover when clicked inside.                     |
+| Name             | Default   | Description                                                                                                                                                                                                                                                            |
+| ------           | --------- | -------------                                                                                                                                                                                                                                                          |
+| title            | N/A       | The title of the popover.                                                                                                                                                                                                                                              |
+| open             | `false`   | Whether the popover is open or not.                                                                                                                                                                                                                                    |
+| placement        | `bottom`  | The preferred placement of the popover. The actual placement may vary to keep the element inside the viewport. One of `top`, `top-start`, `top-end`, `right`, `right-start`, `right-end`, `bottom`, `bottom-start`, `bottom-end`, `left`, `left-start`, or `left-end`. |
+| strategy         | `fixed`   | The value of the `position` CSS property. One of `absolute` or `fixed`.                                                                                                                                                                                                |
+| click_boundaries | `[]`      | The CSS selector of the element that should avoid closing the popover when clicked inside.                                                                                                                                                                             |
 
 ## Examples
 

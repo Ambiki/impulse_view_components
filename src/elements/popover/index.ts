@@ -1,5 +1,5 @@
 import { ImpulseElement, property, registerElement } from '@ambiki/impulse';
-import type { Placement } from '@floating-ui/dom';
+import type { Placement, Strategy } from '@floating-ui/dom';
 import focusTrap from 'src/helpers/focus_trap';
 import useFloatingUI, { UseFloatingUIType } from 'src/hooks/use_floating_ui';
 import useOutsideClick from 'src/hooks/use_outside_click';
@@ -20,6 +20,12 @@ export default class AwcPopoverElement extends ImpulseElement {
   @property() placement: Placement = 'bottom';
 
   /**
+   * The value of the `position` CSS property.
+   * @see https://floating-ui.com/docs/computePosition#strategy
+   */
+  @property() strategy: Strategy = 'fixed';
+
+  /**
    * The CSS selector of the element that should avoid closing the popover when clicked inside.
    */
   @property({ type: Array }) clickBoundaries: string[] = [];
@@ -34,6 +40,7 @@ export default class AwcPopoverElement extends ImpulseElement {
       arrowElement: this.arrow,
       arrowPadding: this.arrowPadding,
       placement: this.placement,
+      strategy: this.strategy,
       offsetOptions: 8,
       flipOptions: {
         fallbackAxisSideDirection: 'end',
