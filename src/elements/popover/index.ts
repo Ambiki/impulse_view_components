@@ -99,7 +99,14 @@ export default class AwcPopoverElement extends ImpulseElement {
     this.open = true;
   }
 
-  hide() {
+  hide(event?: Event) {
+    if (event) {
+      const target = event.target as HTMLElement;
+      if (target.closest(this.identifier) !== this) {
+        return;
+      }
+    }
+
     if (!this.open) return;
     this.open = false;
   }
