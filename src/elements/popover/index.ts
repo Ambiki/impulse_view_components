@@ -1,10 +1,10 @@
-import { ImpulseElement, property, registerElement, target } from '@ambiki/impulse';
-import type { Placement } from '@floating-ui/dom';
+import { ImpulseElement, property, registerElement } from '@ambiki/impulse';
+import type { Placement, Strategy } from '@floating-ui/dom';
 import focusTrap from 'src/helpers/focus_trap';
 import useFloatingUI, { UseFloatingUIType } from 'src/hooks/use_floating_ui';
 import useOutsideClick from 'src/hooks/use_outside_click';
-import { stripCSSUnit } from '../../helpers/string';
 import { isFocusable } from 'tabbable';
+import { stripCSSUnit } from '../../helpers/string';
 
 @registerElement('awc-popover')
 export default class AwcPopoverElement extends ImpulseElement {
@@ -20,13 +20,15 @@ export default class AwcPopoverElement extends ImpulseElement {
   @property() placement: Placement = 'bottom';
 
   /**
+   * The value of the `position` CSS property.
+   * @see https://floating-ui.com/docs/computePosition#strategy
+   */
+  @property() strategy: Strategy = 'fixed';
+
+  /**
    * The CSS selector of the element that should avoid closing the popover when clicked inside.
    */
   @property({ type: Array }) clickBoundaries: string[] = [];
-
-  @target() button: HTMLButtonElement;
-  @target() panel: HTMLElement;
-  @target() arrow?: HTMLElement;
 
   private floatingUI: UseFloatingUIType;
   private _focusTrap?: AbortController;
@@ -38,6 +40,7 @@ export default class AwcPopoverElement extends ImpulseElement {
       arrowElement: this.arrow,
       arrowPadding: this.arrowPadding,
       placement: this.placement,
+      strategy: this.strategy,
       offsetOptions: 8,
       flipOptions: {
         fallbackAxisSideDirection: 'end',
@@ -47,7 +50,8 @@ export default class AwcPopoverElement extends ImpulseElement {
     useOutsideClick(this, {
       boundaries: this.boundaries,
       callback: (event: Event, target: HTMLElement) => {
-        if (this.open) {
+        // Only proceed if element is open and nested popovers are hidden.
+        if (this.open && !this.querySelector<AwcPopoverElement>(this.identifier)?.open) {
           this.open = false;
           // Prevent modals from closing accidentally.
           if (!isFocusable(target)) {
@@ -73,7 +77,7 @@ export default class AwcPopoverElement extends ImpulseElement {
       this.emit('show');
       this.button.setAttribute('aria-expanded', 'true');
       this.floatingUI.start();
-      this._focusTrap = focusTrap(this.panel);
+      this._focusTrap = focusTrap(this.panel, { boundaries: this.boundaries });
       this.emit('shown');
     } else {
       this.emit('hide');
@@ -84,7 +88,11 @@ export default class AwcPopoverElement extends ImpulseElement {
     }
   }
 
-  handleButtonClick() {
+  handleButtonClick(event: Event) {
+    const target = event.target as HTMLElement;
+    if (target.closest(this.identifier) !== this) {
+      return;
+    }
     if (this.button.disabled || this.button.getAttribute('aria-disabled') === 'true') return;
     this.toggle();
   }
@@ -98,14 +106,24 @@ export default class AwcPopoverElement extends ImpulseElement {
     this.open = true;
   }
 
-  hide() {
+  hide(event?: Event) {
+    if (event) {
+      const target = event.target as HTMLElement;
+      if (target.closest(this.identifier) !== this) {
+        return;
+      }
+    }
+
     if (!this.open) return;
     this.open = false;
   }
 
   handleKeydown(event: KeyboardEvent) {
     switch (event.key) {
-      case 'Escape':
+      case 'Escape': {
+        const target = event.target as HTMLElement;
+        const popover = target.closest<AwcPopoverElement>(this.identifier);
+        if (popover !== this && popover?.open) return;
         if (this.open) {
           // prevent modals from accidentally closing.
           event.preventDefault();
@@ -113,6 +131,7 @@ export default class AwcPopoverElement extends ImpulseElement {
           this.open = false;
         }
         break;
+      }
     }
   }
 
@@ -128,6 +147,24 @@ export default class AwcPopoverElement extends ImpulseElement {
   private get boundaries() {
     const elements = this.clickBoundaries.map((s) => document.querySelector<HTMLElement>(s));
     return elements.concat([this.button, this.panel]);
+  }
+
+  private get button() {
+    return Array.from(this.querySelectorAll<HTMLButtonElement>(`[data-target~="${this.identifier}.button"]`)).filter(
+      (b) => b.closest(this.identifier) === this
+    )[0];
+  }
+
+  private get panel() {
+    return Array.from(this.querySelectorAll<HTMLElement>(`[data-target~="${this.identifier}.panel"]`)).filter(
+      (b) => b.closest(this.identifier) === this
+    )[0];
+  }
+
+  private get arrow() {
+    return Array.from(this.querySelectorAll<HTMLElement>(`[data-target~="${this.identifier}.arrow"]`)).filter(
+      (b) => b.closest(this.identifier) === this
+    )[0];
   }
 }
 

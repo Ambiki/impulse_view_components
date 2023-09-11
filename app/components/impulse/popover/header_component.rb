@@ -10,6 +10,10 @@ module Impulse
           "popover-header"
         )
       end
+
+      def render?
+        content.present? || @title.present?
+      end
     end
   end
 end

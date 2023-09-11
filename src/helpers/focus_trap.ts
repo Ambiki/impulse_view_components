@@ -1,14 +1,25 @@
 import { FocusableElement, focusable, isFocusable, tabbable } from 'tabbable';
 import uniqueId from './unique_id';
 
-const containerStack: Set<HTMLElement> = new Set();
+type Boundary = Element | null;
+const containerStack: Set<Element> = new Set();
 
-export default function focusTrap(container: HTMLElement, { abortSignal }: { abortSignal?: AbortSignal } = {}) {
+export default function focusTrap(
+  container: HTMLElement,
+  { abortSignal, boundaries = [] }: { abortSignal?: AbortSignal; boundaries?: Boundary[] } = {}
+) {
   const controller = new AbortController();
   const signal = abortSignal || controller.signal;
 
   let focusedElementBeforeActivation: HTMLElement | null = document.activeElement as HTMLElement;
   let recentlyFocused: HTMLElement | FocusableElement | null;
+
+  // TODO: Remove this once ambiki migrates to dialog component.
+  boundaries.forEach((boundary) => {
+    if (boundary) {
+      containerStack.add(boundary);
+    }
+  });
 
   // Ensure focus remains inside the container or inside one of the container stack.
   function handleFocusin(event: Event) {

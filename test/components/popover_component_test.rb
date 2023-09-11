@@ -39,6 +39,14 @@ module Impulse
       refute_text "Activity feed"
     end
 
+    test "renders without the header component" do
+      render_inline(Impulse::PopoverComponent.new(title: nil)) do |c|
+        c.with_trigger(data: {test_id: "btn"}) { "Toggle popover" }
+      end
+
+      refute_selector ".popover-header"
+    end
+
     test "disabled popover" do
       render_inline(Impulse::PopoverComponent.new(title: "Activity feed")) do |c|
         c.with_trigger(disabled: true) { "Toggle popover" }
@@ -54,6 +62,15 @@ module Impulse
       end
 
       refute_component_rendered
+    end
+
+    test "popover body's HTML tag can be changed" do
+      render_inline(Impulse::PopoverComponent.new(title: "Activity feed")) do |c|
+        c.with_trigger { "Toggle popover" }
+        c.with_body(tag: :article) { "Popover body" }
+      end
+
+      assert_selector "article.popover-body", text: "Popover body"
     end
   end
 end
