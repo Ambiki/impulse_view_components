@@ -12,7 +12,7 @@ module Impulse
       end
 
       def render?
-        content.present? || !@title.nil?
+        content.present? || @title.present?
       end
     end
   end

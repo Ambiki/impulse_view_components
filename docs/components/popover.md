@@ -52,6 +52,20 @@ Add the `data-action="click->awc-popover#hide"` attribute on the `button` elemen
 <% end %>
 ```
 
+### Without header and title
+
+If you pass `nil` as the `title` argument and avoid calling the `with_header` slot, the popover's header element will
+not be rendered.
+
+```erb{1}
+<%= render(Impulse::PopoverComponent.new(title: nil)) do |c| %>
+  <% c.with_trigger { "Toggle popover" } %>
+  <% c.with_body do %>
+    Header will not be rendered!
+  <% end %>
+<% end %>
+```
+
 ## Slots
 
 ### `with_trigger`
@@ -77,6 +91,7 @@ The body of the popover.
 
 | Name          | Default   | Description                                                               |
 | ------        | --------- | -------------                                                             |
+| `tag`         | `div`     | The name of the HTML tag.                                                 |
 | `system_args` | `{}`      | HTML attributes that should be passed to the Rails' `content_tag` method. |
 
 ## Imports
