@@ -1,0 +1,10 @@
+<%= render(Impulse::PopoverComponent.new(title: "Activity feed")) do |c| %>
+  <% c.with_trigger { "Open" } %>
+  <% c.with_body do %>
+    Here is some activity feed for you!
+    <%= render(Impulse::PopoverComponent.new(title: "Nested popover", class: "d-block mt-3", placement: :right)) do |c| %>
+      <% c.with_trigger { "Open nested popover" } %>
+      <% c.with_body { "Awesome body content!" } %>
+    <% end %>
+  <% end %>
+<% end %>
