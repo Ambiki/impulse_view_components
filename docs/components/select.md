@@ -23,7 +23,7 @@ Select allows a user to filter through a list of pre-defined sets of options and
 | Name           | Default   | Description                                                                                                                                      |
 | ------         | --------- | -------------                                                                                                                                    |
 | selected       | `nil`     | The `value` of the option that you want to force select.                                                                                         |
-| size           | `:md`     | The size of the select control. One of `:sm`, `:md`, or `:lg`.                                                                                   |
+| size           | `md`      | The size of the select control. One of `sm`, `md`, or `lg`.                                                                                      |
 | name           | `nil`     | The name of the field. By default rails will automatically create a `name` string based on the `object_name` and `method_name`.                  |
 | input_id       | `nil`     | The id of the input field.                                                                                                                       |
 | placeholder    | `nil`     | The placeholder text that is displayed within the input field.                                                                                   |

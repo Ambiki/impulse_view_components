@@ -26,7 +26,7 @@ Ajax select allows users to fetch a list of options from the server.
 | selected       | `nil`     | The `class` instance that should respond to the `value_method` and `text_method` as defined in the positional arguments.                         |
 | src            | `nil`     | The endpoint to fetch the options from.                                                                                                          |
 | param          | `q`       | The param that is appended when making a network request. Example: `/fruits?q=Guava`.                                                            |
-| size           | `:md`     | The size of the select control. One of `:sm`, `:md`, or `:lg`.                                                                                   |
+| size           | `md`      | The size of the select control. One of `sm`, `md`, or `lg`.                                                                                      |
 | name           | `nil`     | The name of the field. By default rails will automatically create a `name` string based on the `object_name` and `method_name`.                  |
 | input_id       | `nil`     | The id of the input field.                                                                                                                       |
 | placeholder    | `nil`     | The placeholder text that is displayed within the input field.                                                                                   |
