@@ -59,6 +59,7 @@ export default class AwcPopoverElement extends ImpulseElement {
           // Prevent modals from closing accidentally.
           if (!isFocusable(target)) {
             event.preventDefault();
+            this.button.focus();
           }
         }
       },
@@ -101,7 +102,11 @@ export default class AwcPopoverElement extends ImpulseElement {
   }
 
   toggle() {
-    this.open = !this.open;
+    if (this.open) {
+      this.hide();
+    } else {
+      this.show();
+    }
   }
 
   show() {
@@ -119,6 +124,11 @@ export default class AwcPopoverElement extends ImpulseElement {
 
     if (!this.open) return;
     this.open = false;
+
+    // This event originated from a button click.
+    if (event) {
+      this.button.focus();
+    }
   }
 
   handleKeydown(event: KeyboardEvent) {
@@ -132,6 +142,7 @@ export default class AwcPopoverElement extends ImpulseElement {
           event.preventDefault();
           event.stopPropagation();
           this.open = false;
+          this.button.focus();
         }
         break;
       }

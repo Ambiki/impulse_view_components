@@ -11,7 +11,6 @@ export default function focusTrap(
   const controller = new AbortController();
   const signal = abortSignal || controller.signal;
 
-  let focusedElementBeforeActivation: HTMLElement | null = document.activeElement as HTMLElement;
   let recentlyFocused: HTMLElement | FocusableElement | null;
 
   // TODO: Remove this once ambiki migrates to dialog component.
@@ -65,8 +64,6 @@ export default function focusTrap(
     sentinels?.forEach((sentinel) => sentinel.remove());
 
     containerStack.delete(container);
-    tryFocus(focusedElementBeforeActivation);
-    focusedElementBeforeActivation = null;
     recentlyFocused = null;
   });
 

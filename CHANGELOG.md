@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Only hide the last opened popover when clicking outside if there are multiple nested popovers
+- Focus popover trigger element when event is initiated via user interaction
 
 ## [0.2.3] - 2023-09-12
 

@@ -108,7 +108,7 @@ describe('focus_trap', () => {
     expect(document.activeElement).to.equal(button2);
 
     nestedTrap.abort();
-    expect(document.activeElement).to.equal(button1);
+    button1.focus();
 
     await sendKeys({ press: 'Tab' });
     expect(document.activeElement).to.equal(button2);
@@ -156,7 +156,7 @@ describe('focus_trap', () => {
     expect(document.activeElement).to.equal(button3);
 
     trap2.abort();
-    expect(document.activeElement).to.equal(button1);
+    button1.focus();
 
     await sendKeys({ press: 'Tab' });
     expect(document.activeElement).to.equal(button2);
