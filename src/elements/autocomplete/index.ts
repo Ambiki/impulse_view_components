@@ -1,9 +1,9 @@
 import Combobox from '@ambiki/combobox';
 import { ImpulseElement, property, registerElement, target, targets } from '@ambiki/impulse';
 import debounce from 'src/helpers/debounce';
+import { isLooselyFocusable } from 'src/helpers/focus';
 import useFloatingUI, { UseFloatingUIType } from 'src/hooks/use_floating_ui';
 import useOutsideClick from 'src/hooks/use_outside_click';
-import { isFocusable } from 'tabbable';
 import { getText, getValue } from './helpers';
 import MultipleSelect from './multiple_select';
 import SingleSelect from './single_select';
@@ -85,7 +85,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
       callback: (event: Event, target: HTMLElement) => {
         // Since the blur event fires before the click event, we need to conditionally prevent the event so that the
         // dialog element remains open when there are nested autocomplete elements inside it which are still open.
-        if (this.inputPristine && !isFocusable(target)) {
+        if (this.inputPristine && !isLooselyFocusable(target)) {
           event.preventDefault();
         } else if (this.open) {
           this.open = false;
@@ -207,7 +207,9 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     this.firstFocus = false;
   }
 
-  handleInputMousedown() {
+  handleInputMousedown(event: Event) {
+    // Prevent to always open the listbox.
+    event.preventDefault();
     this.open = true;
   }
 
