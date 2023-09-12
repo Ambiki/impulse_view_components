@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Only hide the last opened popover when clicking outside if there are multiple nested popovers
+
 ## [0.2.3] - 2023-09-12
 
 ### Added
