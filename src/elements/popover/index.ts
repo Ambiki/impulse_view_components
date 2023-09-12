@@ -1,9 +1,9 @@
 import { ImpulseElement, property, registerElement } from '@ambiki/impulse';
 import type { Placement, Strategy } from '@floating-ui/dom';
+import { isLooselyFocusable } from 'src/helpers/focus';
 import focusTrap from 'src/helpers/focus_trap';
 import useFloatingUI, { UseFloatingUIType } from 'src/hooks/use_floating_ui';
 import useOutsideClick from 'src/hooks/use_outside_click';
-import { isFocusable } from 'tabbable';
 import { stripCSSUnit } from '../../helpers/string';
 
 @registerElement('awc-popover')
@@ -57,7 +57,7 @@ export default class AwcPopoverElement extends ImpulseElement {
         ) {
           this.open = false;
           // Prevent modals from closing accidentally.
-          if (!isFocusable(target)) {
+          if (!isLooselyFocusable(target)) {
             event.preventDefault();
             this.button.focus();
           }

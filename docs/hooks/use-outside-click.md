@@ -55,7 +55,7 @@ popovers remain open when clicking outside of it.
 ```ts{3,10,15-17}
 import { ImpulseElement, registerElement } from '@ambiki/impulse';
 import useOutsideClick from '@ambiki/impulse-view-components/dist/hooks/use_outside_click';
-import { isFocusable } from 'tabbable';
+import { isLooselyFocusable } from '@ambiki/impulse-view-components/dist/helpers/focus';
 
 @registerElement('pop-over')
 export default class PopoverElement extends ImpulseElement {
@@ -67,7 +67,7 @@ export default class PopoverElement extends ImpulseElement {
         if (this.open) {
           this.hidden = true;
           // Prevent modals from closing accidentally.
-          if (!isFocusable(target)) {
+          if (!isLooselyFocusable(target)) {
             event.preventDefault();
           }
         }

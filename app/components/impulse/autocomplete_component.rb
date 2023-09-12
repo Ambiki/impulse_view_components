@@ -35,6 +35,7 @@ module Impulse
         "awc-autocomplete--clearable": @clearable
       )
 
+      @system_args[:"data-loosely-focusable"] = "true"
       @system_args[:data] = merge_attributes(
         system_args[:data],
         action: "mousedown->awc-autocomplete#handleMousedown click->awc-autocomplete#handleClick combobox:commit->awc-autocomplete#handleCommit"
