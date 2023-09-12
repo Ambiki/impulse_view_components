@@ -37,6 +37,10 @@ export default defineConfig({
             text: 'Select',
             link: '/components/select',
           },
+          {
+            text: 'Spinner',
+            link: '/components/spinner',
+          },
         ],
       },
       {
