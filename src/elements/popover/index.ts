@@ -51,7 +51,10 @@ export default class AwcPopoverElement extends ImpulseElement {
       boundaries: this.boundaries,
       callback: (event: Event, target: HTMLElement) => {
         // Only proceed if element is open and nested popovers are hidden.
-        if (this.open && !this.querySelector<AwcPopoverElement>(this.identifier)?.open) {
+        if (
+          this.open &&
+          Array.from(this.querySelectorAll<AwcPopoverElement>(this.identifier)).filter((p) => p.open).length === 0
+        ) {
           this.open = false;
           // Prevent modals from closing accidentally.
           if (!isFocusable(target)) {
