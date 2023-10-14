@@ -34,8 +34,7 @@ export default class AwcDialogElement extends ImpulseElement {
 
   // `close` event is not cancelable.
   // See: https://developer.mozilla.org/en-US/docs/Web/API/HTMLDialogElement/close_event
-  handleClose(event: Event) {
-    if (event.target !== this.dialog) return;
+  handleClose() {
     this.trigger?.setAttribute('aria-expanded', 'false');
 
     // If the parent dialog is still open, do not remove the styles.
@@ -51,16 +50,7 @@ export default class AwcDialogElement extends ImpulseElement {
     document.body.style.overflow = 'hidden';
   }
 
-  hide(event?: Event) {
-    if (event) {
-      event.stopPropagation();
-      const target = event.target as HTMLElement;
-      // Fix for nested dialogs.
-      if (target.closest(this.identifier) !== this) {
-        return;
-      }
-    }
-
+  hide() {
     this.dialog.close();
   }
 
