@@ -1,4 +1,4 @@
-import { ImpulseElement, property, registerElement } from '@ambiki/impulse';
+import { ImpulseElement, property, registerElement, target } from '@ambiki/impulse';
 import type { Placement, Strategy } from '@floating-ui/dom';
 import { isLooselyFocusable } from 'src/helpers/focus';
 import focusTrap from 'src/helpers/focus_trap';
@@ -29,6 +29,10 @@ export default class AwcPopoverElement extends ImpulseElement {
    * The CSS selector of the element that should avoid closing the popover when clicked inside.
    */
   @property({ type: Array }) clickBoundaries: string[] = [];
+
+  @target() button: HTMLButtonElement;
+  @target() panel: HTMLElement;
+  @target() arrow: HTMLElement;
 
   private floatingUI: UseFloatingUIType;
   private _focusTrap?: AbortController;
@@ -92,11 +96,7 @@ export default class AwcPopoverElement extends ImpulseElement {
     }
   }
 
-  handleButtonClick(event: Event) {
-    const target = event.target as HTMLElement;
-    if (target.closest(this.identifier) !== this) {
-      return;
-    }
+  handleButtonClick() {
     if (this.button.disabled || this.button.getAttribute('aria-disabled') === 'true') return;
     this.toggle();
   }
@@ -115,13 +115,6 @@ export default class AwcPopoverElement extends ImpulseElement {
   }
 
   hide(event?: Event) {
-    if (event) {
-      const target = event.target as HTMLElement;
-      if (target.closest(this.identifier) !== this) {
-        return;
-      }
-    }
-
     if (!this.open) return;
     this.open = false;
 
@@ -161,24 +154,6 @@ export default class AwcPopoverElement extends ImpulseElement {
   private get boundaries() {
     const elements = this.clickBoundaries.map((s) => document.querySelector<HTMLElement>(s));
     return elements.concat([this.button, this.panel]);
-  }
-
-  private get button() {
-    return Array.from(this.querySelectorAll<HTMLButtonElement>(`[data-target~="${this.identifier}.button"]`)).filter(
-      (b) => b.closest(this.identifier) === this
-    )[0];
-  }
-
-  private get panel() {
-    return Array.from(this.querySelectorAll<HTMLElement>(`[data-target~="${this.identifier}.panel"]`)).filter(
-      (b) => b.closest(this.identifier) === this
-    )[0];
-  }
-
-  private get arrow() {
-    return Array.from(this.querySelectorAll<HTMLElement>(`[data-target~="${this.identifier}.arrow"]`)).filter(
-      (b) => b.closest(this.identifier) === this
-    )[0];
   }
 }
 
