@@ -151,10 +151,10 @@
   resolved "https://registry.yarnpkg.com/@ambiki/combobox/-/combobox-2.0.1.tgz#8fd059dec4d6d160331c8a4a9df82b6a095fb549"
   integrity sha512-HDbUvfh2s0v7jGULHjxuDgKsXHukJ3qMDG20i6uIeoHLghWjw+HFWMgxwNqrKzM17HEMSI3RletQGdggUDmA3g==
 
-"@ambiki/impulse@^0.1.3":
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/@ambiki/impulse/-/impulse-0.1.3.tgz#fb8ccfd5576bff723b1adcc5f14b86e9354c600e"
-  integrity sha512-QZezRWFC2JylD8Wz5Z4SMcdn3J4gfhrMHGhJ+pYgpcUrjJXLjB6+fEhYovRzSOOdPyxbMlzyxAC2O0yeghnhlA==
+"@ambiki/impulse@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@ambiki/impulse/-/impulse-0.2.0.tgz#c9fe2cbf9268a2097279de830628fc60dc23a617"
+  integrity sha512-RXeITv70eJWj3O52JIht2Bl2pwu3qdrI3Rcmg9FL8YBNkdiCaR0gnkGOLmDo5gd5k9x+LRbNj9wlk6QSGuybFQ==
 
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.12.11":
   version "7.22.5"
