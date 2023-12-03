@@ -87,6 +87,26 @@ module Impulse
 
     # @display center true
     # @display max_width true
+    def grouped_options_single_select
+      grouped_options = [
+        ["North America", [["United States", "US"], ["Canada", "CN", {disabled: true}]]],
+        ["Europe", ["Denmark", "Germany"]]
+      ]
+      render(Impulse::SelectComponent.new(:user, :fruit_id, grouped_options, selected: "US"))
+    end
+
+    # @display center true
+    # @display max_width true
+    def grouped_options_multiple_select
+      grouped_options = [
+        ["North America", [["United States", "US"], ["Canada", "CN", {disabled: true}]]],
+        ["Europe", ["Denmark", "Germany"]]
+      ]
+      render(Impulse::SelectComponent.new(:user, :fruit_id, grouped_options, selected: ["US"], multiple: true))
+    end
+
+    # @display center true
+    # @display max_width true
     def custom_blankslate
       render(Impulse::SelectComponent.new(:user, :fruit_id)) do |c|
         c.with_blankslate { "Nothing found" }

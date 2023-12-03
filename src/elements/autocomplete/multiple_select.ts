@@ -57,6 +57,9 @@ export default class MultipleSelect {
       for (const option of this.autocomplete.options) {
         option.hidden = false;
       }
+      for (const group of this.autocomplete.groups) {
+        group.hidden = false;
+      }
     }
   }
 

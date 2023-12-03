@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support grouping options in `SelectComponent` and `AjaxSelectComponent`
+
 ### Fixed
 
 - Only hide the last opened popover when clicking outside if there are multiple nested popovers

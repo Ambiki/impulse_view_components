@@ -104,12 +104,16 @@
 .awc-autocomplete-options {
   margin: 0;
   padding: 0;
+
+  .awc-autocomplete-group:not([hidden]) ~ :not([hidden]) {
+    border-top: 1px solid var(--color-border-default);
+    margin-top: var(--space-1);
+  }
 }
 
-// Group header
+// Group
 .awc-autocomplete-group-header {
   padding: var(--awc-autocomplete-group-header-padding-y) var(--awc-autocomplete-group-header-padding-x);
-  background-color: var(--awc-autocomplete-group-header-bg-color);
   line-height: var(--awc-autocomplete-group-header-lh);
   font-size: var(--awc-autocomplete-group-header-font-size);
   font-weight: var(--awc-autocomplete-group-header-fw);

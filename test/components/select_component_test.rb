@@ -70,5 +70,34 @@ module Impulse
         render_inline(Impulse::SelectComponent.new(:user, :fruit_id, ["Apple", "Guava"], selected: ["Invalid", "Apple"], multiple: true))
       end
     end
+
+    test "grouped options" do
+      grouped_options = [["North America", [["United States", "US"], "Canada"]]]
+      render_inline(Impulse::SelectComponent.new(:user, :fruit_id, grouped_options))
+
+      assert_selector "[role='group']", visible: false do
+        assert_selector "div", text: "North America", visible: false
+        assert_selector "[value='US']", text: "United States", visible: false
+        assert_selector "[value='Canada']", text: "Canada", visible: false
+      end
+    end
+
+    test "selects an option from grouped options" do
+      grouped_options = [
+        ["North America", [["United States", "US"], "Canada"]],
+        ["Europe", ["Denmark", "Germany"]]
+      ]
+      render_inline(Impulse::SelectComponent.new(:user, :fruit_id, grouped_options, selected: "Canada"))
+
+      assert_selector "awc-autocomplete[value='Canada']"
+      assert_selector "[data-behavior='hidden-field'][value='Canada']", visible: false
+    end
+
+    test "HTML attributes can be passed to one of the option within the group" do
+      grouped_options = [["North America", [["United States", "US", {disabled: true}], "Canada"]]]
+      render_inline(Impulse::SelectComponent.new(:user, :fruit_id, grouped_options))
+
+      assert_selector "[role='option'][value='US'][disabled]", visible: false
+    end
   end
 end

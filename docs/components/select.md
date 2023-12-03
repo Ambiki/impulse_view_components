@@ -86,6 +86,33 @@ Do not add "aria-selected" attribute to an option. If you want to select an opti
 [`selected`](#selecting-an-option) argument.
 :::
 
+### Grouping options
+
+Similarly to rails' [`grouped_collection_select`](https://api.rubyonrails.org/classes/ActionView/Helpers/FormOptionsHelper.html#method-i-grouped_collection_select)
+method, the select component also supports grouping options. You can pass an array or a hash of grouped options.
+
+```erb
+<%
+  grouped_options = [
+    ["North America", [["United States", "US"], ["Canada", "CN", {disabled: true}]]],
+    ["Europe", ["Denmark", "Germany"]]
+  ]
+%>
+
+<%= render(Impulse::SelectComponent.new(:user, :country_id, grouped_options, selected: "US")) %>
+```
+
+```erb
+<%
+  grouped_options = {
+    "North America" => [["United States", "US"], "Canada"],
+    "Europe" => ["Denmark", "Germany"]
+  }
+%>
+
+<%= render(Impulse::SelectComponent.new(:user, :country_id, grouped_options, selected: "US")) %>
+```
+
 ### Custom blankslate
 
 A blankslate is displayed when the input's text does not match any of the options.

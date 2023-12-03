@@ -5,7 +5,15 @@
     <% end %>
   <% else %>
     <% options_from_choices.each do |option| %>
-      <%= c.with_option(value: option.value, text: option.text, **option.html_attributes) %>
+      <% if option.is_a?(Array) %>
+        <% c.with_group(title: option.first) do |group| %>
+          <% option.second.each do |grouped_option| %>
+            <% group.with_option(value: grouped_option.value, text: grouped_option.text, **grouped_option.html_attributes) %>
+          <% end %>
+        <% end %>
+      <% else %>
+        <%= c.with_option(value: option.value, text: option.text, **option.html_attributes) %>
+      <% end %>
     <% end %>
   <% end %>
 
