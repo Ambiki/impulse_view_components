@@ -17,6 +17,7 @@ describe('focus_trap', () => {
     focusTrap(container);
 
     expect(document.activeElement).to.equal(container.querySelector('button'));
+    expect(container).to.have.attribute('data-focus-trap-id');
   });
 
   it('should focus on the element that has the data-autofocus attribute', async () => {
@@ -193,5 +194,24 @@ describe('focus_trap', () => {
 
     await sendKeys({ press: 'Shift+Tab' });
     expect(document.activeElement).to.equal(el.querySelector('#dynamic-button'));
+  });
+
+  it('should be able to release the focus trap', async () => {
+    const el: HTMLElement = await fixture(html`
+      <div>
+        <button type="button">Button</button>
+        <div id="container">
+          <button type="button">Button 1</button>
+        </div>
+      </div>
+    `);
+
+    const container = el.querySelector<HTMLElement>('#container')!;
+    const trap = focusTrap(container);
+
+    expect(container).to.have.attribute('data-focus-trap-id');
+
+    trap.abort();
+    expect(container).not.to.have.attribute('data-focus-trap-id');
   });
 });

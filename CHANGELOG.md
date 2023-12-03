@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Only hide the last opened popover when clicking outside if there are multiple nested popovers
 - Focus popover trigger element when event is initiated via user interaction
 - Loosely look for focusable elements when clicking outside
+- Remove `data-focus-trap-id` attribute from the container after releasing the focus trap
 
 ## [0.2.3] - 2023-09-12
 
