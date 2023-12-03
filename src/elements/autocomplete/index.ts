@@ -52,6 +52,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   @target() optionsContainer: HTMLElement;
   @target() clearBtn?: HTMLButtonElement;
   @targets() tagDismissBtns?: HTMLButtonElement[];
+  @targets() groups: HTMLElement[];
 
   combobox: Combobox;
   private singleSelect = new SingleSelect(this);
@@ -141,6 +142,9 @@ export default class AwcAutocompleteElement extends ImpulseElement {
       if (!this.src) {
         for (const option of this.options) {
           option.hidden = false;
+        }
+        for (const group of this.groups) {
+          group.hidden = false;
         }
       }
       this.removeAttribute('no-options');
@@ -501,12 +505,21 @@ export default class AwcAutocompleteElement extends ImpulseElement {
 
 function filterOptions(query: string) {
   return (target: HTMLElement) => {
+    const group = target.closest<HTMLElement>('[role="group"]');
+
     if (query) {
       const value = getText(target);
       const match = value?.toLowerCase().includes(query.toLowerCase());
       target.hidden = !match;
+      if (group) {
+        const options = Array.from(group.querySelectorAll<HTMLElement>('[role="option"]'));
+        group.hidden = options.every((o) => o.hidden);
+      }
     } else {
       target.hidden = false;
+      if (group) {
+        group.hidden = false;
+      }
     }
   };
 }

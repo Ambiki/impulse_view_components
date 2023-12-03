@@ -105,5 +105,18 @@ module Impulse
 
       assert_selector "[data-behavior='hidden-field'][name='custom_name']", visible: false
     end
+
+    test "grouped options" do
+      render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_id)) do |c|
+        c.with_group(title: "My group") do |g|
+          g.with_option(value: "first", text: "First")
+        end
+      end
+
+      assert_selector "[role='group']", visible: false do
+        assert_selector "div", text: "My group", visible: false
+        assert_selector "[value='first']", text: "First", visible: false
+      end
+    end
   end
 end

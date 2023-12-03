@@ -35,6 +35,36 @@ module Impulse
 
     # @display center true
     # @display max_width true
+    def grouped_options_single_select
+      render(Impulse::AutocompleteComponent.new(:user, :country_id, selected: OpenStruct.new(value: "CN", text: "Canada"))) do |c|
+        c.with_group(title: "North America") do |g|
+          g.with_option(value: "US", text: "United States")
+          g.with_option(value: "CN", text: "Canada")
+        end
+        c.with_group(title: "Europe") do |g|
+          g.with_option(value: "DK", text: "Denmark")
+          g.with_option(value: "DE", text: "Germany")
+        end
+      end
+    end
+
+    # @display center true
+    # @display max_width true
+    def grouped_options_multiple_select
+      render(Impulse::AutocompleteComponent.new(:user, :country_ids, multiple: true)) do |c|
+        c.with_group(title: "North America") do |g|
+          g.with_option(value: "US", text: "United States")
+          g.with_option(value: "CN", text: "Canada")
+        end
+        c.with_group(title: "Europe") do |g|
+          g.with_option(value: "DK", text: "Denmark")
+          g.with_option(value: "DE", text: "Germany")
+        end
+      end
+    end
+
+    # @display center true
+    # @display max_width true
     def multiple_ajax_select
       render(Impulse::AutocompleteComponent.new(:user, :fruit_ids, src: "/users", selected: [OpenStruct.new(value: "arnold_winnie", text: "Arnold Winnie")], multiple: true))
     end

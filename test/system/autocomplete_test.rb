@@ -121,5 +121,50 @@ module Impulse
       refute_selector "[role='option']"
       assert_selector "awc-autocomplete[no-options]"
     end
+
+    test "filters options within a group" do
+      visit_preview(:grouped_options_single_select)
+      page.find(".awc-autocomplete-control").click
+
+      assert_selector "[role='group']", count: 2
+      assert_selector "[role='option']", count: 4
+
+      fill_in "user_country_id", with: "den"
+      assert_selector "[role='group']", count: 1
+      assert_selector "[role='option']", count: 1
+    end
+
+    test "resets the group after filtering and closing the listbox" do
+      visit_preview(:grouped_options_single_select)
+      page.find(".awc-autocomplete-control").click
+
+      fill_in "user_country_id", with: "den"
+      assert_selector "[role='group']", count: 1
+      assert_selector "[role='option']", count: 1
+
+      page.find("[role='option'][value='DK']").click
+      refute_selector "[role='listbox']" # Closes the listbox
+
+      page.find(".awc-autocomplete-control").click
+      assert_selector "[role='group']", count: 2
+      assert_selector "[role='option']", count: 4
+    end
+
+    test "resets the group after selecting an option" do
+      visit_preview(:grouped_options_multiple_select)
+      page.find(".awc-autocomplete-control").click
+
+      assert_selector "[role='group']", count: 2
+      assert_selector "[role='option']", count: 4
+
+      fill_in "user_country_ids", with: "den"
+      assert_selector "[role='group']", count: 1
+      assert_selector "[role='option']", count: 1
+
+      page.find("[role='option'][value='DK']").click
+      assert_selector "[role='listbox']" # Does not close the listbox
+      assert_selector "[role='group']", count: 2
+      assert_selector "[role='option']", count: 4
+    end
   end
 end

@@ -22,6 +22,6 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "capybara", "~> 3.39", ">= 3.39.2"
   spec.add_development_dependency "byebug", "~> 11.1", ">= 11.1.3"
-  spec.add_development_dependency "selenium-webdriver", "~> 4.10"
+  spec.add_development_dependency "selenium-webdriver", "~> 4.15"
   spec.add_development_dependency "webmock", "~> 3.18", ">= 3.18.1"
 end

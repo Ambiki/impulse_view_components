@@ -1,0 +1,6 @@
+<%= render(Impulse::BaseRenderer.new(**@system_args)) do %>
+  <%= tag.div @title, id: @id, class: "awc-autocomplete-group-header" %>
+  <% options.each do |option| %>
+    <%= option %>
+  <% end %>
+<% end %>
