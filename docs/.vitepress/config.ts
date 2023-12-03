@@ -41,6 +41,10 @@ export default defineConfig({
             text: 'Spinner',
             link: '/components/spinner',
           },
+          {
+            text: 'Time zone select',
+            link: '/components/time-zone-select',
+          },
         ],
       },
       {

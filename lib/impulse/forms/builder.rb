@@ -26,6 +26,17 @@ module Impulse
           **system_args
         ).render_tag(&block)
       end
+
+      def time_zone_select(method_name, priority_zones = nil, **system_args, &block)
+        Tags::TimeZoneSelect.new(
+          object:,
+          object_name:,
+          method_name:,
+          template:,
+          priority_zones:,
+          **system_args
+        ).render_tag(&block)
+      end
     end
   end
 end
