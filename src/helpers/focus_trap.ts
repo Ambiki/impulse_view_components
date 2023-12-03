@@ -62,6 +62,7 @@ export default function focusTrap(
   signal.addEventListener('abort', () => {
     const sentinels = container.parentNode?.querySelectorAll(`[data-sentinel-for="${id}"]`);
     sentinels?.forEach((sentinel) => sentinel.remove());
+    container.removeAttribute('data-focus-trap-id');
 
     containerStack.delete(container);
     recentlyFocused = null;
