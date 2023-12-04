@@ -43,6 +43,11 @@ The server response should include the options that matched the search query.
 <%= render(Impulse::Autocomplete::OptionComponent.new(value: "guava", text: "Guava")) %>
 <%= render(Impulse::Autocomplete::OptionComponent.new(value: "kiwi", text: "Kiwi")) %>
 ```
+
+The `Impulse::Autocomplete::OptionComponent` also takes an optional `description` argument.
+```erb
+<%= render(Impulse::Autocomplete::OptionComponent.new(value: "kiwi", text: "Kiwi", description: "This is a fruit.")) %>
+```
 :::
 
 ## Examples

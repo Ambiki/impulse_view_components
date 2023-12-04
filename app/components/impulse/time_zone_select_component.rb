@@ -4,7 +4,7 @@ module Impulse
 
     OptionStruct = Struct.new(:value, :text)
 
-    def initialize(object_name, method_name, priority_zones = nil, selected: nil, default: nil, model: ::ActiveSupport::TimeZone, priority_zones_title: "Priority zones", **system_args)
+    def initialize(object_name, method_name, priority_zones = nil, selected: nil, default: nil, model: ::ActiveSupport::TimeZone, priority_zones_title: "Prioritized time zones", **system_args)
       @object_name = object_name
       @method_name = method_name
       @priority_zones = priority_zones

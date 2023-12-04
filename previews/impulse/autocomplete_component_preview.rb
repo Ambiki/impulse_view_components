@@ -35,6 +35,16 @@ module Impulse
 
     # @display center true
     # @display max_width true
+    def option_description
+      render(Impulse::AutocompleteComponent.new(:user, :fruit_id)) do |c|
+        [["Apple", "apple", {description: "An apple a day keeps the doctor away."}], ["Banana", "banana", {description: "Rich in carbohydrates."}], ["Guava", "guava", {description: "Grows best in tropical or subtropical climates."}]].each do |fruit|
+          c.with_option(value: fruit.second, text: fruit.first, description: fruit.last[:description])
+        end
+      end
+    end
+
+    # @display center true
+    # @display max_width true
     def grouped_options_single_select
       render(Impulse::AutocompleteComponent.new(:user, :country_id, selected: OpenStruct.new(value: "CN", text: "Canada"))) do |c|
         c.with_group(title: "North America") do |g|

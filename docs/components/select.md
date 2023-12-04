@@ -86,6 +86,32 @@ Do not add "aria-selected" attribute to an option. If you want to select an opti
 [`selected`](#selecting-an-option) argument.
 :::
 
+### Add description to an option
+
+You can optionally add an inline description or pass the description attribute to the option slot.
+
+```erb{6,16}
+<%# Inline %>
+<%= render(
+  Impulse::SelectComponent.new(
+    :user,
+    :country_id,
+    [["USA", { description: "USA is a country." }]]
+  )
+) %>
+
+<%# Block %>
+<%= render(Impulse::SelectComponent.new(:user, :country_id) do |c| %>
+  <% Country.all.each do |country| %>
+    <% c.with_option(
+      value: country.id,
+      text: country.display_name,
+      description: country.description
+    ) %>
+  <% end %>
+<% end %>
+```
+
 ### Grouping options
 
 Similarly to rails' [`grouped_collection_select`](https://api.rubyonrails.org/classes/ActionView/Helpers/FormOptionsHelper.html#method-i-grouped_collection_select)

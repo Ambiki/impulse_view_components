@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add description to `AutocompleteComponent`
 - Add `TimeZoneSelectComponent`
 - Support grouping options in `SelectComponent` and `AjaxSelectComponent`
 

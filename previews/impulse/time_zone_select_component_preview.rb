@@ -20,23 +20,22 @@ module Impulse
       render(Impulse::TimeZoneSelectComponent.new(:user, :time_zones, nil, multiple: true, size:, placeholder:, disabled:, clearable:))
     end
 
-    # @!group Priority zones
+    # @!group Prioritized time zones
     # @display center true
     # @display max_width true
     # @param priority_zones_title text
-    def us_zones(priority_zones_title: "Priority zones")
+    def us_zones(priority_zones_title: "Prioritized time zones")
       render(Impulse::TimeZoneSelectComponent.new(:user, :time_zone, ActiveSupport::TimeZone.us_zones, priority_zones_title:))
     end
 
     # @param priority_zones_title text
-    def regex(priority_zones_title: "Priority zones")
+    def regex(priority_zones_title: "Prioritized time zones")
       render(Impulse::TimeZoneSelectComponent.new(:user, :time_zone, /Australia/, priority_zones_title:))
     end
 
     def sorted
       render(Impulse::TimeZoneSelectComponent.new(:user, :time_zone, ActiveSupport::TimeZone.all.sort))
     end
-
     # @!endgroup
 
     # @display center true

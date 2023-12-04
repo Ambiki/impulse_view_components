@@ -36,7 +36,7 @@ module Impulse
     test "prioritizes time zones" do
       render_inline(Impulse::TimeZoneSelectComponent.new(:user, :time_zone, ActiveSupport::TimeZone.us_zones))
 
-      assert_selector "[role='group']", text: "Priority zones", visible: false
+      assert_selector "[role='group']", text: "Prioritized time zones", visible: false
       assert_selector "[role='group']", text: "Other", visible: false
       assert_selector "[data-test-id='priority-zones']", count: ActiveSupport::TimeZone.us_zones.size, visible: false
       assert_selector "[data-test-id='unprioritized-zones']", count: (ActiveSupport::TimeZone.all - ActiveSupport::TimeZone.us_zones).size, visible: false

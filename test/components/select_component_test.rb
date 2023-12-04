@@ -32,6 +32,14 @@ module Impulse
       assert_selector "[role='option'][value='$40'][data-text='Plus']", visible: false
     end
 
+    test "renders option with a description" do
+      render_inline(Impulse::SelectComponent.new(:user, :fruit_id, [["Apple", "apple", {description: "An apple a day keeps the doctor away."}]]))
+
+      assert_selector "[role='option'][value='apple']", visible: false do
+        assert_selector "span", text: "An apple a day keeps the doctor away.", visible: false
+      end
+    end
+
     test "renders options from a block" do
       render_inline(Impulse::SelectComponent.new(:user, :fruit_id)) do |c|
         c.with_option(value: "apple", text: "Apple", data: {foo: "bar"})
@@ -40,6 +48,16 @@ module Impulse
       assert_selector "[role='option'][value='apple']", visible: false
       assert_selector "[role='option'][data-text='Apple']", visible: false
       assert_selector "[role='option'][data-foo='bar']", visible: false
+    end
+
+    test "renders options from a block with a description" do
+      render_inline(Impulse::SelectComponent.new(:user, :fruit_id)) do |c|
+        c.with_option(value: "apple", text: "Apple", description: "Favorite fruit.")
+      end
+
+      assert_selector "[role='option'][value='apple']", visible: false do
+        assert_selector "span", text: "Favorite fruit.", visible: false
+      end
     end
 
     test "can select a single option" do
@@ -98,6 +116,15 @@ module Impulse
       render_inline(Impulse::SelectComponent.new(:user, :fruit_id, grouped_options))
 
       assert_selector "[role='option'][value='US'][disabled]", visible: false
+    end
+
+    test "renders a group of options with a description" do
+      grouped_options = [["North America", [["United States", "US", {description: "Country"}]]]]
+      render_inline(Impulse::SelectComponent.new(:user, :fruit_id, grouped_options))
+
+      assert_selector "[role='option'][value='US']", visible: false do
+        assert_selector "span", text: "Country", visible: false
+      end
     end
   end
 end

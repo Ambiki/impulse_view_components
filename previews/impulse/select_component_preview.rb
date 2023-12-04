@@ -77,6 +77,20 @@ module Impulse
 
     # @display center true
     # @display max_width true
+    # @param multiple toggle
+    def option_description(multiple: false)
+      render(
+        Impulse::SelectComponent.new(
+          :user,
+          :fruit_id,
+          [["Apple", "apple", {description: "An apple a day keeps the doctor away."}], ["Banana", "banana", {description: "Rich in carbohydrates."}], ["Guava", "guava", {description: "Grows best in tropical or subtropical climates."}]],
+          multiple:
+        )
+      )
+    end
+
+    # @display center true
+    # @display max_width true
     def block_options
       render(Impulse::SelectComponent.new(:user, :fruit_id, selected: "kiwi")) do |c|
         %w[Apple Banana Guava Kiwi Litchi Mango Pomegranate].each do |fruit|
