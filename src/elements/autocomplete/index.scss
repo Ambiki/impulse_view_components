@@ -94,6 +94,7 @@
   font-size: var(--awc-autocomplete-listbox-font-size);
   max-height: var(--awc-autocomplete-listbox-max-height);
   overflow-y: auto;
+  box-shadow: var(--shadow-md);
 
   // Use native [hidden] attribute to show/hide listbox.
   &.dropdown-menu {
@@ -151,6 +152,7 @@
   // TODO: Disabled options cannot be activated. Need to fix this in the combobox package.
   &.disabled {
     pointer-events: auto;
+    cursor: not-allowed;
   }
 
   // https://github.com/twbs/bootstrap/blob/v4.6.0/scss/_dropdown.scss#L161

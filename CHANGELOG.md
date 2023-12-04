@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `TimeZoneSelectComponent`
 - Support grouping options in `SelectComponent` and `AjaxSelectComponent`
 
+### Changed
+
+- Add `box-shadow`, increase group header `font-weight`, and set cursor to `not-allowed` if option is disabled in autocomplete
+
 ### Fixed
 
 - Only hide the last opened popover when clicking outside if there are multiple nested popovers
