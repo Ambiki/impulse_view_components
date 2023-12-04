@@ -1,0 +1,20 @@
+<%= render(Impulse::AutocompleteComponent.new(@object_name, @method_name, selected: value, **@system_args)) do |c| %>
+  <% if prioritized? %>
+    <% c.with_group(title: @priority_zones_title) do |group| %>
+      <% options[:priority_zones].each do |option| %>
+        <% group.with_option(value: option.name, text: option.to_s, data: {test_id: "priority-zones"}) %>
+      <% end %>
+    <% end %>
+    <% c.with_group(title: "Other") do |group| %>
+      <% options[:other].each do |option| %>
+        <% group.with_option(value: option.name, text: option.to_s, data: {test_id: "unprioritized-zones"}) %>
+      <% end %>
+    <% end %>
+  <% else %>
+    <% options[:other].each do |option| %>
+      <% c.with_option(value: option.name, text: option.to_s) %>
+    <% end %>
+  <% end %>
+
+  <% c.with_blankslate_content(blankslate.presence || "We couldn't find that time zone!") %>
+<% end %>
