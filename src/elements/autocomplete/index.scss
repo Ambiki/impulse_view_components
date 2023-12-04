@@ -93,7 +93,7 @@
 .awc-autocomplete-listbox {
   font-size: var(--awc-autocomplete-listbox-font-size);
   max-height: var(--awc-autocomplete-listbox-max-height);
-  overflow-y: auto;
+  overflow: hidden auto;
   box-shadow: var(--shadow-md);
 
   // Use native [hidden] attribute to show/hide listbox.
@@ -129,15 +129,18 @@
 }
 
 .awc-autocomplete-option {
+  position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  column-gap: 0.25rem;
   padding: var(--awc-autocomplete-option-padding-y) var(--awc-autocomplete-option-padding-x);
   line-height: var(--awc-autocomplete-option-lh);
   cursor: pointer;
   user-select: none;
   text-decoration: none;
   font-size: var(--awc-autocomplete-option-font-size);
+  white-space: initial;
 
   // https://github.com/twbs/bootstrap/blob/v4.6.0/scss/_dropdown.scss#L148C27-L148C27
   // Mimic dropdown-item hover state.
@@ -170,11 +173,21 @@
   visibility: visible;
 }
 
+.awc-autocomplete-option-content {
+  flex: 1 1 0%;
+  display: flex;
+  flex-direction: column;
+  row-gap: 2px;
+  word-break: break-word;
+}
+
 .awc-autocomplete-option-text {
   display: block;
-  flex: 1 1 0%;
-  margin-right: 0.25rem;
-  @include text-truncate();
+}
+
+.awc-autocomplete-option-description {
+  color: #627291;
+  font-size: var(--fs-sm);
 }
 
 // Tag

@@ -14,6 +14,14 @@ module Autocomplete
       # Links to text
       id = page.find("[role='option']")["aria-labelledby"]
       assert_selector "##{id}", text: "Guava"
+      # Does not render the description element
+      refute_selector ".awc-autocomplete-option-description"
+    end
+
+    test "renders a description" do
+      render_inline(Impulse::Autocomplete::OptionComponent.new(value: "guava", text: "Guava", description: "My favorite fruit."))
+
+      assert_selector "span.awc-autocomplete-option-description", text: "My favorite fruit."
     end
 
     test "disabled option" do
