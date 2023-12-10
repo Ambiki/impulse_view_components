@@ -1,0 +1,2 @@
+assets: yarn build:watch
+web: cd demo && ./bin/dev

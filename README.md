@@ -15,8 +15,7 @@ cd demo && bundle install
 After installing the dependencies, you can run the project by running:
 
 ```bash
-yarn build:watch
-cd demo && rails server
+./bin/dev
 ```
 
 Visit [localhost:3000/components](localhost:3000/components) to view the list of available components.
