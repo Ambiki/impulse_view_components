@@ -18,7 +18,8 @@ After installing the dependencies, you can run the project by running:
 ./bin/dev
 ```
 
-Visit [localhost:3000/components](localhost:3000/components) to view the list of available components.
+Visit [localhost:3000/components](localhost:3000/components) to view the list of available components and visit
+[http://localhost:5173/impulse_view_components/](http://localhost:5173/impulse_view_components/) to see the docs.
 
 To run the tests, run:
 
