@@ -161,4 +161,7 @@ declare global {
   interface Window {
     AwcPopoverElement: typeof AwcPopoverElement;
   }
+  interface HTMLElementTagNameMap {
+    'awc-popover': AwcPopoverElement;
+  }
 }

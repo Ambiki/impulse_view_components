@@ -215,4 +215,7 @@ declare global {
   interface Window {
     AwcAnchorElement: typeof AwcAnchorElement;
   }
+  interface HTMLElementTagNameMap {
+    'awc-anchor': AwcAnchorElement;
+  }
 }

@@ -528,4 +528,7 @@ declare global {
   interface Window {
     AwcAutocompleteElement: typeof AwcAutocompleteElement;
   }
+  interface HTMLElementTagNameMap {
+    'awc-autocomplete': AwcAutocompleteElement;
+  }
 }
