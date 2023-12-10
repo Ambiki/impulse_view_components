@@ -7,9 +7,7 @@ View components for Ruby on Rails.
 After cloning the repo, run:
 
 ```bash
-yarn install
-bundle install
-cd demo && bundle install
+./bin/setup
 ```
 
 After installing the dependencies, you can run the project by running:
@@ -18,7 +16,7 @@ After installing the dependencies, you can run the project by running:
 ./bin/dev
 ```
 
-Visit [localhost:3000/components](localhost:3000/components) to view the list of available components and visit
+Visit [localhost:3000/components/](http://localhost:3000/components/) to view the list of available components and visit
 [http://localhost:5173/impulse_view_components/](http://localhost:5173/impulse_view_components/) to see the docs.
 
 To run the tests, run:
