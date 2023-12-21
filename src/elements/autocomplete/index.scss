@@ -76,7 +76,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 0.125rem;
+  border-radius: var(--rounded-sm);
+  font-size: var(--fs-sm);
+
+  i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-style: normal;
+
+    &::before {
+      line-height: inherit;
+    }
+  }
 }
 
 // Hide clear btn when there are no selections
@@ -126,6 +138,10 @@
   color: var(--awc-autocomplete-option-check-color);
   flex-shrink: 0;
   visibility: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-xl);
 }
 
 .awc-autocomplete-option {
@@ -230,7 +246,8 @@
   justify-content: center;
   height: var(--awc-autocomplete-tag-btn-size);
   width: var(--awc-autocomplete-tag-btn-size);
-  border-radius: 0.125rem;
+  border-radius: var(--rounded-sm);
+  font-size: var(--fs-lg);
 
   &:hover {
     background-color: var(--awc-autocomplete-tag-btn-bg-hover-color);
@@ -240,6 +257,17 @@
   &[disabled] {
     background-color: transparent;
     color: inherit;
+  }
+
+  i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-style: normal;
+
+    &::before {
+      line-height: inherit;
+    }
   }
 }
 
