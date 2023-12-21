@@ -7,9 +7,7 @@
           <span class="awc-autocomplete-tag-text" data-behavior="text"><%= selected.text %></span>
           <span class="awc-autocomplete-tag-end-adornment">
             <%= content_tag :button, type: :button, class: "awc-autocomplete-tag-dismiss-btn btn", tabindex: "-1", title: "Remove", disabled: @disabled, data: { action: "click->awc-autocomplete#handleTagRemove", target: "awc-autocomplete.tagDismissBtns" } do %>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                <path fill="none" d="M0 0h24v24H0z"></path><path d="M12.0007 10.5865L16.9504 5.63672L18.3646 7.05093L13.4149 12.0007L18.3646 16.9504L16.9504 18.3646L12.0007 13.4149L7.05093 18.3646L5.63672 16.9504L10.5865 12.0007L5.63672 7.05093L7.05093 5.63672L12.0007 10.5865Z"></path>
-              </svg>
+              <i class="bi bi-x"></i>
             <% end %>
           </span>
           <%= hidden_field @object_name, @method_name, id: nil, value: selected.value, multiple: true, data: { behavior: "hidden-field" }, **hidden_field_args %>
@@ -21,9 +19,7 @@
           <span class="awc-autocomplete-tag-text" data-behavior="text"></span>
           <span class="awc-autocomplete-tag-end-adornment">
             <%= content_tag :button, type: :button, class: "awc-autocomplete-tag-dismiss-btn btn", tabindex: "-1", title: "Remove", data: { action: "click->awc-autocomplete#handleTagRemove", target: "awc-autocomplete.tagDismissBtns" } do %>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                <path fill="none" d="M0 0h24v24H0z"></path><path d="M12.0007 10.5865L16.9504 5.63672L18.3646 7.05093L13.4149 12.0007L18.3646 16.9504L16.9504 18.3646L12.0007 13.4149L7.05093 18.3646L5.63672 16.9504L10.5865 12.0007L5.63672 7.05093L7.05093 5.63672L12.0007 10.5865Z"></path>
-              </svg>
+              <i class="bi bi-x"></i>
             <% end %>
           </span>
           <%= hidden_field @object_name, @method_name, id: nil, value: nil, multiple: true, data: { behavior: "hidden-field" }, **hidden_field_args %>
@@ -50,12 +46,12 @@
     <div class="awc-autocomplete-end-adornment">
       <% if @clearable %>
         <%= content_tag :button, type: :button, class: "awc-autocomplete-adornment-btn awc-autocomplete-clear-btn btn btn-light", title: "Clear", disabled: @disabled, data: { action: "click->awc-autocomplete#handleClear", target: "awc-autocomplete.clearBtn" } do %>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path fill="none" d="M0 0h24v24H0z"></path><path d="M12.0007 10.5865L16.9504 5.63672L18.3646 7.05093L13.4149 12.0007L18.3646 16.9504L16.9504 18.3646L12.0007 13.4149L7.05093 18.3646L5.63672 16.9504L10.5865 12.0007L5.63672 7.05093L7.05093 5.63672L12.0007 10.5865Z"></path></svg>
+          <i class="bi bi-x-lg"></i>
         <% end %>
       <% end %>
 
       <div aria-hidden="true" class="awc-autocomplete-adornment-decorator">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path fill="none" d="M0 0h24v24H0z"></path><path d="M12 16L6 10H18L12 16Z"></path></svg>
+        <i class="bi bi-caret-down-fill"></i>
       </div>
     </div>
   <% end %>
