@@ -6,23 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.3.0] - 2023-12-21
+
 ### Added
 
-- Add description to `AutocompleteComponent`
-- Add `TimeZoneSelectComponent`
-- Support grouping options in `SelectComponent` and `AjaxSelectComponent`
+- Add description to `AutocompleteComponent` ([#55](https://github.com/Ambiki/impulse_view_components/pull/55))
+- Add `TimeZoneSelectComponent` ([#53](https://github.com/Ambiki/impulse_view_components/pull/53))
+- Support grouping options in `SelectComponent` and `AjaxSelectComponent` ([#52](https://github.com/Ambiki/impulse_view_components/pull/52))
 
 ### Changed
 
-- Replace autocomplete's svg icons with bootstrap icons
-- Add `box-shadow`, increase group header `font-weight`, and set cursor to `not-allowed` if option is disabled in autocomplete
+- Replace autocomplete's svg icons with bootstrap icons ([#61](https://github.com/Ambiki/impulse_view_components/pull/61))
+- Add `box-shadow`, increase group header `font-weight`, and set cursor to `not-allowed` if option is disabled in autocomplete ([#54](https://github.com/Ambiki/impulse_view_components/pull/54))
 
 ### Fixed
 
-- Only hide the last opened popover when clicking outside if there are multiple nested popovers
-- Focus popover trigger element when event is initiated via user interaction
-- Loosely look for focusable elements when clicking outside
-- Remove `data-focus-trap-id` attribute from the container after releasing the focus trap
+- Remove `data-focus-trap-id` attribute from the container after releasing the focus trap ([#51](https://github.com/Ambiki/impulse_view_components/pull/51))
+- Loosely look for focusable elements when clicking outside ([#47](https://github.com/Ambiki/impulse_view_components/pull/47))
+- Focus popover trigger element when event is initiated via user interaction ([#46](https://github.com/Ambiki/impulse_view_components/pull/46))
+- Only hide the last opened popover when clicking outside if there are multiple nested popovers ([#45](https://github.com/Ambiki/impulse_view_components/pull/45))
 
 ## [0.2.3] - 2023-09-12
 
@@ -98,7 +100,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Everything!
 
-[unreleased]: https://github.com/Ambiki/impulse_view_components/compare/v0.2.3...HEAD
+[unreleased]: https://github.com/Ambiki/impulse_view_components/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/Ambiki/impulse_view_components/compare/v0.2.3...v0.3.0
 [0.2.3]: https://github.com/Ambiki/impulse_view_components/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/Ambiki/impulse_view_components/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/Ambiki/impulse_view_components/compare/v0.2.0...v0.2.1
