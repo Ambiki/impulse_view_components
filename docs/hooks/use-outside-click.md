@@ -12,7 +12,7 @@ import useOutsideClick from '@ambiki/impulse-view-components/dist/hooks/use_outs
 export default class PopoverElement extends ImpulseElement {
   connected() {
     useOutsideClick(this, {
-      boundaries: [document.getElementById('#button')],
+      boundaries: [document.querySelector('#button')],
       callback: () => {
         // Only proceed if the popover element is open.
         if (this.open) {
@@ -61,7 +61,7 @@ import { isLooselyFocusable } from '@ambiki/impulse-view-components/dist/helpers
 export default class PopoverElement extends ImpulseElement {
   connected() {
     useOutsideClick(this, {
-      boundaries: [document.getElementById('#button')],
+      boundaries: [document.querySelector('#button')],
       callback: (event: Event, target: HTMLElement) => {
         // Only proceed if the popover element is open.
         if (this.open) {

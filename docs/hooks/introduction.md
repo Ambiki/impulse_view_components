@@ -19,7 +19,7 @@ import useOutsideClick from '@ambiki/impulse-view-components/dist/hooks/use_outs
 export default class PopoverElement extends ImpulseElement {
   connected() {
     useOutsideClick(this, {
-      boundaries: [document.getElementById('#button')],
+      boundaries: [document.querySelector('#button')],
       callback: () => {
         if (this.open) {
           this.hidden = true;
