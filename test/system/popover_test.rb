@@ -93,5 +93,20 @@ module Impulse
       assert_selector "[data-test-id='parent-popover']"
       refute_selector "[data-test-id='nested-popover']"
     end
+
+    test "closes all popovers when opening a non-related popover" do
+      visit_preview(:nested)
+
+      click_on "Open"
+      assert_selector "[data-test-id='parent-popover']"
+
+      click_on "Open nested popover"
+      assert_selector "[data-test-id='nested-popover']"
+
+      click_on "Event"
+      refute_selector "[data-test-id='parent-popover']"
+      refute_selector "[data-test-id='nested-popover']"
+      assert_selector "[data-test-id='non-related-popover']"
+    end
   end
 end

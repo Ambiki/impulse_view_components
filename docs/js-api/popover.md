@@ -6,6 +6,14 @@ const popover = document.querySelector('awc-popover');
 
 ## Methods
 
+### `open`
+
+Whether the popover is open or not.
+
+```js
+popover.open;
+```
+
 ### `show`
 
 Shows the popover.

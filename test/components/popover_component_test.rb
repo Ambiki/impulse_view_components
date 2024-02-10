@@ -21,11 +21,14 @@ module Impulse
       assert_selector ".popover-body", text: "Popover body"
 
       id = page.find("[data-test-id='btn']")["aria-controls"]
-      assert_selector ".popover[id='#{id}']", visible: false
-      assert_selector ".popover[tabindex='-1']", visible: false
-      assert_selector ".popover[role='dialog']", visible: false
+      assert_selector "button[popovertarget='#{id}']"
+
+      assert_selector ".awc-popover-container[id='#{id}']"
+      assert_selector ".awc-popover-container[tabindex='-1']"
+      assert_selector ".awc-popover-container[role='dialog']"
+      assert_selector ".awc-popover-container[popover='manual']"
       # Arrow
-      assert_selector ".arrow", visible: false
+      assert_selector ".arrow"
     end
 
     test "renders a custom header" do

@@ -4,7 +4,7 @@ import focusTrap from './focus_trap';
 
 describe('focus_trap', () => {
   it('should focus the first element within the container', async () => {
-    const el: HTMLElement = await fixture(html`
+    const el = await fixture<HTMLElement>(html`
       <div>
         <button type="button">Button</button>
         <div id="container">
@@ -15,13 +15,15 @@ describe('focus_trap', () => {
 
     const container = el.querySelector<HTMLElement>('#container')!;
     focusTrap(container);
+    const traps = Array.from(el.querySelectorAll('[data-sentinel-for]'));
 
     expect(document.activeElement).to.equal(container.querySelector('button'));
     expect(container).to.have.attribute('data-focus-trap-id');
+    expect(container).not.to.contain(traps[0]); // surround is true by default.
   });
 
   it('should focus on the element that has the data-autofocus attribute', async () => {
-    const el: HTMLElement = await fixture(html`
+    const el = await fixture<HTMLElement>(html`
       <div id="container">
         <button type="button">Button 1</button>
         <button id="button" type="button" data-autofocus>Button 2</button>
@@ -33,7 +35,7 @@ describe('focus_trap', () => {
   });
 
   it('should cycle the focus from the last element to the first element and vice-versa', async () => {
-    const el: HTMLElement = await fixture(html`
+    const el = await fixture<HTMLElement>(html`
       <div id="container">
         <button id="button1" type="button">Button 1</button>
         <button id="button2" type="button">Button 2</button>
@@ -63,7 +65,7 @@ describe('focus_trap', () => {
   });
 
   it('should prevent the focus from leaving the trap', async () => {
-    const el: HTMLElement = await fixture(html`
+    const el = await fixture<HTMLElement>(html`
       <div>
         <button id="button1" type="button">Button 1</button>
         <div id="container">
@@ -82,7 +84,7 @@ describe('focus_trap', () => {
   });
 
   it('should be able to nest the focus trap', async () => {
-    const el: HTMLElement = await fixture(html`
+    const el = await fixture<HTMLElement>(html`
       <div>
         <button id="button1" type="button">Button 1</button>
         <div id="nested-container">
@@ -122,7 +124,7 @@ describe('focus_trap', () => {
   });
 
   it('should be able to trap the focus within elements without any correlation', async () => {
-    const el: HTMLElement = await fixture(html`
+    const el = await fixture<HTMLElement>(html`
       <div>
         <div id="container1">
           <button id="button1" type="button">Button 1</button>
@@ -167,7 +169,7 @@ describe('focus_trap', () => {
   });
 
   it('should be able to handle dynamic contents', async () => {
-    const el: HTMLElement = await fixture(html`
+    const el = await fixture<HTMLElement>(html`
       <div>
         <button id="button1" type="button">Button 1</button>
         <button id="button2" type="button">Button 2</button>
@@ -197,7 +199,7 @@ describe('focus_trap', () => {
   });
 
   it('should be able to release the focus trap', async () => {
-    const el: HTMLElement = await fixture(html`
+    const el = await fixture<HTMLElement>(html`
       <div>
         <button type="button">Button</button>
         <div id="container">
@@ -213,5 +215,20 @@ describe('focus_trap', () => {
 
     trap.abort();
     expect(container).not.to.have.attribute('data-focus-trap-id');
+  });
+
+  it('appends and prepends the trap', async () => {
+    const el = await fixture<HTMLElement>(html`
+      <div>
+        <button type="button">Button</button>
+        <div id="container"></div>
+      </div>
+    `);
+
+    const container = el.querySelector<HTMLElement>('#container')!;
+    focusTrap(container, { surround: false });
+    const traps = Array.from(el.querySelectorAll('[data-sentinel-for]'));
+
+    expect(container).to.contain(traps[0]);
   });
 });

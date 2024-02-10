@@ -6,7 +6,11 @@ const containerStack: Set<Element> = new Set();
 
 export default function focusTrap(
   container: HTMLElement,
-  { abortSignal, boundaries = [] }: { abortSignal?: AbortSignal; boundaries?: Boundary[] } = {}
+  {
+    abortSignal,
+    surround = true,
+    boundaries = [],
+  }: { abortSignal?: AbortSignal; surround?: boolean; boundaries?: Boundary[] } = {}
 ) {
   const controller = new AbortController();
   const signal = abortSignal || controller.signal;
@@ -42,18 +46,24 @@ export default function focusTrap(
   sentinelStart.onfocus = () => {
     const tabbableElements = tabbable(container).filter((element) => !element.hasAttribute('data-sentinel-for'));
     const lastFocusableElement = tabbableElements[tabbableElements.length - 1] as FocusableElement | undefined;
-    lastFocusableElement?.focus();
+    (lastFocusableElement || container).focus();
   };
 
   const sentinelEnd = createSentinel(id);
   sentinelEnd.onfocus = () => {
     const tabbableElements = tabbable(container).filter((element) => !element.hasAttribute('data-sentinel-for'));
     const firstFocusableElement = tabbableElements[0] as FocusableElement | undefined;
-    firstFocusableElement?.focus();
+    (firstFocusableElement || container).focus();
   };
 
-  insertBefore(sentinelStart, container);
-  insertAfter(sentinelEnd, container);
+  if (surround) {
+    insertBefore(sentinelStart, container);
+    insertAfter(sentinelEnd, container);
+  } else {
+    // Fix for top level popovers. Cannot insertAfter or insertBefore.
+    container.prepend(sentinelStart);
+    container.append(sentinelEnd);
+  }
 
   tryFocus(getFirstFocusableElement(container));
 

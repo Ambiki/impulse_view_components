@@ -48,8 +48,8 @@ export default function useFloatingUI(
 ): UseFloatingUIType {
   let cleanup: ReturnType<typeof autoUpdate> | undefined;
 
-  async function reposition(): Promise<void> {
-    if (!element.open || !referenceElement) return;
+  async function reposition(isOpen = false): Promise<void> {
+    if (!isOpen || !referenceElement) return;
 
     // Middlewares are order dependent: https://floating-ui.com/docs/middleware
     const _middleware: Middleware[] = [offset(offsetOptions)];
@@ -113,18 +113,25 @@ export default function useFloatingUI(
     popupElement.setAttribute('x-placement', _placement);
   }
 
-  function start(): void {
+  // Set the initial top and left position to minimize flickering when the popup is toggled on/off.
+  function forceStart(): void {
     // Fix floatingUI
     popupElement.style.position = strategy;
     popupElement.style.top = '0px';
     popupElement.style.left = '0px';
 
     if (!referenceElement) return;
-    cleanup = autoUpdate(referenceElement, popupElement, reposition);
+    cleanup = autoUpdate(referenceElement, popupElement, () => reposition(true));
+    stop();
+  }
+
+  function start(): void {
+    if (!referenceElement) return;
+    cleanup = autoUpdate(referenceElement, popupElement, () => reposition(element.open));
   }
 
   async function update() {
-    await reposition();
+    await reposition(element.open);
   }
 
   async function stop(): Promise<void> {
@@ -139,7 +146,7 @@ export default function useFloatingUI(
     });
   }
 
-  start();
+  forceStart();
 
   const disconnectedCallback = element.disconnected.bind(element);
   Object.assign(element, {

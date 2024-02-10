@@ -1,23 +1,49 @@
 .awc-popover {
-  > .popover {
-    display: none;
-  }
-
-  &[open] > .popover {
-    display: block;
-  }
+  display: block;
 }
 
 .awc-popover-container {
   outline: none;
+  background-clip: padding-box;
+  background-color: var(--white);
   border-radius: var(--rounded-default);
   box-shadow: var(--shadow-md);
+  max-width: $popover-max-width;
+  margin: 0;
+  padding: 0;
+  overflow: visible; // So that the arrow is visible.
+  border: 1px solid var(--color-border-default);
+  animation-duration: 400ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  word-wrap: break-word;
+
+  &::backdrop {
+    display: none;
+  }
+
+  .arrow {
+    position: absolute;
+    display: block;
+    width: $popover-arrow-width;
+    height: $popover-arrow-height;
+    margin: 0 $popover-border-radius;
+
+    &::before,
+    &::after {
+      position: absolute;
+      display: block;
+      content: '';
+      border-color: transparent;
+      border-style: solid;
+    }
+  }
 }
 
 // FloatingUI changes
 .bs-popover-auto {
   &[x-placement^='top'] {
     margin-bottom: 0;
+    animation-name: slide-down-and-fade;
 
     > .arrow {
       bottom: -$popover-arrow-height;
@@ -28,6 +54,7 @@
 
   &[x-placement^='right'] {
     margin-left: 0;
+    animation-name: slide-left-and-fade;
 
     > .arrow {
       left: -$popover-arrow-height;
@@ -38,6 +65,7 @@
 
   &[x-placement^='bottom'] {
     margin-top: 0;
+    animation-name: slide-up-and-fade;
 
     > .arrow {
       top: -$popover-arrow-height;
@@ -48,11 +76,56 @@
 
   &[x-placement^='left'] {
     margin-right: 0;
+    animation-name: slide-right-and-fade;
 
     > .arrow {
       right: -$popover-arrow-height;
       margin-top: 0;
       margin-bottom: 0;
     }
+  }
+}
+
+@keyframes slide-up-and-fade {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-right-and-fade {
+  from {
+    opacity: 0;
+    transform: translateX(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-down-and-fade {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-left-and-fade {
+  from {
+    opacity: 0;
+    transform: translateX(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }

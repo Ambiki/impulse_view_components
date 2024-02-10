@@ -7,11 +7,11 @@ module Impulse
       system_args[:"aria-haspopup"] = :dialog
       system_args[:"aria-expanded"] = false
       system_args[:"aria-controls"] = @panel_id
+      system_args[:popovertarget] = @panel_id
       system_args[:"aria-disabled"] = (!!system_args[:disabled]).to_s
 
       system_args[:data] = merge_attributes(
         system_args[:data],
-        action: "click->awc-popover#handleButtonClick",
         target: "awc-popover.button"
       )
 
