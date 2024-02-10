@@ -3,20 +3,19 @@ require "test_helper"
 module Impulse
   class PopoverComponentTest < ApplicationTest
     test "renders the component" do
-      render_inline(Impulse::PopoverComponent.new(title: "Activity feed")) do |c|
+      render_inline(Impulse::PopoverComponent.new) do |c|
         c.with_trigger(data: {test_id: "btn"}) { "Toggle popover" }
         c.with_body { "Popover body" }
       end
 
       assert_selector "awc-popover.awc-popover"
+      refute_selector ".popover-header"
+
       assert_selector "[data-test-id='btn']", text: "Toggle popover"
       assert_selector "[data-test-id='btn'][aria-haspopup='dialog']"
       assert_selector "[data-test-id='btn'][aria-expanded='false']"
       assert_selector "[data-test-id='btn'][role='button']"
       assert_selector "[data-test-id='btn'][type='button']"
-
-      assert_selector ".popover-header", text: "Activity feed"
-      assert_selector "button.close[aria-label='Close']"
 
       assert_selector ".popover-body", text: "Popover body"
 
@@ -31,6 +30,16 @@ module Impulse
       assert_selector ".arrow"
     end
 
+    test "renders the title and the close button" do
+      render_inline(Impulse::PopoverComponent.new(title: "Activity feed")) do |c|
+        c.with_trigger(data: {test_id: "btn"}) { "Toggle popover" }
+        c.with_body { "Popover body" }
+      end
+
+      assert_selector ".popover-header", text: "Activity feed"
+      assert_selector "button.close[aria-label='Close']"
+    end
+
     test "renders a custom header" do
       render_inline(Impulse::PopoverComponent.new(title: "Activity feed")) do |c|
         c.with_trigger(data: {test_id: "btn"}) { "Toggle popover" }
@@ -42,16 +51,8 @@ module Impulse
       refute_text "Activity feed"
     end
 
-    test "renders without the header component" do
-      render_inline(Impulse::PopoverComponent.new(title: nil)) do |c|
-        c.with_trigger(data: {test_id: "btn"}) { "Toggle popover" }
-      end
-
-      refute_selector ".popover-header"
-    end
-
     test "disabled popover" do
-      render_inline(Impulse::PopoverComponent.new(title: "Activity feed")) do |c|
+      render_inline(Impulse::PopoverComponent.new) do |c|
         c.with_trigger(disabled: true) { "Toggle popover" }
       end
 
@@ -60,7 +61,7 @@ module Impulse
     end
 
     test "does not render without the button" do
-      render_inline(Impulse::PopoverComponent.new(title: "Activity feed")) do |c|
+      render_inline(Impulse::PopoverComponent.new) do |c|
         c.with_body { "Popover body" }
       end
 
@@ -68,7 +69,7 @@ module Impulse
     end
 
     test "popover body's HTML tag can be changed" do
-      render_inline(Impulse::PopoverComponent.new(title: "Activity feed")) do |c|
+      render_inline(Impulse::PopoverComponent.new) do |c|
         c.with_trigger { "Toggle popover" }
         c.with_body(tag: :article) { "Popover body" }
       end
