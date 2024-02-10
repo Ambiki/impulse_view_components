@@ -600,6 +600,11 @@
     mkdirp "^1.0.4"
     rimraf "^3.0.2"
 
+"@oddbird/popover-polyfill@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@oddbird/popover-polyfill/-/popover-polyfill-0.4.0.tgz#abba79014e670b6d95451512b29afca99eab571a"
+  integrity sha512-jrqoTI8lk5UziDsDPJ2Y+nmXYCcRhmr6uMARr3v/W6AMxRgsnRLWJyWKYr6FjaGMgbyxXG+OkCUPQY4Xl3toGg==
+
 "@open-wc/chai-dom-equals@^0.12.36":
   version "0.12.36"
   resolved "https://registry.yarnpkg.com/@open-wc/chai-dom-equals/-/chai-dom-equals-0.12.36.tgz#ed0eb56b9e98c4d7f7280facce6215654aae9f4c"
