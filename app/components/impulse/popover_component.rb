@@ -29,7 +29,7 @@ module Impulse
       Impulse::BaseRenderer.new(**system_args)
     }
 
-    def initialize(title:, click_boundaries: [], **system_args)
+    def initialize(title: nil, click_boundaries: [], **system_args)
       @title = title
       @system_args = system_args
       @system_args[:tag] = :"awc-popover"
