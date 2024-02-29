@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Avoid rendering Popover's header by default
 - Use [`popover`](https://developer.mozilla.org/en-US/docs/Web/API/Popover_API) API in `PopoverComponent`
 
+### Fixed
+
+- Disabled autocomplete option's description color
+
 ## [0.3.0] - 2023-12-21
 
 ### Added

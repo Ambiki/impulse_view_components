@@ -2,7 +2,10 @@
   /** Colors */
   --white: #ffffff;
 
+  --n300: #627291;
+
   --color-fg-default: #1c3158;
+  --color-fg-secondary: var(--n300);
   --color-border-default: #d0d7de;
 
   /** Border radii */
@@ -66,7 +69,7 @@
   --awc-autocomplete-group-header-fw: 500;
   --awc-autocomplete-tag-padding-x: 0.5rem;
   --awc-autocomplete-tag-btn-size: 1.25rem;
-  --awc-autocomplete-tag-btn-bg-hover-color: #627291; // n300
+  --awc-autocomplete-tag-btn-bg-hover-color: var(--n300);
   --awc-autocomplete-tag-gap: 0.25rem;
   --awc-autocomplete-tag-max-width: 24rem;
   --awc-autocomplete-tag-bg-color: #e0e7f7; // n30
