@@ -183,6 +183,10 @@
   &.disabled .awc-autocomplete-option-check {
     color: var(--awc-autocomplete-option-check-disabled-color);
   }
+
+  &:not(.disabled) .awc-autocomplete-option-description {
+    color: var(--color-fg-secondary);
+  }
 }
 
 .awc-autocomplete-option[aria-selected='true'] .awc-autocomplete-option-check {
@@ -202,7 +206,6 @@
 }
 
 .awc-autocomplete-option-description {
-  color: #627291;
   font-size: var(--fs-sm);
 }
 
