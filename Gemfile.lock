@@ -3,7 +3,7 @@ PATH
   specs:
     impulse_view_components (0.3.0)
       actionview (>= 6.1.0)
-      view_component (~> 3.9)
+      view_component (~> 3.11)
 
 GEM
   remote: https://rubygems.org/
@@ -246,7 +246,7 @@ GEM
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.5.0)
-    view_component (3.9.0)
+    view_component (3.11.0)
       activesupport (>= 5.2.0, < 8.0)
       concurrent-ruby (~> 1.0)
       method_source (~> 1.0)
