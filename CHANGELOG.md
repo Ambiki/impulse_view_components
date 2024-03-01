@@ -6,14 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.3.1] - 2024-03-01
+
 ### Changed
 
-- Avoid rendering Popover's header by default
-- Use [`popover`](https://developer.mozilla.org/en-US/docs/Web/API/Popover_API) API in `PopoverComponent`
+- Avoid rendering Popover's header by default ([#74](https://github.com/Ambiki/impulse_view_components/pull/74))
+- Use [`popover`](https://developer.mozilla.org/en-US/docs/Web/API/Popover_API) API in `PopoverComponent` ([#73](https://github.com/Ambiki/impulse_view_components/pull/73))
 
 ### Fixed
 
-- Disabled autocomplete option's description color
+- Disabled autocomplete option's description color ([#85](https://github.com/Ambiki/impulse_view_components/pull/85))
 
 ## [0.3.0] - 2023-12-21
 
@@ -109,7 +111,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Everything!
 
-[unreleased]: https://github.com/Ambiki/impulse_view_components/compare/v0.3.0...HEAD
+[unreleased]: https://github.com/Ambiki/impulse_view_components/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/Ambiki/impulse_view_components/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/Ambiki/impulse_view_components/compare/v0.2.3...v0.3.0
 [0.2.3]: https://github.com/Ambiki/impulse_view_components/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/Ambiki/impulse_view_components/compare/v0.2.1...v0.2.2
