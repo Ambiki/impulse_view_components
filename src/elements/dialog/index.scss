@@ -1,13 +1,17 @@
 .awc-dialog-dialog {
+  --margin-y: #{$modal-dialog-margin};
+  --margin-y-sm-up: #{$modal-dialog-margin-y-sm-up};
+
   border: 0;
-  border-radius: $modal-content-border-radius;
+  border-radius: var(--rounded-default);
   max-width: 92vw;
   width: 100%;
   color: inherit;
   background-color: var(--white);
   box-shadow: var(--shadow-lg);
   padding: 0;
-  max-height: calc(100vh - 2rem);
+  margin: var(--margin-y) auto;
+  max-height: calc(100vh - calc(#{var(--margin-y)} * 2));
   animation: dialog-show 150ms cubic-bezier(0.16, 1, 0.3, 1);
 
   &[open] {
@@ -25,8 +29,23 @@
   }
 
   @include media-breakpoint-up(sm) {
-    max-width: 30rem;
+    max-width: 498px;
+    max-height: calc(100vh - calc(#{var(--margin-y-sm-up)} * 2));
+    margin-top: var(--margin-y-sm-up);
+    margin-bottom: var(--margin-y-sm-up);
   }
+}
+
+.awc-dialog-dialog--centered {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.awc-dialog--scrollable {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: hidden;
 }
 
 .awc-dialog-header {
@@ -88,13 +107,6 @@
   }
 }
 
-.awc-dialog-body-container {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  overflow-y: hidden;
-}
-
 .awc-dialog-body {
   // Cannot flex-shrink: 0 on iOS.
   flex-grow: 1;
@@ -115,11 +127,11 @@
 }
 
 .awc-dialog--sm .awc-dialog-dialog {
-  max-width: 24rem;
+  max-width: 298px;
 }
 
 .awc-dialog--lg .awc-dialog-dialog {
-  max-width: 42rem;
+  max-width: 798px;
 }
 
 @mixin dialog-fullscreen() {
@@ -131,6 +143,10 @@
 
   @supports (max-height: 100dvh) {
     max-height: 100dvh;
+  }
+
+  @supports (max-width: 100dvw) {
+    max-width: 100dvw;
   }
 }
 

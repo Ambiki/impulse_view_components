@@ -19,5 +19,10 @@ module Impulse
     def nested
       render_with_template
     end
+
+    # @display center true
+    def with_dialog
+      render_with_template
+    end
   end
 end

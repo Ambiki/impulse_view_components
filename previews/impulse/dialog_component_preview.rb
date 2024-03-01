@@ -2,13 +2,12 @@ module Impulse
   class DialogComponentPreview < ViewComponent::Preview
     # @display center true
     # @param size select ["sm", "md", "lg"]
+    # @param center toggle
     # @param fullscreen select ["never", "always", "sm_down", "md_down", "lg_down", "xl_down"]
+    # @param open toggle
     # @param hide_on_outside_click toggle
-    def default(fullscreen: "none", size: "md", hide_on_outside_click: true)
-      render(Impulse::DialogComponent.new(title: "Edit your profile", size:, fullscreen:, hide_on_outside_click:)) do |c|
-        c.with_trigger { "Edit profile" }
-        c.with_body { "Make changes to your profile here. Click save when you're done." }
-      end
+    def default(fullscreen: "none", size: "md", center: true, open: false, hide_on_outside_click: true)
+      render_with_template(locals: {fullscreen:, size:, center:, open:, hide_on_outside_click:})
     end
 
     # @display center true
@@ -32,6 +31,11 @@ module Impulse
     end
 
     def long_scrolling_content
+      render_with_template
+    end
+
+    # @display center true
+    def with_popover
       render_with_template
     end
   end

@@ -30,6 +30,10 @@ export default defineConfig({
             link: '/components/ajax-select',
           },
           {
+            text: 'Dialog',
+            link: '/components/dialog',
+          },
+          {
             text: 'Popover',
             link: '/components/popover',
           },
@@ -54,6 +58,10 @@ export default defineConfig({
           {
             text: 'Autocomplete',
             link: '/js-api/autocomplete',
+          },
+          {
+            text: 'Dialog',
+            link: '/js-api/dialog',
           },
           {
             text: 'Popover',
