@@ -21,7 +21,7 @@ export default class AwcPopoverElement extends ImpulseElement {
    * The value of the `position` CSS property.
    * @see https://floating-ui.com/docs/computePosition#strategy
    */
-  @property() strategy: Strategy = 'absolute';
+  @property() strategy: Strategy = 'fixed';
 
   /**
    * The CSS selector of the element that should avoid closing the popover when clicked inside.
