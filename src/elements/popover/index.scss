@@ -11,6 +11,9 @@
   max-width: $popover-max-width;
   margin: 0;
   padding: 0;
+  // Reset our font and text properties to avoid inheriting weird values.
+  @include reset-text();
+  @include font-size(var(--fs-default));
   overflow: visible; // So that the arrow is visible.
   border: 1px solid var(--color-border-default);
   animation-duration: 400ms;

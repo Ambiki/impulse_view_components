@@ -58,7 +58,7 @@
   "dependencies": {
     "@ambiki/combobox": "^2.0.1",
     "@ambiki/impulse": "^0.2.0",
-    "@floating-ui/dom": "^1.4.5",
+    "@floating-ui/dom": "^1.6.3",
     "@oddbird/popover-polyfill": "^0.4.0",
     "tabbable": "^6.2.0"
   },
