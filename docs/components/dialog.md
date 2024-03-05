@@ -165,3 +165,18 @@ import '@ambiki/impulse-view-components/dist/elements/dialog';
 
 ## JS API
 [Read here](../js-api/dialog.md).
+
+## Ambiki teammates
+
+You need to add `data-controller="dialog"` and provide the `id` of the dialog to the trigger element so that the users
+can open it by clicking on the trigger element.
+
+```erb{1,5}
+<button type="button" data-controller="dialog" data-dialog-id-value="dialog-1">
+  Open dialog
+</button>
+
+<%= render(Impulse::DialogComponent.new(id: "dialog-1", title: "My dialog")) do %>
+  ...
+<% end %>
+```
