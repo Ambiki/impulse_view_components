@@ -1,7 +1,8 @@
-<%= render(Impulse::DialogComponent.new(title: "Edit profile")) do |c| %>
-  <% c.with_trigger { "Edit profile" } %>
-  <form class="awc-dialog-body-container">
-    <%= render(Impulse::Dialog::BodyComponent.new) do %>
+<button type="button" class="btn btn-primary" data-dialog-trigger-for="dialog-1">Open dialog</button>
+
+<%= render(Impulse::DialogComponent.new(id: "dialog-1", title: "Edit profile")) do |c| %>
+  <%= form_with url: "#", class: "awc-dialog--scrollable" do |f| %>
+    <%= c.with_body do %>
       <div class="form-group">
         <label for="name">Full name</label>
         <input type="text" id="name" class="form-control form-control-sm" autocomplete="off">
@@ -10,10 +11,38 @@
         <label for="user_fruit_id">Favorite fruit</label>
         <%= render(Impulse::SelectComponent.new(:user, :fruit_id, ["Mango", "Banana", "Apple"], size: :sm)) %>
       </div>
+      <div class="mt-3">
+        <p>
+          Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis.
+        </p>
+        <p>
+          Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis.
+        </p>
+        <p class="mb-0">
+          Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis.
+        </p>
+      </div>
     <% end %>
-    <%= render(Impulse::Dialog::FooterComponent.new) do %>
+
+    <%= c.with_footer do %>
       <button type="reset" class="btn btn-secondary btn-sm" data-action="click->awc-dialog#hide">Cancel</button>
       <button type="submit" class="btn btn-primary btn-sm">Submit</button>
     <% end %>
-  </form>
+  <% end %>
 <% end %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const buttons = Array.from(document.querySelectorAll('button[data-dialog-trigger-for]'));
+    buttons.forEach((b) => b.addEventListener('click', openDialog));
+  });
+
+  function openDialog(event) {
+    event.preventDefault();
+    const dialogId = event.target.getAttribute('data-dialog-trigger-for');
+    const dialog = document.getElementById(dialogId);
+    if (dialog) {
+      dialog.show();
+    }
+  }
+</script>

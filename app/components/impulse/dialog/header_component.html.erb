@@ -1,6 +1,6 @@
 <%= render(Impulse::BaseRenderer.new(**@system_args)) do %>
   <div class="awc-dialog-title-container">
-    <h2 class="awc-dialog-title"><%= @title %></h2>
+    <%= tag.h2 @title, id: @title_id, class: "awc-dialog-title" %>
   </div>
 
   <button type="button" class="btn btn-light awc-dialog-close-btn" data-action="click->awc-dialog#hide" aria-label="Close dialog">

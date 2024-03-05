@@ -10,6 +10,7 @@ Indicate the loading state of a component or a page.
 
 ## Arguments
 
+### Keyword arguments
 
 | Name    | Default     | Description                                                                                                          |
 | ------  | ---------   | -------------                                                                                                        |

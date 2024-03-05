@@ -1,10 +1,35 @@
-<%= render(Impulse::DialogComponent.new(title: "Edit your profile")) do |c| %>
-  <% c.with_trigger { "Edit profile" } %>
+<button type="button" class="btn btn-primary" data-dialog-trigger-for="dialog-1">Open dialog</button>
+
+<%= render(Impulse::DialogComponent.new(id: "dialog-1", center: false, title: "Edit your profile")) do |c| %>
   <% c.with_body do %>
-    The dialog HTML element represents a dialog box or other interactive component, such as a dismissible alert, inspector, or subwindow. The native HTML dialog element should be used in creating modal dialogs as it provides usability and accessibility features that must be replicated if using other elements for a similar purpose. Use the appropriate .showModal() or .show() method to render dialogs. If creating a custom dialog implementation, ensure all expected default behaviors are supported and proper labeling recommendations are followed. Ensure a mechanism is provided to allow users to close a dialog. The most robust way to ensure all users can close a dialog is to include an explicit button to do so. For instance, a confirmation, cancel or close button as appropriate. Additionally, for those using a device with a keyboard, the Escape key is commonly expected to close modal dialogs as well. By default, a dialog invoked by the showModal() method will allow for its dismissal by the Escape. A non-modal dialog does not dismiss via the Escape key by default, and depending on what the non-modal dialog represents, it may not be desired for this behavior. If multiple modal dialogs are open, Escape should only close the last shown dialog. When using dialog, this behavior is provided by the browser.
+    <p>
+      The dialog HTML element represents a dialog box or other interactive component, such as a dismissible alert, inspector, or subwindow. The native HTML dialog element should be used in creating modal dialogs as it provides usability and accessibility features that must be replicated if using other elements for a similar purpose. Use the appropriate .showModal() or .show() method to render dialogs. If creating a custom dialog implementation, ensure all expected default behaviors are supported and proper labeling recommendations are followed. Ensure a mechanism is provided to allow users to close a dialog. The most robust way to ensure all users can close a dialog is to include an explicit button to do so. For instance, a confirmation, cancel or close button as appropriate. Additionally, for those using a device with a keyboard, the Escape key is commonly expected to close modal dialogs as well. By default, a dialog invoked by the showModal() method will allow for its dismissal by the Escape. A non-modal dialog does not dismiss via the Escape key by default, and depending on what the non-modal dialog represents, it may not be desired for this behavior. If multiple modal dialogs are open, Escape should only close the last shown dialog. When using dialog, this behavior is provided by the browser.
+    </p>
+    <p>
+      The dialog HTML element represents a dialog box or other interactive component, such as a dismissible alert, inspector, or subwindow. The native HTML dialog element should be used in creating modal dialogs as it provides usability and accessibility features that must be replicated if using other elements for a similar purpose. Use the appropriate .showModal() or .show() method to render dialogs. If creating a custom dialog implementation, ensure all expected default behaviors are supported and proper labeling recommendations are followed. Ensure a mechanism is provided to allow users to close a dialog. The most robust way to ensure all users can close a dialog is to include an explicit button to do so. For instance, a confirmation, cancel or close button as appropriate. Additionally, for those using a device with a keyboard, the Escape key is commonly expected to close modal dialogs as well. By default, a dialog invoked by the showModal() method will allow for its dismissal by the Escape. A non-modal dialog does not dismiss via the Escape key by default, and depending on what the non-modal dialog represents, it may not be desired for this behavior. If multiple modal dialogs are open, Escape should only close the last shown dialog. When using dialog, this behavior is provided by the browser.
+    </p>
+    <p class="mb-0">
+      Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis.
+    </p>
   <% end %>
   <% c.with_footer do %>
     <button type="button" class="btn btn-secondary btn-sm" data-action="click->awc-dialog#hide">Cancel</button>
     <button type="button" class="btn btn-primary btn-sm">Save</button>
   <% end %>
 <% end %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const buttons = Array.from(document.querySelectorAll('button[data-dialog-trigger-for]'));
+    buttons.forEach((b) => b.addEventListener('click', openDialog));
+  });
+
+  function openDialog(event) {
+    event.preventDefault();
+    const dialogId = event.target.getAttribute('data-dialog-trigger-for');
+    const dialog = document.getElementById(dialogId);
+    if (dialog) {
+      dialog.show();
+    }
+  }
+</script>

@@ -1,18 +1,7 @@
 module Impulse
   class DialogComponent < ApplicationComponent
-    renders_one :trigger, lambda { |**system_args|
-      system_args[:tag] = :button
-      system_args[:type] = :button
-      system_args[:id] = trigger_id
-      system_args[:"aria-haspopup"] = :dialog
-      system_args[:"aria-expanded"] = "false"
-      system_args[:"aria-controls"] = dialog_id
-
-      Impulse::BaseRenderer.new(**system_args)
-    }
-
     renders_one :header, lambda { |**system_args|
-      Impulse::Dialog::HeaderComponent.new(title: @title, **system_args)
+      Impulse::Dialog::HeaderComponent.new(title: @title, title_id:, **system_args)
     }
 
     renders_one :body, Impulse::Dialog::BodyComponent
@@ -35,13 +24,13 @@ module Impulse
       :xl_down => "awc-dialog--fullscreen-xl-down"
     }.freeze
 
-    def initialize(title:, id: self.class.generate_id, size: DEFAULT_SIZE, fullscreen: DEFAULT_FULLSCREEN, **system_args)
-      @id = id
+    def initialize(title:, id: self.class.generate_id, size: DEFAULT_SIZE, center: true, fullscreen: DEFAULT_FULLSCREEN, **system_args)
       @title = title
+      @id = id
+      @center = center
       @system_args = system_args
       @system_args[:tag] = :"awc-dialog"
       @system_args[:id] = @id
-      @system_args[:trigger_id] = trigger_id
       @system_args[:class] = class_names(
         system_args[:class],
         SIZE_MAPPINGS[fetch_or_fallback(SIZE_MAPPINGS.keys, size, DEFAULT_SIZE)],
@@ -52,12 +41,8 @@ module Impulse
 
     private
 
-    def trigger_id
-      "#{@id}_trigger"
-    end
-
-    def dialog_id
-      "#{@id}_dialog"
+    def title_id
+      "#{@id}_title"
     end
 
     def before_render

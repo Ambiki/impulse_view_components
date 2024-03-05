@@ -1,18 +1,37 @@
-<%= render(Impulse::DialogComponent.new(title: "Edit your profile")) do |c| %>
-  <% c.with_trigger { "Edit profile" } %>
-  <% c.with_body do %>
+<button type="button" class="btn btn-primary" data-dialog-trigger-for="dialog-1">Open dialog</button>
+
+<%= render(Impulse::DialogComponent.new(id: "dialog-1", title: "Edit your profile")) do |c| %>
+  <% c.with_body(data: {test_id: "parent-dialog"}) do %>
     What follows is just some placeholder text for this modal dialog. Sipping on Rosé, Silver Lake sun, coming up all
     lazy. It’s in the palm of your hand now baby. So we hit the boulevard. So make a wish, I'll make it like your
     birthday everyday.
 
     <div class="mt-3">
-      <%= render(Impulse::DialogComponent.new(title: "Nested dialog", size: :sm)) do |s| %>
-        <% s.with_trigger(class: "btn btn-primary btn-sm") { "Open dialog" } %>
-        <% s.with_body { "This is a nested dialog." } %>
+      <button type="button" class="btn btn-primary" data-dialog-trigger-for="dialog-2">Open nested dialog</button>
+      <%= render(Impulse::DialogComponent.new(id: "dialog-2", title: "Nested dialog", size: :sm)) do |s| %>
+        <% s.with_body(data: {test_id: "nested-dialog"}) { "This is a nested dialog." } %>
         <% s.with_footer do %>
-          <button type="button" class="btn btn-secondary btn-sm" data-action="click->awc-dialog#hide">Close</button>
+          <button type="button" class="btn btn-secondary btn-sm" data-action="click->awc-dialog#hide" data-test-id="nested-dialog-close-btn">
+            Close
+          </button>
         <% end %>
       <% end %>
     </div>
   <% end %>
 <% end %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const buttons = Array.from(document.querySelectorAll('button[data-dialog-trigger-for]'));
+    buttons.forEach((b) => b.addEventListener('click', openDialog));
+  });
+
+  function openDialog(event) {
+    event.preventDefault();
+    const dialogId = event.target.getAttribute('data-dialog-trigger-for');
+    const dialog = document.getElementById(dialogId);
+    if (dialog) {
+      dialog.show();
+    }
+  }
+</script>

@@ -3,21 +3,13 @@ require "test_helper"
 module Impulse
   class DialogComponentTest < ApplicationTest
     test "renders the component" do
-      render_inline(Impulse::DialogComponent.new(title: "Edit your profile")) do |c|
-        c.with_trigger(data: {test_id: "button"}) { "Open dialog" }
-      end
-
-      button_id = page.find("[data-test-id='button']")["id"]
+      render_inline(Impulse::DialogComponent.new(title: "Edit your profile"))
 
       assert_selector "awc-dialog.awc-dialog"
-      assert_equal button_id, page.find("awc-dialog")["trigger-id"]
-
-      assert_selector "[data-test-id='button'][type='button']", text: "Open dialog"
-      assert_selector "[data-test-id='button'][aria-haspopup='dialog']"
-      assert_selector "[data-test-id='button'][aria-expanded='false']"
-      assert_equal page.find("dialog")["id"], page.find("[data-test-id='button']")["aria-controls"]
-      assert_equal button_id, page.find("dialog")["aria-labelledby"]
       assert_selector "h2", text: "Edit your profile"
+
+      title_id = page.find("h2")["id"]
+      assert_selector "dialog[aria-labelledby='#{title_id}']"
     end
 
     test "renders the body" do
@@ -37,13 +29,9 @@ module Impulse
     end
 
     test "dialog id can be changed" do
-      render_inline(Impulse::DialogComponent.new(title: "Edit your profile", id: "dialog")) do |c|
-        c.with_trigger { "Open dialog" }
-      end
+      render_inline(Impulse::DialogComponent.new(title: "Edit your profile", id: "dialog"))
 
       assert_selector "awc-dialog[id='dialog']"
-      assert_selector "button[id='dialog_trigger']"
-      assert_selector "dialog[id='dialog_dialog']"
     end
 
     test "renders sm dialog" do
@@ -58,6 +46,18 @@ module Impulse
 
       assert_selector ".awc-dialog.awc-dialog--lg"
       refute_selector ".awc-dialog--sm"
+    end
+
+    test "centers dialog by default" do
+      render_inline(Impulse::DialogComponent.new(title: "Edit your profile"))
+
+      assert_selector "dialog.awc-dialog-dialog--centered"
+    end
+
+    test "does not center the dialog" do
+      render_inline(Impulse::DialogComponent.new(title: "Edit your profile", center: false))
+
+      refute_selector "dialog.awc-dialog-dialog--centered"
     end
 
     test "fullscreen size" do

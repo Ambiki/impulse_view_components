@@ -3,9 +3,9 @@ import { ImpulseElement, property, registerElement, target } from '@ambiki/impul
 @registerElement('awc-dialog')
 export default class AwcDialogElement extends ImpulseElement {
   /**
-   * The `id` of the trigger element (generally the open button).
+   * Whether the dialog is open or not. To make the dialog open by default, set it to `true`.
    */
-  @property() triggerId: string;
+  @property({ type: Boolean }) open = false;
 
   /**
    * Whether or not to hide the dialog when clicking outside of its region.
@@ -14,50 +14,50 @@ export default class AwcDialogElement extends ImpulseElement {
 
   @target() dialog: HTMLDialogElement;
 
-  private controller = new AbortController();
-
+  /**
+   * Called when the element is added to the DOM.
+   */
   connected() {
-    if (this.trigger) {
-      this.trigger.addEventListener('click', this.handleTriggerClick.bind(this), { signal: this.controller.signal });
+    if (this.open) {
+      this.show();
     }
   }
 
+  /**
+   * Called when the element is removed from the DOM.
+   */
   disconnected() {
-    this.hide();
-    this.controller.abort();
+    this.hideWithoutEmitting();
   }
 
-  private handleTriggerClick() {
-    this.trigger?.setAttribute('aria-expanded', 'true');
-    this.show();
-  }
-
-  // `close` event is not cancelable.
-  // See: https://developer.mozilla.org/en-US/docs/Web/API/HTMLDialogElement/close_event
-  handleClose() {
-    this.trigger?.setAttribute('aria-expanded', 'false');
-
-    // If the parent dialog is still open, do not remove the styles.
-    if (!this.closest('dialog[open]')) {
-      document.body.style.removeProperty('padding-right');
-      document.body.style.removeProperty('overflow');
-    }
-  }
-
+  /**
+   * Shows the dialog element.
+   */
   show() {
     this.dialog.showModal();
-    document.body.style.paddingRight = `${window.innerWidth - document.body.clientWidth}px`;
-    document.body.style.overflow = 'hidden';
+    this.hideOverflow();
+    this.open = true;
   }
 
+  /**
+   * Hides the dialog element.
+   *
+   * @example
+   * <awc-dialog>
+   *   <dialog>
+   *     <button type="button" data-action="click->awc-dialog#hide">Close</button>
+   *   </dialog>
+   * </awc-dialog>
+   */
   hide() {
-    this.dialog.close();
+    this.hideWithoutEmitting();
+    this.emit('hidden');
   }
 
-  handleOutsideClick(event: MouseEvent) {
+  handleClick(event: MouseEvent) {
     if (!this.hideOnOutsideClick || event.defaultPrevented) return;
     const target = event.target;
-    // Fix for nested dialogs.
+    // Only close the top most dialog in the stack.
     if (!(target instanceof HTMLElement) || target !== this.dialog) return;
     const rect = target.getBoundingClientRect();
     if (
@@ -68,15 +68,43 @@ export default class AwcDialogElement extends ImpulseElement {
     ) {
       return;
     }
+
     this.hide();
   }
 
-  get trigger() {
-    return document.getElementById(this.triggerId);
+  handleKeydown(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
+      // Avoid parent popovers from being closed.
+      event.stopPropagation();
+      this.emit('hidden');
+    }
   }
 
-  get open() {
-    return this.dialog.open;
+  hideWithoutEmitting() {
+    if (this.dialog.open) {
+      this.dialog.close();
+      // Closing the parent dialog when nested dialogs are still open will break the UI.
+      this.nestedDialog?.hide();
+    }
+    this.showOverflow();
+    this.open = false;
+  }
+
+  private hideOverflow() {
+    document.body.style.paddingRight = `${window.innerWidth - document.body.clientWidth}px`;
+    document.body.style.overflow = 'hidden';
+  }
+
+  private showOverflow() {
+    // If the parent dialog is still open, do not remove the styles.
+    if (!this.closest('dialog[open]')) {
+      document.body.style.removeProperty('padding-right');
+      document.body.style.removeProperty('overflow');
+    }
+  }
+
+  private get nestedDialog() {
+    return this.querySelector<AwcDialogElement>(this.identifier);
   }
 }
 

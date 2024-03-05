@@ -1,7 +1,5 @@
-<%= trigger %>
-
 <%= render(Impulse::BaseRenderer.new(**@system_args)) do %>
-  <dialog id="<%= dialog_id %>" class="awc-dialog-dialog" aria-labelledby="<%= trigger_id %>" data-action="close->awc-dialog#handleClose click->awc-dialog#handleOutsideClick" data-target="awc-dialog.dialog">
+  <dialog class="<%= class_names("awc-dialog-dialog", "awc-dialog-dialog--centered": @center) %>" data-action="click->awc-dialog#handleClick keydown->awc-dialog#handleKeydown close->awc-dialog#hideWithoutEmitting" data-target="awc-dialog.dialog" aria-labelledby="<%= title_id %>">
     <%= header %>
     <% if content.present? %>
       <%= content %>
