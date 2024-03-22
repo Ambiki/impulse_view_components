@@ -66,11 +66,11 @@ class so that only the body element can be scrolled.
 ```erb{2-13}
 <%= render(Impulse::DialogComponent.new(title: "Edit profile")) do |c| %>
   <%= form_with url: "#", class: "awc-dialog--scrollable" do |f| %>
-    <% c.with_body do %>
+    <%= c.with_body do %>
       <%= f.label :name %>
       <%= f.text_field :name %>
     <% end %>
-    <% c.with_footer do %>
+    <%= c.with_footer do %>
       <button type="reset" data-action="click->awc-dialog#hide">Cancel</button>
       <%= f.submit %>
     <% end %>
@@ -96,7 +96,7 @@ component respectively.
     <%= f.label :name %>
     <%= f.text_field :name %>
   <% end %>
-  <% render(Impulse::Dialog::FooterComponent.new) do %>
+  <%= render(Impulse::Dialog::FooterComponent.new) do %>
     <button type="reset" data-action="click->awc-dialog#hide">Cancel</button>
     <%= f.submit %>
   <% end %>
