@@ -60,5 +60,15 @@ module Impulse
 
       assert_selector ".awc-autocomplete-error", text: "Alert!", visible: false
     end
+
+    test "prefixes input id with the namespace value" do
+      render_in_view_context do
+        impulse_form_with(model: User.new(fruit_id: "Apple"), url: "/users", namespace: "foo") do |f|
+          f.ajax_select :fruit_id, :id, :name, src: "/users"
+        end
+      end
+
+      assert_selector "input[type='text'][id='foo_user_fruit_id']"
+    end
   end
 end

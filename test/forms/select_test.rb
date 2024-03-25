@@ -57,5 +57,15 @@ module Impulse
       assert_selector "awc-autocomplete[multiple]"
       assert_selector "[data-behavior='tag'][data-persisted][value='Apple']", count: 1
     end
+
+    test "prefixes input id with the namespace value" do
+      render_in_view_context do
+        impulse_form_with(model: User.new(fruit_id: "Apple"), url: "/users", namespace: "foo") do |f|
+          f.select :fruit_id, ["Apple", "Mango", "Guava"]
+        end
+      end
+
+      assert_selector "input[type='text'][id='foo_user_fruit_id']"
+    end
   end
 end
