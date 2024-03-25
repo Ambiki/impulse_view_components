@@ -8,7 +8,7 @@ module Autocomplete
       end
 
       assert_selector ".awc-autocomplete-group[data-target='awc-autocomplete.groups']"
-      assert_selector ".awc-autocomplete-group[role='group']" do
+      assert_selector ".awc-autocomplete-group[role='group'][data-text='My group']" do
         assert_selector "[role='option']", text: "Apple"
       end
     end

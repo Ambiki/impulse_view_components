@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Add `data-text` attribute to autocomplete group container
+
 ### Fixed
 
 - Inherit `namespace` value from parent `impulse_form_with`
