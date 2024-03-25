@@ -12,6 +12,7 @@ module Impulse
         @system_args["aria-labelledby"] = @id
         @system_args[:class] = class_names(system_args[:class], "awc-autocomplete-group")
 
+        @system_args[:"data-text"] = title
         @system_args[:data] = merge_attributes(
           system_args[:data],
           target: "awc-autocomplete.groups"
