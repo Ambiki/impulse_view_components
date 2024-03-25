@@ -11,7 +11,7 @@ module Impulse
           method_name:,
           template:,
           choices:,
-          **system_args
+          **objectify_options(system_args)
         ).render_tag(&block)
       end
 
@@ -23,7 +23,7 @@ module Impulse
           template:,
           value_method:,
           text_method:,
-          **system_args
+          **objectify_options(system_args)
         ).render_tag(&block)
       end
 
@@ -34,7 +34,7 @@ module Impulse
           method_name:,
           template:,
           priority_zones:,
-          **system_args
+          **objectify_options(system_args)
         ).render_tag(&block)
       end
     end

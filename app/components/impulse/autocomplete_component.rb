@@ -14,7 +14,22 @@ module Impulse
       :lg => "awc-autocomplete--lg"
     }.freeze
 
-    def initialize(object_name, method_name, selected: nil, size: DEFAULT_SIZE, name: nil, input_id: nil, placeholder: nil, include_hidden: true, disabled: false, clearable: true, **system_args)
+    def initialize(
+      object_name,
+      method_name,
+      selected: nil,
+      size: DEFAULT_SIZE,
+      name: nil,
+      input_id: nil,
+      placeholder: nil,
+      include_hidden: true,
+      disabled: false,
+      clearable: true,
+      namespace: nil,
+      skip_default_ids: false,
+      allow_method_names_outside_object: true,
+      **system_args
+    )
       @object_name = object_name
       @method_name = method_name
       @selected = selected
@@ -25,6 +40,9 @@ module Impulse
       @include_hidden = include_hidden
       @disabled = disabled
       @clearable = clearable
+      @namespace = namespace
+      @skip_default_ids = skip_default_ids
+      @allow_method_names_outside_object = allow_method_names_outside_object
       @system_args = system_args
       @system_args[:tag] = :"awc-autocomplete"
       @system_args[:value] = sanitized_value
@@ -57,12 +75,16 @@ module Impulse
       {}.tap do |args|
         args[:id] = @input_id if @input_id
         args[:placeholder] = @placeholder
+        args[:namespace] = @namespace
+        args[:skip_default_ids] = @skip_default_ids
+        args[:allow_method_names_outside_object] = @allow_method_names_outside_object
       end
     end
 
     def hidden_field_args
       {}.tap do |args|
         args[:name] = @name if @name
+        args[:allow_method_names_outside_object] = @allow_method_names_outside_object
       end
     end
 

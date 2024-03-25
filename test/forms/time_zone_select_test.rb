@@ -135,5 +135,15 @@ module Impulse
 
       assert_selector ".awc-autocomplete-blankslate", text: "Not found", visible: false
     end
+
+    test "prefixes input id with the namespace value" do
+      render_in_view_context do
+        impulse_form_with(model: User.new(fruit_id: "Apple"), url: "/users", namespace: "foo") do |f|
+          f.time_zone_select :time_zone
+        end
+      end
+
+      assert_selector "input[type='text'][id='foo_user_time_zone']"
+    end
   end
 end
