@@ -40,8 +40,8 @@
   <% max_width = params.dig(:lookbook, :display, :max_width) %>
 
   <%= content_tag :body,
-    class: class_names("p-3 d-flex flex-column", "justify-content-center align-items-center": center, "align-items-start": !center, "mx-auto max-w-sm w-100": max_width),
-    style: "min-height: 100vh" do %>
+    class: class_names("d-flex flex-column", "justify-content-center align-items-center": center, "align-items-start": !center, "mx-auto max-w-sm w-100": max_width),
+    style: "min-height: 100vh; padding: 16px" do %>
     <% if floating_ui %>
       <div style="flex: 1 1 0%; min-height: 200vh; min-width: 200vw; overflow: auto; display: flex; align-items: center; justify-content: center">
         <%= yield %>
