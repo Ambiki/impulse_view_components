@@ -12,6 +12,7 @@
   padding: 0;
   margin: var(--margin-y) auto;
   max-height: calc(100vh - calc(#{var(--margin-y)} * 2));
+  overflow: hidden;
   animation: dialog-show 150ms cubic-bezier(0.16, 1, 0.3, 1);
 
   &[open] {
@@ -63,7 +64,7 @@
 }
 
 .awc-dialog-title {
-  margin: 0;
+  margin: 0 !important;
   font-size: var(--fs-lg);
   font-weight: var(--fw-medium);
   line-height: 20px;
