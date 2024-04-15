@@ -6,15 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.5.0] - 2024-04-15
+
 ### Added
 
-- Add `data-text` attribute to autocomplete group container
+- Add `data-text` attribute to autocomplete group container ([#97](https://github.com/Ambiki/impulse_view_components/pull/97))
 
 ### Fixed
 
-- Mark dialog title's margin as important
-- Nested dialog resets `body` padding
-- Inherit `namespace` value from parent `impulse_form_with`
+- Mark dialog title's margin as important ([#102](https://github.com/Ambiki/impulse_view_components/pull/102))
+- Nested dialog resets `body` padding ([#99](https://github.com/Ambiki/impulse_view_components/pull/99))
+- Inherit `namespace` value from parent `impulse_form_with` ([#96](https://github.com/Ambiki/impulse_view_components/pull/96))
 
 ## [0.4.0] - 2024-03-05
 
@@ -127,7 +129,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Everything!
 
-[unreleased]: https://github.com/Ambiki/impulse_view_components/compare/v0.4.0...HEAD
+[unreleased]: https://github.com/Ambiki/impulse_view_components/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/Ambiki/impulse_view_components/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/Ambiki/impulse_view_components/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/Ambiki/impulse_view_components/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/Ambiki/impulse_view_components/compare/v0.2.3...v0.3.0
