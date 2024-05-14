@@ -292,7 +292,7 @@
 
 // Spinner
 .awc-autocomplete-spinner {
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   padding: var(--awc-autocomplete-blankslate-padding-y) var(--awc-autocomplete-blankslate-padding-x);
@@ -312,26 +312,26 @@
   }
 }
 
+// Loading
+// Show loading spinner only when loading and options container is empty.
+.awc-autocomplete[loading] .awc-autocomplete-options:empty ~ .awc-autocomplete-spinner {
+  display: flex;
+}
+
 // No options
 .awc-autocomplete[no-options] {
   .awc-autocomplete-options {
     display: none;
   }
 
-  &:not([error]) .awc-autocomplete-blankslate {
+  &:not([error]):not([loading]) .awc-autocomplete-blankslate {
     display: block;
   }
 }
 
 // Error
-.awc-autocomplete[error] {
-  .awc-autocomplete-error {
-    display: block;
-  }
-
-  .awc-autocomplete-spinner {
-    display: none;
-  }
+.awc-autocomplete[error] .awc-autocomplete-error {
+  display: block;
 }
 
 // Multiple

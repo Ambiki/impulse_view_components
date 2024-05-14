@@ -57,17 +57,14 @@
   <% end %>
 
   <div role="listbox" class="awc-autocomplete-listbox dropdown-menu" tabindex="-1" data-target="awc-autocomplete.listbox" hidden>
-    <div role="presentation" class="awc-autocomplete-options" data-target="awc-autocomplete.optionsContainer">
-      <% if ajax? %>
-        <div role="presentation" class="awc-autocomplete-spinner">
-          <%= render(Impulse::SpinnerComponent.new(role: :none)) %>
-        </div>
-      <% else %>
-        <% options.each do |option| %>
-          <%= option %>
-        <% end %>
-      <% end %>
-    </div>
+    <%# Important: This syntax is intentional. Don't prettify it. %>
+    <div role="presentation" class="awc-autocomplete-options" data-target="awc-autocomplete.optionsContainer"><% unless ajax? %><% options.each do |option| %><%= option %><% end %><% end %></div>
+
+    <% if ajax? %>
+      <div role="presentation" class="awc-autocomplete-spinner">
+        <%= render(Impulse::SpinnerComponent.new(role: :none)) %>
+      </div>
+    <% end %>
 
     <div role="presentation" class="awc-autocomplete-blankslate">
       <%= blankslate.presence || "We couldn't find that!" %>
