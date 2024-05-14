@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Specify autocomplete input placeholder color
 - Show autocomplete loading state when fetching options remotely
 
 ## [0.5.0] - 2024-04-15
