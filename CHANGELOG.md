@@ -6,10 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.5.1] - 2024-05-14
+
 ### Fixed
 
-- Specify autocomplete input placeholder color
-- Show autocomplete loading state when fetching options remotely
+- Specify autocomplete input placeholder color ([#109](https://github.com/Ambiki/impulse_view_components/pull/109))
+- Show autocomplete loading state when fetching options remotely ([#108](https://github.com/Ambiki/impulse_view_components/pull/108))
 
 ## [0.5.0] - 2024-04-15
 
@@ -134,7 +136,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Everything!
 
-[unreleased]: https://github.com/Ambiki/impulse_view_components/compare/v0.5.0...HEAD
+[unreleased]: https://github.com/Ambiki/impulse_view_components/compare/v0.5.1...HEAD
+[0.5.1]: https://github.com/Ambiki/impulse_view_components/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/Ambiki/impulse_view_components/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/Ambiki/impulse_view_components/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/Ambiki/impulse_view_components/compare/v0.3.0...v0.3.1
