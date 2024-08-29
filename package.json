@@ -39,7 +39,7 @@
   ],
   "scripts": {
     "build": "concurrently \"yarn build:js\" \"yarn build:css && yarn prefix:css\"",
-    "build:css": "node-sass --include-path node_modules --output-style compressed --source-map true --source-map-contents true --precision 6 src/index.scss app/assets/dist/impulse_view_components.css",
+    "build:css": "sass -I node_modules --style=compressed --source-map --embed-source-map --precision=6 src/index.scss app/assets/dist/impulse_view_components.css",
     "build:js": "rollup --config rollup.config.js",
     "build:prod": "NODE_ENV=production yarn build",
     "build:watch": "concurrently \"yarn build:js --watch\" \"yarn build:css --watch\"",
@@ -80,12 +80,12 @@
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^5.0.0",
     "globby": "^13.2.2",
-    "node-sass": "^9.0.0",
     "postcss": "^8.4.27",
     "postcss-cli": "^10.1.0",
     "prettier": "^3.0.0",
     "rollup": "^3.26.2",
     "rollup-plugin-uglify": "^6.0.4",
+    "sass": "^1.77.8",
     "typescript": "^5.1.6",
     "vitepress": "^1.0.0-beta.7"
   },
