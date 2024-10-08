@@ -59,7 +59,7 @@
     "@ambiki/combobox": "^2.0.1",
     "@ambiki/impulse": "0.5.0-beta.2",
     "@floating-ui/dom": "^1.6.3",
-    "@oddbird/popover-polyfill": "^0.4.0",
+    "@oddbird/popover-polyfill": "^0.4.4",
     "tabbable": "^6.2.0"
   },
   "devDependencies": {

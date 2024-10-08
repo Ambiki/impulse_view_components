@@ -137,7 +137,10 @@ export default class AwcPopoverElement extends ImpulseElement {
   }
 
   private get hasNestedOpenPopovers() {
-    return Array.from(this.querySelectorAll<AwcPopoverElement>(this.identifier)).filter((p) => p.open).length !== 0;
+    const popover = [...popovers].find((p) => p === this);
+    if (!popover) return false;
+    const childPopovers = Array.from(popover.querySelectorAll<AwcPopoverElement>(this.identifier));
+    return childPopovers.some((childPopover) => popovers.has(childPopover));
   }
 
   private get arrowPadding() {
