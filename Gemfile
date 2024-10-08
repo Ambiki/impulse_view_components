@@ -10,7 +10,7 @@ gem "activerecord", rails_version
 gem "appraisal", "~> 2.5"
 gem "bootsnap", require: false
 gem "lookbook", "~> 2.0", ">= 2.0.5"
-gem "puma", "~> 6.4"
+gem "puma", "~> 6.4", ">= 6.4.3"
 gem "rake", "~> 13.0"
 gem "railties", rails_version
 gem "sprockets"
