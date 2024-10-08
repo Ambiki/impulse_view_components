@@ -6,4 +6,8 @@ set -vx
 bundle install
 yarn install
 
-cd demo && bundle install
+cd demo
+yarn install
+bundle install
+
+cd -
