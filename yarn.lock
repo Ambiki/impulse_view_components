@@ -151,10 +151,10 @@
   resolved "https://registry.yarnpkg.com/@ambiki/combobox/-/combobox-2.0.1.tgz#8fd059dec4d6d160331c8a4a9df82b6a095fb549"
   integrity sha512-HDbUvfh2s0v7jGULHjxuDgKsXHukJ3qMDG20i6uIeoHLghWjw+HFWMgxwNqrKzM17HEMSI3RletQGdggUDmA3g==
 
-"@ambiki/impulse@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@ambiki/impulse/-/impulse-0.3.0.tgz#0c6c98146a0d0d152a354039d2d84a54b2667b13"
-  integrity sha512-aHUoRW5zCEn8M17G1w3B+SWEmwl9SoaQ/vaAw/WsDcJbvhLg006hB3NQyRC/bWh1pB+Rbh699Z/J5zk090Fc9A==
+"@ambiki/impulse@0.5.0-beta.2":
+  version "0.5.0-beta.2"
+  resolved "https://registry.yarnpkg.com/@ambiki/impulse/-/impulse-0.5.0-beta.2.tgz#3c3cce47abdc385662fb399c069c601ef7c8ecc9"
+  integrity sha512-eTNqyvOQ1W2BrAmxWVctTeD4SWi3VWxOMhE9Z3dgULk7MAr8JaiHAiW8XGrnIL/34jZfOitxR/c+FwLbyj52JQ==
 
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.12.11":
   version "7.22.5"
@@ -571,10 +571,10 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@oddbird/popover-polyfill@^0.4.0":
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/@oddbird/popover-polyfill/-/popover-polyfill-0.4.0.tgz#abba79014e670b6d95451512b29afca99eab571a"
-  integrity sha512-jrqoTI8lk5UziDsDPJ2Y+nmXYCcRhmr6uMARr3v/W6AMxRgsnRLWJyWKYr6FjaGMgbyxXG+OkCUPQY4Xl3toGg==
+"@oddbird/popover-polyfill@^0.4.4":
+  version "0.4.4"
+  resolved "https://registry.yarnpkg.com/@oddbird/popover-polyfill/-/popover-polyfill-0.4.4.tgz#6f87d81861c37bb1ff983b7522adfad3c2210232"
+  integrity sha512-n9q0ZXYRct6aYmOjjF5E+i5i0RSjVCkoKDJWILzJAkDBk4jmWOAZFjQfExtcAiJa0buX/Lx/CzBdGgiSSAlbrw==
 
 "@open-wc/chai-dom-equals@^0.12.36":
   version "0.12.36"
