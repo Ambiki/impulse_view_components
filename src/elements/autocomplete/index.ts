@@ -19,6 +19,11 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   @property({ type: Boolean }) disabled = false;
 
   /**
+   * Whether the autocomplete element is required or not.
+   */
+  @property({ type: Boolean }) required = false;
+
+  /**
    * Whether multiple values can be selected or not.
    */
   @property({ type: Boolean }) multiple = false;
@@ -70,6 +75,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     this.selectVariant = this.multiple ? new MultipleSelect(this) : new SingleSelect(this);
     this.selectVariant.connected();
     this.searchVariant = this.src ? new RemoteSearch(this) : new LocalSearch(this);
+    this.selectVariant.required = this.required;
   }
 
   /**
@@ -95,6 +101,14 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     for (const button of this.tagDismissButtons) {
       button.disabled = value;
     }
+  }
+
+  /**
+   * @private
+   * Called when the `required` attribute changes.
+   */
+  requiredChanged(value: boolean) {
+    this.selectVariant.required = value;
   }
 
   /**

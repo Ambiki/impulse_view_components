@@ -53,6 +53,10 @@ export default class SingleSelect {
     this.setValue('', '');
   }
 
+  set required(value: boolean) {
+    this.autocomplete.input.required = value;
+  }
+
   private get selectedOption() {
     return this.autocomplete.options.find((o) => o.getAttribute('value') === this.autocomplete.value);
   }
