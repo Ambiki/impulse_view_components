@@ -1,12 +1,12 @@
 import Combobox from '@ambiki/combobox';
 import { ImpulseElement, property, registerElement, target, targets } from '@ambiki/impulse';
+import { isLooselyFocusable } from 'src/helpers/focus';
 import useFloatingUI, { UseFloatingUIType } from 'src/hooks/use_floating_ui';
+import useOutsideClick from 'src/hooks/use_outside_click';
 import LocalSearch from './local_search';
 import MultipleSelect from './multiple_select';
 import RemoteSearch from './remote_search';
 import SingleSelect from './single_select';
-import useOutsideClick from 'src/hooks/use_outside_click';
-import { isLooselyFocusable } from 'src/helpers/focus';
 
 @registerElement('awc-autocomplete')
 export default class AwcAutocompleteElement extends ImpulseElement {
@@ -296,6 +296,46 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   }
 
   /**
+   * Sets the value of the element. If options are fetched from a remote source, the `text` param is required.
+   * @param value - The value of the option.
+   * @param text - The text of the option.
+   */
+  setValue(value: string, text?: string) {
+    const option = this.options.find((o) => o.getAttribute('value') === value);
+    const textValue = text || option?.getAttribute('data-text') || '';
+    this.selectVariant.setValue(value, textValue);
+  }
+
+  /**
+   * Removes a value from the element.
+   * @param value - The value of the option (you do not have to provide the value arg for a single select).
+   */
+  removeValue(value?: string) {
+    if (this.multiple && value) {
+      (this.selectVariant as MultipleSelect).removeValue(value);
+      return;
+    }
+
+    this.selectVariant.clear();
+  }
+
+  /**
+   * Activates an option by setting the `data-active` attribute.
+   * @param option - The option you want to activate.
+   * @param scroll - When true, it scrolls the option to view (by default, it is true).
+   */
+  activate(option: HTMLElement, { scroll = true } = {}) {
+    this.combobox.activate(option, { scroll: scroll });
+  }
+
+  /**
+   * Deactivates the active option by removing the `data-active` attribute.
+   */
+  deactivate() {
+    this.combobox.deactivate();
+  }
+
+  /**
    * Focuses on the input element.
    * @param options - See https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/focus#parameters
    */
@@ -340,7 +380,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   private removeTag(tag: HTMLElement) {
     const value = tag.getAttribute('value');
     if (!value) return;
-    (this.selectVariant as MultipleSelect).removeValue(value);
+    this.removeValue(value);
   }
 
   /**
@@ -362,7 +402,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
    */
   get value(): string | string[] {
     if (this.multiple) {
-      return [];
+      return this.tags.map((tag) => tag.getAttribute('value') ?? '');
     }
     return this.querySelector<HTMLInputElement>('input[data-behavior="hidden-field"]')?.value ?? '';
   }
@@ -379,6 +419,13 @@ export default class AwcAutocompleteElement extends ImpulseElement {
    */
   get visibleOptions() {
     return this.options.filter((option) => !option.hidden);
+  }
+
+  /**
+   * Returns the option that has the `data-active` attribute.
+   */
+  get activeOption() {
+    return this.combobox.activeOption;
   }
 
   /**
