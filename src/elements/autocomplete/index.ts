@@ -50,6 +50,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   selectVariant: SingleSelect | MultipleSelect;
   private searchVariant: LocalSearch | RemoteSearch;
   private floatingUI: UseFloatingUIType;
+  private firstFocus = true;
 
   constructor() {
     super();
@@ -85,6 +86,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   disconnected() {
     this.hide();
     this.form?.removeEventListener('reset', this.handleFormReset);
+    this.firstFocus = true;
   }
 
   /**
@@ -132,6 +134,12 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     if (target.hasAttribute('data-trigger')) {
       this.show();
     }
+
+    if (this.firstFocus && this.input.value) {
+      this.input.select();
+    }
+
+    this.firstFocus = false;
   }
 
   /**
@@ -149,6 +157,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
    */
   handleInputBlur() {
     this.hide();
+    this.firstFocus = true;
   }
 
   /**
