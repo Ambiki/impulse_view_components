@@ -1,5 +1,5 @@
 import Combobox from '@ambiki/combobox';
-import { ImpulseElement, property, registerElement, target } from '@ambiki/impulse';
+import { ImpulseElement, property, registerElement, target, targets } from '@ambiki/impulse';
 import useFloatingUI, { UseFloatingUIType } from 'src/hooks/use_floating_ui';
 import LocalSearch from './local_search';
 import MultipleSelect from './multiple_select';
@@ -12,6 +12,11 @@ export default class AwcAutocompleteElement extends ImpulseElement {
    * Shows/hides the listbox element.
    */
   @property({ type: Boolean }) open = false;
+
+  /**
+   * Whether the autocomplete element is disabled or not.
+   */
+  @property({ type: Boolean }) disabled = false;
 
   /**
    * Whether multiple values can be selected or not.
@@ -33,6 +38,8 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   @target() input: HTMLInputElement;
   @target() listbox: HTMLElement;
   @target() optionsContainer: HTMLElement;
+  @target() clearButton?: HTMLButtonElement;
+  @targets() tagDismissButtons: HTMLButtonElement[];
 
   combobox: Combobox;
   selectVariant: SingleSelect | MultipleSelect;
@@ -76,6 +83,22 @@ export default class AwcAutocompleteElement extends ImpulseElement {
 
   /**
    * @private
+   * Called when the `disabled` attribute changes.
+   */
+  disabledChanged(value: boolean) {
+    this.input.disabled = value;
+
+    if (this.clearButton) {
+      this.clearButton.disabled = value;
+    }
+
+    for (const button of this.tagDismissButtons) {
+      button.disabled = value;
+    }
+  }
+
+  /**
+   * @private
    */
   handleMousedown(event: Event) {
     // Fix focus jitter issue when clicking outside the input element.
@@ -88,6 +111,8 @@ export default class AwcAutocompleteElement extends ImpulseElement {
    * @private
    */
   handleClick(event: Event) {
+    if (this.disabled) return;
+
     this.focus();
     const target = event.target as HTMLElement;
     if (target.hasAttribute('data-trigger')) {
@@ -99,6 +124,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
    * @private
    */
   handleInputMousedown(event: MouseEvent) {
+    if (this.disabled) return;
     if (event.buttons === 1) {
       this.show();
     }

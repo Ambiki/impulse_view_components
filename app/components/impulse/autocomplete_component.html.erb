@@ -6,7 +6,7 @@
         <div class="awc-autocomplete-tag" value="<%= selected.value %>" data-behavior="tag" data-persisted>
           <span class="awc-autocomplete-tag-text" data-behavior="text"><%= selected.text %></span>
           <span class="awc-autocomplete-tag-end-adornment">
-            <%= content_tag :button, type: :button, class: "awc-autocomplete-tag-dismiss-btn btn", tabindex: "-1", title: "Remove", disabled: @disabled, data: { action: "click->awc-autocomplete#handleTagRemove", target: "awc-autocomplete.tagDismissBtns" } do %>
+            <%= content_tag :button, type: :button, class: "awc-autocomplete-tag-dismiss-btn btn", tabindex: "-1", title: "Remove", disabled: @disabled, data: { action: "click->awc-autocomplete#handleTagRemove", target: "awc-autocomplete.tagDismissButtons" } do %>
               <i class="bi bi-x"></i>
             <% end %>
           </span>
@@ -18,7 +18,7 @@
         <div class="awc-autocomplete-tag" data-behavior="tag">
           <span class="awc-autocomplete-tag-text" data-behavior="text"></span>
           <span class="awc-autocomplete-tag-end-adornment">
-            <%= content_tag :button, type: :button, class: "awc-autocomplete-tag-dismiss-btn btn", tabindex: "-1", title: "Remove", data: { action: "click->awc-autocomplete#handleTagRemove", target: "awc-autocomplete.tagDismissBtns" } do %>
+            <%= content_tag :button, type: :button, class: "awc-autocomplete-tag-dismiss-btn btn", tabindex: "-1", title: "Remove", data: { action: "click->awc-autocomplete#handleTagRemove", target: "awc-autocomplete.tagDismissButtons" } do %>
               <i class="bi bi-x"></i>
             <% end %>
           </span>
@@ -45,7 +45,7 @@
       **search_field_args %>
     <div class="awc-autocomplete-end-adornment" data-trigger>
       <% if @clearable %>
-        <%= content_tag :button, type: :button, class: "awc-autocomplete-adornment-btn awc-autocomplete-clear-btn btn btn-light", title: "Clear", disabled: @disabled, data: { action: "click->awc-autocomplete#handleClear", target: "awc-autocomplete.clearBtn" } do %>
+        <%= content_tag :button, type: :button, class: "awc-autocomplete-adornment-btn awc-autocomplete-clear-btn btn btn-light", title: "Clear", disabled: @disabled, data: { action: "click->awc-autocomplete#handleClear", target: "awc-autocomplete.clearButton" } do %>
           <i class="bi bi-x-lg"></i>
         <% end %>
       <% end %>
