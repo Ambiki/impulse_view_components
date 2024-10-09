@@ -1,5 +1,5 @@
 <%= render(Impulse::BaseRenderer.new(**@system_args)) do %>
-  <%= content_tag :div, class: class_names("awc-autocomplete-control form-control", "form-control-sm": @size == "sm", "form-control-lg": @size == "lg"), data: { target: "awc-autocomplete.control" } do %>
+  <%= content_tag :div, class: class_names("awc-autocomplete-control form-control", "form-control-sm": @size == "sm", "form-control-lg": @size == "lg"), data: { target: "awc-autocomplete.control", trigger: "" } do %>
     <% if multiple? %>
       <%= hidden_field @object_name, @method_name, id: nil, multiple: true, value: nil, data: { behavior: "hidden-field" }, **hidden_field_args if @include_hidden %>
       <% @selected&.each do |selected| %>
@@ -10,7 +10,7 @@
               <i class="bi bi-x"></i>
             <% end %>
           </span>
-          <%= hidden_field @object_name, @method_name, id: nil, value: selected.value, multiple: true, data: { behavior: "hidden-field" }, **hidden_field_args %>
+          <%= hidden_field @object_name, @method_name, id: nil, value: selected.value, multiple: true, data: { behavior: "hidden-field", text: selected.text }, **hidden_field_args %>
         </div>
       <% end %>
 
@@ -40,10 +40,10 @@
       disabled: @disabled,
       data: {
         target: "awc-autocomplete.input",
-        action: "mousedown->awc-autocomplete#handleInputMousedown focus->awc-autocomplete#handleInputFocus blur->awc-autocomplete#handleInputBlur keydown->awc-autocomplete#handleInputKeydown input->awc-autocomplete#handleInput"
+        action: "mousedown->awc-autocomplete#handleInputMousedown blur->awc-autocomplete#handleInputBlur keydown->awc-autocomplete#handleInputKeydown input->awc-autocomplete#handleInput"
       },
       **search_field_args %>
-    <div class="awc-autocomplete-end-adornment">
+    <div class="awc-autocomplete-end-adornment" data-trigger>
       <% if @clearable %>
         <%= content_tag :button, type: :button, class: "awc-autocomplete-adornment-btn awc-autocomplete-clear-btn btn btn-light", title: "Clear", disabled: @disabled, data: { action: "click->awc-autocomplete#handleClear", target: "awc-autocomplete.clearBtn" } do %>
           <i class="bi bi-x-lg"></i>
@@ -56,9 +56,14 @@
     </div>
   <% end %>
 
-  <div role="listbox" class="awc-autocomplete-listbox dropdown-menu" tabindex="-1" data-target="awc-autocomplete.listbox" hidden>
-    <%# Important: This syntax is intentional. Don't prettify it. %>
-    <div role="presentation" class="awc-autocomplete-options" data-target="awc-autocomplete.optionsContainer"><% unless ajax? %><% options.each do |option| %><%= option %><% end %><% end %></div>
+  <div role="listbox" class="awc-autocomplete-listbox dropdown-menu" tabindex="-1" data-target="awc-autocomplete.listbox">
+    <div role="presentation" class="awc-autocomplete-options" data-target="awc-autocomplete.optionsContainer">
+      <% unless ajax? %>
+        <% options.each do |option| %>
+          <%= option %>
+        <% end %>
+      <% end %>
+    </div>
 
     <% if ajax? %>
       <div role="presentation" class="awc-autocomplete-spinner">

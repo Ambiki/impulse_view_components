@@ -1,65 +1,65 @@
-import { getText, getValue } from './helpers';
 import type AwcAutocompleteElement from './index';
 
-export default class MultipleSelect {
-  private selectedValues = new Set<string>();
-  private defaultSelectedValues: Array<{ value: string; text: string }> = [];
+type TDefaultSelectedValue = { value: string; text: string };
 
-  constructor(private readonly autocomplete: AwcAutocompleteElement) {
+export default class MultipleSelect {
+  readonly autocomplete: AwcAutocompleteElement;
+  private selectedValues = new Set<string>();
+  private defaultSelectedValues: Array<TDefaultSelectedValue> = [];
+
+  constructor(autocomplete: AwcAutocompleteElement) {
     this.autocomplete = autocomplete;
   }
 
   connected() {
-    const values = parseJSON(this.autocomplete.value);
-    values.forEach((value) => this.selectedValues.add(value));
-    this.defaultSelectedValues = this.persistedTags.map((tag) => ({ value: getValue(tag), text: getText(tag) }));
-  }
-
-  disconnected() {
-    //
+    this.defaultSelectedValues = this.tags.reduce<Array<TDefaultSelectedValue>>((array, tag) => {
+      const hiddenField = tag.querySelector<HTMLInputElement>('[data-behavior="hidden-field"]')!;
+      const value = hiddenField.value;
+      this.selectedValues.add(value);
+      array.push({ value, text: hiddenField.getAttribute('data-text') || '' });
+      return array;
+    }, []);
   }
 
   start() {
-    for (const option of this.autocomplete.options) {
-      if (this.selectedValues.has(getValue(option))) {
-        this.autocomplete.combobox.select(option);
-      } else {
-        this.autocomplete.combobox.deselect(option);
-      }
+    this.selectOrDeselectOptions();
+    if (this.firstActivableOption) {
+      this.autocomplete.combobox.activate(this.firstActivableOption, { scroll: true });
     }
   }
 
   stop() {
-    this.clearInputField();
+    this.autocomplete.input.value = '';
   }
 
-  async commit(option: HTMLElement) {
-    this.clearInputField();
-    const value = getValue(option);
-    const text = getText(option);
+  reset() {
+    this.clear();
+    this.defaultSelectedValues.forEach(({ value, text }) => this.setValue(value, text));
+  }
+
+  select(option: HTMLElement) {
+    const value = option.getAttribute('value');
+    const { text } = option.dataset;
+    if (!value) return;
 
     if (this.selectedValues.has(value)) {
       this.removeValue(value);
     } else {
-      this.setValue(value, text);
+      this.setValue(value, text || '');
     }
+  }
 
-    if (this.autocomplete.src) {
-      await this.autocomplete.makeRequest('');
-      // Select the options and activate the most viable option.
-      this.start();
-      const activeOption =
-        this.autocomplete.visibleOptions.find((o) => getValue(o) === value) || this.autocomplete.visibleOptions[0];
-      if (activeOption) {
-        this.autocomplete.activate(activeOption);
-      }
-    } else {
-      for (const option of this.autocomplete.options) {
-        option.hidden = false;
-      }
-      for (const group of this.autocomplete.groups) {
-        group.hidden = false;
-      }
+  setValue(value: string, text: string) {
+    if (this.selectedValues.has(value)) return;
+    this.selectedValues.add(value);
+    this.insertTag(value, text.trim());
+    // Only select the option if autocomplete is open, otherwise leave it as it is because aria-selected will be
+    // "false" when the autocomplete is hidden.
+    if (!this.autocomplete.open) return;
+
+    const option = this.autocomplete.options.find(this.findByValue(value));
+    if (option) {
+      this.autocomplete.combobox.select(option);
     }
   }
 
@@ -67,101 +67,60 @@ export default class MultipleSelect {
     this.selectedValues.forEach((value) => this.removeValue(value));
   }
 
-  reset() {
-    this.clear();
-    this.defaultSelectedValues.forEach(({ value, text }) => this.setValue(value, text, { persisted: true }));
-  }
-
-  setValue(value: string, text: string, { persisted = false } = {}) {
-    if (this.selectedValues.has(value)) return;
-    this.selectedValues.add(value);
-    this.insertTag(value, text, { persisted });
-    this.updateElementValue();
-    this.setRequiredAttribute(this.autocomplete.required);
-
-    // Only select if the listbox is open because all options are deselected when it is hidden.
-    if (this.autocomplete.open) {
-      const option = this.autocomplete.options.find((option) => getValue(option) === value);
-      if (option) {
-        this.autocomplete.combobox.select(option);
-      }
-    }
-  }
-
   removeValue(value: string) {
     if (!this.selectedValues.has(value)) return;
     this.selectedValues.delete(value);
     this.removeTag(value);
-    this.updateElementValue();
-    this.setRequiredAttribute(this.autocomplete.required);
-
-    const option = this.autocomplete.options.find((option) => getValue(option) === value);
+    const option = this.autocomplete.options.find(this.findByValue(value));
     if (option) {
       this.autocomplete.combobox.deselect(option);
     }
   }
 
-  setRequiredAttribute(value: boolean) {
-    if (!value || (value && this.selectedValues.size > 0)) {
-      this.autocomplete.input.required = false;
-      return;
+  private selectOrDeselectOptions() {
+    for (const option of this.autocomplete.options) {
+      const value = option.getAttribute('value');
+      if (value && this.selectedValues.has(value)) {
+        this.autocomplete.combobox.select(option);
+      } else {
+        this.autocomplete.combobox.deselect(option);
+      }
     }
-
-    this.autocomplete.input.required = true;
   }
 
-  private insertTag(value: string, text: string, { persisted = false } = {}): void {
+  private insertTag(value: string, text: string): void {
     const templateClone = this.template.content.cloneNode(true) as HTMLElement;
-    const tagField = templateClone.querySelector<HTMLElement>('[data-behavior="tag"]');
-    const tagText = templateClone.querySelector<HTMLElement>('[data-behavior="text"]');
-    const tagHiddenField = templateClone.querySelector<HTMLInputElement>('[data-behavior="hidden-field"]');
-    tagField?.setAttribute('value', value);
-    tagField?.toggleAttribute('data-persisted', persisted);
-    if (tagText) tagText.innerText = text;
-    if (tagHiddenField) tagHiddenField.value = value;
-
+    const tagField = templateClone.querySelector<HTMLElement>('[data-behavior="tag"]')!;
+    const tagText = templateClone.querySelector<HTMLElement>('[data-behavior="text"]')!;
+    const tagHiddenField = templateClone.querySelector<HTMLInputElement>('[data-behavior="hidden-field"]')!;
+    tagField.setAttribute('value', value);
+    tagText.innerText = text;
+    tagHiddenField.value = value;
+    tagHiddenField.setAttribute('data-text', text);
     this.autocomplete.control.insertBefore(templateClone, this.template);
   }
 
   private removeTag(value: string) {
-    const tag = this.tags.find((t) => getValue(t) === value);
+    const tag = this.tags.find(this.findByValue(value));
     tag?.remove();
   }
 
-  private updateElementValue(): void {
-    const values = Array.from(this.selectedValues.values());
-    this.autocomplete.value = JSON.stringify(values);
+  private findByValue = (value: string) => {
+    return (target: HTMLElement) => {
+      return target.getAttribute('value') === value;
+    };
+  };
+
+  private get firstActivableOption() {
+    const selectedOption = this.autocomplete.options.find((o) => this.selectedValues.has(o.getAttribute('value')!));
+    return selectedOption || this.autocomplete.visibleOptions[0];
   }
 
-  private clearInputField() {
-    if (this.autocomplete.input.value) {
-      this.autocomplete.input.value = '';
-    }
-  }
-
-  get firstActiveOption(): HTMLElement | undefined {
-    const option = this.autocomplete.visibleOptions.find((option) => this.selectedValues.has(getValue(option)));
-    return option || this.autocomplete.visibleOptions[0];
-  }
-
-  get tags() {
-    return Array.from(this.autocomplete.querySelectorAll<HTMLElement>('[data-behavior="tag"]'));
-  }
-
-  get persistedTags() {
-    return this.tags.filter((tag) => tag.hasAttribute('data-persisted'));
+  private get tags() {
+    return this.autocomplete.tags;
   }
 
   private get template() {
     return this.autocomplete.querySelector<HTMLTemplateElement>('[data-behavior="tag-template"]')!;
-  }
-}
-
-function parseJSON(value: string): string[] {
-  try {
-    const parsedValue = JSON.parse(value) as string[];
-    return parsedValue.map((e) => e.toString());
-  } catch {
-    return [];
   }
 }
