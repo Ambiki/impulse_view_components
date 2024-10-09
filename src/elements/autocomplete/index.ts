@@ -281,6 +281,13 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   }
 
   /**
+   * @private
+   */
+  toggleSelectedClass(value: boolean) {
+    this.classList.toggle('awc-autocomplete--selected', value);
+  }
+
+  /**
    * Returns the selected value.
    */
   get value(): string | string[] {

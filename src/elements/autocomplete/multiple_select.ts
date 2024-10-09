@@ -53,6 +53,7 @@ export default class MultipleSelect {
     if (this.selectedValues.has(value)) return;
     this.selectedValues.add(value);
     this.insertTag(value, text.trim());
+    this.toggleSelectedClass();
     // Only select the option if autocomplete is open, otherwise leave it as it is because aria-selected will be
     // "false" when the autocomplete is hidden.
     if (!this.autocomplete.open) return;
@@ -71,6 +72,7 @@ export default class MultipleSelect {
     if (!this.selectedValues.has(value)) return;
     this.selectedValues.delete(value);
     this.removeTag(value);
+    this.toggleSelectedClass();
     const option = this.autocomplete.options.find(this.findByValue(value));
     if (option) {
       this.autocomplete.combobox.deselect(option);
@@ -110,6 +112,10 @@ export default class MultipleSelect {
       return target.getAttribute('value') === value;
     };
   };
+
+  private toggleSelectedClass() {
+    this.autocomplete.toggleSelectedClass(!!this.selectedValues.size);
+  }
 
   private get firstActivableOption() {
     const selectedOption = this.autocomplete.options.find((o) => this.selectedValues.has(o.getAttribute('value')!));

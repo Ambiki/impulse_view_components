@@ -46,6 +46,7 @@ export default class SingleSelect {
     const trimmedText = text.trim();
     this.hiddenField.setAttribute('data-text', trimmedText);
     this.autocomplete.input.value = trimmedText;
+    this.autocomplete.toggleSelectedClass(!!value);
   }
 
   clear() {
