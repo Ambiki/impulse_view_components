@@ -1,6 +1,7 @@
 import Combobox from '@ambiki/combobox';
 import { ImpulseElement, property, registerElement, target } from '@ambiki/impulse';
 import useFloatingUI, { UseFloatingUIType } from 'src/hooks/use_floating_ui';
+import LocalSearch from './local_search';
 import MultipleSelect from './multiple_select';
 import SingleSelect from './single_select';
 
@@ -22,6 +23,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
 
   combobox: Combobox;
   private selectVariant: SingleSelect | MultipleSelect;
+  private searchVariant: LocalSearch;
   private floatingUI: UseFloatingUIType;
 
   /**
@@ -40,6 +42,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     this.combobox = new Combobox(this.input, this.listbox, { multiple: this.multiple });
     this.selectVariant = this.multiple ? new MultipleSelect(this) : new SingleSelect(this);
     this.selectVariant.connected();
+    this.searchVariant = new LocalSearch(this);
   }
 
   /**
@@ -156,6 +159,18 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   }
 
   /**
+   * @private
+   */
+  handleInput(event: Event) {
+    const { target } = event;
+    if (!(target instanceof HTMLInputElement)) return;
+    const query = target.value.trim();
+
+    this.show();
+    this.searchVariant.search(query);
+  }
+
+  /**
    * Shows the listbox element.
    */
   show() {
@@ -164,6 +179,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     this.floatingUI.start();
     this.combobox.start();
     this.selectVariant.start();
+    this.searchVariant.start();
   }
 
   /**
@@ -174,6 +190,8 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     this.open = false;
     this.combobox.stop();
     this.selectVariant.stop();
+    this.searchVariant.stop();
+    this.removeAttribute('no-options');
     this.floatingUI.stop();
   }
 
@@ -215,6 +233,13 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     const value = tag.getAttribute('value');
     if (!value) return;
     (this.selectVariant as MultipleSelect).removeValue(value);
+  }
+
+  /**
+   * @private
+   */
+  checkIfListIsEmpty() {
+    this.toggleAttribute('no-options', this.visibleOptions.length === 0);
   }
 
   /**
