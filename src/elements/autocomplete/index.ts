@@ -47,6 +47,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   @target() optionsContainer: HTMLElement;
   @target() clearButton?: HTMLButtonElement;
   @targets() tagDismissButtons: HTMLButtonElement[];
+  @targets() groups: HTMLElement[];
 
   combobox: Combobox;
   selectVariant: SingleSelect | MultipleSelect;

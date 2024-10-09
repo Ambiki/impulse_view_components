@@ -26,6 +26,10 @@ export default class LocalSearch {
   }
 
   private resetOptions() {
+    for (const group of this.autocomplete.groups) {
+      group.hidden = false;
+    }
+
     for (const option of this.autocomplete.options) {
       option.hidden = false;
     }
@@ -34,12 +38,20 @@ export default class LocalSearch {
 
 function filterOptions(query: string) {
   return (option: HTMLElement) => {
+    const group = option.closest<HTMLElement>('[role="group"]');
     if (query) {
-      const text = option.getAttribute('data-text') ?? '';
-      const match = text.toLowerCase().includes(query.toLowerCase());
+      const value = option.getAttribute('data-text');
+      const match = value?.toLowerCase().includes(query.toLowerCase());
       option.hidden = !match;
+      if (group) {
+        const options = Array.from(group.querySelectorAll<HTMLElement>('[role="option"]'));
+        group.hidden = options.every((o) => o.hidden);
+      }
     } else {
       option.hidden = false;
+      if (group) {
+        group.hidden = false;
+      }
     }
   };
 }
