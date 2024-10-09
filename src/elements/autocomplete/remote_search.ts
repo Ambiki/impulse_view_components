@@ -25,6 +25,7 @@ export default class RemoteSearch {
   }
 
   private async makeRequest(value: string) {
+    this.emit('loadstart');
     this.abortController?.abort();
     const { signal } = (this.abortController = new AbortController());
 
@@ -47,10 +48,11 @@ export default class RemoteSearch {
         this.autocomplete.checkIfListIsEmpty();
         this.autocomplete.combobox.initializeOptions();
         this.abortController = undefined;
-        // Update the floating UI position after the listbox content has been updated.
-        this.autocomplete.reposition();
         // Start the select variant to select the option(s).
         this.autocomplete.selectVariant.start();
+        // Update the floating UI position after the listbox content has been updated.
+        await this.autocomplete.reposition();
+        this.emit('load');
       } else {
         throw new Error();
       }
@@ -58,9 +60,15 @@ export default class RemoteSearch {
       if (error instanceof Error && error.name !== 'AbortError') {
         this.abortController = undefined;
         this.autocomplete.setAttribute('error', '');
+        this.emit('error');
       }
     } finally {
       this.autocomplete.removeAttribute('loading');
+      this.emit('loadend');
     }
+  }
+
+  private emit(name: string) {
+    this.autocomplete.emit(name, { bubbles: false, prefix: false });
   }
 }

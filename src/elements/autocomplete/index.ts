@@ -175,9 +175,9 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   /**
    * @private
    */
-  handleInputBlur() {
+  async handleInputBlur() {
     this.preventOutsideClickEvent = this.open;
-    this.hide();
+    await this.hide();
     this.firstFocus = true;
   }
 
@@ -214,7 +214,11 @@ export default class AwcAutocompleteElement extends ImpulseElement {
         break;
       case 'Backspace':
         if (this.multiple && !this.input.value) {
-          this.removeLastTag();
+          const tag = this.removeLastTag();
+          if (tag) {
+            event.preventDefault();
+            this.emit('remove', { detail: { target: tag } });
+          }
         }
         break;
     }
@@ -229,6 +233,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     const option = event.target;
     if (!(option instanceof HTMLElement)) return;
     this.selectVariant.select(option);
+    this.emit('commit', { detail: { target: option } });
   }
 
   /**
@@ -237,6 +242,16 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   handleFormReset() {
     this.reset();
     this.hide();
+    this.emit('reset');
+  }
+
+  /**
+   * @private
+   */
+  handleClear() {
+    this.clear();
+    this.hide();
+    this.emit('clear');
   }
 
   /**
@@ -247,14 +262,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     const tag = (event.target as HTMLElement).closest<HTMLElement>('[data-behavior="tag"]');
     if (!tag) return;
     this.removeTag(tag);
-  }
-
-  /**
-   * @private
-   */
-  handleClear() {
-    this.clear();
-    this.hide();
+    this.emit('remove', { detail: { target: tag } });
   }
 
   /**
@@ -274,25 +282,29 @@ export default class AwcAutocompleteElement extends ImpulseElement {
    */
   show() {
     if (this.open) return;
+    this.emit('show');
     this.open = true;
     this.floatingUI.start();
     this.combobox.start();
     this.selectVariant.start();
     this.searchVariant.start();
+    this.emit('shown');
   }
 
   /**
    * Hides the listbox element.
    */
-  hide() {
+  async hide() {
     if (!this.open) return;
+    this.emit('hide');
     this.open = false;
     this.combobox.stop();
     this.selectVariant.stop();
     this.searchVariant.stop();
     this.removeAttribute('no-options');
     this.removeAttribute('error');
-    this.floatingUI.stop();
+    await this.floatingUI.stop();
+    this.emit('hidden');
   }
 
   /**
@@ -371,10 +383,11 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     await this.floatingUI.update();
   }
 
-  private removeLastTag() {
+  private removeLastTag(): HTMLElement | undefined {
     const lastTag = this.tags[this.tags.length - 1];
     if (!lastTag) return;
     this.removeTag(lastTag);
+    return lastTag;
   }
 
   private removeTag(tag: HTMLElement) {
