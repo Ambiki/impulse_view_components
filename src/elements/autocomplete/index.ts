@@ -39,11 +39,18 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   private searchVariant: LocalSearch | RemoteSearch;
   private floatingUI: UseFloatingUIType;
 
+  constructor() {
+    super();
+    this.handleFormReset = this.handleFormReset.bind(this);
+  }
+
   /**
    * @private
    * Called when the element is connected to the DOM.
    */
   connected() {
+    this.form?.addEventListener('reset', this.handleFormReset);
+
     this.floatingUI = useFloatingUI(this, {
       referenceElement: this.control,
       popupElement: this.listbox,
@@ -64,6 +71,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
    */
   disconnected() {
     this.hide();
+    this.form?.removeEventListener('reset', this.handleFormReset);
   }
 
   /**
@@ -151,6 +159,14 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     const option = event.target;
     if (!(option instanceof HTMLElement)) return;
     this.selectVariant.select(option);
+  }
+
+  /**
+   * @private
+   */
+  handleFormReset() {
+    this.reset();
+    this.hide();
   }
 
   /**
