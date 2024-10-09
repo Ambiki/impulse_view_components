@@ -317,10 +317,16 @@
 }
 
 // Loading
-// Show loading spinner only when loading and options container is empty.
-// .awc-autocomplete[loading] .awc-autocomplete-options:empty ~ .awc-autocomplete-spinner {
-//   display: flex;
-// }
+.awc-autocomplete[loading] {
+  .awc-autocomplete-options,
+  .awc-autocomplete-blankslate {
+    display: none;
+  }
+
+  .awc-autocomplete-spinner {
+    display: flex;
+  }
+}
 
 // No options
 .awc-autocomplete[no-options] {

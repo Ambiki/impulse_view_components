@@ -3,6 +3,7 @@ import { ImpulseElement, property, registerElement, target } from '@ambiki/impul
 import useFloatingUI, { UseFloatingUIType } from 'src/hooks/use_floating_ui';
 import LocalSearch from './local_search';
 import MultipleSelect from './multiple_select';
+import RemoteSearch from './remote_search';
 import SingleSelect from './single_select';
 
 @registerElement('awc-autocomplete')
@@ -17,13 +18,25 @@ export default class AwcAutocompleteElement extends ImpulseElement {
    */
   @property({ type: Boolean }) multiple = false;
 
+  /**
+   * The endpoint to fetch the options from.
+   */
+  @property() src: string;
+
+  /**
+   * The param that is appended when making a network request.
+   * Example: /users?q=john
+   */
+  @property() param = 'q';
+
   @target() control: HTMLElement;
   @target() input: HTMLInputElement;
   @target() listbox: HTMLElement;
+  @target() optionsContainer: HTMLElement;
 
   combobox: Combobox;
-  private selectVariant: SingleSelect | MultipleSelect;
-  private searchVariant: LocalSearch;
+  selectVariant: SingleSelect | MultipleSelect;
+  private searchVariant: LocalSearch | RemoteSearch;
   private floatingUI: UseFloatingUIType;
 
   /**
@@ -42,7 +55,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     this.combobox = new Combobox(this.input, this.listbox, { multiple: this.multiple });
     this.selectVariant = this.multiple ? new MultipleSelect(this) : new SingleSelect(this);
     this.selectVariant.connected();
-    this.searchVariant = new LocalSearch(this);
+    this.searchVariant = this.src ? new RemoteSearch(this) : new LocalSearch(this);
   }
 
   /**
@@ -192,11 +205,13 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     this.selectVariant.stop();
     this.searchVariant.stop();
     this.removeAttribute('no-options');
+    this.removeAttribute('error');
     this.floatingUI.stop();
   }
 
   /**
    * Focuses on the input element.
+   * @param options - See https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/focus#parameters
    */
   focus(options?: FocusOptions) {
     this.input.focus(options);
@@ -221,6 +236,13 @@ export default class AwcAutocompleteElement extends ImpulseElement {
    */
   clear() {
     this.selectVariant.clear();
+  }
+
+  /**
+   * Updates the listbox position.
+   */
+  async reposition() {
+    await this.floatingUI.update();
   }
 
   private removeLastTag() {
@@ -264,6 +286,13 @@ export default class AwcAutocompleteElement extends ImpulseElement {
    */
   get visibleOptions() {
     return this.options.filter((option) => !option.hidden);
+  }
+
+  /**
+   * Returns the parent form element.
+   */
+  get form() {
+    return this.closest('form');
   }
 
   /**
