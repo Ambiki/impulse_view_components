@@ -5,6 +5,8 @@ import LocalSearch from './local_search';
 import MultipleSelect from './multiple_select';
 import RemoteSearch from './remote_search';
 import SingleSelect from './single_select';
+import useOutsideClick from 'src/hooks/use_outside_click';
+import { isLooselyFocusable } from 'src/helpers/focus';
 
 @registerElement('awc-autocomplete')
 export default class AwcAutocompleteElement extends ImpulseElement {
@@ -51,6 +53,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   private searchVariant: LocalSearch | RemoteSearch;
   private floatingUI: UseFloatingUIType;
   private firstFocus = true;
+  private preventOutsideClickEvent = false;
 
   constructor() {
     super();
@@ -72,6 +75,21 @@ export default class AwcAutocompleteElement extends ImpulseElement {
       offsetOptions: 4,
     });
 
+    useOutsideClick(this, {
+      boundaries: [this.control, this.listbox],
+      callback: (event, target) => {
+        // Since the blur event fires before the click event, we need to consider the case when the input is blurred so
+        // that we don't prevent the click event from happening.
+        if (this.preventOutsideClickEvent && !isLooselyFocusable(target)) {
+          event.preventDefault();
+        } else if (this.open) {
+          this.hide();
+        }
+
+        this.preventOutsideClickEvent = false;
+      },
+    });
+
     this.combobox = new Combobox(this.input, this.listbox, { multiple: this.multiple });
     this.selectVariant = this.multiple ? new MultipleSelect(this) : new SingleSelect(this);
     this.selectVariant.connected();
@@ -87,6 +105,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     this.hide();
     this.form?.removeEventListener('reset', this.handleFormReset);
     this.firstFocus = true;
+    this.preventOutsideClickEvent = false;
   }
 
   /**
@@ -156,6 +175,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
    * @private
    */
   handleInputBlur() {
+    this.preventOutsideClickEvent = this.open;
     this.hide();
     this.firstFocus = true;
   }
