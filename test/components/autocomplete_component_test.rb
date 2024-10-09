@@ -25,7 +25,7 @@ module Impulse
 
       assert_selector "awc-autocomplete.awc-autocomplete--selected"
       assert_selector ".awc-autocomplete-clear-btn"
-      assert_selector "awc-autocomplete[value='apple']"
+      assert_selector "input[type='hidden'][value='apple']", visible: false
       assert_selector "[data-behavior='hidden-field'][value='apple']", visible: false
       assert_selector "[data-behavior='hidden-field'][data-text='Apple']", visible: false
       assert_selector "input[type='text'][value='Apple']"

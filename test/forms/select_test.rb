@@ -34,7 +34,7 @@ module Impulse
         end
       end
 
-      assert_selector "awc-autocomplete[value='Apple']"
+      assert_selector "input[type='hidden'][value='Apple']", visible: false
     end
 
     test "selected option can be overwritten" do
@@ -44,7 +44,7 @@ module Impulse
         end
       end
 
-      assert_selector "awc-autocomplete[value='Guava']"
+      assert_selector "input[type='hidden'][value='Guava']", visible: false
     end
 
     test "renders multiple select" do

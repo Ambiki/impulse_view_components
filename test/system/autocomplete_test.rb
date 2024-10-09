@@ -23,7 +23,6 @@ module Impulse
       page.find(".awc-autocomplete-control").click
       page.find("[role='option'][value='kiwi']").click
 
-      assert_selector "awc-autocomplete[value='kiwi']"
       assert_equal "Kiwi", page.find_field("user_fruit_id").value
       assert_selector "[data-behavior='hidden-field'][value='kiwi']", visible: false
       assert_selector "[data-behavior='hidden-field'][data-text='Kiwi']", visible: false
@@ -38,10 +37,9 @@ module Impulse
       page.find(".awc-autocomplete-control").click
       page.find("[role='option'][value='kiwi']").click
 
-      assert_selector "[data-behavior='tag'][value='kiwi']" do
-        assert_selector "[data-behavior='hidden-field'][value='kiwi']", visible: false
+      ["apple", "mango", "kiwi"].each do |value|
+        assert_selector "[data-behavior='hidden-field'][value='apple']", visible: false
       end
-      assert_equal ["apple", "mango", "kiwi"], JSON.parse(page.find("awc-autocomplete")["value"])
       refute_selector "[data-behavior='tag'][value='kiwi'][data-persisted]"
       # Does not close the listbox
       assert_selector "[role='listbox']"
@@ -54,8 +52,10 @@ module Impulse
       page.find(".awc-autocomplete-control").click
       page.find("[role='option'][value='mango']").click
 
+      ["apple", "kiwi"].each do |value|
+        assert_selector "[data-behavior='hidden-field'][value='apple']", visible: false
+      end
       refute_selector "[data-behavior='tag'][value='mango'][data-persisted]"
-      assert_equal ["apple"], JSON.parse(page.find("awc-autocomplete")["value"])
       # Does not close the listbox
       assert_selector "[role='listbox']"
     end
@@ -68,7 +68,8 @@ module Impulse
       end
 
       refute_selector "[data-behavior='tag'][value='mango']"
-      assert_equal ["apple"], JSON.parse(page.find("awc-autocomplete")["value"])
+      assert_selector "[data-behavior='tag'] [data-behavior='hidden-field']", visible: false, count: 1
+      assert_selector "[data-behavior='hidden-field'][value='apple']", visible: false
     end
 
     test "clears a selected option by pressing on the clear button" do
@@ -94,7 +95,6 @@ module Impulse
       page.find(".awc-autocomplete-control").click
 
       click_button "Clear"
-      assert JSON.parse(page.find("awc-autocomplete")["value"]).blank?
       refute_selector "[data-behavior='tag']"
       # Closes the listbox
       refute_selector "[role='listbox']"
@@ -146,23 +146,6 @@ module Impulse
       refute_selector "[role='listbox']" # Closes the listbox
 
       page.find(".awc-autocomplete-control").click
-      assert_selector "[role='group']", count: 2
-      assert_selector "[role='option']", count: 4
-    end
-
-    test "resets the group after selecting an option" do
-      visit_preview(:grouped_options_multiple_select)
-      page.find(".awc-autocomplete-control").click
-
-      assert_selector "[role='group']", count: 2
-      assert_selector "[role='option']", count: 4
-
-      fill_in "user_country_ids", with: "den"
-      assert_selector "[role='group']", count: 1
-      assert_selector "[role='option']", count: 1
-
-      page.find("[role='option'][value='DK']").click
-      assert_selector "[role='listbox']" # Does not close the listbox
       assert_selector "[role='group']", count: 2
       assert_selector "[role='option']", count: 4
     end

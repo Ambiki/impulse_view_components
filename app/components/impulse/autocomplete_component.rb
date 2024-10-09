@@ -45,7 +45,6 @@ module Impulse
       @allow_method_names_outside_object = allow_method_names_outside_object
       @system_args = system_args
       @system_args[:tag] = :"awc-autocomplete"
-      @system_args[:value] = sanitized_value
       @system_args[:disabled] = disabled
 
       @system_args[:class] = class_names(
@@ -64,12 +63,6 @@ module Impulse
     end
 
     private
-
-    def sanitized_value
-      return if @selected.nil?
-      return @selected.map(&:value).to_s if multiple?
-      @selected.value
-    end
 
     def search_field_args
       {}.tap do |args|
