@@ -48,6 +48,11 @@ Sets the value of the element.
 autocomplete.setValue('apple', 'Apple');
 autocomplete.value;
 // => ['apple']
+
+// When the options are not loaded from the server, you do not have to pass the text argument.
+autocomplete.setValue('apple');
+autocomplete.value;
+// => ['apple']
 ```
 
 ### `removeValue`

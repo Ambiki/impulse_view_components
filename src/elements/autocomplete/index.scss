@@ -15,7 +15,7 @@
 
 // https://github.com/twbs/bootstrap/blob/v4.6.0/scss/mixins/_forms.scss#L13
 // Mimic input focus state.
-.awc-autocomplete[data-focus] .awc-autocomplete-control {
+.awc-autocomplete:focus-within .awc-autocomplete-control {
   color: var(--awc-autocomplete-control-focus-color);
   background-color: $input-focus-bg;
   border-color: var(--awc-autocomplete-control-focus-border-color);
@@ -111,11 +111,6 @@
   max-height: var(--awc-autocomplete-listbox-max-height);
   overflow: hidden auto;
   box-shadow: var(--shadow-md);
-
-  // Use native [hidden] attribute to show/hide listbox.
-  &.dropdown-menu {
-    display: block;
-  }
 }
 
 .awc-autocomplete-options {
@@ -304,6 +299,11 @@
 
 /** States **/
 
+// Open
+.awc-autocomplete[open] .awc-autocomplete-listbox {
+  display: block;
+}
+
 // Selected
 .awc-autocomplete--selected {
   &.awc-autocomplete--clearable .awc-autocomplete-adornment-decorator {
@@ -317,9 +317,15 @@
 }
 
 // Loading
-// Show loading spinner only when loading and options container is empty.
-.awc-autocomplete[loading] .awc-autocomplete-options:empty ~ .awc-autocomplete-spinner {
-  display: flex;
+.awc-autocomplete[loading] {
+  .awc-autocomplete-options,
+  .awc-autocomplete-blankslate {
+    display: none;
+  }
+
+  .awc-autocomplete-spinner {
+    display: flex;
+  }
 }
 
 // No options

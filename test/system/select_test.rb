@@ -30,16 +30,15 @@ module Impulse
       visit_preview(:form_with_single_select)
 
       assert_equal "Banana", page.find_field("impulse_select_component_preview_user_fruit_id").value
-      assert_selector "awc-autocomplete[value='2']"
+      assert_selector "[data-behavior='hidden-field'][value='2']", visible: false
 
       page.find(".awc-autocomplete-control").click
       page.find("[role='option'][value='3']").click
       assert_equal "Strawberry", page.find_field("impulse_select_component_preview_user_fruit_id").value
-      assert_selector "awc-autocomplete[value='3']"
+      assert_selector "[data-behavior='hidden-field'][value='3']", visible: false
 
       click_button "Reset"
       assert_equal "Banana", page.find_field("impulse_select_component_preview_user_fruit_id").value
-      assert_selector "awc-autocomplete[value='2']"
       assert_selector "[data-behavior='hidden-field'][value='2']", visible: false
     end
 

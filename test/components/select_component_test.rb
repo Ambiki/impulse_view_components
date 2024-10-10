@@ -107,7 +107,7 @@ module Impulse
       ]
       render_inline(Impulse::SelectComponent.new(:user, :fruit_id, grouped_options, selected: "Canada"))
 
-      assert_selector "awc-autocomplete[value='Canada']"
+      assert_selector "input[type='hidden'][value='Canada']", visible: false
       assert_selector "[data-behavior='hidden-field'][value='Canada']", visible: false
     end
 
