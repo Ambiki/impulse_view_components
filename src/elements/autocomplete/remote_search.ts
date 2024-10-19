@@ -4,6 +4,7 @@ import AwcAutocompleteElement from './index';
 export default class RemoteSearch {
   readonly autocomplete: AwcAutocompleteElement;
   private abortController?: AbortController;
+  private cachedOptions: string = '';
 
   constructor(autocomplete: AwcAutocompleteElement) {
     this.autocomplete = autocomplete;
@@ -17,7 +18,11 @@ export default class RemoteSearch {
   }
 
   start() {
-    this.search('');
+    if (this.cachedOptions) {
+      this.insertOptions(this.cachedOptions);
+    } else {
+      this.search('');
+    }
   }
 
   stop() {
@@ -44,14 +49,12 @@ export default class RemoteSearch {
       });
 
       if (response.ok) {
-        this.autocomplete.optionsContainer.innerHTML = await response.text();
-        this.autocomplete.checkIfListIsEmpty();
-        this.autocomplete.combobox.initializeOptions();
+        const options = await response.text();
+        if (value === '') {
+          this.cachedOptions = options;
+        }
+        await this.insertOptions(options);
         this.abortController = undefined;
-        // Start the select variant to select the option(s).
-        this.autocomplete.selectVariant.start();
-        // Update the floating UI position after the listbox content has been updated.
-        await this.autocomplete.reposition();
         this.emit('load');
       } else {
         throw new Error();
@@ -66,6 +69,16 @@ export default class RemoteSearch {
       this.autocomplete.removeAttribute('loading');
       this.emit('loadend');
     }
+  }
+
+  private async insertOptions(options: string) {
+    this.autocomplete.optionsContainer.innerHTML = options;
+    this.autocomplete.checkIfListIsEmpty();
+    this.autocomplete.combobox.initializeOptions();
+    // Start the select variant to select the option(s).
+    this.autocomplete.selectVariant.start();
+    // Update the floating UI position after the listbox content has been updated.
+    await this.autocomplete.reposition();
   }
 
   private emit(name: string) {
