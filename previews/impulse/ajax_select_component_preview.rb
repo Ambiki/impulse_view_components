@@ -19,7 +19,7 @@ module Impulse
     # @display max_width true
     # @param required toggle
     def form_with_single_select(required: false)
-      render_with_template(locals: {required: required})
+      render_with_template(locals: { required: required })
     end
 
     # @display center true
@@ -42,7 +42,7 @@ module Impulse
     # @display max_width true
     # @param required toggle
     def form_with_multiple_select(required: false)
-      render_with_template(locals: {required: required})
+      render_with_template(locals: { required: required })
     end
   end
 end

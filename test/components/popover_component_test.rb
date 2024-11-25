@@ -4,7 +4,7 @@ module Impulse
   class PopoverComponentTest < ApplicationTest
     test "renders the component" do
       render_inline(Impulse::PopoverComponent.new) do |c|
-        c.with_trigger(data: {test_id: "btn"}) { "Toggle popover" }
+        c.with_trigger(data: { test_id: "btn" }) { "Toggle popover" }
         c.with_body { "Popover body" }
       end
 
@@ -32,7 +32,7 @@ module Impulse
 
     test "renders the title and the close button" do
       render_inline(Impulse::PopoverComponent.new(title: "Activity feed")) do |c|
-        c.with_trigger(data: {test_id: "btn"}) { "Toggle popover" }
+        c.with_trigger(data: { test_id: "btn" }) { "Toggle popover" }
         c.with_body { "Popover body" }
       end
 
@@ -42,7 +42,7 @@ module Impulse
 
     test "renders a custom header" do
       render_inline(Impulse::PopoverComponent.new(title: "Activity feed")) do |c|
-        c.with_trigger(data: {test_id: "btn"}) { "Toggle popover" }
+        c.with_trigger(data: { test_id: "btn" }) { "Toggle popover" }
         c.with_header { "Delete feed?" }
       end
 

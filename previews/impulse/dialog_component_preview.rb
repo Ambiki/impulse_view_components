@@ -7,7 +7,7 @@ module Impulse
     # @param open toggle
     # @param hide_on_outside_click toggle
     def default(fullscreen: "none", size: "md", center: true, open: false, hide_on_outside_click: true)
-      render_with_template(locals: {fullscreen:, size:, center:, open:, hide_on_outside_click:})
+      render_with_template(locals: { fullscreen:, size:, center:, open:, hide_on_outside_click: })
     end
 
     # @display center true

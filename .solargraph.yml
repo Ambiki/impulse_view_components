@@ -1,5 +1,0 @@
-plugins:
-  - solargraph-standardrb
-
-reporters:
-  - standardrb

@@ -36,14 +36,14 @@ module Impulse
     # @display max_width true
     # @param required toggle
     def form_with_single_select(required: false)
-      render_with_template(locals: {required: required})
+      render_with_template(locals: { required: required })
     end
 
     # @display center true
     # @display max_width true
     # @param required toggle
     def form_with_single_select_block_options(required: false)
-      render_with_template(locals: {required: required})
+      render_with_template(locals: { required: required })
     end
 
     # @display center true
@@ -72,7 +72,7 @@ module Impulse
     # @display max_width true
     # @param required toggle
     def form_with_multiple_select(required: false)
-      render_with_template(locals: {required: required})
+      render_with_template(locals: { required: required })
     end
 
     # @display center true
@@ -83,7 +83,7 @@ module Impulse
         Impulse::SelectComponent.new(
           :user,
           :fruit_id,
-          [["Apple", "apple", {description: "An apple a day keeps the doctor away."}], ["Banana", "banana", {description: "Rich in carbohydrates."}], ["Guava", "guava", {description: "Grows best in tropical or subtropical climates."}]],
+          [["Apple", "apple", { description: "An apple a day keeps the doctor away." }], ["Banana", "banana", { description: "Rich in carbohydrates." }], ["Guava", "guava", { description: "Grows best in tropical or subtropical climates." }]],
           multiple:
         )
       )
@@ -103,7 +103,7 @@ module Impulse
     # @display max_width true
     def grouped_options_single_select
       grouped_options = [
-        ["North America", [["United States", "US"], ["Canada", "CN", {disabled: true}]]],
+        ["North America", [["United States", "US"], ["Canada", "CN", { disabled: true }]]],
         ["Europe", ["Denmark", "Germany"]]
       ]
       render(Impulse::SelectComponent.new(:user, :fruit_id, grouped_options, selected: "US"))
@@ -113,7 +113,7 @@ module Impulse
     # @display max_width true
     def grouped_options_multiple_select
       grouped_options = [
-        ["North America", [["United States", "US"], ["Canada", "CN", {disabled: true}]]],
+        ["North America", [["United States", "US"], ["Canada", "CN", { disabled: true }]]],
         ["Europe", ["Denmark", "Germany"]]
       ]
       render(Impulse::SelectComponent.new(:user, :fruit_id, grouped_options, selected: ["US"], multiple: true))

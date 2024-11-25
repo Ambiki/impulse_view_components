@@ -28,8 +28,8 @@ jobs:
           bundler: default
           bundler-cache: true
           rubygems: latest
-      - name: Run standardrb
-        run: bundle exec standardrb
+      - name: Run rubocop
+        run: ./bin/rubocop
 
   test_system:
     needs:

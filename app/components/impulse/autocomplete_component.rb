@@ -3,8 +3,8 @@ module Impulse
     renders_one :blankslate
     renders_one :error
     renders_many :options, types: {
-      option: {renders: Impulse::Autocomplete::OptionComponent, as: :option},
-      group: {renders: Impulse::Autocomplete::GroupComponent, as: :group}
+      option: { renders: Impulse::Autocomplete::OptionComponent, as: :option },
+      group: { renders: Impulse::Autocomplete::GroupComponent, as: :group }
     }
 
     DEFAULT_SIZE = :md

@@ -22,8 +22,7 @@ group :development, :test do
 end
 
 group :development do
-  gem "solargraph-standardrb"
-  gem "standard", "~> 1.3"
+  gem "rubocop-rails-omakase", require: false
 end
 
 group :test do

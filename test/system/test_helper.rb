@@ -18,7 +18,7 @@ class ApplicationSystemTest < ActionDispatch::SystemTestCase
   def visit_preview(preview_name, **params)
     component_name = self.class.name.gsub("SystemTest", "")
     component_uri = component_name.underscore
-    url = +"/components/preview/#{component_uri}/#{preview_name}"
+    url = "/components/preview/#{component_uri}/#{preview_name}"
     query_string = params.map { |k, v| "#{k}=#{CGI.escape(v.to_s)}" }.join("&")
     url << "?#{query_string}" if query_string.present?
     visit(url)
