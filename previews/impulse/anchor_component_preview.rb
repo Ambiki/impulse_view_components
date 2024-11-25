@@ -5,7 +5,7 @@ module Impulse
     # @param distance number
     # @param skidding number
     def default(placement: "bottom", distance: 8, skidding: 0)
-      render_with_template(locals: {placement:, distance:, skidding:})
+      render_with_template(locals: { placement:, distance:, skidding: })
     end
   end
 end

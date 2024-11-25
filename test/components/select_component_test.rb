@@ -18,7 +18,7 @@ module Impulse
     end
 
     test "renders options from a pair of choices" do
-      render_inline(Impulse::SelectComponent.new(:user, :fruit_id, [["Apple", "apple"], ["Banana", "banana", {disabled: true, class: "custom-class"}]]))
+      render_inline(Impulse::SelectComponent.new(:user, :fruit_id, [["Apple", "apple"], ["Banana", "banana", { disabled: true, class: "custom-class" }]]))
 
       assert_selector "[role='option'][value='apple']", visible: false
       assert_selector "[role='option'][data-text='Apple']", visible: false
@@ -26,14 +26,14 @@ module Impulse
     end
 
     test "renders options from a hash" do
-      render_inline(Impulse::SelectComponent.new(:user, :fruit_id, {Basic: "$20", Plus: "$40"}))
+      render_inline(Impulse::SelectComponent.new(:user, :fruit_id, { Basic: "$20", Plus: "$40" }))
 
       assert_selector "[role='option'][value='$20'][data-text='Basic']", visible: false
       assert_selector "[role='option'][value='$40'][data-text='Plus']", visible: false
     end
 
     test "renders option with a description" do
-      render_inline(Impulse::SelectComponent.new(:user, :fruit_id, [["Apple", "apple", {description: "An apple a day keeps the doctor away."}]]))
+      render_inline(Impulse::SelectComponent.new(:user, :fruit_id, [["Apple", "apple", { description: "An apple a day keeps the doctor away." }]]))
 
       assert_selector "[role='option'][value='apple']", visible: false do
         assert_selector "span", text: "An apple a day keeps the doctor away.", visible: false
@@ -42,7 +42,7 @@ module Impulse
 
     test "renders options from a block" do
       render_inline(Impulse::SelectComponent.new(:user, :fruit_id)) do |c|
-        c.with_option(value: "apple", text: "Apple", data: {foo: "bar"})
+        c.with_option(value: "apple", text: "Apple", data: { foo: "bar" })
       end
 
       assert_selector "[role='option'][value='apple']", visible: false
@@ -112,14 +112,14 @@ module Impulse
     end
 
     test "HTML attributes can be passed to one of the option within the group" do
-      grouped_options = [["North America", [["United States", "US", {disabled: true}], "Canada"]]]
+      grouped_options = [["North America", [["United States", "US", { disabled: true }], "Canada"]]]
       render_inline(Impulse::SelectComponent.new(:user, :fruit_id, grouped_options))
 
       assert_selector "[role='option'][value='US'][disabled]", visible: false
     end
 
     test "renders a group of options with a description" do
-      grouped_options = [["North America", [["United States", "US", {description: "Country"}]]]]
+      grouped_options = [["North America", [["United States", "US", { description: "Country" }]]]]
       render_inline(Impulse::SelectComponent.new(:user, :fruit_id, grouped_options))
 
       assert_selector "[role='option'][value='US']", visible: false do

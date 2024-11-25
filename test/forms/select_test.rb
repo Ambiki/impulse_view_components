@@ -17,7 +17,7 @@ module Impulse
       render_in_view_context do
         impulse_form_with(model: User.new, url: "/users") do |f|
           f.select :fruit_id do |c|
-            c.with_option(value: "apple", text: "Apple", data: {foo: "bar"})
+            c.with_option(value: "apple", text: "Apple", data: { foo: "bar" })
           end
         end
       end
