@@ -19,7 +19,7 @@ export default class RemoteSearch {
 
   start() {
     if (this.cachedOptions) {
-      this.insertOptions(this.cachedOptions);
+      this.insertOptions(this.cachedOptions, { cached: true });
     } else {
       this.search('');
     }
@@ -71,10 +71,12 @@ export default class RemoteSearch {
     }
   }
 
-  private async insertOptions(options: string) {
+  private async insertOptions(options: string, { cached = false } = {}) {
     this.autocomplete.optionsContainer.innerHTML = options;
     this.autocomplete.checkIfListIsEmpty();
-    this.autocomplete.combobox.initializeOptions();
+    if (!cached) {
+      this.autocomplete.combobox.initializeOptions();
+    }
     // Start the select variant to select the option(s).
     this.autocomplete.selectVariant.start();
     // Update the floating UI position after the listbox content has been updated.
