@@ -150,6 +150,7 @@ export default class AwcPopoverElement extends ImpulseElement {
   }
 
   get open(): boolean {
+    if (!this.panel) return false;
     try {
       return this.panel.matches(':popover-open');
     } catch {
