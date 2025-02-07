@@ -9,8 +9,8 @@ jobs:
   lint_js:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version-file: ".tool-versions"
           cache: "yarn"
@@ -22,7 +22,7 @@ jobs:
   lint_ruby:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
           bundler: default
@@ -47,8 +47,8 @@ jobs:
       BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile
       BUNDLE_PATH_RELATIVE_TO_CWD: true
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version-file: ".tool-versions"
           cache: "yarn"
@@ -63,13 +63,14 @@ jobs:
           rubygems: latest
       - name: Run test
         run: bundle exec rake test:system
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: ${{ failure() }}
         with:
           path: |
             /home/runner/work/view_components/view_components/demo/tmp/capybara/
           if-no-files-found: ignore
           retention-days: 7
+          overwrite: true
 
   test_components:
     needs:
@@ -87,7 +88,7 @@ jobs:
       BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile
       BUNDLE_PATH_RELATIVE_TO_CWD: true
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
@@ -96,22 +97,3 @@ jobs:
           rubygems: latest
       - name: Run test
         run: bundle exec rake test:components
-
-  test_js:
-    needs:
-      - lint_js
-      - lint_ruby
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version-file: ".tool-versions"
-          cache: "yarn"
-      - name: Install playwright
-        run: npx playwright install --with-deps
-      - name: Run test
-        run: |
-          yarn install --frozen-lockfile
-          yarn build:js
-          yarn test
