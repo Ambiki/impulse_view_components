@@ -6,14 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.6.0] - 2025-02-07
+
 ### Added
 
-- Cache autocomplete options if they are fetched remotely
+- Cache autocomplete options if they are fetched remotely ([#123](https://github.com/Ambiki/impulse_view_components/pull/123))
 
 ### Fixed
 
-- Return early if panel is not present in `PopoverComponent`
-- Fixes an issue where popover was breaking Chrome 133
+- Return early if panel is not present in `PopoverComponent` ([#134](https://github.com/Ambiki/impulse_view_components/pull/134))
+- Fixes an issue where popover was breaking Chrome 133 ([#131](https://github.com/Ambiki/impulse_view_components/pull/131))
 
 ## [0.5.1] - 2024-05-14
 
@@ -145,7 +147,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Everything!
 
-[unreleased]: https://github.com/Ambiki/impulse_view_components/compare/v0.5.1...HEAD
+[unreleased]: https://github.com/Ambiki/impulse_view_components/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/Ambiki/impulse_view_components/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/Ambiki/impulse_view_components/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/Ambiki/impulse_view_components/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/Ambiki/impulse_view_components/compare/v0.3.1...v0.4.0
