@@ -5,11 +5,10 @@ module Impulse
     test "opens the popover by clicking on the trigger button" do
       visit_preview(:default)
 
-      refute_selector "[role='dialog']"
+      refute_selector "[popover]"
       click_on "Toggle popover"
 
-      assert_selector "[role='dialog']"
-      assert_selector "[data-focus-trap-id]"
+      assert_selector "[popover]"
     end
 
     test "focuses on the close button after opening the popover" do
@@ -24,30 +23,30 @@ module Impulse
       visit_preview(:default)
 
       click_on "Toggle popover"
-      assert_selector "[role='dialog']"
+      assert_selector "[popover]"
 
       click_on "Toggle popover"
-      refute_selector "[role='dialog']"
+      refute_selector "[popover]"
     end
 
     test "closes the popover by clicking on the close button" do
       visit_preview(:default)
 
       click_on "Toggle popover"
-      assert_selector "[role='dialog']"
+      assert_selector "[popover]"
 
       click_button class: "close"
-      refute_selector "[role='dialog']"
+      refute_selector "[popover]"
     end
 
     test "closes the popover by clicking outside" do
       visit_preview(:default)
 
       click_on "Toggle popover"
-      assert_selector "[role='dialog']"
+      assert_selector "[popover]"
 
       page.find("body").click
-      refute_selector "[role='dialog']"
+      refute_selector "[popover]"
     end
 
     test "opens a nested popover" do

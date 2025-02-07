@@ -24,7 +24,6 @@ module Impulse
 
       assert_selector ".awc-popover-container[id='#{id}']"
       assert_selector ".awc-popover-container[tabindex='-1']"
-      assert_selector ".awc-popover-container[role='dialog']"
       assert_selector ".awc-popover-container[popover='manual']"
       # Arrow
       assert_selector ".arrow"
