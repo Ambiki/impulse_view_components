@@ -1,6 +1,5 @@
 import Combobox from '@ambiki/combobox';
 import { ImpulseElement, property, registerElement, target, targets } from '@ambiki/impulse';
-import { domReady } from 'src/helpers/dom';
 import { isLooselyFocusable } from 'src/helpers/focus';
 import useFloatingUI, { UseFloatingUIType } from 'src/hooks/use_floating_ui';
 import useOutsideClick from 'src/hooks/use_outside_click';
@@ -66,8 +65,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
    * @private
    * Called when the element is connected to the DOM.
    */
-  async connected() {
-    await domReady(); // Fix in IVC.
+  connected() {
     this.form?.addEventListener('reset', this.handleFormReset);
 
     this.floatingUI = useFloatingUI(this, {
