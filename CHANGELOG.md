@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Cache autocomplete options if they are fetched remotely
 
+### Fixed
+
+- Fixes an issue where popover was breaking Chrome 133
+
 ## [0.5.1] - 2024-05-14
 
 ### Fixed
