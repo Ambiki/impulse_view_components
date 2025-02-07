@@ -69,19 +69,19 @@ Wrap your `time_zone_select` tag with the `impulse_form_with` method. The `f.tim
 
 ```erb
 <%= impulse_form_with model: @user do |f| %>
-  <%= f.select :time_zone %>
+  <%= f.time_zone_select :time_zone %>
 <% end %>
 
 <%= impulse_form_with model: @user do |f| %>
-  <%= f.select :time_zone, ActiveSupport::TimeZone.us_zones %>
+  <%= f.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones %>
 <% end %>
 
 <%= impulse_form_with model: @user do |f| %>
-  <%= f.select :time_zone, nil, default: "Hawaii" %>
+  <%= f.time_zone_select :time_zone, nil, default: "Hawaii" %>
 <% end %>
 
 <%= impulse_form_with model: @user do |f| %>
-  <%= f.select :time_zone do |c| %>
+  <%= f.time_zone_select :time_zone do |c| %>
     <% c.with_blankslate { "Time zone not found!" } %>
   <% end %>
 <% end %>
