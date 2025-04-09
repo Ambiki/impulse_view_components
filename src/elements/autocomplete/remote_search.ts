@@ -56,16 +56,20 @@ export default class RemoteSearch {
         await this.insertOptions(options);
         this.abortController = undefined;
         this.emit('load');
+
+        this.autocomplete.removeAttribute('loading');
+        this.emit('loadend');
       } else {
-        throw new Error();
+        throw new Error(await response.text());
       }
     } catch (error) {
-      if (error instanceof Error && error.name !== 'AbortError') {
-        this.abortController = undefined;
-        this.autocomplete.setAttribute('error', '');
-        this.emit('error');
+      if (error instanceof Error && error.name === 'AbortError') {
+        return;
       }
-    } finally {
+
+      this.abortController = undefined;
+      this.autocomplete.setAttribute('error', '');
+      this.emit('error');
       this.autocomplete.removeAttribute('loading');
       this.emit('loadend');
     }
