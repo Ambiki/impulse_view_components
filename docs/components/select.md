@@ -41,7 +41,7 @@ Instead of passing an array of choices to the component, you can also render the
 more flexibility and you can pass any HTML attributes to it.
 
 ```erb{2-4}
-<%= render(Impulse::SelectComponent.new(:post, :person_id) do |c| %>
+<%= render(Impulse::SelectComponent.new(:post, :person_id)) do |c| %>
   <% Person.all.each do |person| %>
     <% c.with_option(value: person.id, text: person.display_name, disabled: person.on_vacation?) %>
   <% end %>
@@ -101,7 +101,7 @@ You can optionally add an inline description or pass the description attribute t
 ) %>
 
 <%# Block %>
-<%= render(Impulse::SelectComponent.new(:user, :country_id) do |c| %>
+<%= render(Impulse::SelectComponent.new(:user, :country_id)) do |c| %>
   <% Country.all.each do |country| %>
     <% c.with_option(
       value: country.id,
