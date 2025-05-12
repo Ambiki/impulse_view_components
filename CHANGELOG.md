@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Return early if popup element is not defined in `useFloatingUI`
 - Remote autocomplete should not remove the `loading` attribute on `AbortError`
 
 ## [0.6.0] - 2025-02-07

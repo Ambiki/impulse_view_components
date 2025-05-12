@@ -18,7 +18,7 @@ export type UseFloatingUIType = {
 
 type Options = {
   referenceElement: ReferenceElement;
-  popupElement: HTMLElement;
+  popupElement?: HTMLElement;
   arrowElement?: HTMLElement | null;
   arrowPadding?: number;
   middleware?: Middleware[];
@@ -49,7 +49,7 @@ export default function useFloatingUI(
   let cleanup: ReturnType<typeof autoUpdate> | undefined;
 
   async function reposition(isOpen = false): Promise<void> {
-    if (!isOpen || !referenceElement) return;
+    if (!isOpen || !referenceElement || !popupElement) return;
 
     // Middlewares are order dependent: https://floating-ui.com/docs/middleware
     const _middleware: Middleware[] = [offset(offsetOptions)];
@@ -115,6 +115,7 @@ export default function useFloatingUI(
 
   // Set the initial top and left position to minimize flickering when the popup is toggled on/off.
   function forceStart(): void {
+    if (!popupElement) return;
     // Fix floatingUI
     popupElement.style.position = strategy;
     popupElement.style.top = '0px';
@@ -126,7 +127,7 @@ export default function useFloatingUI(
   }
 
   function start(): void {
-    if (!referenceElement) return;
+    if (!referenceElement || !popupElement) return;
     cleanup = autoUpdate(referenceElement, popupElement, () => reposition(element.open));
   }
 
