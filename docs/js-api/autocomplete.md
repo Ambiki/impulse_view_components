@@ -152,17 +152,17 @@ autocomplete.form;
 
 ## Events
 
-| Name                      | Bubbles   | Description                                                                                                                                                                        |
-| ------                    | --------- | ------------                                                                                                                                                                       |
-| `awc-autocomplete:show`   | `true`    | This event fires immediately when the `open` attribute is added.                                                                                                                   |
-| `awc-autocomplete:shown`  | `true`    | This event fires when the listbox has been made visible to the user.                                                                                                               |
-| `awc-autocomplete:hide`   | `true`    | This event fires immediately when the `open` attribute is removed.                                                                                                                 |
-| `awc-autocomplete:hidden` | `true`    | This event fires when the listbox has been completely hidden from the user.                                                                                                        |
-| `awc-autocomplete:commit` | `true`    | This event fires when an option has been selected/deselected by clicking on the option element. The committed option is available by accessing the `event.detail.target` property. |
-| `awc-autocomplete:clear`  | `true`    | This event fires when all the selected options have been deselected by clicking on the "Clear" button.                                                                             |
-| `awc-autocomplete:remove` | `true`    | This event fires when a tag has been removed. The removed tag is available by accessing the `event.detail.target` property.                                                        |
-| `awc-autocomplete:reset`  | `true`    | This event fires when the parent form has been reset.                                                                                                                              |
-| `loadstart`               | `false`   | This event fires when the autocomplete starts the network request.                                                                                                                 |
-| `load`                    | `false`   | This event fires when the autocomplete fetches the options successfully from the server.                                                                                           |
-| `error`                   | `false`   | This event fires when the autocomplete fails to fetch the options from the server.                                                                                                 |
-| `loadend`                 | `false`   | This event fires when the autocomplete finishes the network request.                                                                                                               |
+| Name                      | Bubbles   | Description                                                                                                                                                                            |
+| ------                    | --------- | ------------                                                                                                                                                                           |
+| `awc-autocomplete:show`   | `true`    | This event fires immediately when the `open` attribute is added.                                                                                                                       |
+| `awc-autocomplete:shown`  | `true`    | This event fires when the listbox has been made visible to the user.                                                                                                                   |
+| `awc-autocomplete:hide`   | `true`    | This event fires immediately when the `open` attribute is removed.                                                                                                                     |
+| `awc-autocomplete:hidden` | `true`    | This event fires when the listbox has been completely hidden from the user.                                                                                                            |
+| `awc-autocomplete:commit` | `true`    | This event fires when an option is selected or deselected by clicking the option element. You can access the committed option, its value, and its text from the `event.detail` object. |
+| `awc-autocomplete:clear`  | `true`    | This event fires when all the selected options have been deselected by clicking on the "Clear" button.                                                                                 |
+| `awc-autocomplete:remove` | `true`    | This event fires when a tag has been removed. The removed tag is available by accessing the `event.detail.target` property.                                                            |
+| `awc-autocomplete:reset`  | `true`    | This event fires when the parent form has been reset.                                                                                                                                  |
+| `loadstart`               | `false`   | This event fires when the autocomplete starts the network request.                                                                                                                     |
+| `load`                    | `false`   | This event fires when the autocomplete fetches the options successfully from the server.                                                                                               |
+| `error`                   | `false`   | This event fires when the autocomplete fails to fetch the options from the server.                                                                                                     |
+| `loadend`                 | `false`   | This event fires when the autocomplete finishes the network request.                                                                                                                   |
