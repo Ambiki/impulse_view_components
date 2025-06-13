@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Clear autocomplete cache when `src` changes
 - Return early if popup element is not defined in `useFloatingUI`
 - Remote autocomplete should not remove the `loading` attribute on `AbortError`
 

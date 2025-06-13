@@ -144,6 +144,16 @@ export default class AwcAutocompleteElement extends ImpulseElement {
 
   /**
    * @private
+   * Called when the `src` attribute changes.
+   */
+  srcChanged(src: string) {
+    // Clear the selected value without emitting any events to avoid invalid combinations.
+    this.clear();
+    this.searchVariant = src ? new RemoteSearch(this) : new LocalSearch(this);
+  }
+
+  /**
+   * @private
    */
   handleMousedown(event: Event) {
     // Fix focus jitter issue when clicking outside the input element.
