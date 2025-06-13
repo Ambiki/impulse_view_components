@@ -8,6 +8,12 @@ import MultipleSelect from './multiple_select';
 import RemoteSearch from './remote_search';
 import SingleSelect from './single_select';
 
+export interface AwcAutocompleteCommitEvent {
+  target: HTMLElement;
+  text: string;
+  value: string;
+}
+
 @registerElement('awc-autocomplete')
 export default class AwcAutocompleteElement extends ImpulseElement {
   /**
@@ -232,8 +238,11 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     event.stopPropagation();
     const option = event.target;
     if (!(option instanceof HTMLElement)) return;
+
     this.selectVariant.select(option);
-    this.emit('commit', { detail: { target: option } });
+    const value = option.getAttribute('value') ?? '';
+    const { text } = option.dataset;
+    this.emit<AwcAutocompleteCommitEvent>('commit', { detail: { target: option, value, text: text || '' } });
   }
 
   /**
@@ -462,5 +471,8 @@ declare global {
   }
   interface HTMLElementTagNameMap {
     'awc-autocomplete': AwcAutocompleteElement;
+  }
+  interface GlobalEventHandlersEventMap {
+    'awc-autocomplete:commit': CustomEvent<AwcAutocompleteCommitEvent>;
   }
 }
