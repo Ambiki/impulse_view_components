@@ -3,7 +3,7 @@
     <% if multiple? %>
       <%= hidden_field @object_name, @method_name, id: nil, multiple: true, value: nil, data: { behavior: "hidden-field" }, **hidden_field_args if @include_hidden %>
       <% @selected&.each do |selected| %>
-        <div class="awc-autocomplete-tag" value="<%= selected.value %>" data-behavior="tag" data-persisted>
+        <div class="awc-autocomplete-tag" value="<%= selected.value %>" data-text="<%= selected.text %>" data-behavior="tag" data-persisted>
           <span class="awc-autocomplete-tag-text" data-behavior="text"><%= selected.text %></span>
           <span class="awc-autocomplete-tag-end-adornment">
             <%= content_tag :button, type: :button, class: "awc-autocomplete-tag-dismiss-btn btn", tabindex: "-1", title: "Remove", disabled: @disabled, data: { action: "click->awc-autocomplete#handleTagRemove", target: "awc-autocomplete.tagDismissButtons" } do %>

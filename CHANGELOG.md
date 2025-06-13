@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Add `value` and `text` property to the autocomplete `remove` event
 - Add `value` and `text` property to the autocomplete `commit` event
 
 ### Fixed

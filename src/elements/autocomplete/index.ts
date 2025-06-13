@@ -8,11 +8,14 @@ import MultipleSelect from './multiple_select';
 import RemoteSearch from './remote_search';
 import SingleSelect from './single_select';
 
-export interface AwcAutocompleteCommitEvent {
+interface BaseOptionEvent {
   target: HTMLElement;
   text: string;
   value: string;
 }
+
+export interface AwcAutocompleteCommitEvent extends BaseOptionEvent {}
+export interface AwcAutocompleteRemoveEvent extends BaseOptionEvent {}
 
 @registerElement('awc-autocomplete')
 export default class AwcAutocompleteElement extends ImpulseElement {
@@ -223,7 +226,9 @@ export default class AwcAutocompleteElement extends ImpulseElement {
           const tag = this.removeLastTag();
           if (tag) {
             event.preventDefault();
-            this.emit('remove', { detail: { target: tag } });
+            const value = tag.getAttribute('value') ?? '';
+            const { text } = tag.dataset;
+            this.emit<AwcAutocompleteRemoveEvent>('remove', { detail: { target: tag, value, text: text || '' } });
           }
         }
         break;
@@ -270,8 +275,11 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   handleTagRemove(event: Event) {
     const tag = (event.target as HTMLElement).closest<HTMLElement>('[data-behavior="tag"]');
     if (!tag) return;
+
     this.removeTag(tag);
-    this.emit('remove', { detail: { target: tag } });
+    const value = tag.getAttribute('value') ?? '';
+    const { text } = tag.dataset;
+    this.emit<AwcAutocompleteRemoveEvent>('remove', { detail: { target: tag, value, text: text || '' } });
   }
 
   /**
@@ -474,5 +482,6 @@ declare global {
   }
   interface GlobalEventHandlersEventMap {
     'awc-autocomplete:commit': CustomEvent<AwcAutocompleteCommitEvent>;
+    'awc-autocomplete:remove': CustomEvent<AwcAutocompleteRemoveEvent>;
   }
 }

@@ -36,7 +36,7 @@ module Impulse
 
       assert_selector "awc-autocomplete.awc-autocomplete--selected"
       assert_selector "[data-behavior='hidden-field'][name='user[fruit_ids][]']", visible: false
-      assert_selector "[data-behavior='tag'][data-persisted][value='apple']", count: 1 do
+      assert_selector "[data-behavior='tag'][data-persisted][value='apple'][data-text='Apple']", count: 1 do
         assert_selector "[data-behavior='text']", text: "Apple"
         assert_selector "[data-behavior='hidden-field'][name='user[fruit_ids][]'][value='apple']", visible: false
       end
