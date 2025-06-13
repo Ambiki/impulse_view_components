@@ -38,7 +38,8 @@ module Impulse
       page.find("[role='option'][value='kiwi']").click
 
       ["apple", "mango", "kiwi"].each do |value|
-        assert_selector "[data-behavior='hidden-field'][value='apple']", visible: false
+        assert_selector "[data-behavior='tag'][value='#{value}'][data-text='#{value.capitalize}']"
+        assert_selector "[data-behavior='hidden-field'][value='#{value}']", visible: false
       end
       refute_selector "[data-behavior='tag'][value='kiwi'][data-persisted]"
       # Does not close the listbox

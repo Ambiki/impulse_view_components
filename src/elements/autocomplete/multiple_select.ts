@@ -107,6 +107,7 @@ export default class MultipleSelect {
     const tagText = templateClone.querySelector<HTMLElement>('[data-behavior="text"]')!;
     const tagHiddenField = templateClone.querySelector<HTMLInputElement>('[data-behavior="hidden-field"]')!;
     tagField.setAttribute('value', value);
+    tagField.setAttribute('data-text', text);
     tagText.innerText = text;
     tagHiddenField.value = value;
     tagHiddenField.setAttribute('data-text', text);
