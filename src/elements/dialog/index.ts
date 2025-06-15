@@ -94,14 +94,11 @@ export default class AwcDialogElement extends ImpulseElement {
   }
 
   private hideOverflow() {
-    this._scrollLockController = scrollLock();
+    this._scrollLockController = scrollLock(this);
   }
 
   private showOverflow() {
-    // If the parent dialog is still open, do not remove the styles.
-    if (!this.closest('dialog[open]')) {
-      this._scrollLockController?.abort();
-    }
+    this._scrollLockController?.abort();
   }
 
   private get nestedDialog() {
