@@ -1,7 +1,11 @@
+const locks = new Set<Element>();
+
 /**
  * Hides the scroll bar by setting `overflow: hidden` on the `body` element.
  */
-export default function scrollLock({ abortSignal }: { abortSignal?: AbortSignal } = {}) {
+export default function scrollLock(element: Element, { abortSignal }: { abortSignal?: AbortSignal } = {}) {
+  locks.add(element);
+
   const controller = new AbortController();
   const signal = abortSignal || controller.signal;
   const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
@@ -24,6 +28,11 @@ export default function scrollLock({ abortSignal }: { abortSignal?: AbortSignal 
   }
 
   signal.addEventListener('abort', () => {
+    locks.delete(element);
+    if (locks.size !== 0) {
+      return;
+    }
+    // Remove the scroll lock styles if there are no locks.
     if (prevPaddingRight !== undefined) {
       document.body.style.paddingRight = prevPaddingRight;
       prevPaddingRight = undefined;
