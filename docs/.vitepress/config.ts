@@ -96,4 +96,7 @@ export default defineConfig({
     },
     socialLinks: [{ icon: 'github', link: 'https://github.com/Ambiki/impulse_view_components' }],
   },
+  sitemap: {
+    hostname: 'https://ambiki.github.io/impulse_view_components/',
+  },
 });
