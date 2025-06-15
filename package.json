@@ -87,7 +87,7 @@
     "rollup-plugin-uglify": "^6.0.4",
     "sass": "^1.77.8",
     "typescript": "^5.1.6",
-    "vitepress": "^1.0.0-beta.7"
+    "vitepress": "^1.6.3"
   },
   "license": "MIT"
 }
