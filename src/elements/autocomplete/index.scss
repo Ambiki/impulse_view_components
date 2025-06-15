@@ -108,7 +108,10 @@
 
 .awc-autocomplete-listbox {
   font-size: var(--awc-autocomplete-listbox-font-size);
-  max-height: var(--awc-autocomplete-listbox-max-height);
+  max-height: min(
+    var(--awc-autocomplete-listbox-max-height),
+    var(--awc-auto-size-height, var(--awc-autocomplete-listbox-max-height))
+  );
   overflow: hidden auto;
   box-shadow: var(--shadow-md);
 }
