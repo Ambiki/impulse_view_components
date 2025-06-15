@@ -50,6 +50,18 @@ export default class AwcAutocompleteElement extends ImpulseElement {
    */
   @property() param = 'q';
 
+  /**
+   * If `true`, the listbox will automatically adjust its height based on its content.
+   * This helps avoid scrollbars by fitting the content dynamically.
+   */
+  @property({ type: Boolean }) autoSize = true;
+
+  /**
+   * The number of pixels of extra space to add beyond the content's height
+   * when `autoSize` is enabled. Acts as vertical padding.
+   */
+  @property({ type: Number }) autoSizePadding = 4;
+
   @target() control: HTMLElement;
   @target() input: HTMLInputElement;
   @target() listbox: HTMLElement;
@@ -83,6 +95,8 @@ export default class AwcAutocompleteElement extends ImpulseElement {
       placement: 'bottom',
       sync: 'width',
       offsetOptions: 4,
+      autoSize: this.autoSize ? 'height' : undefined,
+      autoSizePadding: this.autoSizePadding,
     });
 
     useOutsideClick(this, {

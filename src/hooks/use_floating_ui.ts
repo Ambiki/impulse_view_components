@@ -28,6 +28,8 @@ type Options = {
   shiftOptions?: ShiftOptions;
   strategy?: Strategy;
   sync?: 'height' | 'width' | 'both';
+  autoSize?: 'height' | 'width' | 'both';
+  autoSizePadding?: number;
 };
 
 export default function useFloatingUI(
@@ -44,6 +46,8 @@ export default function useFloatingUI(
     shiftOptions,
     strategy = 'fixed',
     sync,
+    autoSize,
+    autoSizePadding = 0,
   }: Options
 ): UseFloatingUIType {
   let cleanup: ReturnType<typeof autoUpdate> | undefined;
@@ -72,6 +76,30 @@ export default function useFloatingUI(
 
     _middleware.push(flip(flipOptions));
     _middleware.push(shift(shiftOptions));
+
+    if (autoSize) {
+      _middleware.push(
+        size({
+          padding: autoSizePadding,
+          apply: ({ availableWidth, availableHeight }) => {
+            if (autoSize === 'height' || autoSize === 'both') {
+              popupElement.style.setProperty('--awc-auto-size-height', `${availableHeight}px`);
+            } else {
+              popupElement.style.removeProperty('--awc-auto-size-height');
+            }
+
+            if (autoSize === 'width' || autoSize === 'both') {
+              popupElement.style.setProperty('--awc-auto-size-width', `${availableWidth}px`);
+            } else {
+              popupElement.style.removeProperty('--awc-auto-size-width');
+            }
+          },
+        })
+      );
+    } else {
+      popupElement.style.removeProperty('--awc-auto-size-height');
+      popupElement.style.removeProperty('--awc-auto-size-width');
+    }
 
     if (arrowElement) {
       _middleware.push(
