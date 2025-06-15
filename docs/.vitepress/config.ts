@@ -78,6 +78,10 @@ export default defineConfig({
             link: '/hooks/introduction',
           },
           {
+            text: 'useFloatingUI',
+            link: '/hooks/use-floating-ui',
+          },
+          {
             text: 'useOutsideClick',
             link: '/hooks/use-outside-click',
           },
