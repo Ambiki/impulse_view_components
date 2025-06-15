@@ -91,6 +91,9 @@ export default defineConfig({
         ],
       },
     ],
+    editLink: {
+      pattern: 'https://github.com/Ambiki/impulse_view_components/edit/main/docs/:path',
+    },
     footer: {
       message: 'Released under the MIT License.',
     },
