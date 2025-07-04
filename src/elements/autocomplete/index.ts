@@ -54,7 +54,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
    * If `true`, the listbox will automatically adjust its height based on its content.
    * This helps avoid scrollbars by fitting the content dynamically.
    */
-  @property({ type: Boolean }) autoSize = true;
+  @property({ type: Boolean }) autoSize = false;
 
   /**
    * The number of pixels of extra space to add beyond the content's height
