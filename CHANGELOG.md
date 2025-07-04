@@ -6,17 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.7.0] - 2025-07-04
+
 ### Added
 
-- Dynamically adjust autocomplete's height
-- Add `value` and `text` property to the autocomplete `remove` event
-- Add `value` and `text` property to the autocomplete `commit` event
+- Dynamically adjust autocomplete's height ([#159](https://github.com/Ambiki/impulse_view_components/pull/159))
+- Add `value` and `text` property to the autocomplete `remove` event ([#152](https://github.com/Ambiki/impulse_view_components/pull/152))
+- Add `value` and `text` property to the autocomplete `commit` event ([#151](https://github.com/Ambiki/impulse_view_components/pull/151))
 
 ### Fixed
 
-- Clear autocomplete cache when `src` changes
-- Return early if popup element is not defined in `useFloatingUI`
-- Remote autocomplete should not remove the `loading` attribute on `AbortError`
+- Clear autocomplete cache when `src` changes ([#153](https://github.com/Ambiki/impulse_view_components/pull/153))
+- Return early if popup element is not defined in `useFloatingUI` ([#146](https://github.com/Ambiki/impulse_view_components/pull/146))
+- Remote autocomplete should not remove the `loading` attribute on `AbortError` ([#139](https://github.com/Ambiki/impulse_view_components/pull/139))
 
 ## [0.6.0] - 2025-02-07
 
@@ -159,7 +161,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Everything!
 
-[unreleased]: https://github.com/Ambiki/impulse_view_components/compare/v0.6.0...HEAD
+[unreleased]: https://github.com/Ambiki/impulse_view_components/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/Ambiki/impulse_view_components/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/Ambiki/impulse_view_components/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/Ambiki/impulse_view_components/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/Ambiki/impulse_view_components/compare/v0.4.0...v0.5.0

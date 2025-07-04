@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    impulse_view_components (0.6.0)
+    impulse_view_components (0.7.0)
       actionview (>= 6.1.0)
       view_component (~> 3.11)
 
