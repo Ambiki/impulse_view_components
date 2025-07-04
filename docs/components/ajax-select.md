@@ -35,7 +35,7 @@ Ajax select allows users to fetch a list of options from the server.
 | required          | `false`   | Makes the select control a required field.                                                                                                        |
 | multiple          | `false`   | Whether multiple values can be selected or not.                                                                                                   |
 | clearable         | `true`    | Whether the clear button should be shown or not.                                                                                                  |
-| auto_size         | `true`    | If `true`, the listbox will automatically adjust its height based on its content. This helps avoid scrollbars by fitting the content dynamically. |
+| auto_size         | `false`   | If `true`, the listbox will automatically adjust its height based on its content. This helps avoid scrollbars by fitting the content dynamically. |
 | auto_size_padding | `4`       | The number of pixels of extra space to add beyond the content's height when `auto_size` is enabled. Acts as vertical padding.                     |
 
 ::: tip Note
