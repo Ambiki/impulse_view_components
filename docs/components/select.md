@@ -20,18 +20,20 @@ Select allows a user to filter through a list of pre-defined sets of options and
 
 ### Keyword arguments
 
-| Name           | Default   | Description                                                                                                                                      |
-| ------         | --------- | -------------                                                                                                                                    |
-| selected       | `nil`     | The `value` of the option that you want to force select.                                                                                         |
-| size           | `md`      | The size of the select control. One of `sm`, `md`, or `lg`.                                                                                      |
-| name           | `nil`     | The name of the field. By default rails will automatically create a `name` string based on the `object_name` and `method_name`.                  |
-| input_id       | `nil`     | The id of the input field.                                                                                                                       |
-| placeholder    | `nil`     | The placeholder text that is displayed within the input field.                                                                                   |
-| include_hidden | `true`    | See the "Gotcha" section of rails [`select`](https://api.rubyonrails.org/classes/ActionView/Helpers/FormOptionsHelper.html#method-i-select) tag. |
-| disabled       | `false`   | Disables the select control.                                                                                                                     |
-| required       | `false`   | Makes the select control a required field.                                                                                                       |
-| multiple       | `false`   | Whether multiple values can be selected or not.                                                                                                  |
-| clearable      | `true`    | Whether the clear button should be shown or not.                                                                                                 |
+| Name              | Default   | Description                                                                                                                                       |
+| ------            | --------- | -------------                                                                                                                                     |
+| selected          | `nil`     | The `value` of the option that you want to force select.                                                                                          |
+| size              | `md`      | The size of the select control. One of `sm`, `md`, or `lg`.                                                                                       |
+| name              | `nil`     | The name of the field. By default rails will automatically create a `name` string based on the `object_name` and `method_name`.                   |
+| input_id          | `nil`     | The id of the input field.                                                                                                                        |
+| placeholder       | `nil`     | The placeholder text that is displayed within the input field.                                                                                    |
+| include_hidden    | `true`    | See the "Gotcha" section of rails [`select`](https://api.rubyonrails.org/classes/ActionView/Helpers/FormOptionsHelper.html#method-i-select) tag.  |
+| disabled          | `false`   | Disables the select control.                                                                                                                      |
+| required          | `false`   | Makes the select control a required field.                                                                                                        |
+| multiple          | `false`   | Whether multiple values can be selected or not.                                                                                                   |
+| clearable         | `true`    | Whether the clear button should be shown or not.                                                                                                  |
+| auto_size         | `true`    | If `true`, the listbox will automatically adjust its height based on its content. This helps avoid scrollbars by fitting the content dynamically. |
+| auto_size_padding | `4`       | The number of pixels of extra space to add beyond the content's height when `auto_size` is enabled. Acts as vertical padding.                     |
 
 ## Examples
 

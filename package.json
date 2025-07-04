@@ -1,6 +1,6 @@
 {
   "name": "@ambiki/impulse-view-components",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "A set of JavaScript patterns and Web Components meant to used with the ImpulseViewComponents gem.",
   "author": "Ambitious Idea Labs <info@ambiki.com> (https://ambiki.com/)",
   "contributors": [
