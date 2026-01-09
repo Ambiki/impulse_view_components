@@ -16,7 +16,7 @@ module Impulse
     private
 
     def value
-      return if @selected.nil?
+      return if @selected.blank?
       return @selected.map { |value| find_option(value) }.compact if multiple?
       find_option(@selected)
     end
