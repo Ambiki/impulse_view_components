@@ -86,6 +86,8 @@ module Impulse
         render_inline(Impulse::SelectComponent.new(:user, :fruit_id, ["Apple", "Guava"], selected: "Invalid"))
         render_inline(Impulse::SelectComponent.new(:user, :fruit_id, ["Apple", "Guava"], selected: ["", "Apple"], multiple: true))
         render_inline(Impulse::SelectComponent.new(:user, :fruit_id, ["Apple", "Guava"], selected: ["Invalid", "Apple"], multiple: true))
+        render_inline(Impulse::SelectComponent.new(:user, :fruit_id, ["Apple", "Guava"], selected: "", multiple: true))
+        render_inline(Impulse::SelectComponent.new(:user, :fruit_id, ["Apple", "Guava"], selected: nil, multiple: true))
       end
     end
 
