@@ -12,7 +12,6 @@ module Impulse
       refute_selector ".popover-header"
 
       assert_selector "[data-test-id='btn']", text: "Toggle popover"
-      assert_selector "[data-test-id='btn'][aria-haspopup='dialog']"
       assert_selector "[data-test-id='btn'][aria-expanded='false']"
       assert_selector "[data-test-id='btn'][role='button']"
       assert_selector "[data-test-id='btn'][type='button']"
@@ -20,11 +19,8 @@ module Impulse
       assert_selector ".popover-body", text: "Popover body"
 
       id = page.find("[data-test-id='btn']")["aria-controls"]
-      assert_selector "button[popovertarget='#{id}']"
 
       assert_selector ".awc-popover-container[id='#{id}']"
-      assert_selector ".awc-popover-container[tabindex='-1']"
-      assert_selector ".awc-popover-container[popover='manual']"
       # Arrow
       assert_selector ".arrow"
     end

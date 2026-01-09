@@ -1,15 +1,17 @@
 import { ImpulseElement, property, registerElement, target } from '@ambiki/impulse';
 import type { Placement, Strategy } from '@floating-ui/dom';
-import '@oddbird/popover-polyfill';
-import { isLooselyFocusable } from 'src/helpers/focus';
 import useFloatingUI, { UseFloatingUIType } from 'src/hooks/use_floating_ui';
 import useOutsideClick from 'src/hooks/use_outside_click';
 import { stripCSSUnit } from '../../helpers/string';
 
-const popovers = new Set<AwcPopoverElement>();
-
 @registerElement('awc-popover')
 export default class AwcPopoverElement extends ImpulseElement {
+  /**
+   * When the popover is open or not. To make the popover open by default, set it to `true`.
+   * Make sure you aren't opening multiple popovers on page load, as this may degrade the user experience.
+   */
+  @property({ type: Boolean }) open = false;
+
   /**
    * The placement of the popover. The actual placement will vary to keep the popover inside the viewport.
    * @see https://floating-ui.com/docs/computePosition#placement for a comprehensive list of all available placements.
@@ -28,11 +30,14 @@ export default class AwcPopoverElement extends ImpulseElement {
   @property({ type: Array }) clickBoundaries: string[] = [];
 
   @target() button: HTMLButtonElement;
-  @target() panel: HTMLElement;
+  @target() panel: HTMLDialogElement;
   @target() arrow: HTMLElement;
 
   private floatingUI: UseFloatingUIType;
 
+  /**
+   * Called when the element is added to the DOM.
+   */
   connected() {
     this.floatingUI = useFloatingUI(this, {
       referenceElement: this.button,
@@ -49,53 +54,66 @@ export default class AwcPopoverElement extends ImpulseElement {
 
     useOutsideClick(this, {
       boundaries: this.boundaries,
-      callback: (event: Event, target: HTMLElement) => {
+      callback: () => {
         // Only proceed if element is open and nested popovers are hidden.
         if (this.open && !this.hasNestedOpenPopovers) {
           this.hide();
-          // Prevent modals from closing accidentally.
-          if (!isLooselyFocusable(target)) {
-            event.preventDefault();
-            this.button.focus();
-          }
         }
       },
     });
+
+    if (this.open) {
+      this.show();
+    }
   }
 
+  /**
+   * Called when the element is removed from the DOM.
+   */
   disconnected() {
     this.hide();
   }
 
   async handleToggle() {
     if (this.open) {
-      popovers.add(this);
-      this.closeOtherPopovers();
-      this.emit('show');
-      this.button.setAttribute('aria-expanded', 'true');
-      this.floatingUI.start();
-      this.emit('shown');
-    } else {
       this.emit('hide');
-      this.button.setAttribute('aria-expanded', 'false');
-      await this.floatingUI.stop();
-      popovers.delete(this);
+      await this.hide();
       this.emit('hidden');
+    } else {
+      this.emit('show');
+      this.show();
+      this.emit('shown');
     }
   }
 
+  /**
+   * Shows/hides the popover.
+   */
   toggle() {
     this.panel.togglePopover();
   }
 
+  /**
+   * Shows the popover.
+   */
   show() {
     if (this.open) return;
-    this.panel.showPopover();
+    this.closeOtherPopovers();
+    this.open = true;
+    this.panel.show();
+    this.button.setAttribute('aria-expanded', 'true');
+    this.floatingUI.start();
   }
 
-  hide(event?: Event) {
+  /**
+   * Hides a popover.
+   */
+  async hide(event?: Event): Promise<void> {
     if (!this.open) return;
-    this.panel.hidePopover();
+    this.open = false;
+    this.panel.close();
+    await this.floatingUI.stop();
+    this.button.setAttribute('aria-expanded', 'false');
 
     // This event originated from a button click.
     if (event) {
@@ -121,22 +139,23 @@ export default class AwcPopoverElement extends ImpulseElement {
     }
   }
 
-  async reposition() {
+  /**
+   * Repositions the popover.
+   */
+  async reposition(): Promise<void> {
     await this.floatingUI.update();
   }
 
   private closeOtherPopovers() {
+    const popovers = Array.from(document.querySelectorAll<AwcPopoverElement>(this.identifier));
     for (const popover of popovers) {
       if (popover === this || popover.contains(this)) continue;
       popover.hide();
     }
   }
 
-  private get hasNestedOpenPopovers() {
-    const popover = [...popovers].find((p) => p === this);
-    if (!popover) return false;
-    const childPopovers = Array.from(popover.querySelectorAll<AwcPopoverElement>(this.identifier));
-    return childPopovers.some((childPopover) => popovers.has(childPopover));
+  private get hasNestedOpenPopovers(): boolean {
+    return Array.from(this.querySelectorAll<AwcPopoverElement>(this.identifier)).some((popover) => popover.open);
   }
 
   private get arrowPadding() {
@@ -147,15 +166,6 @@ export default class AwcPopoverElement extends ImpulseElement {
   private get boundaries() {
     const elements = this.clickBoundaries.map((s) => document.querySelector<HTMLElement>(s));
     return elements.concat([this.button, this.panel]);
-  }
-
-  get open(): boolean {
-    if (!this.panel) return false;
-    try {
-      return this.panel.matches(':popover-open');
-    } catch {
-      return this.panel.matches('.\\:popover-open');
-    }
   }
 }
 

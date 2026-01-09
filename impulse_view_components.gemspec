@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "view_component", "~> 3.11"
   spec.add_runtime_dependency "actionview", ">= 6.1.0"
 
-  spec.add_development_dependency "capybara", "~> 3.39", ">= 3.39.2"
+  spec.add_development_dependency "capybara", "~> 3.40"
   spec.add_development_dependency "byebug", "~> 11.1", ">= 11.1.3"
   spec.add_development_dependency "webmock", "~> 3.18", ">= 3.18.1"
 end

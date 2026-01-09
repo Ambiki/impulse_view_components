@@ -27,7 +27,7 @@ popover.show();
 Hides the popover.
 
 ```js
-popover.hide();
+await popover.hide();
 ```
 
 ### `toggle`
