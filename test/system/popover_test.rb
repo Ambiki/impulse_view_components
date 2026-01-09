@@ -5,10 +5,10 @@ module Impulse
     test "opens the popover by clicking on the trigger button" do
       visit_preview(:default)
 
-      refute_selector "[popover]"
+      assert_popover_close
       click_on "Toggle popover"
 
-      assert_selector "[popover]"
+      assert_popover_open
     end
 
     test "focuses on the close button after opening the popover" do
@@ -23,30 +23,30 @@ module Impulse
       visit_preview(:default)
 
       click_on "Toggle popover"
-      assert_selector "[popover]"
+      assert_popover_open
 
       click_on "Toggle popover"
-      refute_selector "[popover]"
+      assert_popover_close
     end
 
     test "closes the popover by clicking on the close button" do
       visit_preview(:default)
 
       click_on "Toggle popover"
-      assert_selector "[popover]"
+      assert_popover_open
 
       click_button class: "close"
-      refute_selector "[popover]"
+      assert_popover_close
     end
 
     test "closes the popover by clicking outside" do
       visit_preview(:default)
 
       click_on "Toggle popover"
-      assert_selector "[popover]"
+      assert_popover_open
 
       page.find("body").click
-      refute_selector "[popover]"
+      assert_popover_close
     end
 
     test "opens a nested popover" do
@@ -106,6 +106,16 @@ module Impulse
       refute_selector "[data-test-id='parent-popover']"
       refute_selector "[data-test-id='nested-popover']"
       assert_selector "[data-test-id='non-related-popover']"
+    end
+
+    private
+
+    def assert_popover_open
+      assert_selector "awc-popover[open]"
+    end
+
+    def assert_popover_close
+      refute_selector "awc-popover[open]"
     end
   end
 end
