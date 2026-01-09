@@ -74,7 +74,10 @@ export default class AwcPopoverElement extends ImpulseElement {
     this.hide();
   }
 
-  async handleToggle() {
+  /**
+   * Shows/hides the popover.
+   */
+  async toggle() {
     if (this.open) {
       this.emit('hide');
       await this.hide();
@@ -84,13 +87,6 @@ export default class AwcPopoverElement extends ImpulseElement {
       this.show();
       this.emit('shown');
     }
-  }
-
-  /**
-   * Shows/hides the popover.
-   */
-  toggle() {
-    this.panel.togglePopover();
   }
 
   /**
