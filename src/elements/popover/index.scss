@@ -19,6 +19,7 @@
   animation-duration: 400ms;
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   word-wrap: break-word;
+  z-index: $zindex-popover; // Element is not rendered in the top-layer anymore.
 
   &::backdrop {
     display: none;
