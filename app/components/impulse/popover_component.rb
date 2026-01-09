@@ -11,7 +11,7 @@ module Impulse
       system_args[:data] = merge_attributes(
         system_args[:data],
         target: "awc-popover.button",
-        action: "click->awc-popover#handleToggle"
+        action: "click->awc-popover#toggle"
       )
 
       Impulse::BaseRenderer.new(**system_args)

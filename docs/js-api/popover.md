@@ -35,7 +35,7 @@ await popover.hide();
 Shows/hides the popover.
 
 ```js
-popover.toggle();
+await popover.toggle();
 ```
 
 ### `reposition`
