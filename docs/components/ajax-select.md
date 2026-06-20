@@ -16,8 +16,8 @@ Ajax select allows users to fetch a list of options from the server.
 | ------       | --------- | -------------                                                    |
 | object_name  | N/A       | The name of the object.                                          |
 | method_name  | N/A       | The name of the method.                                          |
-| value_method | N/A       | The name of the method that the `selected` argument responds to. |
-| text_method  | N/A       | The name of the method that the `selected` argument responds to. |
+| value_method | N/A       | The method called on the `selected` object to read each option's value (e.g. `:id`).        |
+| text_method  | N/A       | The method called on the `selected` object to read each option's display text (e.g. `:name`). |
 
 ### Keyword arguments
 
@@ -27,10 +27,10 @@ Ajax select allows users to fetch a list of options from the server.
 | src               | `nil`     | The endpoint to fetch the options from.                                                                                                           |
 | param             | `q`       | The param that is appended when making a network request. Example: `/fruits?q=Guava`.                                                             |
 | size              | `md`      | The size of the select control. One of `sm`, `md`, or `lg`.                                                                                       |
-| name              | `nil`     | The name of the field. By default rails will automatically create a `name` string based on the `object_name` and `method_name`.                   |
+| name              | `nil`     | The name of the field. By default, Rails automatically creates a `name` string based on the `object_name` and `method_name`.                      |
 | input_id          | `nil`     | The id of the input field.                                                                                                                        |
 | placeholder       | `nil`     | The placeholder text that is displayed within the input field.                                                                                    |
-| include_hidden    | `true`    | See the "Gotcha" section of rails [`select`](https://api.rubyonrails.org/classes/ActionView/Helpers/FormOptionsHelper.html#method-i-select) tag.  |
+| include_hidden    | `true`    | See the "Gotcha" section of the Rails [`select`](https://api.rubyonrails.org/classes/ActionView/Helpers/FormOptionsHelper.html#method-i-select) tag.  |
 | disabled          | `false`   | Disables the select control.                                                                                                                      |
 | required          | `false`   | Makes the select control a required field.                                                                                                        |
 | multiple          | `false`   | Whether multiple values can be selected or not.                                                                                                   |
