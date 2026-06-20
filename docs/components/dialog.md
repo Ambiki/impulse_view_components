@@ -83,7 +83,7 @@ If your arbitrary content comes from a partial as is the case with many `form_wi
 component respectively.
 
 ```erb{2}
-<%= render(Impulse::DialogComponent.new(title: "Edit profile")) %>
+<%= render(Impulse::DialogComponent.new(title: "Edit profile")) do %>
   <%= render "shared/form" %>
 <% end %>
 ```

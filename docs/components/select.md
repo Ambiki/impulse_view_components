@@ -16,7 +16,7 @@ Select allows a user to filter through a list of pre-defined sets of options and
 | ------      | --------- | -------------                                                                                                                                                                    |
 | object_name | N/A       | The name of the object.                                                                                                                                                          |
 | method_name | N/A       | The name of the method.                                                                                                                                                          |
-| choices     | `[]`      | An array of choices similar to how you would pass to native rails [`select`](https://api.rubyonrails.org/classes/ActionView/Helpers/FormOptionsHelper.html#method-i-select) tag. |
+| choices     | `[]`      | An array of choices, similar to what you would pass to the native Rails [`select`](https://api.rubyonrails.org/classes/ActionView/Helpers/FormOptionsHelper.html#method-i-select) tag. |
 
 ### Keyword arguments
 
@@ -24,10 +24,10 @@ Select allows a user to filter through a list of pre-defined sets of options and
 | ------            | --------- | -------------                                                                                                                                     |
 | selected          | `nil`     | The `value` of the option that you want to force select.                                                                                          |
 | size              | `md`      | The size of the select control. One of `sm`, `md`, or `lg`.                                                                                       |
-| name              | `nil`     | The name of the field. By default rails will automatically create a `name` string based on the `object_name` and `method_name`.                   |
+| name              | `nil`     | The name of the field. By default, Rails automatically creates a `name` string based on the `object_name` and `method_name`.                      |
 | input_id          | `nil`     | The id of the input field.                                                                                                                        |
 | placeholder       | `nil`     | The placeholder text that is displayed within the input field.                                                                                    |
-| include_hidden    | `true`    | See the "Gotcha" section of rails [`select`](https://api.rubyonrails.org/classes/ActionView/Helpers/FormOptionsHelper.html#method-i-select) tag.  |
+| include_hidden    | `true`    | See the "Gotcha" section of the Rails [`select`](https://api.rubyonrails.org/classes/ActionView/Helpers/FormOptionsHelper.html#method-i-select) tag.  |
 | disabled          | `false`   | Disables the select control.                                                                                                                      |
 | required          | `false`   | Makes the select control a required field.                                                                                                        |
 | multiple          | `false`   | Whether multiple values can be selected or not.                                                                                                   |
@@ -40,7 +40,7 @@ Select allows a user to filter through a list of pre-defined sets of options and
 ### Rendering custom options
 
 Instead of passing an array of choices to the component, you can also render the options as a block. This provides
-more flexibility and you can pass any HTML attributes to it.
+more flexibility, and you can pass any HTML attributes to each option.
 
 ```erb{2-4}
 <%= render(Impulse::SelectComponent.new(:post, :person_id)) do |c| %>
@@ -171,6 +171,7 @@ Customize the options by rendering a collection of the `with_option` block.
 | ------        | --------- | -------------                                                             |
 | `value`       | N/A       | The value of the option.                                                  |
 | `text`        | N/A       | The text of the option.                                                   |
+| `description` | `nil`     | An optional secondary description displayed below the option's text.      |
 | `system_args` | `{}`      | HTML attributes that should be passed to the Rails' `content_tag` method. |
 
 ### `with_blankslate`
