@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.summary = "View components for Ruby on Rails"
   spec.homepage = "https://github.com/Ambiki/impulse_view_components"
   spec.license = "MIT"
-  spec.required_ruby_version = ">= 3.1.4"
+  spec.required_ruby_version = ">= 3.3"
 
   spec.metadata["source_code_uri"] = spec.homepage
   spec.metadata["changelog_uri"] = "https://github.com/Ambiki/impulse_view_components/blob/main/CHANGELOG.md"
