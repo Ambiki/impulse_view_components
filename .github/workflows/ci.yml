@@ -36,11 +36,11 @@ jobs:
       - lint_js
       - lint_ruby
     runs-on: ubuntu-latest
-    continue-on-error: ${{ matrix.ruby == 'ruby-head' }}
+    continue-on-error: ${{ matrix.ruby == '4.0' }}
     strategy:
       fail-fast: false
       matrix:
-        ruby: ["3.3", "3.4", "ruby-head"]
+        ruby: ["3.3", "3.4", "4.0"]
         gemfile:
           - rails_6_1
           - rails_7
@@ -49,11 +49,11 @@ jobs:
         exclude:
           # Rails 6.1 / 7.0 do not support Ruby 3.4+
           - { ruby: "3.4", gemfile: rails_6_1 }
-          - { ruby: "ruby-head", gemfile: rails_6_1 }
+          - { ruby: "4.0", gemfile: rails_6_1 }
           - { ruby: "3.4", gemfile: rails_7 }
-          - { ruby: "ruby-head", gemfile: rails_7 }
-          # Keep ruby-head limited to the newest Rails only
-          - { ruby: "ruby-head", gemfile: rails_7_1 }
+          - { ruby: "4.0", gemfile: rails_7 }
+          # Keep Ruby 4.0 limited to the newest Rails only
+          - { ruby: "4.0", gemfile: rails_7_1 }
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile
       BUNDLE_PATH_RELATIVE_TO_CWD: true
@@ -88,11 +88,11 @@ jobs:
       - lint_js
       - lint_ruby
     runs-on: ubuntu-latest
-    continue-on-error: ${{ matrix.ruby == 'ruby-head' }}
+    continue-on-error: ${{ matrix.ruby == '4.0' }}
     strategy:
       fail-fast: false
       matrix:
-        ruby: ["3.3", "3.4", "ruby-head"]
+        ruby: ["3.3", "3.4", "4.0"]
         gemfile:
           - rails_6_1
           - rails_7
@@ -101,11 +101,11 @@ jobs:
         exclude:
           # Rails 6.1 / 7.0 do not support Ruby 3.4+
           - { ruby: "3.4", gemfile: rails_6_1 }
-          - { ruby: "ruby-head", gemfile: rails_6_1 }
+          - { ruby: "4.0", gemfile: rails_6_1 }
           - { ruby: "3.4", gemfile: rails_7 }
-          - { ruby: "ruby-head", gemfile: rails_7 }
-          # Keep ruby-head limited to the newest Rails only
-          - { ruby: "ruby-head", gemfile: rails_7_1 }
+          - { ruby: "4.0", gemfile: rails_7 }
+          # Keep Ruby 4.0 limited to the newest Rails only
+          - { ruby: "4.0", gemfile: rails_7_1 }
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile
       BUNDLE_PATH_RELATIVE_TO_CWD: true
