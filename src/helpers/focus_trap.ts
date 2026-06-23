@@ -1,3 +1,5 @@
+// This implementation is heavily inspired by Primer's focus trap behavior.
+// @see https://github.com/primer/behaviors/blob/main/src/focus-trap.ts
 import { FocusableElement, isFocusable, isTabbable, tabbable } from 'tabbable';
 
 interface TrapMetadata {
