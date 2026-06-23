@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Autocomplete now infers its API types from the selection mode and source: `value`/`removeValue` resolve by narrowing on `multiple`, and `setValue`'s `text` requirement by narrowing on the new `remote` getter. Exported `SingleAutocompleteElement` / `MultipleAutocompleteElement` / `LocalAutocompleteElement` / `RemoteAutocompleteElement` types allow pinning the shape explicitly ([#217](https://github.com/Ambiki/impulse_view_components/pull/217))
 - Added `GlobalEventHandlersEventMap` entries for the dialog and popover events so listeners receive a typed `CustomEvent` ([#216](https://github.com/Ambiki/impulse_view_components/pull/216))
 
 ### Fixed
