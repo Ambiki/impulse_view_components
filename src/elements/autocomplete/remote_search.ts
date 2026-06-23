@@ -1,7 +1,8 @@
 import debounce from 'src/helpers/debounce';
-import AwcAutocompleteElement from './index';
+import type AwcAutocompleteElement from './index';
+import type { SearchVariant } from './index';
 
-export default class RemoteSearch {
+export default class RemoteSearch implements SearchVariant {
   readonly autocomplete: AwcAutocompleteElement;
   private abortController?: AbortController;
   private cachedOptions: string = '';

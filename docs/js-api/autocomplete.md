@@ -4,6 +4,75 @@
 const autocomplete = document.querySelector('awc-autocomplete');
 ```
 
+## TypeScript
+
+The selection mode (single vs. multiple) determines the type of `value` and the arguments
+`removeValue` accepts, and the source (local vs. remote) determines whether `setValue` requires
+the `text` argument. TypeScript resolves these automatically when you narrow on the `multiple` and
+`remote` properties:
+
+```ts
+const autocomplete = document.querySelector('awc-autocomplete')!;
+
+if (autocomplete.multiple) {
+  autocomplete.value; // string[]
+  autocomplete.removeValue('1'); // value argument is required
+} else {
+  autocomplete.value; // string
+  autocomplete.removeValue(); // no argument
+}
+
+if (autocomplete.remote) {
+  autocomplete.setValue('1', 'One'); // text is required
+} else {
+  autocomplete.setValue('1'); // text is optional
+}
+```
+
+If you already know the mode at the call site, pass the exported type to `querySelector` instead
+of narrowing:
+
+```ts
+import type {
+  SingleAutocompleteElement,
+  MultipleAutocompleteElement,
+} from '@ambiki/impulse-view-components/dist/elements/autocomplete';
+
+const multi = document.querySelector<MultipleAutocompleteElement>('awc-autocomplete')!;
+multi.value; // string[]
+
+const single = document.querySelector<SingleAutocompleteElement>('awc-autocomplete')!;
+single.value; // string
+```
+
+If you already know the source at the call site, you can also pass the exported type to
+`querySelector` instead of narrowing on `remote`:
+
+```ts
+import type {
+  RemoteAutocompleteElement,
+  LocalAutocompleteElement,
+} from '@ambiki/impulse-view-components/dist/elements/autocomplete';
+
+const remote = document.querySelector<RemoteAutocompleteElement>('awc-autocomplete')!;
+remote.setValue('1', 'One'); // text is required
+remote.setValue('1'); // ✗ type error
+
+const local = document.querySelector<LocalAutocompleteElement>('awc-autocomplete')!;
+local.setValue('1'); // text is optional
+```
+
+Each alias leaves the other dimension open, but they are composable — pass the other dimension as a
+type argument to pin both at once:
+
+```ts
+const el = document.querySelector<MultipleAutocompleteElement<'remote'>>('awc-autocomplete')!;
+el.value; // string[]
+el.setValue('1', 'One'); // text is required
+
+// `RemoteAutocompleteElement<'multiple'>` resolves to the same type.
+```
+
 ## Methods
 
 ### `open`
@@ -33,16 +102,34 @@ autocomplete.hide();
 
 ### `value`
 
-Returns all the selected values.
+Returns the selected value(s). For a single select this is a `string`; for a multiple select it
+is a `string[]`.
 
 ```js
+// Multiple select
 autocomplete.value;
 // => ['1', '2']
+
+// Single select
+autocomplete.value;
+// => '1'
+```
+
+### `remote`
+
+Whether the options are fetched from a remote source (i.e. the `src` attribute is set). Narrowing
+on this resolves source-dependent types — see [TypeScript](#typescript).
+
+```js
+autocomplete.remote;
+// => true
 ```
 
 ### `setValue`
 
-Sets the value of the element.
+Sets the value of the element. When the options are fetched from a remote source, the `text`
+argument is required (the option is not in the DOM, so its text cannot be derived); for local
+options it is optional. See [TypeScript](#typescript) for how to enforce this at compile time.
 
 ```js
 autocomplete.setValue('apple', 'Apple');
@@ -66,7 +153,9 @@ autocomplete.value;
 ```
 
 ::: tip
-You do not have to provide the argument to `removeValue` if the element is a single select.
+The `value` argument is required for a multiple select and is not used by a single select (which
+clears its value when `removeValue()` is called). TypeScript enforces this when the mode is known —
+see [TypeScript](#typescript).
 :::
 
 ### `activate`
@@ -152,17 +241,17 @@ autocomplete.form;
 
 ## Events
 
-| Name                      | Bubbles   | Description                                                                                                                                                                            |
-| ------                    | --------- | ------------                                                                                                                                                                           |
-| `awc-autocomplete:show`   | `true`    | This event fires immediately when the `open` attribute is added.                                                                                                                       |
-| `awc-autocomplete:shown`  | `true`    | This event fires when the listbox has been made visible to the user.                                                                                                                   |
-| `awc-autocomplete:hide`   | `true`    | This event fires immediately when the `open` attribute is removed.                                                                                                                     |
-| `awc-autocomplete:hidden` | `true`    | This event fires when the listbox has been completely hidden from the user.                                                                                                            |
-| `awc-autocomplete:commit` | `true`    | This event fires when an option is selected or deselected by clicking the option element. You can access the committed option, its value, and its text from the `event.detail` object. |
-| `awc-autocomplete:clear`  | `true`    | This event fires when all the selected options have been deselected by clicking on the "Clear" button.                                                                                 |
-| `awc-autocomplete:remove` | `true`    | This event fires when a tag has been removed. You can access the removed tag, its value, and its text from the `event.detail` object.                                                  |
-| `awc-autocomplete:reset`  | `true`    | This event fires when the parent form has been reset.                                                                                                                                  |
-| `loadstart`               | `false`   | This event fires when the autocomplete starts the network request.                                                                                                                     |
-| `load`                    | `false`   | This event fires when the autocomplete fetches the options successfully from the server.                                                                                               |
-| `error`                   | `false`   | This event fires when the autocomplete fails to fetch the options from the server.                                                                                                     |
-| `loadend`                 | `false`   | This event fires when the autocomplete finishes the network request.                                                                                                                   |
+| Name                      | Bubbles | Description                                                                                                                                                                            |
+| ------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `awc-autocomplete:show`   | `true`  | This event fires immediately when the `open` attribute is added.                                                                                                                       |
+| `awc-autocomplete:shown`  | `true`  | This event fires when the listbox has been made visible to the user.                                                                                                                   |
+| `awc-autocomplete:hide`   | `true`  | This event fires immediately when the `open` attribute is removed.                                                                                                                     |
+| `awc-autocomplete:hidden` | `true`  | This event fires when the listbox has been completely hidden from the user.                                                                                                            |
+| `awc-autocomplete:commit` | `true`  | This event fires when an option is selected or deselected by clicking the option element. You can access the committed option, its value, and its text from the `event.detail` object. |
+| `awc-autocomplete:clear`  | `true`  | This event fires when all the selected options have been deselected by clicking on the "Clear" button.                                                                                 |
+| `awc-autocomplete:remove` | `true`  | This event fires when a tag has been removed. You can access the removed tag, its value, and its text from the `event.detail` object.                                                  |
+| `awc-autocomplete:reset`  | `true`  | This event fires when the parent form has been reset.                                                                                                                                  |
+| `loadstart`               | `false` | This event fires when the autocomplete starts the network request.                                                                                                                     |
+| `load`                    | `false` | This event fires when the autocomplete fetches the options successfully from the server.                                                                                               |
+| `error`                   | `false` | This event fires when the autocomplete fails to fetch the options from the server.                                                                                                     |
+| `loadend`                 | `false` | This event fires when the autocomplete finishes the network request.                                                                                                                   |

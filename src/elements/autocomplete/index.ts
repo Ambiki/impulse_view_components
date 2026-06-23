@@ -17,8 +17,42 @@ interface BaseOptionEvent {
 export interface AwcAutocompleteCommitEvent extends BaseOptionEvent {}
 export interface AwcAutocompleteRemoveEvent extends BaseOptionEvent {}
 
+/** Whether multiple values can be selected. */
+export type SelectionMode = 'single' | 'multiple';
+
+/** Where the options come from: the DOM (`local`) or a remote endpoint (`remote`). */
+export type Source = 'local' | 'remote';
+
+/** Resolves the runtime `multiple` property type from the selection mode. */
+type IsMultiple<Mode extends SelectionMode> = Mode extends 'multiple' ? true : false;
+
+/** Resolves the runtime `remote` getter type from the source. */
+type IsRemote<Src extends Source> = Src extends 'remote' ? true : false;
+
+/** Resolves the `value` type based on the selection mode. */
+export type AutocompleteValue<Mode extends SelectionMode> = Mode extends 'multiple' ? string[] : string;
+
+/** Resolves the `removeValue` arguments: required for multi-select, none for single-select. */
+type RemoveValueArgs<Mode extends SelectionMode> = Mode extends 'multiple' ? [value: string] : [];
+
+/** Resolves the `setValue` text argument: required for a remote source, optional otherwise. */
+type SetValueTextArgs<Src extends Source> = Src extends 'remote' ? [text: string] : [text?: string];
+
+/** Resolves the select variant based on the selection mode. */
+type SelectVariant<Mode extends SelectionMode> = Mode extends 'multiple' ? MultipleSelect : SingleSelect;
+
+/** The contract implemented by the local and remote search variants. */
+export interface SearchVariant {
+  search(value: string): void | Promise<void>;
+  start(): void;
+  stop(): void;
+}
+
 @registerElement('awc-autocomplete')
-export default class AwcAutocompleteElement extends ImpulseElement {
+export default class AwcAutocompleteElement<
+  Mode extends SelectionMode = SelectionMode,
+  Src extends Source = Source,
+> extends ImpulseElement {
   /**
    * Shows/hides the listbox element.
    */
@@ -37,7 +71,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   /**
    * Whether multiple values can be selected or not.
    */
-  @property({ type: Boolean }) multiple = false;
+  @property({ type: Boolean }) multiple: IsMultiple<Mode> = false as IsMultiple<Mode>;
 
   /**
    * The endpoint to fetch the options from.
@@ -71,8 +105,8 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   @targets() groups: HTMLElement[];
 
   combobox: Combobox;
-  selectVariant: SingleSelect | MultipleSelect;
-  private searchVariant: LocalSearch | RemoteSearch;
+  selectVariant: SelectVariant<Mode>;
+  private searchVariant: SearchVariant;
   private floatingUI: UseFloatingUIType;
   private firstFocus = true;
   private preventOutsideClickEvent = false;
@@ -115,7 +149,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     });
 
     this.combobox = new Combobox(this.input, this.listbox, { multiple: this.multiple });
-    this.selectVariant = this.multiple ? new MultipleSelect(this) : new SingleSelect(this);
+    this.selectVariant = (this.multiple ? new MultipleSelect(this) : new SingleSelect(this)) as SelectVariant<Mode>;
     this.selectVariant.connected();
     this.searchVariant = this.src ? new RemoteSearch(this) : new LocalSearch(this);
     this.selectVariant.required = this.required;
@@ -353,7 +387,8 @@ export default class AwcAutocompleteElement extends ImpulseElement {
    * @param value - The value of the option.
    * @param text - The text of the option.
    */
-  setValue(value: string, text?: string) {
+  setValue(value: string, ...rest: SetValueTextArgs<Src>) {
+    const [text] = rest as [string?];
     const option = this.options.find((o) => o.getAttribute('value') === value);
     const textValue = text || option?.getAttribute('data-text') || '';
     this.selectVariant.setValue(value, textValue);
@@ -363,9 +398,10 @@ export default class AwcAutocompleteElement extends ImpulseElement {
    * Removes a value from the element.
    * @param value - The value of the option (you do not have to provide the value arg for a single select).
    */
-  removeValue(value?: string) {
-    if (this.multiple && value) {
-      (this.selectVariant as MultipleSelect).removeValue(value);
+  removeValue(...args: RemoveValueArgs<Mode>) {
+    const [value] = args as [string?];
+    if (this.selectVariant instanceof MultipleSelect && value) {
+      this.selectVariant.removeValue(value);
       return;
     }
 
@@ -434,7 +470,8 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   private removeTag(tag: HTMLElement) {
     const value = tag.getAttribute('value');
     if (!value) return;
-    this.removeValue(value);
+    // Tags only exist in multi-select mode, so the value argument is always required here.
+    (this as AwcAutocompleteElement<'multiple'>).removeValue(value);
   }
 
   /**
@@ -452,13 +489,22 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   }
 
   /**
+   * Whether the options are fetched from a remote source (i.e. the `src` attribute is set).
+   * Narrowing on this (`if (el.remote)`) resolves source-dependent types such as `setValue`.
+   */
+  get remote(): IsRemote<Src> {
+    return Boolean(this.src) as IsRemote<Src>;
+  }
+
+  /**
    * Returns the selected value.
    */
-  get value(): string | string[] {
+  get value(): AutocompleteValue<Mode> {
     if (this.multiple) {
-      return this.tags.map((tag) => tag.getAttribute('value') ?? '');
+      return this.tags.map((tag) => tag.getAttribute('value') ?? '') as AutocompleteValue<Mode>;
     }
-    return this.querySelector<HTMLInputElement>('input[data-behavior="hidden-field"]')?.value ?? '';
+    return (this.querySelector<HTMLInputElement>('input[data-behavior="hidden-field"]')?.value ??
+      '') as AutocompleteValue<Mode>;
   }
 
   /**
@@ -497,12 +543,28 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   }
 }
 
+export type SingleAutocompleteElement<Src extends Source = Source> = AwcAutocompleteElement<'single', Src>;
+export type MultipleAutocompleteElement<Src extends Source = Source> = AwcAutocompleteElement<'multiple', Src>;
+export type LocalAutocompleteElement<Mode extends SelectionMode = SelectionMode> = AwcAutocompleteElement<
+  Mode,
+  'local'
+>;
+export type RemoteAutocompleteElement<Mode extends SelectionMode = SelectionMode> = AwcAutocompleteElement<
+  Mode,
+  'remote'
+>;
+
 declare global {
   interface Window {
     AwcAutocompleteElement: typeof AwcAutocompleteElement;
   }
   interface HTMLElementTagNameMap {
-    'awc-autocomplete': AwcAutocompleteElement;
+    // The full cross-product of both dimensions so `if (el.multiple)` and `if (el.remote)` each narrow.
+    'awc-autocomplete':
+      | SingleAutocompleteElement<'local'>
+      | SingleAutocompleteElement<'remote'>
+      | MultipleAutocompleteElement<'local'>
+      | MultipleAutocompleteElement<'remote'>;
   }
   interface GlobalEventHandlersEventMap {
     'awc-autocomplete:commit': CustomEvent<AwcAutocompleteCommitEvent>;
