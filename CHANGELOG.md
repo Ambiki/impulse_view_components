@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed `useOutsideClick` leaking its `click` listener by switching teardown to `AbortController` ([#215](https://github.com/Ambiki/impulse_view_components/pull/215))
+
 ## [0.8.0] - 2026-01-09
 
 ### Changed

@@ -8,6 +8,9 @@ type UseOutsideClickOptions = {
 };
 
 export default function useOutsideClick(element: ImpulseElement, { boundaries, callback }: UseOutsideClickOptions) {
+  const controller = new AbortController();
+  const { signal } = controller;
+
   let initialClickTarget: HTMLElement | null = null;
 
   function setInitialClickTarget(event: Event) {
@@ -33,13 +36,15 @@ export default function useOutsideClick(element: ImpulseElement, { boundaries, c
     initialClickTarget = null;
   }
 
-  document.addEventListener('mousedown', setInitialClickTarget, true);
-  document.addEventListener('click', (event) => handleOutsideClick(event, () => initialClickTarget), true);
+  document.addEventListener('mousedown', setInitialClickTarget, { capture: true, signal });
+  document.addEventListener('click', (event) => handleOutsideClick(event, () => initialClickTarget), {
+    capture: true,
+    signal,
+  });
 
   function destroy() {
     initialClickTarget = null;
-    document.removeEventListener('mousedown', setInitialClickTarget, true);
-    document.removeEventListener('click', (event) => handleOutsideClick(event, () => initialClickTarget), true);
+    controller.abort();
   }
 
   const disconnectedCallback = element.disconnected.bind(element);
