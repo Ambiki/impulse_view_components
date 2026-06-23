@@ -26,6 +26,9 @@ export type Source = 'local' | 'remote';
 /** Resolves the runtime `multiple` property type from the selection mode. */
 type IsMultiple<Mode extends SelectionMode> = Mode extends 'multiple' ? true : false;
 
+/** Resolves the runtime `remote` getter type from the source. */
+type IsRemote<Src extends Source> = Src extends 'remote' ? true : false;
+
 /** Resolves the `value` type based on the selection mode. */
 export type AutocompleteValue<Mode extends SelectionMode> = Mode extends 'multiple' ? string[] : string;
 
@@ -486,6 +489,14 @@ export default class AwcAutocompleteElement<
   }
 
   /**
+   * Whether the options are fetched from a remote source (i.e. the `src` attribute is set).
+   * Narrowing on this (`if (el.remote)`) resolves source-dependent types such as `setValue`.
+   */
+  get remote(): IsRemote<Src> {
+    return Boolean(this.src) as IsRemote<Src>;
+  }
+
+  /**
    * Returns the selected value.
    */
   get value(): AutocompleteValue<Mode> {
@@ -548,7 +559,12 @@ declare global {
     AwcAutocompleteElement: typeof AwcAutocompleteElement;
   }
   interface HTMLElementTagNameMap {
-    'awc-autocomplete': SingleAutocompleteElement | MultipleAutocompleteElement;
+    // The full cross-product of both dimensions so `if (el.multiple)` and `if (el.remote)` each narrow.
+    'awc-autocomplete':
+      | SingleAutocompleteElement<'local'>
+      | SingleAutocompleteElement<'remote'>
+      | MultipleAutocompleteElement<'local'>
+      | MultipleAutocompleteElement<'remote'>;
   }
   interface GlobalEventHandlersEventMap {
     'awc-autocomplete:commit': CustomEvent<AwcAutocompleteCommitEvent>;
