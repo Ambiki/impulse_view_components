@@ -17,17 +17,26 @@ interface BaseOptionEvent {
 export interface AwcAutocompleteCommitEvent extends BaseOptionEvent {}
 export interface AwcAutocompleteRemoveEvent extends BaseOptionEvent {}
 
+/** Whether multiple values can be selected. */
+export type SelectionMode = 'single' | 'multiple';
+
+/** Where the options come from: the DOM (`local`) or a remote endpoint (`remote`). */
+export type Source = 'local' | 'remote';
+
+/** Resolves the runtime `multiple` property type from the selection mode. */
+type IsMultiple<Mode extends SelectionMode> = Mode extends 'multiple' ? true : false;
+
 /** Resolves the `value` type based on the selection mode. */
-export type AutocompleteValue<Multiple extends boolean> = Multiple extends true ? string[] : string;
+export type AutocompleteValue<Mode extends SelectionMode> = Mode extends 'multiple' ? string[] : string;
 
 /** Resolves the `removeValue` arguments: required for multi-select, none for single-select. */
-type RemoveValueArgs<Multiple extends boolean> = Multiple extends true ? [value: string] : [];
+type RemoveValueArgs<Mode extends SelectionMode> = Mode extends 'multiple' ? [value: string] : [];
 
 /** Resolves the `setValue` text argument: required for a remote source, optional otherwise. */
-type SetValueTextArgs<Remote extends boolean> = Remote extends true ? [text: string] : [text?: string];
+type SetValueTextArgs<Src extends Source> = Src extends 'remote' ? [text: string] : [text?: string];
 
 /** Resolves the select variant based on the selection mode. */
-type SelectVariant<Multiple extends boolean> = Multiple extends true ? MultipleSelect : SingleSelect;
+type SelectVariant<Mode extends SelectionMode> = Mode extends 'multiple' ? MultipleSelect : SingleSelect;
 
 /** The contract implemented by the local and remote search variants. */
 export interface SearchVariant {
@@ -38,8 +47,8 @@ export interface SearchVariant {
 
 @registerElement('awc-autocomplete')
 export default class AwcAutocompleteElement<
-  Multiple extends boolean = boolean,
-  Remote extends boolean = boolean,
+  Mode extends SelectionMode = SelectionMode,
+  Src extends Source = Source,
 > extends ImpulseElement {
   /**
    * Shows/hides the listbox element.
@@ -59,7 +68,7 @@ export default class AwcAutocompleteElement<
   /**
    * Whether multiple values can be selected or not.
    */
-  @property({ type: Boolean }) multiple = false as Multiple;
+  @property({ type: Boolean }) multiple: IsMultiple<Mode> = false as IsMultiple<Mode>;
 
   /**
    * The endpoint to fetch the options from.
@@ -93,7 +102,7 @@ export default class AwcAutocompleteElement<
   @targets() groups: HTMLElement[];
 
   combobox: Combobox;
-  selectVariant: SelectVariant<Multiple>;
+  selectVariant: SelectVariant<Mode>;
   private searchVariant: SearchVariant;
   private floatingUI: UseFloatingUIType;
   private firstFocus = true;
@@ -137,7 +146,7 @@ export default class AwcAutocompleteElement<
     });
 
     this.combobox = new Combobox(this.input, this.listbox, { multiple: this.multiple });
-    this.selectVariant = (this.multiple ? new MultipleSelect(this) : new SingleSelect(this)) as SelectVariant<Multiple>;
+    this.selectVariant = (this.multiple ? new MultipleSelect(this) : new SingleSelect(this)) as SelectVariant<Mode>;
     this.selectVariant.connected();
     this.searchVariant = this.src ? new RemoteSearch(this) : new LocalSearch(this);
     this.selectVariant.required = this.required;
@@ -375,7 +384,7 @@ export default class AwcAutocompleteElement<
    * @param value - The value of the option.
    * @param text - The text of the option.
    */
-  setValue(value: string, ...rest: SetValueTextArgs<Remote>) {
+  setValue(value: string, ...rest: SetValueTextArgs<Src>) {
     const [text] = rest as [string?];
     const option = this.options.find((o) => o.getAttribute('value') === value);
     const textValue = text || option?.getAttribute('data-text') || '';
@@ -386,7 +395,7 @@ export default class AwcAutocompleteElement<
    * Removes a value from the element.
    * @param value - The value of the option (you do not have to provide the value arg for a single select).
    */
-  removeValue(...args: RemoveValueArgs<Multiple>) {
+  removeValue(...args: RemoveValueArgs<Mode>) {
     const [value] = args as [string?];
     if (this.selectVariant instanceof MultipleSelect && value) {
       this.selectVariant.removeValue(value);
@@ -459,7 +468,7 @@ export default class AwcAutocompleteElement<
     const value = tag.getAttribute('value');
     if (!value) return;
     // Tags only exist in multi-select mode, so the value argument is always required here.
-    (this as AwcAutocompleteElement<true>).removeValue(value);
+    (this as AwcAutocompleteElement<'multiple'>).removeValue(value);
   }
 
   /**
@@ -479,12 +488,12 @@ export default class AwcAutocompleteElement<
   /**
    * Returns the selected value.
    */
-  get value(): AutocompleteValue<Multiple> {
+  get value(): AutocompleteValue<Mode> {
     if (this.multiple) {
-      return this.tags.map((tag) => tag.getAttribute('value') ?? '') as AutocompleteValue<Multiple>;
+      return this.tags.map((tag) => tag.getAttribute('value') ?? '') as AutocompleteValue<Mode>;
     }
     return (this.querySelector<HTMLInputElement>('input[data-behavior="hidden-field"]')?.value ??
-      '') as AutocompleteValue<Multiple>;
+      '') as AutocompleteValue<Mode>;
   }
 
   /**
@@ -523,10 +532,10 @@ export default class AwcAutocompleteElement<
   }
 }
 
-export type SingleAutocompleteElement = AwcAutocompleteElement<false>;
-export type MultipleAutocompleteElement = AwcAutocompleteElement<true>;
-export type LocalAutocompleteElement = AwcAutocompleteElement<boolean, false>;
-export type RemoteAutocompleteElement = AwcAutocompleteElement<boolean, true>;
+export type SingleAutocompleteElement = AwcAutocompleteElement<'single'>;
+export type MultipleAutocompleteElement = AwcAutocompleteElement<'multiple'>;
+export type LocalAutocompleteElement = AwcAutocompleteElement<SelectionMode, 'local'>;
+export type RemoteAutocompleteElement = AwcAutocompleteElement<SelectionMode, 'remote'>;
 
 declare global {
   interface Window {
