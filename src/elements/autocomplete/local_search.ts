@@ -9,7 +9,7 @@ export default class LocalSearch implements SearchVariant {
   }
 
   search(value: string) {
-    this.autocomplete.options.forEach(filterOptions(value));
+    filterOptions(this.autocomplete.options, value);
     const firstOption = this.autocomplete.visibleOptions[0];
     if (firstOption) {
       this.autocomplete.combobox.activate(firstOption);
@@ -37,22 +37,22 @@ export default class LocalSearch implements SearchVariant {
   }
 }
 
-function filterOptions(query: string) {
-  return (option: HTMLElement) => {
+function filterOptions(options: HTMLElement[], query: string) {
+  const normalizedQuery = query.toLowerCase();
+  // Tracks whether each group has at least one visible option. We accumulate this in a single
+  // pass instead of re-querying every group's options per option (which was O(n × group size)).
+  const groupHasVisibleOption = new Map<HTMLElement, boolean>();
+
+  for (const option of options) {
     const group = option.closest<HTMLElement>('[role="group"]');
-    if (query) {
-      const value = option.getAttribute('data-text');
-      const match = value?.toLowerCase().includes(query.toLowerCase());
-      option.hidden = !match;
-      if (group) {
-        const options = Array.from(group.querySelectorAll<HTMLElement>('[role="option"]'));
-        group.hidden = options.every((o) => o.hidden);
-      }
-    } else {
-      option.hidden = false;
-      if (group) {
-        group.hidden = false;
-      }
+    const match = normalizedQuery ? !!option.getAttribute('data-text')?.toLowerCase().includes(normalizedQuery) : true;
+    option.hidden = !match;
+    if (group) {
+      groupHasVisibleOption.set(group, (groupHasVisibleOption.get(group) ?? false) || match);
     }
-  };
+  }
+
+  for (const [group, hasVisibleOption] of groupHasVisibleOption) {
+    group.hidden = !hasVisibleOption;
+  }
 }
