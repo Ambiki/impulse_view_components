@@ -2,8 +2,8 @@
   <% if content.present? %>
     <%= content %>
   <% else %>
-    <%= @title %>
-    <button type="button" class="close" aria-label="Close" data-action="click->awc-popover#hide" autofocus>
+    <%= tag.span @title, id: @title_id %>
+    <button type="button" class="close" aria-label="Close" data-action="click->awc-popover#hide" data-autofocus>
       &times;
     </button>
   <% end %>

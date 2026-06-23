@@ -15,11 +15,13 @@ describe('focus_trap', () => {
 
     const container = el.querySelector<HTMLElement>('#container')!;
     focusTrap(container);
-    const traps = Array.from(el.querySelectorAll('[data-sentinel-for]'));
 
     expect(document.activeElement).to.equal(container.querySelector('button'));
-    expect(container).to.have.attribute('data-focus-trap-id');
-    expect(container).not.to.contain(traps[0]); // surround is true by default.
+    expect(container).to.have.attribute('data-focus-trap', 'active');
+    // Sentinels are inserted as the first and last children of the container.
+    expect(container.querySelectorAll(':scope > span.sentinel')).to.have.lengthOf(2);
+    expect(container.firstElementChild).to.have.class('sentinel');
+    expect(container.lastElementChild).to.have.class('sentinel');
   });
 
   it('should focus on the element that has the data-autofocus attribute', async () => {
@@ -83,7 +85,7 @@ describe('focus_trap', () => {
     expect(document.activeElement).to.equal(button2);
   });
 
-  it('should be able to nest the focus trap', async () => {
+  it('should suspend the active trap while a nested trap is active and reactivate it afterwards', async () => {
     const el = await fixture<HTMLElement>(html`
       <div>
         <button id="button1" type="button">Button 1</button>
@@ -101,8 +103,12 @@ describe('focus_trap', () => {
 
     focusTrap(el);
     expect(document.activeElement).to.equal(button1);
-    const nestedTrap = focusTrap(nestedContainer);
+
+    const nestedTrap = focusTrap(nestedContainer)!;
     expect(document.activeElement).to.equal(button2);
+    // The outer trap is suspended while the nested trap is active.
+    expect(el).to.have.attribute('data-focus-trap', 'suspended');
+    expect(nestedContainer).to.have.attribute('data-focus-trap', 'active');
 
     await sendKeys({ press: 'Tab' });
     expect(document.activeElement).to.equal(button3);
@@ -111,6 +117,9 @@ describe('focus_trap', () => {
     expect(document.activeElement).to.equal(button2);
 
     nestedTrap.abort();
+    // The outer trap is reactivated once the nested trap is released.
+    expect(el).to.have.attribute('data-focus-trap', 'active');
+    expect(nestedContainer).not.to.have.attribute('data-focus-trap');
     button1.focus();
 
     await sendKeys({ press: 'Tab' });
@@ -151,7 +160,7 @@ describe('focus_trap', () => {
     await sendKeys({ press: 'Tab' });
     expect(document.activeElement).to.equal(button1);
 
-    const trap2 = focusTrap(container2);
+    const trap2 = focusTrap(container2)!;
     expect(document.activeElement).to.equal(button3);
     await sendKeys({ press: 'Tab' });
     expect(document.activeElement).to.equal(button4);
@@ -163,7 +172,7 @@ describe('focus_trap', () => {
 
     await sendKeys({ press: 'Tab' });
     expect(document.activeElement).to.equal(button2);
-    // Make sure trap exists on the first container.
+    // Make sure the trap still exists on the first container.
     await sendKeys({ press: 'Tab' });
     expect(document.activeElement).to.equal(button1);
   });
@@ -184,6 +193,8 @@ describe('focus_trap', () => {
     const button = document.createElement('button');
     button.id = 'dynamic-button';
     el.append(button);
+    // Wait for the mutation observer to re-pin the end sentinel after the appended content.
+    await new Promise((resolve) => setTimeout(resolve));
 
     await sendKeys({ press: 'Tab' });
     expect(document.activeElement).to.equal(button2);
@@ -209,26 +220,13 @@ describe('focus_trap', () => {
     `);
 
     const container = el.querySelector<HTMLElement>('#container')!;
-    const trap = focusTrap(container);
+    const trap = focusTrap(container)!;
 
-    expect(container).to.have.attribute('data-focus-trap-id');
+    expect(container).to.have.attribute('data-focus-trap', 'active');
+    expect(container.querySelectorAll(':scope > span.sentinel')).to.have.lengthOf(2);
 
     trap.abort();
-    expect(container).not.to.have.attribute('data-focus-trap-id');
-  });
-
-  it('appends and prepends the trap', async () => {
-    const el = await fixture<HTMLElement>(html`
-      <div>
-        <button type="button">Button</button>
-        <div id="container"></div>
-      </div>
-    `);
-
-    const container = el.querySelector<HTMLElement>('#container')!;
-    focusTrap(container, { surround: false });
-    const traps = Array.from(el.querySelectorAll('[data-sentinel-for]'));
-
-    expect(container).to.contain(traps[0]);
+    expect(container).not.to.have.attribute('data-focus-trap');
+    expect(container.querySelectorAll(':scope > span.sentinel')).to.have.lengthOf(0);
   });
 });
