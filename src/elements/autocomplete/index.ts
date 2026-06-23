@@ -23,6 +23,9 @@ export type AutocompleteValue<Multiple extends boolean> = Multiple extends true 
 /** Resolves the `removeValue` arguments: required for multi-select, none for single-select. */
 type RemoveValueArgs<Multiple extends boolean> = Multiple extends true ? [value: string] : [];
 
+/** Resolves the `setValue` text argument: required for a remote source, optional otherwise. */
+type SetValueTextArgs<Remote extends boolean> = Remote extends true ? [text: string] : [text?: string];
+
 /** Resolves the select variant based on the selection mode. */
 type SelectVariant<Multiple extends boolean> = Multiple extends true ? MultipleSelect : SingleSelect;
 
@@ -34,7 +37,10 @@ export interface SearchVariant {
 }
 
 @registerElement('awc-autocomplete')
-export default class AwcAutocompleteElement<Multiple extends boolean = boolean> extends ImpulseElement {
+export default class AwcAutocompleteElement<
+  Multiple extends boolean = boolean,
+  Remote extends boolean = boolean,
+> extends ImpulseElement {
   /**
    * Shows/hides the listbox element.
    */
@@ -369,7 +375,8 @@ export default class AwcAutocompleteElement<Multiple extends boolean = boolean> 
    * @param value - The value of the option.
    * @param text - The text of the option.
    */
-  setValue(value: string, text?: string) {
+  setValue(value: string, ...rest: SetValueTextArgs<Remote>) {
+    const [text] = rest as [string?];
     const option = this.options.find((o) => o.getAttribute('value') === value);
     const textValue = text || option?.getAttribute('data-text') || '';
     this.selectVariant.setValue(value, textValue);
@@ -518,6 +525,8 @@ export default class AwcAutocompleteElement<Multiple extends boolean = boolean> 
 
 export type SingleAutocompleteElement = AwcAutocompleteElement<false>;
 export type MultipleAutocompleteElement = AwcAutocompleteElement<true>;
+export type LocalAutocompleteElement = AwcAutocompleteElement<boolean, false>;
+export type RemoteAutocompleteElement = AwcAutocompleteElement<boolean, true>;
 
 declare global {
   interface Window {

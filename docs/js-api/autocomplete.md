@@ -38,6 +38,24 @@ const single = document.querySelector<SingleAutocompleteElement>('awc-autocomple
 single.value; // string
 ```
 
+The source (local vs. remote) determines whether `setValue` requires the `text` argument. Because
+this is driven by the `src` attribute (a string) rather than a boolean, opt into the strict typing
+by querying as `RemoteAutocompleteElement` (or `LocalAutocompleteElement`):
+
+```ts
+import type {
+  RemoteAutocompleteElement,
+  LocalAutocompleteElement,
+} from '@ambiki/impulse-view-components/dist/elements/autocomplete';
+
+const remote = document.querySelector<RemoteAutocompleteElement>('awc-autocomplete')!;
+remote.setValue('1', 'One'); // text is required
+remote.setValue('1'); // ✗ type error
+
+const local = document.querySelector<LocalAutocompleteElement>('awc-autocomplete')!;
+local.setValue('1'); // text is optional
+```
+
 ## Methods
 
 ### `open`
@@ -82,7 +100,9 @@ autocomplete.value;
 
 ### `setValue`
 
-Sets the value of the element.
+Sets the value of the element. When the options are fetched from a remote source, the `text`
+argument is required (the option is not in the DOM, so its text cannot be derived); for local
+options it is optional. See [TypeScript](#typescript) for how to enforce this at compile time.
 
 ```js
 autocomplete.setValue('apple', 'Apple');
