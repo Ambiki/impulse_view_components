@@ -2,6 +2,7 @@ import { ImpulseElement, property, registerElement, target } from '@ambiki/impul
 import type { Placement, Strategy } from '@floating-ui/dom';
 import useFloatingUI, { UseFloatingUIType } from 'src/hooks/use_floating_ui';
 import useOutsideClick from 'src/hooks/use_outside_click';
+import focusTrap from 'src/helpers/focus_trap';
 import { stripCSSUnit } from '../../helpers/string';
 
 @registerElement('awc-popover')
@@ -34,6 +35,7 @@ export default class AwcPopoverElement extends ImpulseElement {
   @target() arrow: HTMLElement;
 
   private floatingUI: UseFloatingUIType;
+  private focusTrapController?: AbortController;
 
   /**
    * Called when the element is added to the DOM.
@@ -99,6 +101,9 @@ export default class AwcPopoverElement extends ImpulseElement {
     this.panel.show();
     this.button.setAttribute('aria-expanded', 'true');
     this.floatingUI.start();
+    // Trap keyboard focus within the panel. Initial focus lands on the element marked with
+    // `data-autofocus` (the close button by default).
+    this.focusTrapController = focusTrap(this.panel);
   }
 
   /**
@@ -107,6 +112,7 @@ export default class AwcPopoverElement extends ImpulseElement {
   async hide(event?: Event): Promise<void> {
     if (!this.open) return;
     this.open = false;
+    this.focusTrapController?.abort();
     this.panel.close();
     await this.floatingUI.stop();
     this.button.setAttribute('aria-expanded', 'false');
