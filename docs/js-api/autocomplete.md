@@ -56,6 +56,17 @@ const local = document.querySelector<LocalAutocompleteElement>('awc-autocomplete
 local.setValue('1'); // text is optional
 ```
 
+Each alias leaves the other dimension open, but they are composable — pass the other dimension as a
+type argument to pin both at once:
+
+```ts
+const el = document.querySelector<MultipleAutocompleteElement<'remote'>>('awc-autocomplete')!;
+el.value; // string[]
+el.setValue('1', 'One'); // text is required
+
+// `RemoteAutocompleteElement<'multiple'>` resolves to the same type.
+```
+
 ## Methods
 
 ### `open`

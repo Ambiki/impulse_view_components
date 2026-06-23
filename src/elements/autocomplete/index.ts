@@ -532,10 +532,16 @@ export default class AwcAutocompleteElement<
   }
 }
 
-export type SingleAutocompleteElement = AwcAutocompleteElement<'single'>;
-export type MultipleAutocompleteElement = AwcAutocompleteElement<'multiple'>;
-export type LocalAutocompleteElement = AwcAutocompleteElement<SelectionMode, 'local'>;
-export type RemoteAutocompleteElement = AwcAutocompleteElement<SelectionMode, 'remote'>;
+export type SingleAutocompleteElement<Src extends Source = Source> = AwcAutocompleteElement<'single', Src>;
+export type MultipleAutocompleteElement<Src extends Source = Source> = AwcAutocompleteElement<'multiple', Src>;
+export type LocalAutocompleteElement<Mode extends SelectionMode = SelectionMode> = AwcAutocompleteElement<
+  Mode,
+  'local'
+>;
+export type RemoteAutocompleteElement<Mode extends SelectionMode = SelectionMode> = AwcAutocompleteElement<
+  Mode,
+  'remote'
+>;
 
 declare global {
   interface Window {
