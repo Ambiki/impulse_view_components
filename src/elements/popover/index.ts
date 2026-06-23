@@ -172,4 +172,10 @@ declare global {
   interface HTMLElementTagNameMap {
     'awc-popover': AwcPopoverElement;
   }
+  interface GlobalEventHandlersEventMap {
+    'awc-popover:hide': CustomEvent<Record<string, never>>;
+    'awc-popover:hidden': CustomEvent<Record<string, never>>;
+    'awc-popover:show': CustomEvent<Record<string, never>>;
+    'awc-popover:shown': CustomEvent<Record<string, never>>;
+  }
 }

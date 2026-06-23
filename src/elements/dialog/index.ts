@@ -113,4 +113,7 @@ declare global {
   interface HTMLElementTagNameMap {
     'awc-dialog': AwcDialogElement;
   }
+  interface GlobalEventHandlersEventMap {
+    'awc-dialog:hidden': CustomEvent<Record<string, never>>;
+  }
 }
