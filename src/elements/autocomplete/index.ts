@@ -26,6 +26,13 @@ type RemoveValueArgs<Multiple extends boolean> = Multiple extends true ? [value:
 /** Resolves the select variant based on the selection mode. */
 type SelectVariant<Multiple extends boolean> = Multiple extends true ? MultipleSelect : SingleSelect;
 
+/** The contract implemented by the local and remote search variants. */
+export interface SearchVariant {
+  search(value: string): void | Promise<void>;
+  start(): void;
+  stop(): void;
+}
+
 @registerElement('awc-autocomplete')
 export default class AwcAutocompleteElement<Multiple extends boolean = boolean> extends ImpulseElement {
   /**
@@ -81,7 +88,7 @@ export default class AwcAutocompleteElement<Multiple extends boolean = boolean> 
 
   combobox: Combobox;
   selectVariant: SelectVariant<Multiple>;
-  private searchVariant: LocalSearch | RemoteSearch;
+  private searchVariant: SearchVariant;
   private floatingUI: UseFloatingUIType;
   private firstFocus = true;
   private preventOutsideClickEvent = false;

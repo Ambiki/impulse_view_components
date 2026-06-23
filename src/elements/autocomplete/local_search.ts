@@ -1,6 +1,7 @@
-import AwcAutocompleteElement from './index';
+import type AwcAutocompleteElement from './index';
+import type { SearchVariant } from './index';
 
-export default class LocalSearch {
+export default class LocalSearch implements SearchVariant {
   readonly autocomplete: AwcAutocompleteElement;
 
   constructor(autocomplete: AwcAutocompleteElement) {
