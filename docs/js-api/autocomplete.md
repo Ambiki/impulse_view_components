@@ -4,6 +4,40 @@
 const autocomplete = document.querySelector('awc-autocomplete');
 ```
 
+## TypeScript
+
+The selection mode (single vs. multiple) determines the type of `value` and the arguments
+`removeValue` accepts. TypeScript resolves these automatically when you narrow on the `multiple`
+property:
+
+```ts
+const autocomplete = document.querySelector('awc-autocomplete')!;
+
+if (autocomplete.multiple) {
+  autocomplete.value; // string[]
+  autocomplete.removeValue('1'); // value argument is required
+} else {
+  autocomplete.value; // string
+  autocomplete.removeValue(); // no argument
+}
+```
+
+If you already know the mode at the call site, pass the exported type to `querySelector` instead
+of narrowing:
+
+```ts
+import type {
+  SingleAutocompleteElement,
+  MultipleAutocompleteElement,
+} from '@ambiki/impulse-view-components/dist/elements/autocomplete';
+
+const multi = document.querySelector<MultipleAutocompleteElement>('awc-autocomplete')!;
+multi.value; // string[]
+
+const single = document.querySelector<SingleAutocompleteElement>('awc-autocomplete')!;
+single.value; // string
+```
+
 ## Methods
 
 ### `open`
@@ -33,11 +67,17 @@ autocomplete.hide();
 
 ### `value`
 
-Returns all the selected values.
+Returns the selected value(s). For a single select this is a `string`; for a multiple select it
+is a `string[]`.
 
 ```js
+// Multiple select
 autocomplete.value;
 // => ['1', '2']
+
+// Single select
+autocomplete.value;
+// => '1'
 ```
 
 ### `setValue`
@@ -66,7 +106,9 @@ autocomplete.value;
 ```
 
 ::: tip
-You do not have to provide the argument to `removeValue` if the element is a single select.
+The `value` argument is required for a multiple select and is not used by a single select (which
+clears its value when `removeValue()` is called). TypeScript enforces this when the mode is known —
+see [TypeScript](#typescript).
 :::
 
 ### `activate`

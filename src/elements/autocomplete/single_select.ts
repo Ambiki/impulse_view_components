@@ -58,7 +58,7 @@ export default class SingleSelect {
   }
 
   private get selectedOption() {
-    return this.autocomplete.options.find((o) => o.getAttribute('value') === this.autocomplete.value);
+    return this.autocomplete.options.find((o) => o.getAttribute('value') === this.hiddenField.value);
   }
 
   private get hiddenField() {

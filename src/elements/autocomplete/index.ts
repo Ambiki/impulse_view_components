@@ -17,8 +17,17 @@ interface BaseOptionEvent {
 export interface AwcAutocompleteCommitEvent extends BaseOptionEvent {}
 export interface AwcAutocompleteRemoveEvent extends BaseOptionEvent {}
 
+/** Resolves the `value` type based on the selection mode. */
+export type AutocompleteValue<Multiple extends boolean> = Multiple extends true ? string[] : string;
+
+/** Resolves the `removeValue` arguments: required for multi-select, none for single-select. */
+type RemoveValueArgs<Multiple extends boolean> = Multiple extends true ? [value: string] : [];
+
+/** Resolves the select variant based on the selection mode. */
+type SelectVariant<Multiple extends boolean> = Multiple extends true ? MultipleSelect : SingleSelect;
+
 @registerElement('awc-autocomplete')
-export default class AwcAutocompleteElement extends ImpulseElement {
+export default class AwcAutocompleteElement<Multiple extends boolean = boolean> extends ImpulseElement {
   /**
    * Shows/hides the listbox element.
    */
@@ -37,7 +46,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   /**
    * Whether multiple values can be selected or not.
    */
-  @property({ type: Boolean }) multiple = false;
+  @property({ type: Boolean }) multiple = false as Multiple;
 
   /**
    * The endpoint to fetch the options from.
@@ -71,7 +80,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   @targets() groups: HTMLElement[];
 
   combobox: Combobox;
-  selectVariant: SingleSelect | MultipleSelect;
+  selectVariant: SelectVariant<Multiple>;
   private searchVariant: LocalSearch | RemoteSearch;
   private floatingUI: UseFloatingUIType;
   private firstFocus = true;
@@ -115,7 +124,7 @@ export default class AwcAutocompleteElement extends ImpulseElement {
     });
 
     this.combobox = new Combobox(this.input, this.listbox, { multiple: this.multiple });
-    this.selectVariant = this.multiple ? new MultipleSelect(this) : new SingleSelect(this);
+    this.selectVariant = (this.multiple ? new MultipleSelect(this) : new SingleSelect(this)) as SelectVariant<Multiple>;
     this.selectVariant.connected();
     this.searchVariant = this.src ? new RemoteSearch(this) : new LocalSearch(this);
     this.selectVariant.required = this.required;
@@ -363,9 +372,10 @@ export default class AwcAutocompleteElement extends ImpulseElement {
    * Removes a value from the element.
    * @param value - The value of the option (you do not have to provide the value arg for a single select).
    */
-  removeValue(value?: string) {
-    if (this.multiple && value) {
-      (this.selectVariant as MultipleSelect).removeValue(value);
+  removeValue(...args: RemoveValueArgs<Multiple>) {
+    const [value] = args as [string?];
+    if (this.selectVariant instanceof MultipleSelect && value) {
+      this.selectVariant.removeValue(value);
       return;
     }
 
@@ -434,7 +444,8 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   private removeTag(tag: HTMLElement) {
     const value = tag.getAttribute('value');
     if (!value) return;
-    this.removeValue(value);
+    // Tags only exist in multi-select mode, so the value argument is always required here.
+    (this as AwcAutocompleteElement<true>).removeValue(value);
   }
 
   /**
@@ -454,11 +465,12 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   /**
    * Returns the selected value.
    */
-  get value(): string | string[] {
+  get value(): AutocompleteValue<Multiple> {
     if (this.multiple) {
-      return this.tags.map((tag) => tag.getAttribute('value') ?? '');
+      return this.tags.map((tag) => tag.getAttribute('value') ?? '') as AutocompleteValue<Multiple>;
     }
-    return this.querySelector<HTMLInputElement>('input[data-behavior="hidden-field"]')?.value ?? '';
+    return (this.querySelector<HTMLInputElement>('input[data-behavior="hidden-field"]')?.value ??
+      '') as AutocompleteValue<Multiple>;
   }
 
   /**
@@ -497,12 +509,15 @@ export default class AwcAutocompleteElement extends ImpulseElement {
   }
 }
 
+export type SingleAutocompleteElement = AwcAutocompleteElement<false>;
+export type MultipleAutocompleteElement = AwcAutocompleteElement<true>;
+
 declare global {
   interface Window {
     AwcAutocompleteElement: typeof AwcAutocompleteElement;
   }
   interface HTMLElementTagNameMap {
-    'awc-autocomplete': AwcAutocompleteElement;
+    'awc-autocomplete': SingleAutocompleteElement | MultipleAutocompleteElement;
   }
   interface GlobalEventHandlersEventMap {
     'awc-autocomplete:commit': CustomEvent<AwcAutocompleteCommitEvent>;
