@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Fixed the `exports` subpath map pointing at directories instead of files, which broke `dist/elements/*`, `dist/hooks/*` and `dist/helpers/*` imports for Node and for TypeScript under `moduleResolution: bundler`/`node16`. Every subpath now maps to a real file and declares a `types` condition, and element stylesheets stay reachable through the `sass`/`style` conditions ([#224](https://github.com/Ambiki/impulse_view_components/issues/224))
 - Fixed `useOutsideClick` leaking its `click` listener by switching teardown to `AbortController` ([#215](https://github.com/Ambiki/impulse_view_components/pull/215))
 
 ## [0.8.0] - 2026-01-09
