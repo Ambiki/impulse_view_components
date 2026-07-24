@@ -6,17 +6,23 @@
 // `mainFiles` *after* the exports mapping), so a broken map only surfaces in Node and in
 // TypeScript once a consumer moves to `moduleResolution: bundler`/`node16`.
 //
-// This script therefore checks resolution the way those two resolvers do:
+// This script therefore checks resolution the way those resolvers do:
 //   1. every public subpath resolves through Node's ESM resolver to a file that exists,
-//   2. every element directory is reachable by its bare specifier, with its stylesheet
-//      exposed under the `sass`/`style` conditions,
-//   3. `tsc --noEmit` passes on a fixture that imports all of them.
+//   2. element stylesheets resolve under the `sass`/`style` conditions, which is how
+//      sass-loader asks for them,
+//   3. a declaration file sits next to every runtime file,
+//   4. `tsc --noEmit` passes on a fixture that imports all of them.
+//
+// Resolution works without linking the package into `node_modules`: a package with an
+// `exports` map can reference itself by name, and both this script and the fixture live
+// inside it.
 //
 // Run with `yarn test:exports` (requires `NODE_ENV=production yarn build:js` first).
 
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
+import { createRequire } from 'node:module';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
@@ -34,23 +40,22 @@ function check(description, fn) {
   }
 }
 
-// Node only resolves a package by name from a `node_modules` directory, so link the package
-// into its own tree. `node_modules` is gitignored, and the link is reused across runs.
-function linkSelf() {
-  const linkPath = path.join(rootDir, 'node_modules', pkg.name);
-  fs.mkdirSync(path.dirname(linkPath), { recursive: true });
-
-  if (fs.existsSync(linkPath)) {
-    if (fs.realpathSync(linkPath) === fs.realpathSync(rootDir)) return;
-    fs.rmSync(linkPath, { recursive: true, force: true });
-  }
-
-  fs.symlinkSync(rootDir, linkPath, 'junction');
+function resolvesToFile(specifier) {
+  const filePath = fileURLToPath(import.meta.resolve(specifier));
+  assert.ok(fs.existsSync(filePath), `resolved to ${path.relative(rootDir, filePath)}, which does not exist`);
+  return filePath;
 }
 
-function resolvesToFile(specifier) {
-  const resolved = import.meta.resolve(specifier);
-  const filePath = fileURLToPath(resolved);
+// `import.meta.resolve` cannot be given custom conditions, so resolve in a child process
+// that was started with them.
+function resolvesToFileUnder(conditions, specifier) {
+  const script = `process.stdout.write(import.meta.resolve(${JSON.stringify(specifier)}))`;
+  const args = [...conditions.flatMap((condition) => ['--conditions', condition]), '--input-type=module', '-e', script];
+  const result = spawnSync(process.execPath, args, { cwd: rootDir, encoding: 'utf8' });
+
+  assert.equal(result.status, 0, `did not resolve\n${(result.stderr || '').trim()}`);
+
+  const filePath = fileURLToPath(result.stdout.trim());
   assert.ok(fs.existsSync(filePath), `resolved to ${path.relative(rootDir, filePath)}, which does not exist`);
   return filePath;
 }
@@ -66,13 +71,14 @@ if (!fs.existsSync(distDir) || !fs.existsSync(path.join(distDir, 'styles'))) {
   process.exit(1);
 }
 
-linkSelf();
-
-// 1. Runtime resolution through Node's ESM resolver.
 const elementDirs = fs
   .readdirSync(path.join(distDir, 'elements'), { withFileTypes: true })
   .filter((entry) => entry.isDirectory())
   .map((entry) => entry.name);
+
+const styledElementDirs = elementDirs.filter((name) =>
+  fs.existsSync(path.join(distDir, 'elements', name, 'index.scss'))
+);
 
 const flatModules = ['hooks', 'helpers'].flatMap((group) =>
   fs
@@ -81,7 +87,8 @@ const flatModules = ['hooks', 'helpers'].flatMap((group) =>
     .map((file) => [group, path.basename(file, '.js')])
 );
 
-const specifiers = [
+// 1. Runtime resolution through Node's ESM resolver.
+const scriptSpecifiers = [
   pkg.name,
   subpath('dist', 'index.js'),
   ...elementDirs.map((name) => subpath('dist', 'elements', name)),
@@ -93,34 +100,45 @@ const specifiers = [
     .readdirSync(path.join(distDir, 'elements', 'autocomplete'))
     .filter((file) => file.endsWith('.js') && file !== 'index.js')
     .map((file) => subpath('dist', 'elements', 'autocomplete', path.basename(file, '.js'))),
-  // Stylesheets are addressed with their extension.
+];
+
+// Stylesheets addressed with their extension, which needs no condition.
+const styleSpecifiers = [
+  ...styledElementDirs.map((name) => subpath('dist', 'elements', name, 'index.scss')),
   ...fs.readdirSync(path.join(distDir, 'styles')).map((file) => subpath('dist', 'styles', file)),
 ];
 
-for (const specifier of specifiers) {
+for (const specifier of [...scriptSpecifiers, ...styleSpecifiers]) {
   check(`node: ${specifier}`, () => resolvesToFile(specifier));
 }
 
-// 2. Types and stylesheet conditions declared for every element directory.
+// 2. Element stylesheets under the conditions sass-loader resolves with. Without them the
+// bare specifier lands on the element's JavaScript, and sass-loader reports the subpath as
+// missing rather than falling back.
+for (const name of styledElementDirs) {
+  const specifier = subpath('dist', 'elements', name);
+  const stylesheet = path.join(distDir, 'elements', name, 'index.scss');
+
+  for (const condition of ['sass', 'style']) {
+    check(`node --conditions ${condition}: ${specifier}`, () => {
+      assert.equal(resolvesToFileUnder([condition], specifier), stylesheet);
+    });
+  }
+}
+
+// Element directories need an exact key: a pattern cannot append `/index`, so a new element
+// silently stops resolving without one.
 for (const name of elementDirs) {
   const key = `./dist/elements/${name}`;
 
   check(`exports["${key}"]`, () => {
-    const entry = pkg.exports[key];
-    assert.ok(entry, `missing. Element directories need an exact key: patterns cannot add /index`);
-    assert.equal(entry.types, `${key}/index.d.ts`);
-    assert.equal(entry.default, `${key}/index.js`);
-
-    if (fs.existsSync(path.join(rootDir, key, 'index.scss'))) {
-      assert.equal(entry.sass, `${key}/index.scss`, 'stylesheet not exposed under the `sass` condition');
-      assert.equal(entry.style, `${key}/index.scss`, 'stylesheet not exposed under the `style` condition');
-    }
+    assert.ok(pkg.exports[key], 'missing. Element directories need an exact key, patterns cannot append /index');
   });
 }
 
-// Types must resolve alongside every runtime file, otherwise `tsc` reports TS2307 even
+// 3. Types must resolve alongside every runtime file, otherwise `tsc` reports TS2307 even
 // though Node is happy.
-for (const specifier of specifiers.filter((value) => !value.endsWith('.scss'))) {
+for (const specifier of scriptSpecifiers) {
   check(`types: ${specifier}`, () => {
     const filePath = resolvesToFile(specifier);
     const types = filePath.replace(/\.js$/, '.d.ts');
@@ -128,9 +146,9 @@ for (const specifier of specifiers.filter((value) => !value.endsWith('.scss'))) 
   });
 }
 
-// 3. A consumer type-checking under both exports-aware resolution modes.
+// 4. A consumer type-checking under both exports-aware resolution modes.
 const fixture = path.join(rootDir, 'scripts', 'exports-fixture', 'tsconfig.json');
-const tscBin = path.join(rootDir, 'node_modules', 'typescript', 'bin', 'tsc');
+const tscBin = createRequire(import.meta.url).resolve('typescript/bin/tsc');
 
 for (const [moduleKind, moduleResolution] of [
   ['ESNext', 'bundler'],
@@ -150,4 +168,5 @@ if (failures.length > 0) {
   process.exit(1);
 }
 
-console.log(`✓ ${specifiers.length} subpaths resolve in Node and type-check under moduleResolution bundler/node16`);
+const total = scriptSpecifiers.length + styleSpecifiers.length;
+console.log(`✓ ${total} subpaths resolve in Node and type-check under moduleResolution bundler/node16`);
