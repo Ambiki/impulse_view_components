@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "lib": ["ES2017", "dom", "dom.iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2017",
+    "types": []
+  },
+  "include": ["consumer.ts"]
+}

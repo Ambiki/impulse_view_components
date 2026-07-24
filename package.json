@@ -22,11 +22,60 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "default": "./dist/index.js"
     },
-    "./dist/elements/*": "./dist/elements/*",
-    "./dist/hooks/*": "./dist/hooks/*",
-    "./dist/helpers/*": "./dist/helpers/*",
+    "./package.json": "./package.json",
+    "./dist/index.js": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./dist/elements/anchor": {
+      "types": "./dist/elements/anchor/index.d.ts",
+      "default": "./dist/elements/anchor/index.js"
+    },
+    "./dist/elements/autocomplete": {
+      "types": "./dist/elements/autocomplete/index.d.ts",
+      "sass": "./dist/elements/autocomplete/index.scss",
+      "style": "./dist/elements/autocomplete/index.scss",
+      "default": "./dist/elements/autocomplete/index.js"
+    },
+    "./dist/elements/dialog": {
+      "types": "./dist/elements/dialog/index.d.ts",
+      "sass": "./dist/elements/dialog/index.scss",
+      "style": "./dist/elements/dialog/index.scss",
+      "default": "./dist/elements/dialog/index.js"
+    },
+    "./dist/elements/popover": {
+      "types": "./dist/elements/popover/index.d.ts",
+      "sass": "./dist/elements/popover/index.scss",
+      "style": "./dist/elements/popover/index.scss",
+      "default": "./dist/elements/popover/index.js"
+    },
+    "./dist/elements/*.scss": "./dist/elements/*.scss",
+    "./dist/elements/*.js": {
+      "types": "./dist/elements/*.d.ts",
+      "default": "./dist/elements/*.js"
+    },
+    "./dist/elements/*": {
+      "types": "./dist/elements/*.d.ts",
+      "default": "./dist/elements/*.js"
+    },
+    "./dist/hooks/*.js": {
+      "types": "./dist/hooks/*.d.ts",
+      "default": "./dist/hooks/*.js"
+    },
+    "./dist/hooks/*": {
+      "types": "./dist/hooks/*.d.ts",
+      "default": "./dist/hooks/*.js"
+    },
+    "./dist/helpers/*.js": {
+      "types": "./dist/helpers/*.d.ts",
+      "default": "./dist/helpers/*.js"
+    },
+    "./dist/helpers/*": {
+      "types": "./dist/helpers/*.d.ts",
+      "default": "./dist/helpers/*.js"
+    },
     "./dist/styles/*": "./dist/styles/*"
   },
   "files": [
@@ -53,6 +102,7 @@
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
     "test": "web-test-runner",
+    "test:exports": "node scripts/check-exports.mjs",
     "test:watch": "yarn test --watch"
   },
   "dependencies": {

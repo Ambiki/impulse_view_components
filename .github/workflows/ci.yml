@@ -19,6 +19,20 @@ jobs:
           yarn install --frozen-lockfile
           yarn lint
 
+  check_exports:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".tool-versions"
+          cache: "yarn"
+      - name: Check package exports
+        run: |
+          yarn install --frozen-lockfile
+          NODE_ENV=production yarn build:js
+          yarn test:exports
+
   lint_ruby:
     runs-on: ubuntu-latest
     steps:
