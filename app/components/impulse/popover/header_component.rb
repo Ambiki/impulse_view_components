@@ -1,8 +1,9 @@
 module Impulse
   module Popover
     class HeaderComponent < ApplicationComponent
-      def initialize(title: nil, **system_args)
+      def initialize(title: nil, title_id: nil, **system_args)
         @title = title
+        @title_id = title_id
         @system_args = system_args
         @system_args[:tag] = :div
         @system_args[:class] = class_names(

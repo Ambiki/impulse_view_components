@@ -19,6 +19,29 @@ module Impulse
       assert_equal page.evaluate_script("document.activeElement")["aria-label"], "Close"
     end
 
+    test "traps the focus within the popover" do
+      visit_preview(:default)
+
+      click_on "Toggle popover"
+      assert_equal page.evaluate_script("document.activeElement")["aria-label"], "Close"
+
+      # The close button is the only focusable element, so tabbing cycles back to it instead of
+      # escaping to the page behind the panel.
+      page.driver.browser.action.send_keys(:tab).perform
+      assert_equal page.evaluate_script("document.activeElement")["aria-label"], "Close"
+    end
+
+    test "restores the focus to the trigger button after closing with the Escape key" do
+      visit_preview(:default)
+
+      click_on "Toggle popover"
+      assert_popover_open
+
+      page.driver.browser.action.send_keys(:escape).perform
+      assert_popover_close
+      assert_equal page.evaluate_script("document.activeElement")["aria-haspopup"], "dialog"
+    end
+
     test "closes the popover by clicking on the trigger button" do
       visit_preview(:default)
 

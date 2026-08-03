@@ -3,7 +3,7 @@ module Impulse
     renders_one :trigger, lambda { |**system_args|
       system_args[:tag] = :button
       system_args[:type] = system_args.fetch(:type, "button")
-      system_args[:role] = :button
+      system_args[:"aria-haspopup"] = :dialog
       system_args[:"aria-expanded"] = false
       system_args[:"aria-controls"] = @panel_id
       system_args[:"aria-disabled"] = (!!system_args[:disabled]).to_s
@@ -18,7 +18,7 @@ module Impulse
     }
 
     renders_one :header, lambda { |**system_args|
-      Impulse::Popover::HeaderComponent.new(title: @title, **system_args)
+      Impulse::Popover::HeaderComponent.new(title: @title, title_id: @title_id, **system_args)
     }
 
     renders_one :body, lambda { |**system_args|
@@ -34,6 +34,7 @@ module Impulse
       @system_args[:tag] = :"awc-popover"
       @system_args[:"click-boundaries"] = click_boundaries.to_json
       @panel_id = self.class.generate_id
+      @title_id = "#{@panel_id}_title"
 
       @system_args[:class] = class_names(
         system_args[:class],
