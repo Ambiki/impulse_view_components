@@ -10,9 +10,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Autocomplete now infers its API types from the selection mode and source: `value`/`removeValue` resolve by narrowing on `multiple`, and `setValue`'s `text` requirement by narrowing on the new `remote` getter. Exported `SingleAutocompleteElement` / `MultipleAutocompleteElement` / `LocalAutocompleteElement` / `RemoteAutocompleteElement` types allow pinning the shape explicitly ([#217](https://github.com/Ambiki/impulse_view_components/pull/217))
 - Added `GlobalEventHandlersEventMap` entries for the dialog and popover events so listeners receive a typed `CustomEvent` ([#216](https://github.com/Ambiki/impulse_view_components/pull/216))
+- Every prefixed autocomplete event is now declared, so `show`, `shown`, `hide`, `hidden`, `clear` and `reset` listeners receive a typed `CustomEvent` alongside `commit` and `remove`. The four remote-source events (`loadstart`, `load`, `error`, `loadend`) are unchanged — they stay unprefixed and non-bubbling
 
 ### Fixed
 
+- Fixed the autocomplete issuing a request against a source it was no longer using: changing `src`, or removing the element, now cancels a request that is in flight and one that is still waiting out the debounce. Previously a response from the old source could overwrite the options of the new one
 - Fixed the `exports` subpath map pointing at directories instead of files, which broke `dist/elements/*`, `dist/hooks/*` and `dist/helpers/*` imports for Node and for TypeScript under `moduleResolution: bundler`/`node16`. Every subpath now maps to a real file and declares a `types` condition, and element stylesheets stay reachable through the `sass`/`style` conditions ([#224](https://github.com/Ambiki/impulse_view_components/issues/224))
 - Fixed `useOutsideClick` leaking its `click` listener by switching teardown to `AbortController` ([#215](https://github.com/Ambiki/impulse_view_components/pull/215))
 

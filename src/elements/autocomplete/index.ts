@@ -3,19 +3,14 @@ import { ImpulseElement, property, registerElement, target, targets } from '@amb
 import { isLooselyFocusable } from 'src/helpers/focus';
 import useFloatingUI, { UseFloatingUIType } from 'src/hooks/use_floating_ui';
 import useOutsideClick from 'src/hooks/use_outside_click';
+import { optionEventDetail } from './events';
+import type { AutocompleteEventArgs, AutocompleteEventMap, AutocompleteEventName } from './events';
 import LocalSearch from './local_search';
 import MultipleSelect from './multiple_select';
 import RemoteSearch from './remote_search';
 import SingleSelect from './single_select';
 
-interface BaseOptionEvent {
-  target: HTMLElement;
-  text: string;
-  value: string;
-}
-
-export interface AwcAutocompleteCommitEvent extends BaseOptionEvent {}
-export interface AwcAutocompleteRemoveEvent extends BaseOptionEvent {}
+export type { AwcAutocompleteCommitEvent, AwcAutocompleteRemoveEvent } from './events';
 
 /** Whether multiple values can be selected. */
 export type SelectionMode = 'single' | 'multiple';
@@ -38,14 +33,35 @@ type RemoveValueArgs<Mode extends SelectionMode> = Mode extends 'multiple' ? [va
 /** Resolves the `setValue` text argument: required for a remote source, optional otherwise. */
 type SetValueTextArgs<Src extends Source> = Src extends 'remote' ? [text: string] : [text?: string];
 
-/** Resolves the select variant based on the selection mode. */
-type SelectVariant<Mode extends SelectionMode> = Mode extends 'multiple' ? MultipleSelect : SingleSelect;
+/**
+ * The contract implemented by the single and multiple select variants.
+ *
+ * Both variants implement every member, so a member added here has to be answered by both of them before the code
+ * compiles — which is the point. There is no way for one variant to quietly lack an operation the other has.
+ */
+export interface SelectVariant {
+  connected(): void;
+  start(): void;
+  stop(): void;
+  reset(): void;
+  select(option: HTMLElement): void;
+  setValue(value: string, text: string): void;
+  clear(): void;
+  /**
+   * Removes `value` from the selection. A single select holds at most one value, so it ignores the argument and
+   * clears whatever is selected.
+   */
+  removeValue(value: string): void;
+  set required(value: boolean);
+}
 
 /** The contract implemented by the local and remote search variants. */
 export interface SearchVariant {
   search(value: string): void | Promise<void>;
   start(): void;
   stop(): void;
+  /** Releases anything still outstanding — an in-flight request, a pending debounce — before the variant is dropped. */
+  disconnected(): void;
 }
 
 @registerElement('awc-autocomplete')
@@ -105,7 +121,10 @@ export default class AwcAutocompleteElement<
   @targets() groups: HTMLElement[];
 
   combobox: Combobox;
-  selectVariant: SelectVariant<Mode>;
+  /**
+   * @private
+   */
+  selectVariant: SelectVariant;
   private searchVariant: SearchVariant;
   private floatingUI: UseFloatingUIType;
   private firstFocus = true;
@@ -149,7 +168,7 @@ export default class AwcAutocompleteElement<
     });
 
     this.combobox = new Combobox(this.input, this.listbox, { multiple: this.multiple });
-    this.selectVariant = (this.multiple ? new MultipleSelect(this) : new SingleSelect(this)) as SelectVariant<Mode>;
+    this.selectVariant = this.multiple ? new MultipleSelect(this) : new SingleSelect(this);
     this.selectVariant.connected();
     this.searchVariant = this.src ? new RemoteSearch(this) : new LocalSearch(this);
     this.selectVariant.required = this.required;
@@ -161,6 +180,7 @@ export default class AwcAutocompleteElement<
    */
   disconnected() {
     this.hide();
+    this.searchVariant?.disconnected();
     this.form?.removeEventListener('reset', this.handleFormReset);
     this.firstFocus = true;
     this.preventOutsideClickEvent = false;
@@ -197,6 +217,9 @@ export default class AwcAutocompleteElement<
   srcChanged(src: string) {
     // Clear the selected value without emitting any events to avoid invalid combinations.
     this.clear();
+    // Release the outgoing variant before replacing it, so a request made against the previous source cannot land in
+    // the listbox of the new one.
+    this.searchVariant?.disconnected();
     this.searchVariant = src ? new RemoteSearch(this) : new LocalSearch(this);
   }
 
@@ -284,9 +307,7 @@ export default class AwcAutocompleteElement<
           const tag = this.removeLastTag();
           if (tag) {
             event.preventDefault();
-            const value = tag.getAttribute('value') ?? '';
-            const { text } = tag.dataset;
-            this.emit<AwcAutocompleteRemoveEvent>('remove', { detail: { target: tag, value, text: text || '' } });
+            this.emitEvent('remove', optionEventDetail(tag));
           }
         }
         break;
@@ -303,9 +324,7 @@ export default class AwcAutocompleteElement<
     if (!(option instanceof HTMLElement)) return;
 
     this.selectVariant.select(option);
-    const value = option.getAttribute('value') ?? '';
-    const { text } = option.dataset;
-    this.emit<AwcAutocompleteCommitEvent>('commit', { detail: { target: option, value, text: text || '' } });
+    this.emitEvent('commit', optionEventDetail(option));
   }
 
   /**
@@ -314,7 +333,7 @@ export default class AwcAutocompleteElement<
   handleFormReset() {
     this.reset();
     this.hide();
-    this.emit('reset');
+    this.emitEvent('reset');
   }
 
   /**
@@ -323,7 +342,7 @@ export default class AwcAutocompleteElement<
   handleClear() {
     this.clear();
     this.hide();
-    this.emit('clear');
+    this.emitEvent('clear');
   }
 
   /**
@@ -335,9 +354,7 @@ export default class AwcAutocompleteElement<
     if (!tag) return;
 
     this.removeTag(tag);
-    const value = tag.getAttribute('value') ?? '';
-    const { text } = tag.dataset;
-    this.emit<AwcAutocompleteRemoveEvent>('remove', { detail: { target: tag, value, text: text || '' } });
+    this.emitEvent('remove', optionEventDetail(tag));
   }
 
   /**
@@ -357,13 +374,13 @@ export default class AwcAutocompleteElement<
    */
   show() {
     if (this.open) return;
-    this.emit('show');
+    this.emitEvent('show');
     this.open = true;
     this.floatingUI.start();
     this.combobox.start();
     this.selectVariant.start();
     this.searchVariant.start();
-    this.emit('shown');
+    this.emitEvent('shown');
   }
 
   /**
@@ -371,7 +388,7 @@ export default class AwcAutocompleteElement<
    */
   async hide() {
     if (!this.open) return;
-    this.emit('hide');
+    this.emitEvent('hide');
     this.open = false;
     this.combobox.stop();
     this.selectVariant.stop();
@@ -379,7 +396,7 @@ export default class AwcAutocompleteElement<
     this.removeAttribute('no-options');
     this.removeAttribute('error');
     await this.floatingUI.stop();
-    this.emit('hidden');
+    this.emitEvent('hidden');
   }
 
   /**
@@ -400,7 +417,7 @@ export default class AwcAutocompleteElement<
    */
   removeValue(...args: RemoveValueArgs<Mode>) {
     const [value] = args as [string?];
-    if (this.selectVariant instanceof MultipleSelect && value) {
+    if (value) {
       this.selectVariant.removeValue(value);
       return;
     }
@@ -458,6 +475,16 @@ export default class AwcAutocompleteElement<
    */
   async reposition() {
     await this.floatingUI.update();
+  }
+
+  /**
+   * Emits one of the events declared in `./events`. Going through here rather than `emit` is what keeps the set of
+   * events the element dispatches and the set it declares to listeners in step: an undeclared name or a detail of the
+   * wrong shape does not compile.
+   */
+  private emitEvent<Name extends AutocompleteEventName>(name: Name, ...args: AutocompleteEventArgs<Name>) {
+    const [detail] = args;
+    return this.emit(name, { detail });
   }
 
   private removeLastTag(): HTMLElement | undefined {
@@ -566,8 +593,6 @@ declare global {
       | MultipleAutocompleteElement<'local'>
       | MultipleAutocompleteElement<'remote'>;
   }
-  interface GlobalEventHandlersEventMap {
-    'awc-autocomplete:commit': CustomEvent<AwcAutocompleteCommitEvent>;
-    'awc-autocomplete:remove': CustomEvent<AwcAutocompleteRemoveEvent>;
-  }
+  // Derived from the event map so that declaring an event and typing it for listeners are the same act.
+  interface GlobalEventHandlersEventMap extends AutocompleteEventMap {}
 }

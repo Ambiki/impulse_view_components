@@ -1,4 +1,5 @@
-import debounce from 'src/helpers/debounce';
+import debounce, { type Cancelable } from 'src/helpers/debounce';
+import { REMOTE_EVENT_INIT, type RemoteEventName } from './events';
 import type AwcAutocompleteElement from './index';
 import type { SearchVariant } from './index';
 
@@ -6,16 +7,19 @@ export default class RemoteSearch implements SearchVariant {
   readonly autocomplete: AwcAutocompleteElement;
   private abortController?: AbortController;
   private cachedOptions: string = '';
+  // Held in its own field rather than assigned back over `makeRequest`, which would erase `Cancelable` from its type
+  // and leave no way to cancel a request that is still waiting out the debounce.
+  private readonly debouncedRequest: ((value: string) => void) & Cancelable;
 
   constructor(autocomplete: AwcAutocompleteElement) {
     this.autocomplete = autocomplete;
-    this.makeRequest = debounce(this.makeRequest.bind(this), 300);
+    this.debouncedRequest = debounce((value: string) => this.makeRequest(value), 300);
   }
 
-  async search(value: string) {
+  search(value: string) {
     this.autocomplete.setAttribute('loading', '');
     this.autocomplete.removeAttribute('error');
-    await this.makeRequest(value);
+    this.debouncedRequest(value);
   }
 
   start() {
@@ -28,6 +32,20 @@ export default class RemoteSearch implements SearchVariant {
 
   stop() {
     //
+  }
+
+  disconnected() {
+    const wasRequesting = Boolean(this.abortController);
+    this.debouncedRequest.clear();
+    this.abortController?.abort();
+    this.abortController = undefined;
+    // An aborted request returns early without clearing up after itself, and no later request will arrive to do it
+    // either. `search` sets `loading` before the request is even made, so it has to go whether or not one went out.
+    this.autocomplete.removeAttribute('loading');
+    // Only pair a `loadstart` that was actually emitted — during the debounce window, none has been.
+    if (wasRequesting) {
+      this.emit('loadend');
+    }
   }
 
   private async makeRequest(value: string) {
@@ -88,7 +106,7 @@ export default class RemoteSearch implements SearchVariant {
     await this.autocomplete.reposition();
   }
 
-  private emit(name: string) {
-    this.autocomplete.emit(name, { bubbles: false, prefix: false });
+  private emit(name: RemoteEventName) {
+    this.autocomplete.emit(name, REMOTE_EVENT_INIT);
   }
 }

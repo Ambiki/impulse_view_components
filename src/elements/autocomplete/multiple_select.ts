@@ -1,8 +1,9 @@
 import type AwcAutocompleteElement from './index';
+import type { SelectVariant } from './index';
 
 type TDefaultSelectedValue = { value: string; text: string };
 
-export default class MultipleSelect {
+export default class MultipleSelect implements SelectVariant {
   readonly autocomplete: AwcAutocompleteElement;
   private selectedValues = new Set<string>();
   private defaultSelectedValues: Array<TDefaultSelectedValue> = [];
