@@ -13,5 +13,16 @@ export default {
     playwrightLauncher({ product: 'firefox' }),
     playwrightLauncher({ product: 'webkit' }),
   ],
-  plugins: [esbuildPlugin({ ts: true, target: 'auto' })],
+  plugins: [
+    // Source files import each other through the `src/...` prefix, which tsconfig's `baseUrl` resolves for the
+    // compiler and `@rollup/plugin-typescript` resolves for the build. The dev server needs it spelled out.
+    {
+      name: 'resolve-src-prefix',
+      resolveImport({ source }) {
+        if (!source.startsWith('src/')) return;
+        return `/${source}.ts`;
+      },
+    },
+    esbuildPlugin({ ts: true, target: 'auto' }),
+  ],
 };
