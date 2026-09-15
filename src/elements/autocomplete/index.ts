@@ -60,6 +60,8 @@ export interface SearchVariant {
   search(value: string): void | Promise<void>;
   start(): void;
   stop(): void;
+  /** Releases anything still outstanding — an in-flight request, a pending debounce — before the variant is dropped. */
+  disconnected(): void;
 }
 
 @registerElement('awc-autocomplete')
@@ -178,6 +180,7 @@ export default class AwcAutocompleteElement<
    */
   disconnected() {
     this.hide();
+    this.searchVariant?.disconnected();
     this.form?.removeEventListener('reset', this.handleFormReset);
     this.firstFocus = true;
     this.preventOutsideClickEvent = false;
@@ -214,6 +217,9 @@ export default class AwcAutocompleteElement<
   srcChanged(src: string) {
     // Clear the selected value without emitting any events to avoid invalid combinations.
     this.clear();
+    // Release the outgoing variant before replacing it, so a request made against the previous source cannot land in
+    // the listbox of the new one.
+    this.searchVariant?.disconnected();
     this.searchVariant = src ? new RemoteSearch(this) : new LocalSearch(this);
   }
 

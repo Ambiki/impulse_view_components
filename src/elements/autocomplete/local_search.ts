@@ -26,6 +26,10 @@ export default class LocalSearch implements SearchVariant {
     this.resetOptions();
   }
 
+  disconnected() {
+    // Nothing outstanding: filtering the options in the DOM is synchronous.
+  }
+
   private resetOptions() {
     for (const group of this.autocomplete.groups) {
       group.hidden = false;
