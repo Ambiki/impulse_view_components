@@ -1,6 +1,7 @@
 import type AwcAutocompleteElement from './index';
+import type { SelectVariant } from './index';
 
-export default class SingleSelect {
+export default class SingleSelect implements SelectVariant {
   readonly autocomplete: AwcAutocompleteElement;
   private defaultValue = '';
   private defaultText = '';
@@ -51,6 +52,15 @@ export default class SingleSelect {
 
   clear() {
     this.setValue('', '');
+  }
+
+  /**
+   * A single select holds at most one value, so there is nothing to match the argument against: whatever is selected
+   * is the value being removed.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  removeValue(_value: string) {
+    this.clear();
   }
 
   set required(value: boolean) {
