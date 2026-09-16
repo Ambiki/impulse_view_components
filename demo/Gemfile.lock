@@ -2,7 +2,7 @@ PATH
   remote: ..
   specs:
     impulse_view_components (0.8.0)
-      actionview (>= 6.1.0)
+      actionview (>= 7.0.9)
       view_component (~> 3.24.0)
 
 GEM
@@ -144,7 +144,7 @@ GEM
     method_source (1.0.0)
     mini_mime (1.1.5)
     minitest (5.22.2)
-    msgpack (1.7.2)
+    msgpack (1.8.2)
     mutex_m (0.2.0)
     net-imap (0.6.6)
       date
