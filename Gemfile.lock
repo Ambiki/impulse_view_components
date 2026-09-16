@@ -43,8 +43,8 @@ GEM
       mutex_m
       securerandom (>= 0.3)
       tzinfo (~> 2.0)
-    addressable (2.8.6)
-      public_suffix (>= 2.0.2, < 6.0)
+    addressable (2.9.0)
+      public_suffix (>= 2.0.2, < 8.0)
     appraisal (2.5.0)
       bundler
       rake
@@ -107,7 +107,6 @@ GEM
     matrix (0.4.3)
     method_source (1.0.0)
     mini_mime (1.1.5)
-    mini_portile2 (2.8.9)
     minitest (5.25.5)
     msgpack (1.7.2)
     mutex_m (0.3.0)
@@ -121,7 +120,7 @@ GEM
       racc
     psych (5.1.2)
       stringio
-    public_suffix (5.0.4)
+    public_suffix (7.0.5)
     puma (6.4.3)
       nio4r (~> 2.0)
     racc (1.8.1)
@@ -213,8 +212,6 @@ GEM
       actionpack (>= 5.2)
       activesupport (>= 5.2)
       sprockets (>= 3.0.0)
-    sqlite3 (1.7.0)
-      mini_portile2 (~> 2.8.0)
     sqlite3 (1.7.0-x86_64-linux)
     stringio (3.1.0)
     thor (1.4.0)
