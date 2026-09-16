@@ -12,6 +12,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added `GlobalEventHandlersEventMap` entries for the dialog and popover events so listeners receive a typed `CustomEvent` ([#216](https://github.com/Ambiki/impulse_view_components/pull/216))
 - Every prefixed autocomplete event is now declared, so `show`, `shown`, `hide`, `hidden`, `clear` and `reset` listeners receive a typed `CustomEvent` alongside `commit` and `remove`. The four remote-source events (`loadstart`, `load`, `error`, `loadend`) are unchanged — they stay unprefixed and non-bubbling
 
+### Removed
+
+- Dropped support for Rails 6.1 and Ruby 3.3. The minimum supported versions are now Rails 7.0.9 and Ruby 3.4. Earlier Rails 7.0 releases fail to load on Ruby 3.4 because they don't declare `base64`, `bigdecimal`, `drb` and `mutex_m`, which Ruby 3.4 moved to bundled gems
+
 ### Fixed
 
 - Fixed the autocomplete issuing a request against a source it was no longer using: changing `src`, or removing the element, now cancels a request that is in flight and one that is still waiting out the debounce. Previously a response from the old source could overwrite the options of the new one
