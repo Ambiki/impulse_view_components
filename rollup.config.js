@@ -62,6 +62,7 @@ export default [
         compilerOptions: {
           declaration: false, // iife bundles don't need types
           declarationMap: false,
+          outDir: 'app/assets/dist', // @rollup/plugin-typescript requires outDir to contain the output file
         },
       }),
       ...(isProd ? [uglify()] : []),

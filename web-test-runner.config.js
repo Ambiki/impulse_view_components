@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { playwrightLauncher } from '@web/test-runner-playwright';
 import { esbuildPlugin } from '@web/dev-server-esbuild';
 
@@ -23,6 +24,7 @@ export default {
         return `/${source}.ts`;
       },
     },
-    esbuildPlugin({ ts: true, target: 'auto' }),
+    // esbuild only applies `experimentalDecorators` and `useDefineForClassFields: false` when it reads the tsconfig.
+    esbuildPlugin({ ts: true, target: 'auto', tsconfig: fileURLToPath(new URL('./tsconfig.json', import.meta.url)) }),
   ],
 };
