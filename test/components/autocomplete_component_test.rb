@@ -2,6 +2,8 @@ require "test_helper"
 
 module Impulse
   class AutocompleteComponentTest < ApplicationTest
+    Option = Struct.new(:value, :text)
+
     test "renders the component" do
       render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_id)) do |c|
         %w[Apple Banana Guava Kiwi Litchi Mango Pomegranate].each do |fruit|
@@ -21,7 +23,7 @@ module Impulse
     end
 
     test "selected option" do
-      render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_id, selected: OpenStruct.new(value: "apple", text: "Apple")))
+      render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_id, selected: Option.new(value: "apple", text: "Apple")))
 
       assert_selector "awc-autocomplete.awc-autocomplete--selected"
       assert_selector ".awc-autocomplete-clear-btn"
@@ -32,7 +34,7 @@ module Impulse
     end
 
     test "multiple selected options" do
-      render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_ids, multiple: true, selected: [OpenStruct.new(value: "apple", text: "Apple")]))
+      render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_ids, multiple: true, selected: [Option.new(value: "apple", text: "Apple")]))
 
       assert_selector "awc-autocomplete.awc-autocomplete--selected"
       assert_selector "[data-behavior='hidden-field'][name='user[fruit_ids][]']", visible: false
@@ -51,7 +53,7 @@ module Impulse
     end
 
     test "does not render the clear button" do
-      render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_ids, multiple: true, selected: OpenStruct.new(value: "apple", text: "Apple"), clearable: false))
+      render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_ids, multiple: true, selected: [Option.new(value: "apple", text: "Apple")], clearable: false))
 
       refute_selector ".awc-autocomplete--clearable"
       assert_selector ".awc-autocomplete-adornment-decorator"
@@ -81,7 +83,7 @@ module Impulse
     end
 
     test "disabled tags" do
-      render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_ids, selected: [OpenStruct.new(value: "apple", text: "Apple")], multiple: true, disabled: true))
+      render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_ids, selected: [Option.new(value: "apple", text: "Apple")], multiple: true, disabled: true))
 
       assert_selector "[data-behavior='tag'][data-persisted]", count: 1 do
         assert_selector ".awc-autocomplete-tag-dismiss-btn[disabled]"

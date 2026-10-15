@@ -2,6 +2,8 @@ require "test_helper"
 
 module Impulse
   class AjaxSelectComponentTest < ApplicationTest
+    Option = Struct.new(:value, :text)
+
     test "raises an error if src attribute is missing" do
       assert_raises ArgumentError do
         render_inline(Impulse::AjaxSelectComponent.new(:user, :fruit_id, :value, :text))
@@ -25,14 +27,14 @@ module Impulse
     end
 
     test "select a single option" do
-      render_inline(Impulse::AjaxSelectComponent.new(:user, :fruit_id, :value, :text, selected: OpenStruct.new(value: "apple", text: "Apple"), src: "/users"))
+      render_inline(Impulse::AjaxSelectComponent.new(:user, :fruit_id, :value, :text, selected: Option.new(value: "apple", text: "Apple"), src: "/users"))
 
       assert_selector "[data-behavior='hidden-field'][value='apple']", visible: false
       assert_selector "[data-behavior='hidden-field'][data-text='Apple']", visible: false
     end
 
     test "select multiple options" do
-      render_inline(Impulse::AjaxSelectComponent.new(:user, :fruit_ids, :value, :text, selected: [OpenStruct.new(value: "apple", text: "Apple")], src: "/users", multiple: true))
+      render_inline(Impulse::AjaxSelectComponent.new(:user, :fruit_ids, :value, :text, selected: [Option.new(value: "apple", text: "Apple")], src: "/users", multiple: true))
 
       assert_selector "[data-behavior='tag'][data-persisted][value='apple']", count: 1 do
         assert_selector "[data-behavior='hidden-field'][value='apple']", visible: false
