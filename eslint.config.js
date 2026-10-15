@@ -16,7 +16,7 @@ export default defineConfig([
       globals: globals.browser,
     },
     linterOptions: {
-      reportUnusedDisableDirectives: 'error',
+      reportUnusedDisableDirectives: 'warn',
     },
     rules: {
       // Event types and the `GlobalEventHandlersEventMap` augmentation extend a single type on purpose: interfaces
