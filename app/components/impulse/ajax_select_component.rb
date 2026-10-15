@@ -3,6 +3,9 @@ module Impulse
     renders_one :blankslate
     renders_one :error
 
+    Option = Struct.new(:value, :text)
+    private_constant :Option
+
     def initialize(object_name, method_name, value_method, text_method, selected: nil, **system_args)
       @object_name = object_name
       @method_name = method_name
@@ -23,8 +26,7 @@ module Impulse
     end
 
     def build_option(element)
-      tuple = [value_for_collection(element, @text_method), value_for_collection(element, @value_method)]
-      OpenStruct.new(value: tuple.last, text: tuple.first)
+      Option.new(value: value_for_collection(element, @value_method), text: value_for_collection(element, @text_method))
     end
 
     def multiple?

@@ -66,7 +66,7 @@ Pass an object that responds to the `value_method` and the `text_method`.
     :id,
     :name,
     src: "/persons",
-    selected: OpenStruct.new(id: 1, name: "John Doe")
+    selected: Person.find(1)
   )
 ) %>
 ```

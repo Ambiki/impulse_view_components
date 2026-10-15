@@ -2,6 +2,8 @@ require "test_helper"
 
 module Impulse
   class AjaxSelectTest < ApplicationTest
+    Fruit = Struct.new(:id, :name)
+
     test "renders the component" do
       render_in_view_context do
         impulse_form_with(model: User.new, url: "/users") do |f|
@@ -16,7 +18,7 @@ module Impulse
     test "selected option" do
       render_in_view_context do
         impulse_form_with(model: User.new, url: "/users") do |f|
-          f.ajax_select :fruit_id, :id, :name, selected: OpenStruct.new(id: "apple", name: "Apple"), src: "/users"
+          f.ajax_select :fruit_id, :id, :name, selected: Fruit.new(id: "apple", name: "Apple"), src: "/users"
         end
       end
 
@@ -28,7 +30,7 @@ module Impulse
     test "multiple selected options" do
       render_in_view_context do
         impulse_form_with(model: User.new, url: "/users") do |f|
-          f.ajax_select :fruit_ids, :id, :name, selected: [OpenStruct.new(id: "apple", name: "Apple"), OpenStruct.new(id: "guava", name: "Guava")], src: "/users", multiple: true
+          f.ajax_select :fruit_ids, :id, :name, selected: [Fruit.new(id: "apple", name: "Apple"), Fruit.new(id: "guava", name: "Guava")], src: "/users", multiple: true
         end
       end
 

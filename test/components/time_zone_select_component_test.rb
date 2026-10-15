@@ -2,6 +2,8 @@ require "test_helper"
 
 module Impulse
   class TimeZoneSelectComponentTest < ApplicationTest
+    TimeZone = Struct.new(:name, :to_s)
+
     test "renders the component" do
       render_inline(Impulse::TimeZoneSelectComponent.new(:user, :time_zone))
 
@@ -78,7 +80,7 @@ module Impulse
     test "renders the time zones from a given list" do
       time_zones = Class.new do
         def self.all
-          [OpenStruct.new(name: "My time zone", to_s: "[12:00] My time zone")]
+          [TimeZone.new(name: "My time zone", to_s: "[12:00] My time zone")]
         end
       end
 
