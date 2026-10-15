@@ -136,7 +136,7 @@
     "rollup": "^4.64.7",
     "rollup-plugin-uglify": "^6.0.4",
     "sass": "^1.105.1",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.3",
     "typescript-eslint": "^8.71.2",
     "vitepress": "^1.6.4",
     "vitepress-plugin-llms": "^1.14.0"

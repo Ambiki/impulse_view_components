@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "declaration": true,
     "declarationMap": true,
     "esModuleInterop": true,
@@ -10,10 +9,15 @@
     "moduleResolution": "bundler",
     "noEmit": true,
     "outDir": "./dist",
+    "rootDir": "./src",
+    "paths": {
+      "src/*": ["./src/*"]
+    },
     "sourceMap": false,
     "strict": true,
     "strictPropertyInitialization": false,
     "target": "ES2017",
+    "types": ["mocha"],
     "useDefineForClassFields": false
   },
   "include": ["src"]
