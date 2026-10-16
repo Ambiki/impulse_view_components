@@ -1,6 +1,5 @@
 import { ImpulseElement, property, registerElement } from '@ambiki/impulse';
 import type { Placement, Strategy } from '@floating-ui/dom';
-import { stripCSSUnit } from 'src/helpers/string';
 import { createPositioner, positioningDefaults, type PositioningOptions } from 'src/internal/positioning';
 
 @registerElement('awc-anchor')
@@ -161,7 +160,6 @@ export default class AwcAnchorElement extends ImpulseElement {
   }
 
   private get positioningOptions(): PositioningOptions {
-    const arrowElement = this.arrowElement;
     return {
       anchor: this.anchorElement,
       floating: this,
@@ -178,17 +176,9 @@ export default class AwcAnchorElement extends ImpulseElement {
       sync: this.sync,
       autoSize: this.autoSize,
       autoSizePadding: this.autoSizePadding,
-      arrow: arrowElement,
-      arrowPadding: arrowElement ? this._arrowPadding : undefined,
+      arrow: this.arrowElement,
+      arrowPadding: this.arrowPadding,
     };
-  }
-
-  private get _arrowPadding() {
-    if (typeof this.arrowPadding === 'number') {
-      return this.arrowPadding;
-    }
-    const borderRadius = getComputedStyle(this).borderRadius;
-    return stripCSSUnit(borderRadius) || 2;
   }
 }
 
