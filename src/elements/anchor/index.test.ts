@@ -198,6 +198,25 @@ describe('awc-anchor', () => {
     expect(arrow.style.top).to.equal('');
   });
 
+  it('keeps no padding around its arrow by default, even with a border radius', async () => {
+    const { anchor, floating, arrow } = await anchorFixture('active style="border-radius: 10px"');
+    // A 10px wide anchor at the viewport's left edge: the arrow has to point 5px in.
+    Object.assign(anchor.style, { left: '0px', width: '10px' });
+    await floating.reposition();
+
+    // Shifted against the left edge at x = 0, so the 8px arrow starts 5 - 4 = 1px in.
+    expect(floating.style.left).to.equal('0px');
+    expect(arrow.style.left).to.equal('1px');
+  });
+
+  it('keeps `arrow-padding` around its arrow', async () => {
+    const { anchor, floating, arrow } = await anchorFixture('active arrow-padding="6"');
+    Object.assign(anchor.style, { left: '0px', width: '10px' });
+    await floating.reposition();
+
+    expect(arrow.style.left).to.equal('6px');
+  });
+
   it('follows a different anchor when `anchor-id` changes', async () => {
     const { container, floating } = await anchorFixture();
     const other = document.createElement('button');
