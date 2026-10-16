@@ -77,6 +77,41 @@ describe('awc-anchor', () => {
     expect(floating.style.left).to.equal('185px');
   });
 
+  it('activates and follows the anchor when started', async () => {
+    const { anchor, floating } = await anchorFixture('');
+
+    floating.start();
+
+    expect(floating.active).to.equal(true);
+    await waitUntil(() => floating.style.left === '85px', 'did not position once started');
+    moveAnchor(anchor, { left: '200px' });
+    await waitUntil(() => floating.style.left === '185px', 'did not follow the anchor');
+  });
+
+  it('deactivates and stops following the anchor when stopped', async () => {
+    const { anchor, floating } = await anchorFixture();
+    await floating.reposition();
+
+    await floating.stop();
+    moveAnchor(anchor, { left: '200px' });
+    await settle();
+
+    expect(floating.active).to.equal(false);
+    expect(floating.style.left).to.equal('85px');
+  });
+
+  it('stays active when disconnected, so it resumes once reconnected', async () => {
+    const { container, anchor, floating } = await anchorFixture();
+    await floating.reposition();
+
+    floating.remove();
+    container.append(floating);
+    moveAnchor(anchor, { left: '200px' });
+
+    expect(floating.active).to.equal(true);
+    await waitUntil(() => floating.style.left === '185px', 'did not resume following the anchor');
+  });
+
   it('offsets itself by `distance` and `skidding`', async () => {
     const { floating } = await anchorFixture('active distance="8" skidding="5"');
     await floating.reposition();
