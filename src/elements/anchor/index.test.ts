@@ -145,6 +145,15 @@ describe('awc-anchor', () => {
     expect(floating.style.getPropertyValue('--awc-auto-size-height')).to.equal('100px');
   });
 
+  it('exposes the available height as a custom property with `auto-size`', async () => {
+    const { floating } = await anchorFixture('active auto-size="height" auto-size-padding="10"');
+    await floating.reposition();
+
+    // From its top edge (120px) to 10px short of the viewport's bottom edge.
+    expect(floating.style.getPropertyValue('--awc-auto-size-height')).to.equal(`${window.innerHeight - 120 - 10}px`);
+    expect(floating.style.getPropertyValue('--awc-auto-size-width')).to.equal('');
+  });
+
   it('points its `[data-arrow]` at the anchor', async () => {
     const { floating, arrow } = await anchorFixture();
     await floating.reposition();

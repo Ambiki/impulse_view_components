@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added `GlobalEventHandlersEventMap` entries for the dialog and popover events so listeners receive a typed `CustomEvent` ([#216](https://github.com/Ambiki/impulse_view_components/pull/216))
 - Every prefixed autocomplete event is now declared, so `show`, `shown`, `hide`, `hidden`, `clear` and `reset` listeners receive a typed `CustomEvent` alongside `commit` and `remove`. The four remote-source events (`loadstart`, `load`, `error`, `loadend`) are unchanged — they stay unprefixed and non-bubbling
 - `useFloatingUI` accepts a function for its options, read on every reposition, and exports its options type as `UseFloatingUIOptions` ([#273](https://github.com/Ambiki/impulse_view_components/pull/273))
+- Added `auto-size` and `auto-size-padding` to `<awc-anchor>` (`auto_size:` and `auto_size_padding:` on `Impulse::AnchorComponent`) ([#274](https://github.com/Ambiki/impulse_view_components/pull/274))
 
 ### Removed
 

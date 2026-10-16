@@ -11,6 +11,12 @@ module Impulse
       assert_selector "awc-anchor", text: "Anchor contents"
     end
 
+    test "renders auto size options as attributes" do
+      render_inline(Impulse::AnchorComponent.new(anchor_id: "awc-button", auto_size: "height", auto_size_padding: 8))
+
+      assert_selector "awc-anchor[auto-size='height'][auto-size-padding='8']"
+    end
+
     test "serializes fallback placements to json" do
       render_inline(Impulse::AnchorComponent.new(anchor_id: "awc-button", fallback_placements: ["top"]))
 

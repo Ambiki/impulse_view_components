@@ -73,6 +73,17 @@ export default class AwcAnchorElement extends ImpulseElement {
   @property({ type: Number }) shiftPadding = 0;
 
   /**
+   * Exposes the space available to the element as the `--awc-auto-size-height` and `--awc-auto-size-width` CSS custom
+   * properties, e.g. to cap its height with `max-height: var(--awc-auto-size-height)`.
+   */
+  @property() autoSize?: 'height' | 'width' | 'both';
+
+  /**
+   * The amount of padding in pixels to keep from the viewport edge when measuring the available space.
+   */
+  @property({ type: Number }) autoSizePadding = 0;
+
+  /**
    * The padding between the arrow and the edges of the element.
    */
   @property({ type: Number }) arrowPadding: number;
@@ -142,6 +153,8 @@ export default class AwcAnchorElement extends ImpulseElement {
       },
       shift: this.shift && { padding: this.shiftPadding },
       sync: this.sync,
+      autoSize: this.autoSize,
+      autoSizePadding: this.autoSizePadding,
       arrow: arrowElement,
       arrowPadding: arrowElement ? this._arrowPadding : undefined,
     };
