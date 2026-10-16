@@ -29,7 +29,7 @@ Impulse ViewComponents is a library of accessible, interactive UI components for
 custom element from [\`@ambiki/impulse\`](https://github.com/Ambiki/impulse) for behavior, so you get progressive \
 enhancement without a heavy client framework.
 
-Components include Ajax select, Dialog, Popover, Select, Spinner, and Time zone select. JavaScript behavior is \
+Components include Ajax select, Anchor, Dialog, Popover, Select, Spinner, and Time zone select. JavaScript behavior is \
 exposed through a small JS API (Autocomplete, Dialog, Popover) and reusable hooks (\`useFloatingUI\`, \
 \`useOutsideClick\`). Components are imported individually for both JS and styles, so you only ship what you use.`,
       }),
@@ -74,6 +74,10 @@ exposed through a small JS API (Autocomplete, Dialog, Popover) and reusable hook
             link: '/components/ajax-select',
           },
           {
+            text: 'Anchor',
+            link: '/components/anchor',
+          },
+          {
             text: 'Dialog',
             link: '/components/dialog',
           },
@@ -99,6 +103,10 @@ exposed through a small JS API (Autocomplete, Dialog, Popover) and reusable hook
         text: 'JS API',
         collapsed: false,
         items: [
+          {
+            text: 'Anchor',
+            link: '/js-api/anchor',
+          },
           {
             text: 'Autocomplete',
             link: '/js-api/autocomplete',
