@@ -1,5 +1,5 @@
-import { ImpulseElement, registerElement } from '@ambiki/impulse';
 import type { Middleware, Placement } from '@floating-ui/dom';
+import { ImpulseElement, registerElement } from '@ambiki/impulse';
 import { expect, fixture, html, nextFrame, waitUntil } from '@open-wc/testing';
 import useFloatingUI from './use_floating_ui';
 

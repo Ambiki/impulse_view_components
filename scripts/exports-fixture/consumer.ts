@@ -9,6 +9,7 @@
 //
 // See `scripts/check-exports.mjs`.
 
+/* eslint-disable perfectionist/sort-imports -- grouped by kind of subpath, as the comments describe */
 import * as root from '@ambiki/impulse-view-components';
 import * as rootIndex from '@ambiki/impulse-view-components/dist/index.js';
 
@@ -69,11 +70,11 @@ export const used = {
   uniqueId,
 };
 
-export type Elements = {
+export interface Elements {
   autocomplete: AmbikiAutocompleteElement;
   dialog: AmbikiDialogElement;
   popover: AmbikiPopoverElement;
-};
+}
 
 // Positioning types must reach the consumer as their real unions. A declaration that imports them through a path the
 // consumer can't resolve degrades them to `any` without an error, because library checks are skipped; each

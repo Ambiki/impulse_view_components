@@ -13,9 +13,9 @@ export default function scrollLock(element: Element, { abortSignal }: { abortSig
   let prevOverflowSetting: string | undefined;
 
   if (prevPaddingRight === undefined && scrollBarWidth > 0) {
-    const computedBodyPaddingRight = parseInt(
+    const computedBodyPaddingRight = Number.parseInt(
       window.getComputedStyle(document.body).getPropertyValue('padding-right'),
-      10
+      10,
     );
 
     prevPaddingRight = document.body.style.paddingRight;

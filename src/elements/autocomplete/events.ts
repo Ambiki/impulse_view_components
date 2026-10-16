@@ -48,9 +48,9 @@ export type AutocompleteEventMap = {
 };
 
 /** Makes the detail argument optional for the events that do not carry one. */
-export type AutocompleteEventArgs<Name extends AutocompleteEventName> = AutocompleteEventDetails[Name] extends NoDetail
-  ? [detail?: AutocompleteEventDetails[Name]]
-  : [detail: AutocompleteEventDetails[Name]];
+export type AutocompleteEventArgs<Name extends AutocompleteEventName> = AutocompleteEventDetails[Name] extends NoDetail ?
+  [detail?: AutocompleteEventDetails[Name]] :
+  [detail: AutocompleteEventDetails[Name]];
 
 /**
  * The events emitted while fetching options from a remote source.

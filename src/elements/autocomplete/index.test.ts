@@ -1,13 +1,13 @@
-import { aTimeout, expect, fixture, nextFrame, oneEvent, waitUntil } from '@open-wc/testing';
-// Registers `awc-autocomplete`. Kept separate from the type import below, which the bundler elides.
-import './index';
 import type AwcAutocompleteElement from './index';
+import { aTimeout, expect, fixture, nextFrame, oneEvent, waitUntil } from '@open-wc/testing';
+// Registers `awc-autocomplete`. Kept separate from the type import above, which the bundler elides.
+import './index';
 
-type FixtureOptions = {
+interface FixtureOptions {
   src?: string;
   multiple?: boolean;
   options?: Array<{ value: string; text: string }>;
-};
+}
 
 /**
  * Mirrors the structure of `app/components/impulse/autocomplete_component.html.erb`. Only the parts the element reads
@@ -17,20 +17,20 @@ function autocompleteHtml({ src, multiple = false, options = [] }: FixtureOption
   const optionsHtml = options
     .map(
       ({ value, text }) =>
-        `<div role="option" tabindex="-1" value="${value}" data-text="${text}" aria-selected="false">${text}</div>`
+        `<div role="option" tabindex="-1" value="${value}" data-text="${text}" aria-selected="false">${text}</div>`,
     )
     .join('');
 
-  const selection = multiple
-    ? `<input type="hidden" data-behavior="hidden-field" value="">
+  const selection = multiple ?
+    `<input type="hidden" data-behavior="hidden-field" value="">
        <template data-behavior="tag-template">
          <div class="awc-autocomplete-tag" data-behavior="tag">
            <span data-behavior="text"></span>
            <button type="button" data-action="click->awc-autocomplete#handleTagRemove" data-target="awc-autocomplete.tagDismissButtons"></button>
            <input type="hidden" data-behavior="hidden-field">
          </div>
-       </template>`
-    : `<input type="hidden" data-behavior="hidden-field" value="" data-text="">`;
+       </template>` :
+    `<input type="hidden" data-behavior="hidden-field" value="" data-text="">`;
 
   return `
     <awc-autocomplete ${multiple ? 'multiple' : ''} ${src ? `src="${src}"` : ''}
@@ -58,12 +58,12 @@ async function autocompleteFixture(options: FixtureOptions = {}) {
   return el;
 }
 
-type FetchStub = {
+interface FetchStub {
   /** The urls that have been requested, in order. */
   urls: string[];
   /** The signal of the most recent request. */
   signal?: AbortSignal;
-};
+}
 
 /**
  * Replaces `window.fetch` with a request that never resolves on its own and rejects with an `AbortError` once its
@@ -177,7 +177,7 @@ describe('AwcAutocompleteElement', () => {
     it('should apply `auto-size-padding` straight away while it is open', async () => {
       const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
       const listbox = el.querySelector<HTMLElement>('[role="listbox"]')!;
-      const availableHeight = () => parseFloat(listbox.style.getPropertyValue('--awc-auto-size-height'));
+      const availableHeight = () => Number.parseFloat(listbox.style.getPropertyValue('--awc-auto-size-height'));
       el.autoSize = true;
       el.show();
       await drainObservers();

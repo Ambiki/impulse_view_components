@@ -1,7 +1,9 @@
-import debounce, { type Cancelable } from 'src/helpers/debounce';
-import { REMOTE_EVENT_INIT, type RemoteEventName } from './events';
+import type { Cancelable } from 'src/helpers/debounce';
+import type { RemoteEventName } from './events';
 import type AwcAutocompleteElement from './index';
 import type { SearchVariant } from './index';
+import debounce from 'src/helpers/debounce';
+import { REMOTE_EVENT_INIT } from './events';
 
 export default class RemoteSearch implements SearchVariant {
   readonly autocomplete: AwcAutocompleteElement;

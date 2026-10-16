@@ -1,7 +1,7 @@
-import { expect, fixture, nextFrame, waitUntil } from '@open-wc/testing';
-// Registers `awc-anchor`. Kept separate from the type import below, which the bundler elides.
-import './index';
 import type AwcAnchorElement from './index';
+import { expect, fixture, nextFrame, waitUntil } from '@open-wc/testing';
+// Registers `awc-anchor`. Kept separate from the type import above, which the bundler elides.
+import './index';
 
 /**
  * An anchor at (100, 100) sized 50×20, and an 80×40 `awc-anchor`. The anchor is fixed so its geometry doesn't depend
@@ -172,7 +172,7 @@ describe('awc-anchor', () => {
     expect(floating.style.height).to.equal('');
   });
 
-  it("leaves the element's own auto size custom properties alone", async () => {
+  it('leaves the element\'s own auto size custom properties alone', async () => {
     const { floating } = await anchorFixture();
     floating.style.setProperty('--awc-auto-size-height', '100px');
     await floating.reposition();

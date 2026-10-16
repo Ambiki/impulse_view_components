@@ -1,7 +1,7 @@
 import type AwcAutocompleteElement from './index';
 import type { SelectVariant } from './index';
 
-type TDefaultSelectedValue = { value: string; text: string };
+interface TDefaultSelectedValue { value: string; text: string }
 
 export default class MultipleSelect implements SelectVariant {
   readonly autocomplete: AwcAutocompleteElement;
@@ -82,6 +82,7 @@ export default class MultipleSelect implements SelectVariant {
     }
   }
 
+  // eslint-disable-next-line accessor-pairs
   set required(value: boolean) {
     if (!value || (value && this.selectedValues.size > 0)) {
       this.autocomplete.input.required = false;
@@ -109,6 +110,7 @@ export default class MultipleSelect implements SelectVariant {
     const tagHiddenField = templateClone.querySelector<HTMLInputElement>('[data-behavior="hidden-field"]')!;
     tagField.setAttribute('value', value);
     tagField.setAttribute('data-text', text);
+    // eslint-disable-next-line unicorn/prefer-dom-node-text-content
     tagText.innerText = text;
     tagHiddenField.value = value;
     tagHiddenField.setAttribute('data-text', text);

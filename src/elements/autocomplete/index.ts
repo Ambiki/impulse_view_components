@@ -1,10 +1,11 @@
+import type { UseFloatingUIType } from 'src/hooks/use_floating_ui';
+import type { AutocompleteEventArgs, AutocompleteEventMap, AutocompleteEventName } from './events';
 import Combobox from '@ambiki/combobox';
 import { ImpulseElement, property, registerElement, target, targets } from '@ambiki/impulse';
 import { isLooselyFocusable } from 'src/helpers/focus';
-import useFloatingUI, { UseFloatingUIType } from 'src/hooks/use_floating_ui';
+import useFloatingUI from 'src/hooks/use_floating_ui';
 import useOutsideClick from 'src/hooks/use_outside_click';
 import { optionEventDetail } from './events';
-import type { AutocompleteEventArgs, AutocompleteEventMap, AutocompleteEventName } from './events';
 import LocalSearch from './local_search';
 import MultipleSelect from './multiple_select';
 import RemoteSearch from './remote_search';
@@ -40,28 +41,28 @@ type SetValueTextArgs<Src extends Source> = Src extends 'remote' ? [text: string
  * compiles — which is the point. There is no way for one variant to quietly lack an operation the other has.
  */
 export interface SelectVariant {
-  connected(): void;
-  start(): void;
-  stop(): void;
-  reset(): void;
-  select(option: HTMLElement): void;
-  setValue(value: string, text: string): void;
-  clear(): void;
+  connected: () => void;
+  start: () => void;
+  stop: () => void;
+  reset: () => void;
+  select: (option: HTMLElement) => void;
+  setValue: (value: string, text: string) => void;
+  clear: () => void;
   /**
    * Removes `value` from the selection. A single select holds at most one value, so it ignores the argument and
    * clears whatever is selected.
    */
-  removeValue(value: string): void;
+  removeValue: (value: string) => void;
   set required(value: boolean);
 }
 
 /** The contract implemented by the local and remote search variants. */
 export interface SearchVariant {
-  search(value: string): void | Promise<void>;
-  start(): void;
-  stop(): void;
+  search: (value: string) => void | Promise<void>;
+  start: () => void;
+  stop: () => void;
   /** Releases anything still outstanding — an in-flight request, a pending debounce — before the variant is dropped. */
-  disconnected(): void;
+  disconnected: () => void;
 }
 
 @registerElement('awc-autocomplete')
@@ -135,8 +136,8 @@ export default class AwcAutocompleteElement<
   }
 
   /**
-   * @private
    * Called when the element is connected to the DOM.
+   * @private
    */
   connected() {
     this.form?.addEventListener('reset', this.handleFormReset);
@@ -176,8 +177,8 @@ export default class AwcAutocompleteElement<
   }
 
   /**
-   * @private
    * Called when the element is disconnected from the DOM.
+   * @private
    */
   disconnected() {
     this.hide();
@@ -188,8 +189,8 @@ export default class AwcAutocompleteElement<
   }
 
   /**
-   * @private
    * Called when the `disabled` attribute changes.
+   * @private
    */
   disabledChanged(value: boolean) {
     this.input.disabled = value;
@@ -204,16 +205,16 @@ export default class AwcAutocompleteElement<
   }
 
   /**
-   * @private
    * Called when the `required` attribute changes.
+   * @private
    */
   requiredChanged(value: boolean) {
     this.selectVariant.required = value;
   }
 
   /**
-   * @private
    * Called when the `src` attribute changes.
+   * @private
    */
   srcChanged(src: string) {
     // Clear the selected value without emitting any events to avoid invalid combinations.
@@ -225,16 +226,16 @@ export default class AwcAutocompleteElement<
   }
 
   /**
-   * @private
    * Called when the `auto-size` attribute changes.
+   * @private
    */
   autoSizeChanged() {
     this.reposition();
   }
 
   /**
-   * @private
    * Called when the `auto-size-padding` attribute changes.
+   * @private
    */
   autoSizePaddingChanged() {
     this.reposition();
@@ -332,8 +333,8 @@ export default class AwcAutocompleteElement<
   }
 
   /**
-   * @private
    * Handles the `combobox:commit` event from the combobox.
+   * @private
    */
   handleCommit(event: Event) {
     event.stopPropagation();
@@ -363,8 +364,8 @@ export default class AwcAutocompleteElement<
   }
 
   /**
-   * @private
    * Removes the tag when the "X" button is clicked.
+   * @private
    */
   handleTagRemove(event: Event) {
     const tag = (event.target as HTMLElement).closest<HTMLElement>('[data-behavior="tag"]');
@@ -416,6 +417,7 @@ export default class AwcAutocompleteElement<
     this.emitEvent('hidden');
   }
 
+  /* eslint-disable jsdoc/check-param-names -- documents the arguments the rest tuples resolve to */
   /**
    * Sets the value of the element. If options are fetched from a remote source, the `text` param is required.
    * @param value - The value of the option.
@@ -441,14 +443,16 @@ export default class AwcAutocompleteElement<
 
     this.selectVariant.clear();
   }
+  /* eslint-enable jsdoc/check-param-names */
 
   /**
    * Activates an option by setting the `data-active` attribute.
    * @param option - The option you want to activate.
-   * @param scroll - When true, it scrolls the option to view (by default, it is true).
+   * @param options - Activation options.
+   * @param options.scroll - When true, it scrolls the option to view (by default, it is true).
    */
   activate(option: HTMLElement, { scroll = true } = {}) {
-    this.combobox.activate(option, { scroll: scroll });
+    this.combobox.activate(option, { scroll });
   }
 
   /**
@@ -605,10 +609,10 @@ declare global {
   interface HTMLElementTagNameMap {
     // The full cross-product of both dimensions so `if (el.multiple)` and `if (el.remote)` each narrow.
     'awc-autocomplete':
-      | SingleAutocompleteElement<'local'>
-      | SingleAutocompleteElement<'remote'>
-      | MultipleAutocompleteElement<'local'>
-      | MultipleAutocompleteElement<'remote'>;
+      SingleAutocompleteElement<'local'> |
+      SingleAutocompleteElement<'remote'> |
+      MultipleAutocompleteElement<'local'> |
+      MultipleAutocompleteElement<'remote'>;
   }
   // Derived from the event map so that declaring an event and typing it for listeners are the same act.
   interface GlobalEventHandlersEventMap extends AutocompleteEventMap {}

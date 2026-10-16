@@ -34,16 +34,16 @@ export default [
       typescript({ tsconfig: './tsconfig.prod.json' }),
       // Runs after `typescript`, which emits the declarations this rewrites.
       rewriteDeclarationImports(),
-      ...(isProd
-        ? [
-            // Copy styles
-            copy({
-              patterns: '**/*.scss',
-              rootDir: './src',
-              exclude: ['node_modules', 'index.scss'],
-            }),
-          ]
-        : []),
+      ...(isProd ?
+        [
+          // Copy styles
+          copy({
+            patterns: '**/*.scss',
+            rootDir: './src',
+            exclude: ['node_modules', 'index.scss'],
+          }),
+        ] :
+        []),
     ],
   },
   {

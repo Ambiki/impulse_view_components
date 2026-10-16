@@ -2,10 +2,10 @@ import type { ImpulseElement } from '@ambiki/impulse';
 
 export type Boundary = Element | null;
 
-type UseOutsideClickOptions = {
+interface UseOutsideClickOptions {
   boundaries: Boundary[];
   callback: (event: Event, element: HTMLElement) => void;
-};
+}
 
 export default function useOutsideClick(element: ImpulseElement, { boundaries, callback }: UseOutsideClickOptions) {
   const controller = new AbortController();

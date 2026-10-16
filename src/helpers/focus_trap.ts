@@ -1,4 +1,5 @@
-import { FocusableElement, focusable, isFocusable, tabbable } from 'tabbable';
+import type { FocusableElement } from 'tabbable';
+import { focusable, isFocusable, tabbable } from 'tabbable';
 import uniqueId from './unique_id';
 
 type Boundary = Element | null;
@@ -10,7 +11,7 @@ export default function focusTrap(
     abortSignal,
     surround = true,
     boundaries = [],
-  }: { abortSignal?: AbortSignal; surround?: boolean; boundaries?: Boundary[] } = {}
+  }: { abortSignal?: AbortSignal; surround?: boolean; boundaries?: Boundary[] } = {},
 ) {
   const controller = new AbortController();
   const signal = abortSignal || controller.signal;
