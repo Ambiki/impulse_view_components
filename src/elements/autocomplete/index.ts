@@ -143,8 +143,8 @@ export default class AwcAutocompleteElement<
     this.form?.addEventListener('reset', this.handleFormReset);
 
     this.floatingUI = useFloatingUI(this, {
-      referenceElement: this.control,
-      popupElement: this.listbox,
+      anchorElement: this.control,
+      floatingElement: this.listbox,
       placement: 'bottom',
       sync: 'width',
       offsetOptions: 4,

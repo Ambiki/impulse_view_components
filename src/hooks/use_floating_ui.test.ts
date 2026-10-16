@@ -72,7 +72,7 @@ const nudge: Middleware = { name: 'nudge', fn: ({ x }) => ({ x: x + 7 }) };
 describe('useFloatingUI', () => {
   it('runs custom middleware', async () => {
     const { host, anchor, floating } = await floatingFixture();
-    const floatingUI = useFloatingUI(host, { referenceElement: anchor, popupElement: floating, middleware: [nudge] });
+    const floatingUI = useFloatingUI(host, { anchorElement: anchor, floatingElement: floating, middleware: [nudge] });
 
     host.open = true;
     await floatingUI.update();
@@ -85,8 +85,8 @@ describe('useFloatingUI', () => {
   it('aligns the arrow after custom middleware has moved the floating element', async () => {
     const { host, anchor, floating, arrow } = await floatingFixture();
     const floatingUI = useFloatingUI(host, {
-      referenceElement: anchor,
-      popupElement: floating,
+      anchorElement: anchor,
+      floatingElement: floating,
       arrowElement: arrow,
       middleware: [nudge],
     });
@@ -100,7 +100,7 @@ describe('useFloatingUI', () => {
 
   it('positions the floating element at `bottom` with a fixed strategy by default', async () => {
     const { host, anchor, floating } = await floatingFixture();
-    const floatingUI = useFloatingUI(host, { referenceElement: anchor, popupElement: floating });
+    const floatingUI = useFloatingUI(host, { anchorElement: anchor, floatingElement: floating });
 
     host.open = true;
     await floatingUI.update();
@@ -115,8 +115,8 @@ describe('useFloatingUI', () => {
   it('honours `placement` and `offsetOptions`', async () => {
     const { host, anchor, floating } = await floatingFixture();
     const floatingUI = useFloatingUI(host, {
-      referenceElement: anchor,
-      popupElement: floating,
+      anchorElement: anchor,
+      floatingElement: floating,
       placement: 'top',
       offsetOptions: 8,
     });
@@ -133,7 +133,7 @@ describe('useFloatingUI', () => {
   it('flips to the opposite side when there is no room', async () => {
     const { host, anchor, floating } = await floatingFixture();
     moveAnchor(anchor, { top: `${window.innerHeight - 30}px` });
-    const floatingUI = useFloatingUI(host, { referenceElement: anchor, popupElement: floating });
+    const floatingUI = useFloatingUI(host, { anchorElement: anchor, floatingElement: floating });
 
     host.open = true;
     await floatingUI.update();
@@ -146,8 +146,8 @@ describe('useFloatingUI', () => {
     const { host, anchor, floating } = await floatingFixture();
     moveAnchor(anchor, { left: `${window.innerWidth - 60}px` });
     const floatingUI = useFloatingUI(host, {
-      referenceElement: anchor,
-      popupElement: floating,
+      anchorElement: anchor,
+      floatingElement: floating,
       placement: 'bottom-start',
     });
 
@@ -162,7 +162,7 @@ describe('useFloatingUI', () => {
   it('shifts the floating element back inside the viewport when no alignment fits', async () => {
     const { host, anchor, floating } = await floatingFixture();
     moveAnchor(anchor, { left: `${window.innerWidth - 60}px` });
-    const floatingUI = useFloatingUI(host, { referenceElement: anchor, popupElement: floating });
+    const floatingUI = useFloatingUI(host, { anchorElement: anchor, floatingElement: floating });
 
     host.open = true;
     await floatingUI.update();
@@ -173,7 +173,7 @@ describe('useFloatingUI', () => {
 
   it('syncs the width of the floating element to the anchor', async () => {
     const { host, anchor, floating } = await floatingFixture();
-    const floatingUI = useFloatingUI(host, { referenceElement: anchor, popupElement: floating, sync: 'width' });
+    const floatingUI = useFloatingUI(host, { anchorElement: anchor, floatingElement: floating, sync: 'width' });
 
     host.open = true;
     await floatingUI.update();
@@ -185,8 +185,8 @@ describe('useFloatingUI', () => {
   it('exposes the available height as a custom property', async () => {
     const { host, anchor, floating } = await floatingFixture();
     const floatingUI = useFloatingUI(host, {
-      referenceElement: anchor,
-      popupElement: floating,
+      anchorElement: anchor,
+      floatingElement: floating,
       autoSize: 'height',
       autoSizePadding: 10,
     });
@@ -201,7 +201,7 @@ describe('useFloatingUI', () => {
 
   it('points the arrow at the anchor', async () => {
     const { host, anchor, floating, arrow } = await floatingFixture();
-    const floatingUI = useFloatingUI(host, { referenceElement: anchor, popupElement: floating, arrowElement: arrow });
+    const floatingUI = useFloatingUI(host, { anchorElement: anchor, floatingElement: floating, arrowElement: arrow });
 
     host.open = true;
     await floatingUI.update();
@@ -213,9 +213,9 @@ describe('useFloatingUI', () => {
 
   it('reads an options object once, when created', async () => {
     const { host, anchor, floating } = await floatingFixture();
-    const options: { referenceElement: HTMLElement; popupElement: HTMLElement; placement?: 'top' } = {
-      referenceElement: anchor,
-      popupElement: floating,
+    const options: { anchorElement: HTMLElement; floatingElement: HTMLElement; placement?: 'top' } = {
+      anchorElement: anchor,
+      floatingElement: floating,
     };
     const floatingUI = useFloatingUI(host, options);
 
@@ -228,7 +228,7 @@ describe('useFloatingUI', () => {
 
   it('positions the floating element once when created, even while closed', async () => {
     const { host, anchor, floating } = await floatingFixture();
-    useFloatingUI(host, { referenceElement: anchor, popupElement: floating });
+    useFloatingUI(host, { anchorElement: anchor, floatingElement: floating });
     await settle();
 
     expect(floating.style.position).to.equal('fixed');
@@ -237,7 +237,7 @@ describe('useFloatingUI', () => {
 
   it('does not reposition on `update` while closed', async () => {
     const { host, anchor, floating } = await floatingFixture();
-    const floatingUI = useFloatingUI(host, { referenceElement: anchor, popupElement: floating });
+    const floatingUI = useFloatingUI(host, { anchorElement: anchor, floatingElement: floating });
     await settle();
 
     moveAnchor(anchor, { left: '200px' });
@@ -248,7 +248,7 @@ describe('useFloatingUI', () => {
 
   it('follows the anchor between `start` and `stop`', async () => {
     const { host, anchor, floating } = await floatingFixture();
-    const floatingUI = useFloatingUI(host, { referenceElement: anchor, popupElement: floating });
+    const floatingUI = useFloatingUI(host, { anchorElement: anchor, floatingElement: floating });
 
     host.open = true;
     floatingUI.start();
@@ -264,7 +264,7 @@ describe('useFloatingUI', () => {
 
   it('stops following the anchor when the element disconnects', async () => {
     const { host, anchor, floating } = await floatingFixture();
-    const floatingUI = useFloatingUI(host, { referenceElement: anchor, popupElement: floating });
+    const floatingUI = useFloatingUI(host, { anchorElement: anchor, floatingElement: floating });
     host.open = true;
     floatingUI.start();
     await waitUntil(() => floating.style.left === '85px');
@@ -282,7 +282,7 @@ describe('useFloatingUI', () => {
   it('reads options from a function every time it repositions', async () => {
     const { host, anchor, floating } = await floatingFixture();
     let placement: Placement = 'bottom-start';
-    const floatingUI = useFloatingUI(host, () => ({ referenceElement: anchor, popupElement: floating, placement }));
+    const floatingUI = useFloatingUI(host, () => ({ anchorElement: anchor, floatingElement: floating, placement }));
 
     host.open = true;
     await floatingUI.update();

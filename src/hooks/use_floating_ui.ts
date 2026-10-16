@@ -17,8 +17,8 @@ export type UseFloatingUIType = {
 };
 
 export type UseFloatingUIOptions = {
-  referenceElement: ReferenceElement;
-  popupElement?: HTMLElement;
+  anchorElement: ReferenceElement;
+  floatingElement?: HTMLElement;
   arrowElement?: HTMLElement | null;
   arrowPadding?: number;
   middleware?: Middleware[];
@@ -33,8 +33,8 @@ export type UseFloatingUIOptions = {
 };
 
 function toPositioningOptions({
-  referenceElement,
-  popupElement,
+  anchorElement,
+  floatingElement,
   arrowElement,
   arrowPadding = 0,
   middleware = [],
@@ -48,8 +48,8 @@ function toPositioningOptions({
   autoSizePadding = 0,
 }: UseFloatingUIOptions): PositioningOptions {
   return {
-    anchor: referenceElement,
-    floating: popupElement,
+    anchor: anchorElement,
+    floating: floatingElement,
     placement,
     strategy,
     sync,
@@ -70,9 +70,9 @@ function optionsReader(options: UseFloatingUIOptions | (() => UseFloatingUIOptio
 }
 
 /**
- * Positions `popupElement` against `referenceElement` while `element` is open. Pass a function instead of an object to
- * have the options read every time `popupElement` is repositioned, so that changes (e.g. to an attribute) are picked up.
- * An object is read once, when the hook is created.
+ * Positions `floatingElement` against `anchorElement` while `element` is open. Pass a function instead of an object to
+ * have the options read every time `floatingElement` is repositioned, so that changes (e.g. to an attribute) are picked
+ * up. An object is read once, when the hook is created.
  */
 export default function useFloatingUI(
   element: ImpulseElement & { open: boolean },
@@ -94,7 +94,7 @@ export default function useFloatingUI(
     return positioner.stop();
   }
 
-  // Set the initial top and left position, then place `popupElement` once, to minimize flickering when it's toggled.
+  // Set the initial top and left position, then place `floatingElement` once, to minimize flickering when it's toggled.
   positioner.prime();
   positioner.reposition();
 
