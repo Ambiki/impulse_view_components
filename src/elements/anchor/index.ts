@@ -1,7 +1,7 @@
 import { ImpulseElement, property, registerElement } from '@ambiki/impulse';
 import type { Placement, Strategy } from '@floating-ui/dom';
 import { stripCSSUnit } from 'src/helpers/string';
-import { createPositioner, type PositioningOptions } from 'src/internal/positioning';
+import { createPositioner, positioningDefaults, type PositioningOptions } from 'src/internal/positioning';
 
 @registerElement('awc-anchor')
 export default class AwcAnchorElement extends ImpulseElement {
@@ -13,7 +13,7 @@ export default class AwcAnchorElement extends ImpulseElement {
   /**
    * The preferred placement of the element. The actual placement may vary to keep the element inside the viewport.
    */
-  @property() placement: Placement = 'bottom';
+  @property() placement: Placement = positioningDefaults.placement;
 
   /**
    * Activates the positioning logic.
@@ -23,7 +23,7 @@ export default class AwcAnchorElement extends ImpulseElement {
   /**
    * The `position` value of the CSS property.
    */
-  @property() strategy: Strategy = 'fixed';
+  @property() strategy: Strategy = positioningDefaults.strategy;
 
   /**
    * The distance in pixels from which to offset the panel away from its anchor.
@@ -43,7 +43,7 @@ export default class AwcAnchorElement extends ImpulseElement {
   /**
    * When `true`, the element will be flipped to the fallback placements to keep the element inside the viewport.
    */
-  @property({ type: Boolean }) flip = true;
+  @property({ type: Boolean }) flip: boolean = positioningDefaults.flip;
 
   /**
    * The amount of padding in pixels before flipping the element.
@@ -65,7 +65,7 @@ export default class AwcAnchorElement extends ImpulseElement {
   /**
    * When `true`, the element will be shifted along its axis to keep the element inside the viewport.
    */
-  @property({ type: Boolean }) shift = false;
+  @property({ type: Boolean }) shift: boolean = positioningDefaults.shift;
 
   /**
    * The amount of padding in pixels before shifting the element.

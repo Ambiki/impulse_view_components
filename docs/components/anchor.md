@@ -10,9 +10,7 @@ doesn't have to be. For example, a menu opened by a chevron button can be anchor
 ::: tip Anchor or `useFloatingUI`?
 Use `Impulse::AnchorComponent` when you are writing markup and want something positioned. If you are writing your own
 [`impulse`](https://github.com/Ambiki/impulse) element that opens and closes a floating element, use the
-[`useFloatingUI`](../hooks/use-floating-ui.md) hook instead. Both share the same positioning logic, but their defaults
-differ: the hook places at `bottom-start` and always shifts, while the component places at `bottom` and doesn't shift
-unless asked.
+[`useFloatingUI`](../hooks/use-floating-ui.md) hook instead. Both share the same positioning logic and defaults.
 :::
 
 ## Usage
@@ -42,7 +40,7 @@ unless asked.
 | flip_padding        | `0`       | The padding in pixels to keep from the viewport edge before flipping.                                                                                                                                                                                   |
 | fallback_placements | `[]`      | The placements to try, in order, when the preferred one doesn't fit. By default, the opposite side is tried.                                                                                                                                            |
 | fallback_strategy   | `bestFit` | What to do when no placement fits. `bestFit` uses the placement that fits best, and `initialPlacement` uses `placement`.                                                                                                                                |
-| shift               | `false`   | Shifts the element along the anchor to keep it inside the viewport.                                                                                                                                                                                     |
+| shift               | `true`    | Shifts the element along the anchor to keep it inside the viewport.                                                                                                                                                                                     |
 | shift_padding       | `0`       | The padding in pixels to keep from the viewport edge while shifting.                                                                                                                                                                                    |
 | auto_size           | `nil`     | Exposes the space available to the element as the `--awc-auto-size-height` and `--awc-auto-size-width` CSS custom properties. One of `height`, `width`, or `both`.                                                                                      |
 | auto_size_padding   | `0`       | The padding in pixels to keep from the viewport edge when measuring the available space.                                                                                                                                                                |

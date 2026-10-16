@@ -14,6 +14,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `useFloatingUI` accepts a function for its options, read on every reposition, and exports its options type as `UseFloatingUIOptions` ([#273](https://github.com/Ambiki/impulse_view_components/pull/273))
 - Added `auto-size` and `auto-size-padding` to `<awc-anchor>` (`auto_size:` and `auto_size_padding:` on `Impulse::AnchorComponent`) ([#274](https://github.com/Ambiki/impulse_view_components/pull/274))
 
+### Changed
+
+- **Breaking:** `useFloatingUI` and `<awc-anchor>` now share their defaults: `bottom` placement, with flip and shift on. Hook callers that omit `placement` get `bottom` instead of `bottom-start`, and `<awc-anchor>` now shifts unless `shift` is `false` ([#276](https://github.com/Ambiki/impulse_view_components/pull/276))
+
 ### Removed
 
 - Dropped support for Rails 6.1 and Ruby 3.3. The minimum supported versions are now Rails 7.0.9 and Ruby 3.4. Earlier Rails 7.0 releases fail to load on Ruby 3.4 because they don't declare `base64`, `bigdecimal`, `drb` and `mutex_m`, which Ruby 3.4 moved to bundled gems
