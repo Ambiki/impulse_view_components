@@ -16,7 +16,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Bumped `@ambiki/impulse` to 2.0.0-rc.0, so an open popover moved in the page keeps working in Chromium and Firefox ([#282](https://github.com/Ambiki/impulse_view_components/pull/282))
 - **Breaking:** Renamed `useFloatingUI`'s `referenceElement` and `popupElement` options to `anchorElement` and `floatingElement` ([#278](https://github.com/Ambiki/impulse_view_components/pull/278))
 - **Breaking:** `<awc-anchor>`'s `start()` and `stop()` now turn `active` on and off ([#277](https://github.com/Ambiki/impulse_view_components/pull/277))
 - **Breaking:** `useFloatingUI` and `<awc-anchor>` now share their defaults: `bottom` placement, with flip and shift on. Hook callers that omit `placement` get `bottom` instead of `bottom-start`, and `<awc-anchor>` now shifts unless `shift` is `false` ([#276](https://github.com/Ambiki/impulse_view_components/pull/276))
@@ -27,6 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Fixed an open popover breaking after it's moved in the page ([#282](https://github.com/Ambiki/impulse_view_components/pull/282))
 - Fixed removing an open popover from the page throwing a `TypeError` ([#281](https://github.com/Ambiki/impulse_view_components/pull/281))
 - Fixed the popover ignoring changes to `placement` after it connected ([#273](https://github.com/Ambiki/impulse_view_components/pull/273))
 - Fixed `useFloatingUI` ignoring its `middleware` option. Custom middleware now runs before the arrow is aligned ([#269](https://github.com/Ambiki/impulse_view_components/pull/269))
