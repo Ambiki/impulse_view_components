@@ -72,6 +72,59 @@ module Impulse
       assert_selector "[data-behavior='tag'][value='Apple'][data-persisted]", count: 1
     end
 
+    test "renders grouped options from a block" do
+      render_inline(Impulse::SelectComponent.new(:user, :country_id)) do |c|
+        c.with_group(title: "North America") do |group|
+          group.with_option(value: "US", text: "United States", description: "Country")
+        end
+        c.with_option(value: "AQ", text: "Antarctica")
+      end
+
+      assert_selector "[role='group']", visible: false do
+        assert_selector ".awc-autocomplete-group-header", text: "North America", visible: false
+        assert_selector "[role='option'][value='US']", text: "United States", visible: false
+        assert_selector "[role='option'][value='US'] span", text: "Country", visible: false
+      end
+      assert_selector "[role='option'][value='AQ']", text: "Antarctica", visible: false
+    end
+
+    test "selects an option from a group in a block" do
+      render_inline(Impulse::SelectComponent.new(:user, :country_id, selected: "CA")) do |c|
+        c.with_group(title: "North America") do |group|
+          group.with_option(value: "US", text: "United States")
+          group.with_option(value: "CA", text: "Canada")
+        end
+      end
+
+      assert_selector "awc-autocomplete.awc-autocomplete--selected"
+      assert_selector "[data-behavior='hidden-field'][value='CA'][data-text='Canada']", visible: false
+      assert_selector "input.awc-autocomplete-input[value='Canada']"
+    end
+
+    test "selects multiple options from groups in a block" do
+      render_inline(Impulse::SelectComponent.new(:user, :country_ids, selected: ["DK", "Invalid", "CA"], multiple: true)) do |c|
+        c.with_group(title: "North America") do |group|
+          group.with_option(value: "CA", text: "Canada")
+        end
+        c.with_group(title: "Europe") do |group|
+          group.with_option(value: "DK", text: "Denmark")
+        end
+      end
+
+      assert_selector "[data-behavior='tag'][data-persisted]", count: 2
+      assert_selector "[data-behavior='tag'][value='DK'][data-text='Denmark']"
+      assert_selector "[data-behavior='tag'][value='CA'][data-text='Canada']"
+    end
+
+    test "renders options from a collection" do
+      render_inline(Impulse::SelectComponent.new(:user, :fruit_id, selected: "kiwi")) do |c|
+        c.with_options([{ value: "apple", text: "Apple" }, { value: "kiwi", text: "Kiwi" }])
+      end
+
+      assert_selector "[role='option']", count: 2, visible: false
+      assert_selector "[data-behavior='hidden-field'][value='kiwi'][data-text='Kiwi']", visible: false
+    end
+
     test "renders a custom blankslate" do
       render_inline(Impulse::SelectComponent.new(:user, :fruit_id)) do |c|
         c.with_blankslate { "Nothing found!" }

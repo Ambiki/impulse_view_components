@@ -46,15 +46,9 @@ module Impulse
       @system_args = system_args
       @system_args[:tag] = :"awc-autocomplete"
       @system_args[:disabled] = disabled
-
-      @system_args[:class] = class_names(
-        system_args[:class],
-        SIZE_MAPPINGS[fetch_or_fallback(SIZE_MAPPINGS.keys, size, DEFAULT_SIZE)],
-        "awc-autocomplete",
-        "awc-autocomplete--selected": @selected.present?,
-        "awc-autocomplete--clearable": @clearable
-      )
-
+      # Holds `class` in its place among the attributes even when none is given. `root_args` fills it in when
+      # rendering, once the selection is known.
+      @system_args[:class] = system_args[:class]
       @system_args[:"data-loosely-focusable"] = "true"
       @system_args[:data] = merge_attributes(
         system_args[:data],
@@ -63,6 +57,29 @@ module Impulse
     end
 
     private
+
+    def root_args
+      @system_args.merge(
+        class: class_names(
+          @system_args[:class],
+          SIZE_MAPPINGS[fetch_or_fallback(SIZE_MAPPINGS.keys, @size, DEFAULT_SIZE)],
+          "awc-autocomplete",
+          "awc-autocomplete--selected": selection.present?,
+          "awc-autocomplete--clearable": @clearable
+        )
+      )
+    end
+
+    # The selected option, or options when `multiple`, each responding to `value` and `text`. Subclasses that hold
+    # their own options look the selection up among them instead.
+    def selection
+      @selected
+    end
+
+    # Shown when no option matches and no `blankslate` is given.
+    def default_blankslate
+      "We couldn't find that!"
+    end
 
     def search_field_args
       {}.tap do |args|

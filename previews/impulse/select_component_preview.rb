@@ -121,6 +121,22 @@ module Impulse
 
     # @display center true
     # @display max_width true
+    def grouped_block_options(multiple: false)
+      continents = {
+        "North America" => [["US", "United States"], ["CA", "Canada"]],
+        "Europe" => [["DK", "Denmark"], ["DE", "Germany"]]
+      }
+      render(Impulse::SelectComponent.new(:user, :fruit_id, selected: multiple ? ["CA", "DK"] : "CA", multiple: multiple)) do |c|
+        continents.each do |continent, countries|
+          c.with_group(title: continent) do |group|
+            countries.each { |code, name| group.with_option(value: code, text: name) }
+          end
+        end
+      end
+    end
+
+    # @display center true
+    # @display max_width true
     def custom_blankslate
       render(Impulse::SelectComponent.new(:user, :fruit_id)) do |c|
         c.with_blankslate { "Nothing found" }

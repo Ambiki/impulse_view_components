@@ -141,6 +141,20 @@ method, the select component also supports grouping options. You can pass an arr
 <%= render(Impulse::SelectComponent.new(:user, :country_id, grouped_options, selected: "US")) %>
 ```
 
+When rendering the options as a block, wrap them in `with_group`.
+
+```erb{3,5}
+<%= render(Impulse::SelectComponent.new(:user, :country_id, selected: "US")) do |c| %>
+  <% Continent.all.each do |continent| %>
+    <% c.with_group(title: continent.name) do |group| %>
+      <% continent.countries.each do |country| %>
+        <% group.with_option(value: country.code, text: country.name) %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>
+```
+
 ### Custom blankslate
 
 A blankslate is displayed when the input's text does not match any of the options.
@@ -172,6 +186,16 @@ Customize the options by rendering a collection of the `with_option` block.
 | `value`       | N/A       | The value of the option.                                                  |
 | `text`        | N/A       | The text of the option.                                                   |
 | `description` | `nil`     | An optional secondary description displayed below the option's text.      |
+| `system_args` | `{}`      | HTML attributes that should be passed to the Rails' `content_tag` method. |
+
+### `with_group`
+
+Groups options under a title. Add the options with the group's `with_option`, which takes the same arguments as
+`with_option` above. A group with no options isn't rendered.
+
+| Name          | Default   | Description                                                               |
+| ------        | --------- | -------------                                                             |
+| `title`       | N/A       | The title displayed above the group's options.                            |
 | `system_args` | `{}`      | HTML attributes that should be passed to the Rails' `content_tag` method. |
 
 ### `with_blankslate`
