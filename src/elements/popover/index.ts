@@ -114,14 +114,17 @@ export default class AwcPopoverElement extends ImpulseElement {
    */
   async hide(event?: Event): Promise<void> {
     if (!this.open) return;
+    // Taken before awaiting: when hiding because the popover was removed, its targets are gone by the time `stop`
+    // resolves.
+    const button = this.button;
     this.open = false;
     this.panel.close();
     await this.floatingUI.stop();
-    this.button.setAttribute('aria-expanded', 'false');
+    button.setAttribute('aria-expanded', 'false');
 
     // This event originated from a button click.
     if (event) {
-      this.button.focus();
+      button.focus();
     }
   }
 
