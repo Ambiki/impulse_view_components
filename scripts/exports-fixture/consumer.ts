@@ -44,6 +44,7 @@ import type AmbikiPopoverElement from '@ambiki/impulse-view-components/dist/elem
 import type AmbikiAnchorElement from '@ambiki/impulse-view-components/dist/elements/anchor';
 import type { UseFloatingUIOptions } from '@ambiki/impulse-view-components/dist/hooks/use_floating_ui';
 import type { VirtualElement } from '@floating-ui/dom';
+import type { AwcAutocompleteCommitEvent } from '@ambiki/impulse-view-components/dist/elements/autocomplete';
 
 export const used = {
   root,
@@ -83,6 +84,8 @@ export const notAPlacement: UseFloatingUIOptions['placement'] = 'middle';
 export const notAPopoverPlacement: AmbikiPopoverElement['placement'] = 'middle';
 // @ts-expect-error: not a fallback strategy
 export const notAFallbackStrategy: AmbikiAnchorElement['fallbackStrategy'] = 'nearest';
+// @ts-expect-error: an event's `value` is a string
+export const notACommitValue: AwcAutocompleteCommitEvent['value'] = 1;
 
 // The hook still takes everything Floating UI's `ReferenceElement` does: a Floating UI `VirtualElement`, and a virtual
 // element with `getClientRects` (which Floating UI's `inline()` middleware reads).
