@@ -112,21 +112,21 @@ describe('awc-anchor', () => {
     expect(floating.getAttribute('x-placement')).to.equal('right');
   });
 
-  it('overflows the viewport rather than shifting by default', async () => {
+  it('shifts back inside the viewport by default', async () => {
     const { anchor, floating } = await anchorFixture();
+    moveAnchor(anchor, { left: `${window.innerWidth - 60}px` });
+    await floating.reposition();
+
+    expect(floating.style.left).to.equal(`${window.innerWidth - 80}px`);
+  });
+
+  it('overflows the viewport when `shift` is false', async () => {
+    const { anchor, floating } = await anchorFixture('active shift="false"');
     moveAnchor(anchor, { left: `${window.innerWidth - 60}px` });
     await floating.reposition();
 
     // Centred under the anchor: (innerWidth - 35) - 40, which pokes 5px past the viewport's right edge.
     expect(floating.style.left).to.equal(`${window.innerWidth - 75}px`);
-  });
-
-  it('shifts back inside the viewport with `shift`', async () => {
-    const { anchor, floating } = await anchorFixture('active shift');
-    moveAnchor(anchor, { left: `${window.innerWidth - 60}px` });
-    await floating.reposition();
-
-    expect(floating.style.left).to.equal(`${window.innerWidth - 80}px`);
   });
 
   it('syncs its width to the anchor', async () => {

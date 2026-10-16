@@ -2,9 +2,9 @@
  * The positioning engine behind `useFloatingUI` and `<awc-anchor>`. It is internal: nothing here is exported from the
  * package, so its interface can change freely. See docs/adr/0001-single-positioning-engine-two-faces.md.
  *
- * The engine has no behavioural defaults: each public face supplies its own placement, strategy, flip and shift, and an
- * omitted offset or padding means zero. Options are read through a function on every reposition, so a face can reflect
- * changes (e.g. to an attribute) without re-creating the positioner.
+ * The engine owns the defaults that every public face shares (`positioningDefaults`), so the faces can't drift apart.
+ * Options are read through a function on every reposition, so a face can reflect changes (e.g. to an attribute) without
+ * re-creating the positioner.
  */
 import type {
   FlipOptions,
@@ -56,19 +56,32 @@ export type FloatingUIPassthrough = {
   middleware?: Middleware[];
 };
 
+/** The defaults shared by every face. An omitted offset or padding means zero. */
+export const positioningDefaults: {
+  placement: Placement;
+  strategy: Strategy;
+  flip: boolean;
+  shift: boolean;
+} = {
+  placement: 'bottom',
+  strategy: 'fixed',
+  flip: true,
+  shift: true,
+};
+
 export type PositioningOptions = {
   anchor?: Anchor | null;
   floating?: HTMLElement | null;
-  placement: Placement;
-  strategy: Strategy;
+  placement?: Placement;
+  strategy?: Strategy;
   /** Offset in pixels away from the anchor. */
   distance?: number;
   /** Offset in pixels along the anchor. */
   skidding?: number;
   /** Flips to another placement to stay inside the viewport, or `false` to keep the placement. */
-  flip: FlipConfig | false;
+  flip?: FlipConfig | boolean;
   /** Shifts along the anchor to stay inside the viewport, or `false` to let it overflow. */
-  shift: ShiftConfig | false;
+  shift?: ShiftConfig | boolean;
   /** Matches the floating element's size to the anchor's. */
   sync?: Dimension;
   /** Exposes the space available to the floating element as `--awc-auto-size-height` and `--awc-auto-size-width`. */
@@ -101,7 +114,7 @@ export function createPositioner(getOptions: () => PositioningOptions): Position
   let autoSized = false;
 
   function prime() {
-    const { floating, strategy } = getOptions();
+    const { floating, strategy = positioningDefaults.strategy } = getOptions();
     if (!floating) return;
 
     floating.style.position = strategy;
@@ -136,12 +149,14 @@ export function createPositioner(getOptions: () => PositioningOptions): Position
       floating.style.height = '';
     }
 
-    if (options.flip) {
-      middleware.push(flip({ ...options.flip, ...floatingUI.flip }));
+    const flipConfig = options.flip ?? positioningDefaults.flip;
+    if (flipConfig) {
+      middleware.push(flip({ ...(flipConfig === true ? {} : flipConfig), ...floatingUI.flip }));
     }
 
-    if (options.shift) {
-      middleware.push(shift({ ...options.shift, ...floatingUI.shift }));
+    const shiftConfig = options.shift ?? positioningDefaults.shift;
+    if (shiftConfig) {
+      middleware.push(shift({ ...(shiftConfig === true ? {} : shiftConfig), ...floatingUI.shift }));
     }
 
     const { autoSize } = options;
@@ -180,9 +195,9 @@ export function createPositioner(getOptions: () => PositioningOptions): Position
     }
 
     const { x, y, placement, strategy, middlewareData } = await computePosition(anchor, floating, {
-      placement: options.placement,
+      placement: options.placement ?? positioningDefaults.placement,
       middleware,
-      strategy: options.strategy,
+      strategy: options.strategy ?? positioningDefaults.strategy,
     });
 
     Object.assign(floating.style, {

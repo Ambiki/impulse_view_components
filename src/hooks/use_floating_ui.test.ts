@@ -77,7 +77,8 @@ describe('useFloatingUI', () => {
     host.open = true;
     await floatingUI.update();
 
-    expect(floating.style.left).to.equal('107px');
+    // Centred under the anchor at 125 - 80 / 2 = 85, then nudged to 92.
+    expect(floating.style.left).to.equal('92px');
     expect(floating.style.top).to.equal('120px');
   });
 
@@ -93,21 +94,22 @@ describe('useFloatingUI', () => {
     host.open = true;
     await floatingUI.update();
 
-    // The anchor's centre is at x = 125. The floating element starts at x = 107, so the 8px arrow starts 125 - 107 - 4 = 14px in.
-    expect(arrow.style.left).to.equal('14px');
+    // The anchor's centre is at x = 125. The floating element starts at x = 92, so the 8px arrow starts 125 - 92 - 4 = 29px in.
+    expect(arrow.style.left).to.equal('29px');
   });
 
-  it('positions the floating element at `bottom-start` with a fixed strategy by default', async () => {
+  it('positions the floating element at `bottom` with a fixed strategy by default', async () => {
     const { host, anchor, floating } = await floatingFixture();
     const floatingUI = useFloatingUI(host, { referenceElement: anchor, popupElement: floating });
 
     host.open = true;
     await floatingUI.update();
 
+    // Centred under the anchor: 125 - 80 / 2 = 85.
     expect(floating.style.position).to.equal('fixed');
-    expect(floating.style.left).to.equal('100px');
+    expect(floating.style.left).to.equal('85px');
     expect(floating.style.top).to.equal('120px');
-    expect(floating.getAttribute('x-placement')).to.equal('bottom-start');
+    expect(floating.getAttribute('x-placement')).to.equal('bottom');
   });
 
   it('honours `placement` and `offsetOptions`', async () => {
@@ -137,13 +139,17 @@ describe('useFloatingUI', () => {
     await floatingUI.update();
 
     expect(floating.style.top).to.equal(`${window.innerHeight - 30 - 40}px`);
-    expect(floating.getAttribute('x-placement')).to.equal('top-start');
+    expect(floating.getAttribute('x-placement')).to.equal('top');
   });
 
   it('flips the alignment when the floating element would overflow along the anchor', async () => {
     const { host, anchor, floating } = await floatingFixture();
     moveAnchor(anchor, { left: `${window.innerWidth - 60}px` });
-    const floatingUI = useFloatingUI(host, { referenceElement: anchor, popupElement: floating });
+    const floatingUI = useFloatingUI(host, {
+      referenceElement: anchor,
+      popupElement: floating,
+      placement: 'bottom-start',
+    });
 
     host.open = true;
     await floatingUI.update();
@@ -156,7 +162,7 @@ describe('useFloatingUI', () => {
   it('shifts the floating element back inside the viewport when no alignment fits', async () => {
     const { host, anchor, floating } = await floatingFixture();
     moveAnchor(anchor, { left: `${window.innerWidth - 60}px` });
-    const floatingUI = useFloatingUI(host, { referenceElement: anchor, popupElement: floating, placement: 'bottom' });
+    const floatingUI = useFloatingUI(host, { referenceElement: anchor, popupElement: floating });
 
     host.open = true;
     await floatingUI.update();
@@ -200,8 +206,8 @@ describe('useFloatingUI', () => {
     host.open = true;
     await floatingUI.update();
 
-    // The anchor's centre is at x = 125 and the floating element starts at x = 100, so the 8px arrow starts 125 - 100 - 4 = 21px in.
-    expect(arrow.style.left).to.equal('21px');
+    // Centred: 80 / 2 - 8 / 2 = 36.
+    expect(arrow.style.left).to.equal('36px');
     expect(arrow.style.top).to.equal('');
   });
 
@@ -217,7 +223,7 @@ describe('useFloatingUI', () => {
     host.open = true;
     await floatingUI.update();
 
-    expect(floating.getAttribute('x-placement')).to.equal('bottom-start');
+    expect(floating.getAttribute('x-placement')).to.equal('bottom');
   });
 
   it('positions the floating element once when created, even while closed', async () => {
@@ -226,7 +232,7 @@ describe('useFloatingUI', () => {
     await settle();
 
     expect(floating.style.position).to.equal('fixed');
-    expect(floating.style.left).to.equal('100px');
+    expect(floating.style.left).to.equal('85px');
   });
 
   it('does not reposition on `update` while closed', async () => {
@@ -237,7 +243,7 @@ describe('useFloatingUI', () => {
     moveAnchor(anchor, { left: '200px' });
     await floatingUI.update();
 
-    expect(floating.style.left).to.equal('100px');
+    expect(floating.style.left).to.equal('85px');
   });
 
   it('follows the anchor between `start` and `stop`', async () => {
@@ -247,13 +253,13 @@ describe('useFloatingUI', () => {
     host.open = true;
     floatingUI.start();
     moveAnchor(anchor, { left: '200px' });
-    await waitUntil(() => floating.style.left === '200px', 'did not follow the anchor');
+    await waitUntil(() => floating.style.left === '185px', 'did not follow the anchor');
 
     await floatingUI.stop();
     moveAnchor(anchor, { left: '300px' });
     await settle();
 
-    expect(floating.style.left).to.equal('200px');
+    expect(floating.style.left).to.equal('185px');
   });
 
   it('stops following the anchor when the element disconnects', async () => {
@@ -261,7 +267,7 @@ describe('useFloatingUI', () => {
     const floatingUI = useFloatingUI(host, { referenceElement: anchor, popupElement: floating });
     host.open = true;
     floatingUI.start();
-    await waitUntil(() => floating.style.left === '100px');
+    await waitUntil(() => floating.style.left === '85px');
 
     // Keep the anchor in the document so a lingering `autoUpdate` would still have something to follow.
     document.body.append(anchor);
@@ -269,7 +275,7 @@ describe('useFloatingUI', () => {
     moveAnchor(anchor, { left: '200px' });
     await settle();
 
-    expect(floating.style.left).to.equal('100px');
+    expect(floating.style.left).to.equal('85px');
     anchor.remove();
   });
 
