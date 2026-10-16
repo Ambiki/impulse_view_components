@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- The JavaScript now compiles to ES2020, so `?.`, `??` and object spread ship untranspiled. No supported browser is dropped, but bundlers that can't parse ES2020, such as webpack 4, need to transpile the package ([#298](https://github.com/Ambiki/impulse_view_components/pull/298))
 - **Breaking:** Renamed `useFloatingUI`'s `referenceElement` and `popupElement` options to `anchorElement` and `floatingElement` ([#278](https://github.com/Ambiki/impulse_view_components/pull/278))
 - **Breaking:** `<awc-anchor>`'s `start()` and `stop()` now turn `active` on and off ([#277](https://github.com/Ambiki/impulse_view_components/pull/277))
 - **Breaking:** `useFloatingUI` and `<awc-anchor>` now share their defaults: `bottom` placement, with flip and shift on. Hook callers that omit `placement` get `bottom` instead of `bottom-start`, and `<awc-anchor>` now shifts unless `shift` is `false` ([#276](https://github.com/Ambiki/impulse_view_components/pull/276))
