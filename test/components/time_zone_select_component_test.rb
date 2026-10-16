@@ -29,6 +29,14 @@ module Impulse
       assert_selector "[data-behavior='hidden-field'][value='Alaska']", visible: false
     end
 
+    test "selects multiple options" do
+      render_inline(Impulse::TimeZoneSelectComponent.new(:user, :time_zones, nil, selected: ["Hawaii", "Alaska"], multiple: true))
+
+      assert_selector "[data-behavior='tag'][data-persisted]", count: 2
+      assert_selector "[data-behavior='tag'][value='Hawaii']"
+      assert_selector "[data-behavior='tag'][value='Alaska']"
+    end
+
     test "does not raise an error if option cannot be found" do
       assert_nothing_raised do
         render_inline(Impulse::TimeZoneSelectComponent.new(:user, :time_zone, nil, selected: "Invalid"))

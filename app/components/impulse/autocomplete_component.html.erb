@@ -1,8 +1,8 @@
-<%= render(Impulse::BaseRenderer.new(**@system_args)) do %>
+<%= render(Impulse::BaseRenderer.new(**root_args)) do %>
   <%= content_tag :div, class: class_names("awc-autocomplete-control form-control", "form-control-sm": @size == "sm", "form-control-lg": @size == "lg"), data: { target: "awc-autocomplete.control", trigger: "" } do %>
     <% if multiple? %>
       <%= hidden_field @object_name, @method_name, id: nil, multiple: true, value: nil, data: { behavior: "hidden-field" }, **hidden_field_args if @include_hidden %>
-      <% @selected&.each do |selected| %>
+      <% selection&.each do |selected| %>
         <div class="awc-autocomplete-tag" value="<%= selected.value %>" data-text="<%= selected.text %>" data-behavior="tag" data-persisted>
           <span class="awc-autocomplete-tag-text" data-behavior="text"><%= selected.text %></span>
           <span class="awc-autocomplete-tag-end-adornment">
@@ -26,13 +26,13 @@
         </div>
       </template>
     <% else %>
-      <%= hidden_field @object_name, @method_name, id: nil, value: @selected&.value, data: { behavior: "hidden-field", text: @selected&.text }, **hidden_field_args %>
+      <%= hidden_field @object_name, @method_name, id: nil, value: selection&.value, data: { behavior: "hidden-field", text: selection&.text }, **hidden_field_args %>
     <% end %>
 
     <%= text_field @object_name,
       @method_name,
       class: "awc-autocomplete-input",
-      value: multiple? ? nil : @selected&.text,
+      value: multiple? ? nil : selection&.text,
       name: nil,
       autocomplete: "off",
       spellcheck: false,
@@ -72,7 +72,7 @@
     <% end %>
 
     <div role="presentation" class="awc-autocomplete-blankslate">
-      <%= blankslate.presence || "We couldn't find that!" %>
+      <%= blankslate.presence || default_blankslate %>
     </div>
 
     <% if ajax? %>

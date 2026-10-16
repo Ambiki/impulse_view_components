@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- `Impulse::SelectComponent`'s block form can group options with `with_group` ([#299](https://github.com/Ambiki/impulse_view_components/pull/299))
 - Added `auto-size` and `auto-size-padding` to `<awc-anchor>` (`auto_size:` and `auto_size_padding:` on `Impulse::AnchorComponent`) ([#274](https://github.com/Ambiki/impulse_view_components/pull/274))
 - `useFloatingUI` accepts a function for its options, read on every reposition, and exports its options type as `UseFloatingUIOptions` ([#273](https://github.com/Ambiki/impulse_view_components/pull/273))
 - Autocomplete now infers its API types from the selection mode and source: `value`/`removeValue` resolve by narrowing on `multiple`, and `setValue`'s `text` requirement by narrowing on the new `remote` getter. Exported `SingleAutocompleteElement` / `MultipleAutocompleteElement` / `LocalAutocompleteElement` / `RemoteAutocompleteElement` types allow pinning the shape explicitly ([#217](https://github.com/Ambiki/impulse_view_components/pull/217))
@@ -27,6 +28,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Fixed `Impulse::TimeZoneSelectComponent` with `multiple: true` not preselecting its `selected` values ([#299](https://github.com/Ambiki/impulse_view_components/pull/299))
 - Fixed type declarations that apps using `moduleResolution: node16` couldn't resolve, which turned some types into `any` ([#296](https://github.com/Ambiki/impulse_view_components/pull/296))
 - Fixed `<awc-anchor>`'s `fallbackPlacements` being typed as `never[]` ([#295](https://github.com/Ambiki/impulse_view_components/pull/295))
 - Fixed the autocomplete ignoring changes to `auto-size` and `auto-size-padding` after it connected ([#292](https://github.com/Ambiki/impulse_view_components/pull/292))
