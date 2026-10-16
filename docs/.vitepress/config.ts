@@ -7,6 +7,8 @@ export default defineConfig({
   title: 'Impulse ViewComponents',
   description: 'View components for Ruby on Rails.',
   lastUpdated: true,
+  // Architecture decision records are for maintainers, not part of the published docs.
+  srcExclude: ['adr/**'],
   markdown: {
     config(md) {
       md.use(copyOrDownloadAsMarkdownButtons);
