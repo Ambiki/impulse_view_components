@@ -8,7 +8,7 @@ import type {
   ShiftOptions,
   Strategy,
 } from '@floating-ui/dom';
-import { arrow, autoUpdate, computePosition, flip, offset, shift, size } from '@floating-ui/dom';
+import { createPositioner } from 'src/internal/positioning';
 
 export type UseFloatingUIType = {
   start: () => void;
@@ -50,133 +50,38 @@ export default function useFloatingUI(
     autoSizePadding = 0,
   }: Options
 ): UseFloatingUIType {
-  let cleanup: ReturnType<typeof autoUpdate> | undefined;
-
-  async function reposition(isOpen = false): Promise<void> {
-    if (!isOpen || !referenceElement || !popupElement) return;
-
-    // Middlewares are order dependent: https://floating-ui.com/docs/middleware
-    const _middleware: Middleware[] = [offset(offsetOptions)];
-
-    if (sync) {
-      _middleware.push(
-        size({
-          apply: ({ rects }) => {
-            const syncWidth = sync === 'width' || sync === 'both';
-            const syncHeight = sync === 'height' || sync === 'both';
-            popupElement.style.width = syncWidth ? `${rects.reference.width}px` : '';
-            popupElement.style.height = syncHeight ? `${rects.reference.height}px` : '';
-          },
-        })
-      );
-    } else {
-      popupElement.style.width = '';
-      popupElement.style.height = '';
-    }
-
-    _middleware.push(flip(flipOptions));
-    _middleware.push(shift(shiftOptions));
-
-    if (autoSize) {
-      _middleware.push(
-        size({
-          padding: autoSizePadding,
-          apply: ({ availableWidth, availableHeight }) => {
-            if (autoSize === 'height' || autoSize === 'both') {
-              popupElement.style.setProperty('--awc-auto-size-height', `${availableHeight}px`);
-            } else {
-              popupElement.style.removeProperty('--awc-auto-size-height');
-            }
-
-            if (autoSize === 'width' || autoSize === 'both') {
-              popupElement.style.setProperty('--awc-auto-size-width', `${availableWidth}px`);
-            } else {
-              popupElement.style.removeProperty('--awc-auto-size-width');
-            }
-          },
-        })
-      );
-    } else {
-      popupElement.style.removeProperty('--awc-auto-size-height');
-      popupElement.style.removeProperty('--awc-auto-size-width');
-    }
-
-    // Custom middleware may move `popupElement`, so it runs before the arrow is aligned to the final position.
-    _middleware.push(...middleware);
-
-    if (arrowElement) {
-      _middleware.push(
-        arrow({
-          element: arrowElement,
-          padding: arrowPadding,
-        })
-      );
-    }
-
-    const {
-      x,
-      y,
-      placement: _placement,
-      strategy: _strategy,
-      middlewareData,
-    } = await computePosition(referenceElement, popupElement, {
-      placement,
-      middleware: _middleware,
-      strategy,
-    });
-    Object.assign(popupElement.style, {
-      left: `${x}px`,
-      top: `${y}px`,
-      position: _strategy,
-    });
-
-    if (middlewareData.arrow && arrowElement) {
-      const { x, y } = middlewareData.arrow;
-      Object.assign(arrowElement.style, {
-        left: typeof x === 'number' ? `${x}px` : '',
-        top: typeof y === 'number' ? `${y}px` : '',
-      });
-    }
-
-    // Bootstrap's arrow depends on this attribute.
-    popupElement.setAttribute('x-placement', _placement);
-  }
-
-  // Set the initial top and left position to minimize flickering when the popup is toggled on/off.
-  function forceStart(): void {
-    if (!popupElement) return;
-    // Fix floatingUI
-    popupElement.style.position = strategy;
-    popupElement.style.top = '0px';
-    popupElement.style.left = '0px';
-
-    if (!referenceElement) return;
-    cleanup = autoUpdate(referenceElement, popupElement, () => reposition(true));
-    stop();
-  }
+  const positioner = createPositioner(() => ({
+    anchor: referenceElement,
+    floating: popupElement,
+    placement,
+    strategy,
+    // The hook always flips and shifts; `flipOptions` and `shiftOptions` only tune how.
+    flip: {},
+    shift: {},
+    sync,
+    autoSize,
+    autoSizePadding,
+    arrow: arrowElement,
+    arrowPadding,
+    floatingUI: { offset: offsetOptions, flip: flipOptions, shift: shiftOptions, middleware },
+  }));
 
   function start(): void {
-    if (!referenceElement || !popupElement) return;
-    cleanup = autoUpdate(referenceElement, popupElement, () => reposition(element.open));
+    positioner.start(update);
   }
 
   async function update() {
-    await reposition(element.open);
+    if (!element.open) return;
+    await positioner.reposition();
   }
 
-  async function stop(): Promise<void> {
-    return new Promise((resolve) => {
-      if (cleanup) {
-        cleanup();
-        cleanup = undefined;
-        requestAnimationFrame(() => resolve());
-      } else {
-        resolve();
-      }
-    });
+  function stop(): Promise<void> {
+    return positioner.stop();
   }
 
-  forceStart();
+  // Set the initial top and left position, then place `popupElement` once, to minimize flickering when it's toggled.
+  positioner.prime();
+  positioner.reposition();
 
   const disconnectedCallback = element.disconnected.bind(element);
   Object.assign(element, {
