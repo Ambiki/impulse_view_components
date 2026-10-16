@@ -1,7 +1,7 @@
 import { ImpulseElement, property, registerElement } from '@ambiki/impulse';
-import type { Middleware, Placement, Strategy } from '@floating-ui/dom';
-import { arrow, autoUpdate, computePosition, flip, offset, shift, size } from '@floating-ui/dom';
+import type { Placement, Strategy } from '@floating-ui/dom';
 import { stripCSSUnit } from 'src/helpers/string';
+import { createPositioner, type PositioningOptions } from 'src/internal/positioning';
 
 @registerElement('awc-anchor')
 export default class AwcAnchorElement extends ImpulseElement {
@@ -77,7 +77,7 @@ export default class AwcAnchorElement extends ImpulseElement {
    */
   @property({ type: Number }) arrowPadding: number;
 
-  private cleanup?: ReturnType<typeof autoUpdate>;
+  private positioner = createPositioner(() => this.positioningOptions);
 
   connected() {
     // Start positioning the element immediately.
@@ -105,93 +105,17 @@ export default class AwcAnchorElement extends ImpulseElement {
 
   start() {
     if (!this.anchorElement) return;
-    // Fix floatingUI.
-    this.style.position = this.strategy;
-    this.style.top = '0px';
-    this.style.left = '0px';
-    this.cleanup = autoUpdate(this.anchorElement, this, this.reposition.bind(this));
+    this.positioner.prime();
+    this.positioner.start(() => this.reposition());
   }
 
   async stop(): Promise<void> {
-    return new Promise((resolve) => {
-      if (this.cleanup) {
-        this.cleanup();
-        this.cleanup = undefined;
-        requestAnimationFrame(() => resolve());
-      } else {
-        resolve();
-      }
-    });
+    return this.positioner.stop();
   }
 
   async reposition() {
     if (!this.active || !this.anchorElement) return;
-    const middleware: Middleware[] = [offset({ mainAxis: this.distance, crossAxis: this.skidding })];
-
-    if (this.sync) {
-      middleware.push(
-        size({
-          apply: ({ rects }) => {
-            const syncWidth = this.sync === 'width' || this.sync === 'both';
-            const syncHeight = this.sync === 'height' || this.sync === 'both';
-            this.style.width = syncWidth ? `${rects.reference.width}px` : '';
-            this.style.height = syncHeight ? `${rects.reference.height}px` : '';
-          },
-        })
-      );
-    } else {
-      this.style.width = '';
-      this.style.height = '';
-    }
-
-    if (this.flip) {
-      middleware.push(
-        flip({
-          fallbackPlacements: this.fallbackPlacements.length ? this.fallbackPlacements : undefined,
-          fallbackStrategy: this.fallbackStrategy,
-          padding: this.flipPadding,
-        })
-      );
-    }
-
-    if (this.shift) {
-      middleware.push(
-        shift({
-          padding: this.shiftPadding,
-        })
-      );
-    }
-
-    if (this.arrowElement) {
-      middleware.push(
-        arrow({
-          element: this.arrowElement,
-          padding: this._arrowPadding,
-        })
-      );
-    }
-
-    const { x, y, placement, strategy, middlewareData } = await computePosition(this.anchorElement, this, {
-      placement: this.placement,
-      middleware,
-      strategy: this.strategy,
-    });
-
-    Object.assign(this.style, {
-      left: `${x}px`,
-      top: `${y}px`,
-      position: strategy,
-    });
-
-    if (middlewareData.arrow && this.arrowElement) {
-      const { x, y } = middlewareData.arrow;
-      Object.assign(this.arrowElement.style, {
-        left: typeof x === 'number' ? `${x}px` : '',
-        top: typeof y === 'number' ? `${y}px` : '',
-      });
-    }
-    // Bootstrap requires this attribute.
-    this.setAttribute('x-placement', placement);
+    await this.positioner.reposition();
   }
 
   get anchorElement() {
@@ -200,6 +124,27 @@ export default class AwcAnchorElement extends ImpulseElement {
 
   get arrowElement() {
     return this.querySelector<HTMLElement>('[data-arrow]');
+  }
+
+  private get positioningOptions(): PositioningOptions {
+    const arrowElement = this.arrowElement;
+    return {
+      anchor: this.anchorElement,
+      floating: this,
+      placement: this.placement,
+      strategy: this.strategy,
+      distance: this.distance,
+      skidding: this.skidding,
+      flip: this.flip && {
+        padding: this.flipPadding,
+        fallbackPlacements: this.fallbackPlacements.length ? this.fallbackPlacements : undefined,
+        fallbackStrategy: this.fallbackStrategy,
+      },
+      shift: this.shift && { padding: this.shiftPadding },
+      sync: this.sync,
+      arrow: arrowElement,
+      arrowPadding: arrowElement ? this._arrowPadding : undefined,
+    };
   }
 
   private get _arrowPadding() {
