@@ -8,17 +8,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Added `auto-size` and `auto-size-padding` to `<awc-anchor>` (`auto_size:` and `auto_size_padding:` on `Impulse::AnchorComponent`) ([#274](https://github.com/Ambiki/impulse_view_components/pull/274))
+- `useFloatingUI` accepts a function for its options, read on every reposition, and exports its options type as `UseFloatingUIOptions` ([#273](https://github.com/Ambiki/impulse_view_components/pull/273))
 - Autocomplete now infers its API types from the selection mode and source: `value`/`removeValue` resolve by narrowing on `multiple`, and `setValue`'s `text` requirement by narrowing on the new `remote` getter. Exported `SingleAutocompleteElement` / `MultipleAutocompleteElement` / `LocalAutocompleteElement` / `RemoteAutocompleteElement` types allow pinning the shape explicitly ([#217](https://github.com/Ambiki/impulse_view_components/pull/217))
 - Added `GlobalEventHandlersEventMap` entries for the dialog and popover events so listeners receive a typed `CustomEvent` ([#216](https://github.com/Ambiki/impulse_view_components/pull/216))
 - Every prefixed autocomplete event is now declared, so `show`, `shown`, `hide`, `hidden`, `clear` and `reset` listeners receive a typed `CustomEvent` alongside `commit` and `remove`. The four remote-source events (`loadstart`, `load`, `error`, `loadend`) are unchanged — they stay unprefixed and non-bubbling
-- `useFloatingUI` accepts a function for its options, read on every reposition, and exports its options type as `UseFloatingUIOptions` ([#273](https://github.com/Ambiki/impulse_view_components/pull/273))
-- Added `auto-size` and `auto-size-padding` to `<awc-anchor>` (`auto_size:` and `auto_size_padding:` on `Impulse::AnchorComponent`) ([#274](https://github.com/Ambiki/impulse_view_components/pull/274))
 
 ### Changed
 
-- **Breaking:** `useFloatingUI` and `<awc-anchor>` now share their defaults: `bottom` placement, with flip and shift on. Hook callers that omit `placement` get `bottom` instead of `bottom-start`, and `<awc-anchor>` now shifts unless `shift` is `false` ([#276](https://github.com/Ambiki/impulse_view_components/pull/276))
-- **Breaking:** `<awc-anchor>`'s `start()` and `stop()` now turn `active` on and off ([#277](https://github.com/Ambiki/impulse_view_components/pull/277))
 - **Breaking:** Renamed `useFloatingUI`'s `referenceElement` and `popupElement` options to `anchorElement` and `floatingElement` ([#278](https://github.com/Ambiki/impulse_view_components/pull/278))
+- **Breaking:** `<awc-anchor>`'s `start()` and `stop()` now turn `active` on and off ([#277](https://github.com/Ambiki/impulse_view_components/pull/277))
+- **Breaking:** `useFloatingUI` and `<awc-anchor>` now share their defaults: `bottom` placement, with flip and shift on. Hook callers that omit `placement` get `bottom` instead of `bottom-start`, and `<awc-anchor>` now shifts unless `shift` is `false` ([#276](https://github.com/Ambiki/impulse_view_components/pull/276))
 
 ### Removed
 
@@ -26,11 +26,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Fixed the popover ignoring changes to `placement` after it connected ([#273](https://github.com/Ambiki/impulse_view_components/pull/273))
+- Fixed `useFloatingUI` ignoring its `middleware` option. Custom middleware now runs before the arrow is aligned ([#269](https://github.com/Ambiki/impulse_view_components/pull/269))
 - Fixed the autocomplete issuing a request against a source it was no longer using: changing `src`, or removing the element, now cancels a request that is in flight and one that is still waiting out the debounce. Previously a response from the old source could overwrite the options of the new one
 - Fixed the `exports` subpath map pointing at directories instead of files, which broke `dist/elements/*`, `dist/hooks/*` and `dist/helpers/*` imports for Node and for TypeScript under `moduleResolution: bundler`/`node16`. Every subpath now maps to a real file and declares a `types` condition, and element stylesheets stay reachable through the `sass`/`style` conditions ([#224](https://github.com/Ambiki/impulse_view_components/issues/224))
 - Fixed `useOutsideClick` leaking its `click` listener by switching teardown to `AbortController` ([#215](https://github.com/Ambiki/impulse_view_components/pull/215))
-- Fixed `useFloatingUI` ignoring its `middleware` option. Custom middleware now runs before the arrow is aligned ([#269](https://github.com/Ambiki/impulse_view_components/pull/269))
-- Fixed the popover ignoring changes to `placement` after it connected ([#273](https://github.com/Ambiki/impulse_view_components/pull/273))
 
 ## [0.8.0] - 2026-01-09
 

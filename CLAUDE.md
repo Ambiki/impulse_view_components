@@ -3,6 +3,7 @@
 ## Changelog
 
 - Keep `CHANGELOG.md` entries short and to the point.
+- List entries newest first: add a new entry at the top of its section, not the bottom.
 - Always link the pull request, with its number: `([#123](https://github.com/Ambiki/impulse_view_components/pull/123))`.
   Never link the issue or use its number.
 
