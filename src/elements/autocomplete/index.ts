@@ -101,14 +101,13 @@ export default class AwcAutocompleteElement<
   @property() param = 'q';
 
   /**
-   * If `true`, the listbox will automatically adjust its height based on its content.
-   * This helps avoid scrollbars by fitting the content dynamically.
+   * If `true`, caps the listbox's height to the space between it and the edge of the viewport, so a long list scrolls
+   * instead of running off screen.
    */
   @property({ type: Boolean }) autoSize = false;
 
   /**
-   * The number of pixels of extra space to add beyond the content's height
-   * when `autoSize` is enabled. Acts as vertical padding.
+   * The space in pixels to keep between the listbox and the edge of the viewport when `autoSize` is enabled.
    */
   @property({ type: Number }) autoSizePadding = 4;
 
