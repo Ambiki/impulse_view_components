@@ -16,7 +16,7 @@ export default class AwcAnchorElement extends ImpulseElement {
   @property() placement: Placement = positioningDefaults.placement;
 
   /**
-   * Activates the positioning logic.
+   * Whether the element is positioned. `start` and `stop` set it.
    */
   @property({ type: Boolean }) active = false;
 
@@ -91,42 +91,65 @@ export default class AwcAnchorElement extends ImpulseElement {
   private positioner = createPositioner(() => this.positioningOptions);
 
   connected() {
-    // Start positioning the element immediately.
-    this.start();
+    // Lay the element out straight away; it is only positioned once `active`.
+    this.follow();
   }
 
   disconnected() {
-    this.stop();
+    // Leaves `active` alone, so that the element resumes once it's reconnected.
+    this.unfollow();
   }
 
   async anchorIdChanged(newValue: string) {
-    await this.stop();
+    await this.unfollow();
     if (newValue && this.anchorElement) {
-      this.start();
+      this.follow();
     }
   }
 
   async activeChanged(newValue: boolean) {
     if (newValue) {
-      this.start();
+      this.follow();
     } else {
-      await this.stop();
+      await this.unfollow();
     }
   }
 
+  /**
+   * Activates the element, and keeps it positioned next to its anchor until `stop` is called.
+   */
   start() {
-    if (!this.anchorElement) return;
-    this.positioner.prime();
-    this.positioner.start(() => this.reposition());
+    if (this.active) {
+      this.follow();
+    } else {
+      // `activeChanged` starts following.
+      this.active = true;
+    }
   }
 
+  /**
+   * Deactivates the element, and stops keeping it positioned. Resolves on the next frame.
+   */
   async stop(): Promise<void> {
-    return this.positioner.stop();
+    // Taken before deactivating, which would otherwise have already stopped it and leave nothing to wait for.
+    const stopped = this.unfollow();
+    this.active = false;
+    return stopped;
   }
 
   async reposition() {
     if (!this.active || !this.anchorElement) return;
     await this.positioner.reposition();
+  }
+
+  private follow() {
+    if (!this.anchorElement) return;
+    this.positioner.prime();
+    this.positioner.start(() => this.reposition());
+  }
+
+  private unfollow(): Promise<void> {
+    return this.positioner.stop();
   }
 
   get anchorElement() {
