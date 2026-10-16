@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed the autocomplete issuing a request against a source it was no longer using: changing `src`, or removing the element, now cancels a request that is in flight and one that is still waiting out the debounce. Previously a response from the old source could overwrite the options of the new one
 - Fixed the `exports` subpath map pointing at directories instead of files, which broke `dist/elements/*`, `dist/hooks/*` and `dist/helpers/*` imports for Node and for TypeScript under `moduleResolution: bundler`/`node16`. Every subpath now maps to a real file and declares a `types` condition, and element stylesheets stay reachable through the `sass`/`style` conditions ([#224](https://github.com/Ambiki/impulse_view_components/issues/224))
 - Fixed `useOutsideClick` leaking its `click` listener by switching teardown to `AbortController` ([#215](https://github.com/Ambiki/impulse_view_components/pull/215))
+- Fixed `useFloatingUI` ignoring its `middleware` option. Custom middleware now runs before the arrow is aligned ([#269](https://github.com/Ambiki/impulse_view_components/pull/269))
 
 ## [0.8.0] - 2026-01-09
 

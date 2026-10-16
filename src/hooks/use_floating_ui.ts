@@ -101,6 +101,9 @@ export default function useFloatingUI(
       popupElement.style.removeProperty('--awc-auto-size-width');
     }
 
+    // Custom middleware may move `popupElement`, so it runs before the arrow is aligned to the final position.
+    _middleware.push(...middleware);
+
     if (arrowElement) {
       _middleware.push(
         arrow({
@@ -109,8 +112,6 @@ export default function useFloatingUI(
         })
       );
     }
-
-    _middleware.concat(middleware);
 
     const {
       x,
