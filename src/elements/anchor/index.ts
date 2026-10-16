@@ -1,5 +1,4 @@
 import { ImpulseElement, property, registerElement } from '@ambiki/impulse';
-// Relative and ending in `.js`, because it reaches the published declarations (see `scripts/check-exports.mjs`).
 import {
   createPositioner,
   positioningDefaults,
@@ -8,7 +7,7 @@ import {
   type Placement,
   type PositioningOptions,
   type Strategy,
-} from '../../internal/positioning.js';
+} from 'src/internal/positioning';
 
 @registerElement('awc-anchor')
 export default class AwcAnchorElement extends ImpulseElement {

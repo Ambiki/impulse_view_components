@@ -26,6 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Fixed type declarations that apps using `moduleResolution: node16` couldn't resolve, which turned some types into `any` ([#296](https://github.com/Ambiki/impulse_view_components/pull/296))
 - Fixed `<awc-anchor>`'s `fallbackPlacements` being typed as `never[]` ([#295](https://github.com/Ambiki/impulse_view_components/pull/295))
 - Fixed the autocomplete ignoring changes to `auto-size` and `auto-size-padding` after it connected ([#292](https://github.com/Ambiki/impulse_view_components/pull/292))
 - Fixed an open popover breaking after it's moved in the page ([#282](https://github.com/Ambiki/impulse_view_components/pull/282))

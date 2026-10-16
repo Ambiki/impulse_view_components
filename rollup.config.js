@@ -3,6 +3,7 @@ import typescript from '@rollup/plugin-typescript';
 import { copy } from '@web/rollup-plugin-copy';
 import { globby } from 'globby';
 import { uglify } from 'rollup-plugin-uglify';
+import rewriteDeclarationImports from './scripts/rewrite-declaration-imports.mjs';
 
 const isProd = process.env.NODE_ENV === 'production';
 
@@ -31,6 +32,8 @@ export default [
     plugins: [
       resolve(),
       typescript({ tsconfig: './tsconfig.prod.json' }),
+      // Runs after `typescript`, which emits the declarations this rewrites.
+      rewriteDeclarationImports(),
       ...(isProd
         ? [
             // Copy styles
