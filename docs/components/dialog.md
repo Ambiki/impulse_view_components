@@ -17,7 +17,7 @@ solves z-index issues by rendering the element in the [top layer](https://develo
 const button = document.querySelector('button');
 const dialog = document.querySelector('awc-dialog');
 button.addEventListener('click', () => {
-  dialog.show();
+  dialog.requestShow();
 });
 ```
 
@@ -71,7 +71,7 @@ class so that only the body element can be scrolled.
       <%= f.text_field :name %>
     <% end %>
     <%= c.with_footer do %>
-      <button type="reset" data-action="click->awc-dialog#hide">Cancel</button>
+      <button type="reset" data-action="click->awc-dialog#requestHide">Cancel</button>
       <%= f.submit %>
     <% end %>
   <% end %>
@@ -97,7 +97,7 @@ component respectively.
     <%= f.text_field :name %>
   <% end %>
   <%= render(Impulse::Dialog::FooterComponent.new) do %>
-    <button type="reset" data-action="click->awc-dialog#hide">Cancel</button>
+    <button type="reset" data-action="click->awc-dialog#requestHide">Cancel</button>
     <%= f.submit %>
   <% end %>
 <% end %>
@@ -105,12 +105,15 @@ component respectively.
 
 ## Closing the dialog
 
-Add the `data-action="click->awc-dialog#hide"` attribute on the `button` element to close the dialog when clicking it.
+Add the `data-action="click->awc-dialog#requestHide"` attribute on the `button` element to close the dialog when clicking it.
+
+`requestHide` emits the cancelable `awc-dialog:hide` event first, so a listener can keep the dialog open, for example
+while a form inside it has unsaved changes. `hide` closes it without asking.
 
 ```erb{3}
 <%= render(Impulse::DialogComponent.new(title: "Edit your profile")) do |c| %>
   <% c.with_body do %>
-    <button type="button" data-action="click->awc-dialog#hide">Close</button>
+    <button type="button" data-action="click->awc-dialog#requestHide">Close</button>
   <% end %>
 <% end %>
 ```

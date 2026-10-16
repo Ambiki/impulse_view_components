@@ -60,13 +60,16 @@ You are encouraged to use the `title` argument if there aren't any rich content 
 
 ### Closing the popover
 
-Add the `data-action="click->awc-popover#hide"` attribute on the `button` element to close the popover when clicking it.
+Add the `data-action="click->awc-popover#requestHide"` attribute on the `button` element to close the popover when clicking it.
+
+`requestHide` emits the cancelable `awc-popover:hide` event first, so a listener can keep the popover open, for example
+while a form inside it has unsaved changes. `hide` closes it without asking.
 
 ```erb{4}
 <%= render(Impulse::PopoverComponent.new(title: "Activity feed")) do |c| %>
   <% c.with_trigger { "Toggle popover" } %>
   <% c.with_body do %>
-    <button type="button" data-action="click->awc-popover#hide">Close</button>
+    <button type="button" data-action="click->awc-popover#requestHide">Close</button>
   <% end %>
 <% end %>
 ```

@@ -25,7 +25,7 @@
     <% end %>
 
     <%= c.with_footer do %>
-      <button type="reset" class="btn btn-secondary btn-sm" data-action="click->awc-dialog#hide">Cancel</button>
+      <button type="reset" class="btn btn-secondary btn-sm" data-action="click->awc-dialog#requestHide">Cancel</button>
       <button type="submit" class="btn btn-primary btn-sm">Submit</button>
     <% end %>
   <% end %>
@@ -42,7 +42,7 @@
     const dialogId = event.target.getAttribute('data-dialog-trigger-for');
     const dialog = document.getElementById(dialogId);
     if (dialog) {
-      dialog.show();
+      dialog.requestShow();
     }
   }
 </script>

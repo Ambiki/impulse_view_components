@@ -86,7 +86,7 @@ autocomplete.open;
 
 ### `show`
 
-Shows the listbox.
+Shows the listbox. Emits `awc-autocomplete:shown`, but not the cancelable `awc-autocomplete:show`.
 
 ```js
 autocomplete.show();
@@ -94,10 +94,28 @@ autocomplete.show();
 
 ### `hide`
 
-Hides the listbox.
+Hides the listbox. Emits `awc-autocomplete:hidden`, but not the cancelable `awc-autocomplete:hide`.
 
 ```js
-autocomplete.hide();
+await autocomplete.hide();
+```
+
+### `requestShow`
+
+Shows the listbox as if the user asked to. Emits a cancelable `awc-autocomplete:show`, and does nothing if it is
+prevented.
+
+```js
+autocomplete.requestShow();
+```
+
+### `requestHide`
+
+Hides the listbox as if the user asked to. Emits a cancelable `awc-autocomplete:hide`, and does nothing if it is
+prevented.
+
+```js
+await autocomplete.requestHide();
 ```
 
 ### `value`
@@ -241,17 +259,27 @@ autocomplete.form;
 
 ## Events
 
-| Name                      | Bubbles | Description                                                                                                                                                                            |
-| ------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `awc-autocomplete:show`   | `true`  | This event fires immediately when the `open` attribute is added.                                                                                                                       |
-| `awc-autocomplete:shown`  | `true`  | This event fires when the listbox has been made visible to the user.                                                                                                                   |
-| `awc-autocomplete:hide`   | `true`  | This event fires immediately when the `open` attribute is removed.                                                                                                                     |
-| `awc-autocomplete:hidden` | `true`  | This event fires when the listbox has been completely hidden from the user.                                                                                                            |
-| `awc-autocomplete:commit` | `true`  | This event fires when an option is selected or deselected by clicking the option element. You can access the committed option, its value, and its text from the `event.detail` object. |
-| `awc-autocomplete:clear`  | `true`  | This event fires when all the selected options have been deselected by clicking on the "Clear" button.                                                                                 |
-| `awc-autocomplete:remove` | `true`  | This event fires when a tag has been removed. You can access the removed tag, its value, and its text from the `event.detail` object.                                                  |
-| `awc-autocomplete:reset`  | `true`  | This event fires when the parent form has been reset.                                                                                                                                  |
-| `loadstart`               | `false` | This event fires when the autocomplete starts the network request.                                                                                                                     |
-| `load`                    | `false` | This event fires when the autocomplete fetches the options successfully from the server.                                                                                               |
-| `error`                   | `false` | This event fires when the autocomplete fails to fetch the options from the server.                                                                                                     |
-| `loadend`                 | `false` | This event fires when the autocomplete finishes the network request.                                                                                                                   |
+Events work as they do on native elements. A user action (pressing or typing in the input, Escape, Alt+ArrowDown,
+Alt+ArrowUp, an outside click, the input losing focus, committing an option, clearing), or a `requestShow` or
+`requestHide` call, first emits a
+cancelable `show` or `hide`; calling `preventDefault()` on it keeps the listbox closed or open. `show()` and `hide()`
+act directly and emit no `show` or `hide`, and neither does closing because the form reset. `shown` and `hidden` fire
+after every open and close. Removing the element emits nothing.
+
+Like `input` and `change`, `commit`, `clear`, `remove` and `reset` fire after the value has changed, and only when the
+user changed it or the form reset: `setValue`, `removeValue`, `clear` and `reset` called from code emit nothing.
+
+| Name                      | Bubbles | Cancelable | Description                                                                                                                                                                            |
+| ------------------------- | ------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `awc-autocomplete:show`   | `true`  | `true`     | Fires before the listbox opens for a user action or `requestShow`.                                                                                                                     |
+| `awc-autocomplete:shown`  | `true`  | `false`    | Fires after the listbox has opened.                                                                                                                                                    |
+| `awc-autocomplete:hide`   | `true`  | `true`     | Fires before the listbox closes for a user action or `requestHide`.                                                                                                                    |
+| `awc-autocomplete:hidden` | `true`  | `false`    | Fires after the listbox has closed.                                                                                                                                                    |
+| `awc-autocomplete:commit` | `true`  | `false`    | This event fires when an option is selected or deselected by clicking the option element. You can access the committed option, its value, and its text from the `event.detail` object. |
+| `awc-autocomplete:clear`  | `true`  | `false`    | This event fires when all the selected options have been deselected by clicking on the "Clear" button.                                                                                 |
+| `awc-autocomplete:remove` | `true`  | `false`    | This event fires when a tag has been removed. You can access the removed tag, its value, and its text from the `event.detail` object.                                                  |
+| `awc-autocomplete:reset`  | `true`  | `false`    | This event fires when the parent form has been reset.                                                                                                                                  |
+| `loadstart`               | `false` | `false`    | This event fires when the autocomplete starts the network request.                                                                                                                     |
+| `load`                    | `false` | `false`    | This event fires when the autocomplete fetches the options successfully from the server.                                                                                               |
+| `error`                   | `false` | `false`    | This event fires when the autocomplete fails to fetch the options from the server.                                                                                                     |
+| `loadend`                 | `false` | `false`    | This event fires when the autocomplete finishes the network request.                                                                                                                   |

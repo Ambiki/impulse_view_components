@@ -1,5 +1,5 @@
 import type { UseFloatingUIType } from 'src/hooks/use_floating_ui';
-import type { AutocompleteEventArgs, AutocompleteEventMap, AutocompleteEventName } from './events';
+import type { AutocompleteEventArgs, AutocompleteEventDetails, AutocompleteEventMap, AutocompleteEventName } from './events';
 import Combobox from '@ambiki/combobox';
 import { ImpulseElement, property, registerElement, target, targets } from '@ambiki/impulse';
 import { isLooselyFocusable } from 'src/helpers/focus';
@@ -162,7 +162,7 @@ export default class AwcAutocompleteElement<
         if (this.preventOutsideClickEvent && !isLooselyFocusable(target)) {
           event.preventDefault();
         } else if (this.open) {
-          this.hide();
+          this.requestHide();
         }
 
         this.preventOutsideClickEvent = false;
@@ -181,7 +181,8 @@ export default class AwcAutocompleteElement<
    * @private
    */
   disconnected() {
-    this.hide();
+    // Removal emits nothing: there is no element left to react to.
+    this.hideWithoutEmitting();
     this.searchVariant?.disconnected();
     this.form?.removeEventListener('reset', this.handleFormReset);
     this.firstFocus = true;
@@ -260,7 +261,7 @@ export default class AwcAutocompleteElement<
     this.focus();
     const target = event.target as HTMLElement;
     if (target.hasAttribute('data-trigger')) {
-      this.show();
+      this.requestShow();
     }
 
     if (this.firstFocus && this.input.value) {
@@ -276,7 +277,7 @@ export default class AwcAutocompleteElement<
   handleInputMousedown(event: MouseEvent) {
     if (this.disabled) return;
     if (event.buttons === 1) {
-      this.show();
+      this.requestShow();
     }
   }
 
@@ -285,7 +286,7 @@ export default class AwcAutocompleteElement<
    */
   async handleInputBlur() {
     this.preventOutsideClickEvent = this.open;
-    await this.hide();
+    await this.requestHide();
     this.firstFocus = true;
   }
 
@@ -305,19 +306,19 @@ export default class AwcAutocompleteElement<
           // Prevent dialogs from closing accidentally.
           event.preventDefault();
           event.stopPropagation();
-          this.hide();
+          this.requestHide();
         }
         break;
       case 'ArrowDown':
         if (event.altKey && !this.open) {
           event.preventDefault();
-          this.show();
+          this.requestShow();
         }
         break;
       case 'ArrowUp':
         if (event.altKey && this.open) {
           event.preventDefault();
-          this.hide();
+          this.requestHide();
         }
         break;
       case 'Backspace':
@@ -350,6 +351,7 @@ export default class AwcAutocompleteElement<
    */
   handleFormReset() {
     this.reset();
+    // Direct, not a request: the form may have been reset from code, and the value is already gone.
     this.hide();
     this.emitEvent('reset');
   }
@@ -359,7 +361,7 @@ export default class AwcAutocompleteElement<
    */
   handleClear() {
     this.clear();
-    this.hide();
+    this.requestHide();
     this.emitEvent('clear');
   }
 
@@ -383,16 +385,31 @@ export default class AwcAutocompleteElement<
     if (!(target instanceof HTMLInputElement)) return;
     const query = target.value.trim();
 
-    this.show();
+    this.requestShow();
     this.searchVariant.search(query);
   }
 
   /**
-   * Shows the listbox element.
+   * Shows the listbox as if the user asked to. Emits a cancelable `show`, and does nothing if it is prevented.
+   */
+  requestShow() {
+    if (this.open || !this.emitRequest('show')) return;
+    this.show();
+  }
+
+  /**
+   * Hides the listbox as if the user asked to. Emits a cancelable `hide`, and does nothing if it is prevented.
+   */
+  async requestHide(): Promise<void> {
+    if (!this.open || !this.emitRequest('hide')) return;
+    await this.hide();
+  }
+
+  /**
+   * Shows the listbox element. Emits `shown` but no `show`: use `requestShow` to let listeners prevent it.
    */
   show() {
     if (this.open) return;
-    this.emitEvent('show');
     this.open = true;
     this.floatingUI.start();
     this.combobox.start();
@@ -402,19 +419,15 @@ export default class AwcAutocompleteElement<
   }
 
   /**
-   * Hides the listbox element.
+   * Hides the listbox element. Emits `hidden` but no `hide`: use `requestHide` to let listeners prevent it.
    */
   async hide() {
     if (!this.open) return;
-    this.emitEvent('hide');
-    this.open = false;
-    this.combobox.stop();
-    this.selectVariant.stop();
-    this.searchVariant.stop();
-    this.removeAttribute('no-options');
-    this.removeAttribute('error');
-    await this.floatingUI.stop();
-    this.emitEvent('hidden');
+    await this.hideWithoutEmitting();
+    // Shown again before the hide finished, so there is no close left to report.
+    if (!this.open) {
+      this.emitEvent('hidden');
+    }
   }
 
   /* eslint-disable jsdoc/check-param-names -- documents the arguments the rest tuples resolve to */
@@ -501,11 +514,28 @@ export default class AwcAutocompleteElement<
   /**
    * Emits one of the events declared in `./events`. Going through here rather than `emit` is what keeps the set of
    * events the element dispatches and the set it declares to listeners in step: an undeclared name or a detail of the
-   * wrong shape does not compile.
+   * wrong shape does not compile. `emitRequest` is the one other way out, for the cancelable request events.
    */
   private emitEvent<Name extends AutocompleteEventName>(name: Name, ...args: AutocompleteEventArgs<Name>) {
     const [detail] = args;
     return this.emit(name, { detail });
+  }
+
+  /** Emits the cancelable request event `name`, returning whether the element may go ahead. */
+  private emitRequest(name: Extract<AutocompleteEventName, 'show' | 'hide'>) {
+    const detail: AutocompleteEventDetails[typeof name] = {};
+    return !this.emit(name, { detail, cancelable: true }).defaultPrevented;
+  }
+
+  private async hideWithoutEmitting() {
+    if (!this.open) return;
+    this.open = false;
+    this.combobox.stop();
+    this.selectVariant.stop();
+    this.searchVariant.stop();
+    this.removeAttribute('no-options');
+    this.removeAttribute('error');
+    await this.floatingUI.stop();
   }
 
   private removeLastTag(): HTMLElement | undefined {

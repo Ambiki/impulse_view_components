@@ -16,7 +16,8 @@ popover.open;
 
 ### `show`
 
-Shows the popover.
+Shows the popover and hides any other open popover. Emits `awc-popover:shown`, but not the cancelable
+`awc-popover:show`.
 
 ```js
 popover.show();
@@ -24,15 +25,32 @@ popover.show();
 
 ### `hide`
 
-Hides the popover.
+Hides the popover. Emits `awc-popover:hidden`, but not the cancelable `awc-popover:hide`.
 
 ```js
 await popover.hide();
 ```
 
+### `requestShow`
+
+Shows the popover as if the user asked to. Emits a cancelable `awc-popover:show`, then a cancelable `awc-popover:hide` on
+each other open popover. Does nothing if any of them is prevented.
+
+```js
+popover.requestShow();
+```
+
+### `requestHide`
+
+Hides the popover as if the user asked to. Emits a cancelable `awc-popover:hide`, and does nothing if it is prevented.
+
+```js
+await popover.requestHide();
+```
+
 ### `toggle`
 
-Shows/hides the popover.
+Shows or hides the popover as if its trigger was clicked: calls `requestShow` or `requestHide`.
 
 ```js
 await popover.toggle();
@@ -49,9 +67,17 @@ await popover.reposition();
 
 ## Events
 
-| Name                 | Bubbles   | Description                                                                                                                  |
-| ------               | --------- | ------------                                                                                                                 |
-| `awc-popover:show`   | `true`    | This event fires immediately when the `open` attribute is added.                                                             |
-| `awc-popover:shown`  | `true`    | This event fires when the popover has been made visible to the user (will wait for the focus trap to be activated).          |
-| `awc-popover:hide`   | `true`    | This event fires immediately when the `open` attribute is removed.                                                           |
-| `awc-popover:hidden` | `true`    | This event fires when the popover has been completely hidden from the user (will wait for the focus trap to be deactivated). |
+Events work as they do on native elements. A user action, or a `requestShow`, `requestHide` or `toggle` call, first
+emits a cancelable `show` or `hide`; calling `preventDefault()` on it stops the popover from opening or closing. `show()`
+and `hide()` act directly, like `dialog.close()`, and emit no `show` or `hide`. `shown` and `hidden` fire after every
+open and close, whatever caused it. Connecting, moving and removing the element emit nothing.
+
+Like the other events, `show` and `hide` bubble. A listener on an element that contains other popovers receives their
+`show` and `hide` too, so check `event.target` before preventing one.
+
+| Name                 | Bubbles | Cancelable | Description                                                                                                                                         |
+| ------               | ------- | ---------- | ------------                                                                                                                                        |
+| `awc-popover:show`   | `true`  | `true`     | Fires before the popover opens for a user action or `requestShow`. Opening the popover also asks the other open popovers to hide.                   |
+| `awc-popover:shown`  | `true`  | `false`    | Fires after the popover has opened.                                                                                                                 |
+| `awc-popover:hide`   | `true`  | `true`     | Fires before the popover closes for a user action or `requestHide`: its trigger, a close button, Escape, an outside click, or another popover opening. |
+| `awc-popover:hidden` | `true`  | `false`    | Fires after the popover has closed.                                                                                                                 |

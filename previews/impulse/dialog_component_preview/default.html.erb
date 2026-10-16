@@ -15,7 +15,7 @@
     const dialogId = event.target.getAttribute('data-dialog-trigger-for');
     const dialog = document.getElementById(dialogId);
     if (dialog) {
-      dialog.show();
+      dialog.requestShow();
     }
   }
 </script>
