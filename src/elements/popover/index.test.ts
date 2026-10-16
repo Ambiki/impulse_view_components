@@ -1,4 +1,4 @@
-import { expect, fixture, waitUntil } from '@open-wc/testing';
+import { expect, fixture, nextFrame, waitUntil } from '@open-wc/testing';
 // Registers `awc-popover`. Kept separate from the type import below, which the bundler elides.
 import './index';
 import type AwcPopoverElement from './index';
@@ -28,6 +28,12 @@ async function popoverFixture() {
   return el;
 }
 
+/** Waits long enough for a rejection from a `hide` that nothing awaits to be reported as `unhandledrejection`. */
+async function settle() {
+  await nextFrame();
+  await nextFrame();
+}
+
 describe('awc-popover', () => {
   it('moves the open panel when `placement` changes', async () => {
     const el = await popoverFixture();
@@ -39,8 +45,30 @@ describe('awc-popover', () => {
     await waitUntil(() => el.panel.getAttribute('x-placement') === 'top', 'did not move the panel');
     // Above the trigger, 8px away: 100 - 8 - 40.
     expect(el.panel.style.top).to.equal('52px');
+  });
 
-    // Removing an open popover throws once its targets are gone, so close it before the fixture is torn down.
-    await el.hide();
+  it('closes cleanly when removed while open', async () => {
+    const el = await popoverFixture();
+    el.show();
+    await waitUntil(() => el.panel.getAttribute('x-placement') === 'bottom', 'did not position the panel');
+    const { button, panel } = el;
+    const rejections: unknown[] = [];
+    const onRejection = (event: PromiseRejectionEvent) => {
+      rejections.push(event.reason);
+      event.preventDefault();
+    };
+    window.addEventListener('unhandledrejection', onRejection);
+
+    try {
+      el.remove();
+      await settle();
+    } finally {
+      window.removeEventListener('unhandledrejection', onRejection);
+    }
+
+    expect(rejections).to.eql([]);
+    expect(el.open).to.equal(false);
+    expect(panel.open).to.equal(false);
+    expect(button.getAttribute('aria-expanded')).to.equal('false');
   });
 });
