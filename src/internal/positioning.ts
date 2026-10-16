@@ -21,7 +21,7 @@ export type Placement = Side | `${Side}-${'start' | 'end'}`;
 export type Strategy = 'absolute' | 'fixed';
 
 /** A rectangle in viewport coordinates. */
-type AnchorRect = {
+interface AnchorRect {
   x: number;
   y: number;
   width: number;
@@ -30,19 +30,19 @@ type AnchorRect = {
   right: number;
   bottom: number;
   left: number;
-};
+}
 
 /**
  * Something that only knows where it is on screen, such as a pointer position, standing in for an anchor element. It
  * accepts everything Floating UI's `VirtualElement` does.
  */
-export type VirtualAnchor = {
-  getBoundingClientRect(): AnchorRect;
+export interface VirtualAnchor {
+  getBoundingClientRect: () => AnchorRect;
   /** The rectangles of each line box, for an anchor that wraps across lines (read by Floating UI's `inline()`). */
   getClientRects?: (() => Array<AnchorRect> | DOMRectList) | undefined;
   /** The element the virtual anchor belongs to, used to find the scroll containers to watch. */
   contextElement?: Element | undefined;
-};
+}
 
 /** The element (or a virtual anchor) that a floating element is positioned against. */
 export type Anchor = Element | VirtualAnchor;
@@ -60,25 +60,25 @@ function covers(value: DimensionOrBoth, dimension: Dimension): boolean {
   return value === dimension || value === 'both';
 }
 
-export type FlipConfig = {
+export interface FlipConfig {
   /** Padding in pixels to keep from the viewport edge before flipping. */
   padding?: number;
   /** Placements to try, in order, when the preferred one doesn't fit. */
   fallbackPlacements?: Placement[];
   /** What to do when no placement fits. */
   fallbackStrategy?: FallbackStrategy;
-};
+}
 
-export type ShiftConfig = {
+export interface ShiftConfig {
   /** Padding in pixels to keep from the viewport edge while shifting. */
   padding?: number;
-};
+}
 
 /**
  * Raw Floating UI options, for callers that need more than the engine's own vocabulary. Only the Floating UI backend
  * reads them, so using any of them ties a floating element to that backend.
  */
-export type FloatingUIPassthrough = {
+export interface FloatingUIPassthrough {
   /** Replaces `distance` and `skidding`. */
   offset?: OffsetOptions;
   /** Merged over `flip` when flipping is enabled. */
@@ -87,7 +87,7 @@ export type FloatingUIPassthrough = {
   shift?: ShiftOptions;
   /** Runs after the built-in middleware and before the arrow is aligned. */
   middleware?: Middleware[];
-};
+}
 
 /** The defaults shared by every face. An omitted offset or padding means zero. */
 export const positioningDefaults: {
@@ -102,7 +102,7 @@ export const positioningDefaults: {
   shift: true,
 };
 
-export type PositioningOptions = {
+export interface PositioningOptions {
   anchor?: Anchor | null;
   floating?: HTMLElement | null;
   placement?: Placement;
@@ -125,21 +125,21 @@ export type PositioningOptions = {
   /** Padding in pixels between the arrow and the floating element's edges. */
   arrowPadding?: number;
   floatingUI?: FloatingUIPassthrough;
-};
+}
 
-export type Positioner = {
+export interface Positioner {
   /** Lays the floating element out at the viewport's origin, so that it doesn't flash elsewhere before it's placed. */
-  prime(): void;
+  prime: () => void;
   /** Positions the floating element once. */
-  reposition(): Promise<void>;
+  reposition: () => Promise<void>;
   /**
    * Calls `onUpdate` whenever the anchor or the floating element moves or resizes, until `stop` is called. The face
    * decides whether to `reposition` from there. The anchor and floating element are read once, when starting.
    */
-  start(onUpdate: () => void): void;
+  start: (onUpdate: () => void) => void;
   /** Stops keeping the floating element positioned. Resolves on the next frame. */
-  stop(): Promise<void>;
-};
+  stop: () => Promise<void>;
+}
 
 export function createPositioner(getOptions: () => PositioningOptions): Positioner {
   let cleanup: ReturnType<typeof autoUpdate> | undefined;
@@ -179,7 +179,7 @@ export function createPositioner(getOptions: () => PositioningOptions): Position
             floating.style.width = covers(sync, 'width') ? `${rects.reference.width}px` : '';
             floating.style.height = covers(sync, 'height') ? `${rects.reference.height}px` : '';
           },
-        })
+        }),
       );
     } else {
       floating.style.width = '';
@@ -215,7 +215,7 @@ export function createPositioner(getOptions: () => PositioningOptions): Position
               floating.style.removeProperty('--awc-auto-size-width');
             }
           },
-        })
+        }),
       );
       autoSized = true;
     } else if (autoSized) {

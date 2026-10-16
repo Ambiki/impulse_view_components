@@ -34,8 +34,8 @@ of narrowing:
 
 ```ts
 import type {
-  SingleAutocompleteElement,
   MultipleAutocompleteElement,
+  SingleAutocompleteElement,
 } from '@ambiki/impulse-view-components/dist/elements/autocomplete';
 
 const multi = document.querySelector<MultipleAutocompleteElement>('awc-autocomplete')!;
@@ -50,8 +50,8 @@ If you already know the source at the call site, you can also pass the exported 
 
 ```ts
 import type {
-  RemoteAutocompleteElement,
   LocalAutocompleteElement,
+  RemoteAutocompleteElement,
 } from '@ambiki/impulse-view-components/dist/elements/autocomplete';
 
 const remote = document.querySelector<RemoteAutocompleteElement>('awc-autocomplete')!;

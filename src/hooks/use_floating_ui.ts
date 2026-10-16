@@ -1,21 +1,15 @@
 import type { ImpulseElement } from '@ambiki/impulse';
 import type { FlipOptions, Middleware, OffsetOptions, ShiftOptions } from '@floating-ui/dom';
-import {
-  createPositioner,
-  type Anchor,
-  type DimensionOrBoth,
-  type Placement,
-  type PositioningOptions,
-  type Strategy,
-} from 'src/internal/positioning';
+import type { Anchor, DimensionOrBoth, Placement, PositioningOptions, Strategy } from 'src/internal/positioning';
+import { createPositioner } from 'src/internal/positioning';
 
-export type UseFloatingUIType = {
+export interface UseFloatingUIType {
   start: () => void;
   update: () => Promise<void>;
   stop: () => Promise<void>;
-};
+}
 
-export type UseFloatingUIOptions = {
+export interface UseFloatingUIOptions {
   anchorElement: Anchor;
   floatingElement?: HTMLElement;
   arrowElement?: HTMLElement | null;
@@ -29,7 +23,7 @@ export type UseFloatingUIOptions = {
   sync?: DimensionOrBoth;
   autoSize?: DimensionOrBoth;
   autoSizePadding?: number;
-};
+}
 
 function toPositioningOptions({
   anchorElement,
@@ -75,7 +69,7 @@ function optionsReader(options: UseFloatingUIOptions | (() => UseFloatingUIOptio
  */
 export default function useFloatingUI(
   element: ImpulseElement & { open: boolean },
-  options: UseFloatingUIOptions | (() => UseFloatingUIOptions)
+  options: UseFloatingUIOptions | (() => UseFloatingUIOptions),
 ): UseFloatingUIType {
   const getOptions = optionsReader(options);
   const positioner = createPositioner(() => toPositioningOptions(getOptions()));

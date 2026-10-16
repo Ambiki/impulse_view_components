@@ -1,11 +1,14 @@
 {
   "name": "@ambiki/impulse-view-components",
+  "type": "module",
   "version": "0.8.0",
   "description": "A set of JavaScript patterns and Web Components meant to used with the ImpulseViewComponents gem.",
   "author": "Ambitious Idea Labs <info@ambiki.com> (https://ambiki.com/)",
   "contributors": [
     "Abeid Ahmed <aahmed@mysidekicktherapy.com>"
   ],
+  "license": "MIT",
+  "homepage": "https://github.com/Ambiki/impulse_view_components#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Ambiki/impulse_view_components.git"
@@ -13,12 +16,14 @@
   "bugs": {
     "url": "https://github.com/Ambiki/impulse_view_components/issues"
   },
-  "homepage": "https://github.com/Ambiki/impulse_view_components#readme",
   "publishConfig": {
     "access": "public"
   },
-  "type": "module",
-  "types": "./dist/index.d.ts",
+  "keywords": [
+    "view-components",
+    "rails",
+    "components"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -78,13 +83,9 @@
     },
     "./dist/styles/*": "./dist/styles/*"
   },
+  "types": "./dist/index.d.ts",
   "files": [
     "dist"
-  ],
-  "keywords": [
-    "view-components",
-    "rails",
-    "components"
   ],
   "scripts": {
     "build": "concurrently \"yarn build:js\" \"yarn build:css && yarn prefix:css\"",
@@ -93,11 +94,10 @@
     "build:prod": "NODE_ENV=production yarn build",
     "build:watch": "concurrently \"yarn build:js --watch\" \"yarn build:css --watch\"",
     "clean": "rm -rf dist app/assets/dist",
-    "lint": "eslint 'src/**/*.ts'",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
     "prefix:css": "postcss --replace ./app/assets/dist/impulse_view_components.css --use autoprefixer --map",
     "prepublishOnly": "yarn clean && yarn build:prod",
-    "prettier": "prettier --write --log-level warn .",
-    "prettier:check": "prettier --check --log-level warn .",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
@@ -112,7 +112,7 @@
     "tabbable": "^6.4.0"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
+    "@antfu/eslint-config": "^8.2.0",
     "@open-wc/testing": "^5.0.0",
     "@rollup/plugin-commonjs": "^29.0.3",
     "@rollup/plugin-node-resolve": "^16.0.3",
@@ -126,20 +126,15 @@
     "bootstrap": "4.6",
     "concurrently": "^10.0.6",
     "eslint": "^10.12.0",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.7",
-    "globals": "^17.13.0",
+    "eslint-plugin-format": "^2.0.1",
     "globby": "^16.2.4",
     "postcss": "^8.5.30",
     "postcss-cli": "^12.0.0",
-    "prettier": "^3.9.10",
     "rollup": "^4.64.7",
     "rollup-plugin-uglify": "^6.0.4",
     "sass": "^1.105.1",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.71.2",
     "vitepress": "^1.6.4",
     "vitepress-plugin-llms": "^1.14.0"
-  },
-  "license": "MIT"
+  }
 }

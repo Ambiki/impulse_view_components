@@ -58,11 +58,11 @@ export default class SingleSelect implements SelectVariant {
    * A single select holds at most one value, so there is nothing to match the argument against: whatever is selected
    * is the value being removed.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   removeValue(_value: string) {
     this.clear();
   }
 
+  // eslint-disable-next-line accessor-pairs
   set required(value: boolean) {
     this.autocomplete.input.required = value;
   }

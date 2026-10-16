@@ -82,14 +82,14 @@ const elementDirs = fs
   .map((entry) => entry.name);
 
 const styledElementDirs = elementDirs.filter((name) =>
-  fs.existsSync(path.join(distDir, 'elements', name, 'index.scss'))
+  fs.existsSync(path.join(distDir, 'elements', name, 'index.scss')),
 );
 
 const flatModules = ['hooks', 'helpers'].flatMap((group) =>
   fs
     .readdirSync(path.join(distDir, group))
     .filter((file) => file.endsWith('.js'))
-    .map((file) => [group, path.basename(file, '.js')])
+    .map((file) => [group, path.basename(file, '.js')]),
 );
 
 // 1. Runtime resolution through Node's ESM resolver.

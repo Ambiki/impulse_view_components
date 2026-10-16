@@ -1,7 +1,7 @@
-import { expect, fixture, nextFrame, waitUntil } from '@open-wc/testing';
-// Registers `awc-popover`. Kept separate from the type import below, which the bundler elides.
-import './index';
 import type AwcPopoverElement from './index';
+import { expect, fixture, nextFrame, waitUntil } from '@open-wc/testing';
+// Registers `awc-popover`. Kept separate from the type import above, which the bundler elides.
+import './index';
 
 /**
  * Mirrors the structure of `app/components/impulse/popover_component.html.erb`. Only the parts the element reads are

@@ -1,13 +1,6 @@
+import type { DimensionOrBoth, FallbackStrategy, Placement, PositioningOptions, Strategy } from 'src/internal/positioning';
 import { ImpulseElement, property, registerElement } from '@ambiki/impulse';
-import {
-  createPositioner,
-  positioningDefaults,
-  type DimensionOrBoth,
-  type FallbackStrategy,
-  type Placement,
-  type PositioningOptions,
-  type Strategy,
-} from 'src/internal/positioning';
+import { createPositioner, positioningDefaults } from 'src/internal/positioning';
 
 @registerElement('awc-anchor')
 export default class AwcAnchorElement extends ImpulseElement {

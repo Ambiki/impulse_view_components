@@ -12,8 +12,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: ".tool-versions"
-          cache: "yarn"
+          node-version-file: .tool-versions
+          cache: yarn
       - name: Run ESLint
         run: |
           yarn install --frozen-lockfile
@@ -25,8 +25,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: ".tool-versions"
-          cache: "yarn"
+          node-version-file: .tool-versions
+          cache: yarn
       - name: Check package exports
         run: |
           yarn install --frozen-lockfile
@@ -69,8 +69,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: ".tool-versions"
-          cache: "yarn"
+          node-version-file: .tool-versions
+          cache: yarn
       - run: |
           yarn install --frozen-lockfile
           yarn build
