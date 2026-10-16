@@ -1,31 +1,64 @@
 /**
- * The positioning engine behind `useFloatingUI` and `<awc-anchor>`. It is internal: nothing here is exported from the
- * package, so its interface can change freely. See docs/adr/0001-single-positioning-engine-two-faces.md.
+ * The positioning engine behind `useFloatingUI` and `<awc-anchor>`. It is internal: the package's `exports` map doesn't
+ * list it, so `createPositioner` and its options can change freely. Its vocabulary types (`Placement`, `Strategy`,
+ * `Anchor`, `DimensionOrBoth`, `FallbackStrategy`) do reach apps, though, through the public faces' declarations, so
+ * changing those changes the public API. See docs/adr/0001-single-positioning-engine-two-faces.md.
  *
  * The engine owns the defaults that every public face shares (`positioningDefaults`), so the faces can't drift apart.
  * Options are read through a function on every reposition, so a face can reflect changes (e.g. to an attribute) without
  * re-creating the positioner.
  */
-import type {
-  FlipOptions,
-  Middleware,
-  OffsetOptions,
-  Placement as FloatingUIPlacement,
-  ReferenceElement,
-  ShiftOptions,
-  Strategy as FloatingUIStrategy,
-} from '@floating-ui/dom';
+import type { FlipOptions, Middleware, OffsetOptions, ShiftOptions } from '@floating-ui/dom';
 import { arrow, autoUpdate, computePosition, flip, offset, shift, size } from '@floating-ui/dom';
 
-/** The element (or a virtual element, such as a pointer position) that a floating element is positioned against. */
-export type Anchor = ReferenceElement;
+/** A side of the anchor. */
+type Side = 'top' | 'right' | 'bottom' | 'left';
 
-export type Placement = FloatingUIPlacement;
+/** Where the floating element sits against its anchor: a side, optionally aligned to that side's start or end. */
+export type Placement = Side | `${Side}-${'start' | 'end'}`;
 
-/** The `position` the floating element is laid out with. */
-export type Strategy = FloatingUIStrategy;
+/** The CSS `position` the floating element is laid out with. */
+export type Strategy = 'absolute' | 'fixed';
 
-export type Dimension = 'height' | 'width' | 'both';
+/** A rectangle in viewport coordinates. */
+type AnchorRect = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+};
+
+/**
+ * Something that only knows where it is on screen, such as a pointer position, standing in for an anchor element. It
+ * accepts everything Floating UI's `VirtualElement` does.
+ */
+export type VirtualAnchor = {
+  getBoundingClientRect(): AnchorRect;
+  /** The rectangles of each line box, for an anchor that wraps across lines (read by Floating UI's `inline()`). */
+  getClientRects?: (() => Array<AnchorRect> | DOMRectList) | undefined;
+  /** The element the virtual anchor belongs to, used to find the scroll containers to watch. */
+  contextElement?: Element | undefined;
+};
+
+/** The element (or a virtual anchor) that a floating element is positioned against. */
+export type Anchor = Element | VirtualAnchor;
+
+/** One of the floating element's dimensions. */
+export type Dimension = 'height' | 'width';
+
+/** Which of the floating element's dimensions an option applies to: one, or both. */
+export type DimensionOrBoth = Dimension | 'both';
+
+/** What to do when no placement fits: use the one that fits best, or keep the preferred one. */
+export type FallbackStrategy = 'bestFit' | 'initialPlacement';
+
+function covers(value: DimensionOrBoth, dimension: Dimension): boolean {
+  return value === dimension || value === 'both';
+}
 
 export type FlipConfig = {
   /** Padding in pixels to keep from the viewport edge before flipping. */
@@ -33,7 +66,7 @@ export type FlipConfig = {
   /** Placements to try, in order, when the preferred one doesn't fit. */
   fallbackPlacements?: Placement[];
   /** What to do when no placement fits. */
-  fallbackStrategy?: 'bestFit' | 'initialPlacement';
+  fallbackStrategy?: FallbackStrategy;
 };
 
 export type ShiftConfig = {
@@ -83,9 +116,9 @@ export type PositioningOptions = {
   /** Shifts along the anchor to stay inside the viewport, or `false` to let it overflow. */
   shift?: ShiftConfig | boolean;
   /** Matches the floating element's size to the anchor's. */
-  sync?: Dimension;
+  sync?: DimensionOrBoth;
   /** Exposes the space available to the floating element as `--awc-auto-size-height` and `--awc-auto-size-width`. */
-  autoSize?: Dimension;
+  autoSize?: DimensionOrBoth;
   /** Padding in pixels to keep from the viewport edge when measuring the available space. */
   autoSizePadding?: number;
   arrow?: HTMLElement | null;
@@ -143,10 +176,8 @@ export function createPositioner(getOptions: () => PositioningOptions): Position
         size({
           apply: ({ rects }) => {
             if (isStale()) return;
-            const syncWidth = sync === 'width' || sync === 'both';
-            const syncHeight = sync === 'height' || sync === 'both';
-            floating.style.width = syncWidth ? `${rects.reference.width}px` : '';
-            floating.style.height = syncHeight ? `${rects.reference.height}px` : '';
+            floating.style.width = covers(sync, 'width') ? `${rects.reference.width}px` : '';
+            floating.style.height = covers(sync, 'height') ? `${rects.reference.height}px` : '';
           },
         })
       );
@@ -172,13 +203,13 @@ export function createPositioner(getOptions: () => PositioningOptions): Position
           padding: options.autoSizePadding ?? 0,
           apply: ({ availableWidth, availableHeight }) => {
             if (isStale()) return;
-            if (autoSize === 'height' || autoSize === 'both') {
+            if (covers(autoSize, 'height')) {
               floating.style.setProperty('--awc-auto-size-height', `${availableHeight}px`);
             } else {
               floating.style.removeProperty('--awc-auto-size-height');
             }
 
-            if (autoSize === 'width' || autoSize === 'both') {
+            if (covers(autoSize, 'width')) {
               floating.style.setProperty('--awc-auto-size-width', `${availableWidth}px`);
             } else {
               floating.style.removeProperty('--awc-auto-size-width');

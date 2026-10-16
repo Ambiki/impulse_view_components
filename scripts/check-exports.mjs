@@ -11,7 +11,9 @@
 //   2. element stylesheets resolve under the `sass`/`style` conditions, which is how
 //      sass-loader asks for them,
 //   3. a declaration file sits next to every runtime file,
-//   4. `tsc --noEmit` passes on a fixture that imports all of them.
+//   4. no declaration file imports through the repo-only `src/` path alias,
+//   5. `tsc --noEmit` passes on a fixture that imports all of them, and the positioning types
+//      it reads aren't `any`.
 //
 // Resolution works without linking the package into `node_modules`: a package with an
 // `exports` map can reference itself by name, and both this script and the fixture live
@@ -146,7 +148,25 @@ for (const specifier of scriptSpecifiers) {
   });
 }
 
-// 4. A consumer type-checking under both exports-aware resolution modes.
+// 4. Declarations must not import through the `src/*` path alias. It only resolves inside this repo, and the fixture
+// below skips library checks, so a consumer would silently get `any` for every type imported that way.
+function declarationFiles(dir) {
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const entryPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) return declarationFiles(entryPath);
+    return entry.name.endsWith('.d.ts') ? [entryPath] : [];
+  });
+}
+
+for (const file of declarationFiles(distDir)) {
+  check(`declarations: ${path.relative(rootDir, file)}`, () => {
+    // `from 'src/…'`, `import('src/…')` and a bare `import 'src/…'`.
+    const aliased = fs.readFileSync(file, 'utf8').match(/(?:from\s+|import\s*\(\s*|import\s+)['"]src\/[^'"]+['"]/g);
+    assert.equal(aliased, null, `imports through the src/ alias: ${aliased?.join(', ')}`);
+  });
+}
+
+// 5. A consumer type-checking under both exports-aware resolution modes.
 const fixture = path.join(rootDir, 'scripts', 'exports-fixture', 'tsconfig.json');
 const tscBin = createRequire(import.meta.url).resolve('typescript/bin/tsc');
 

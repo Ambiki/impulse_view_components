@@ -1,6 +1,14 @@
 import { ImpulseElement, property, registerElement } from '@ambiki/impulse';
-import type { Placement, Strategy } from '@floating-ui/dom';
-import { createPositioner, positioningDefaults, type PositioningOptions } from 'src/internal/positioning';
+// Relative and ending in `.js`, because it reaches the published declarations (see `scripts/check-exports.mjs`).
+import {
+  createPositioner,
+  positioningDefaults,
+  type DimensionOrBoth,
+  type FallbackStrategy,
+  type Placement,
+  type PositioningOptions,
+  type Strategy,
+} from '../../internal/positioning.js';
 
 @registerElement('awc-anchor')
 export default class AwcAnchorElement extends ImpulseElement {
@@ -37,7 +45,7 @@ export default class AwcAnchorElement extends ImpulseElement {
   /**
    * Syncs the element's height or width to that of the anchor element.
    */
-  @property() sync?: 'height' | 'width' | 'both';
+  @property() sync?: DimensionOrBoth;
 
   /**
    * When `true`, the element will be flipped to the fallback placements to keep the element inside the viewport.
@@ -53,13 +61,13 @@ export default class AwcAnchorElement extends ImpulseElement {
    * If the preferred placement does not keep the element inside the viewport, element will be tested in these
    * placements until one of them fits.
    */
-  @property({ type: Array }) fallbackPlacements = [];
+  @property({ type: Array }) fallbackPlacements: Placement[] = [];
 
   /**
    * When no placements fit, then we want to decide what happens next. `bestFit` will use the placement which fits
    * best on the checked axis whereas `initialPlacement` will use the initial `placement` specified.
    */
-  @property() fallbackStrategy: 'bestFit' | 'initialPlacement' = 'bestFit';
+  @property() fallbackStrategy: FallbackStrategy = 'bestFit';
 
   /**
    * When `true`, the element will be shifted along its axis to keep the element inside the viewport.
@@ -75,7 +83,7 @@ export default class AwcAnchorElement extends ImpulseElement {
    * Exposes the space available to the element as the `--awc-auto-size-height` and `--awc-auto-size-width` CSS custom
    * properties, e.g. to cap its height with `max-height: var(--awc-auto-size-height)`.
    */
-  @property() autoSize?: 'height' | 'width' | 'both';
+  @property() autoSize?: DimensionOrBoth;
 
   /**
    * The amount of padding in pixels to keep from the viewport edge when measuring the available space.
