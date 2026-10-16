@@ -26,6 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Fixed removing an open popover from the page throwing a `TypeError` ([#281](https://github.com/Ambiki/impulse_view_components/pull/281))
 - Fixed the popover ignoring changes to `placement` after it connected ([#273](https://github.com/Ambiki/impulse_view_components/pull/273))
 - Fixed `useFloatingUI` ignoring its `middleware` option. Custom middleware now runs before the arrow is aligned ([#269](https://github.com/Ambiki/impulse_view_components/pull/269))
 - Fixed the autocomplete issuing a request against a source it was no longer using: changing `src`, or removing the element, now cancels a request that is in flight and one that is still waiting out the debounce. Previously a response from the old source could overwrite the options of the new one
