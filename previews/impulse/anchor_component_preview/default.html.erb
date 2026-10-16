@@ -2,15 +2,16 @@
 <%= render(
   Impulse::AnchorComponent.new(
     anchor_id: "awc-button",
-    placement: local_assigns[:placement],
-    distance: local_assigns[:distance],
-    skidding: local_assigns[:skidding],
     active: true,
-    class: "popover bs-popover-auto"
+    class: "popover bs-popover-auto",
+    **local_assigns
   )
 ) do %>
   <div class="arrow" data-arrow></div>
-  <div class="popover-body">
-    I am anchored to the button!
+  <%# `auto_size` exposes the space left in the viewport; capping the body with it makes a long list scroll. %>
+  <div class="popover-body" style="max-height: var(--awc-auto-size-height); overflow-y: auto">
+    <% 1.upto(20) do |item| %>
+      <div>Item <%= item %></div>
+    <% end %>
   </div>
 <% end %>
