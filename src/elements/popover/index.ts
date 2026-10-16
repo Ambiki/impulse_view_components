@@ -39,18 +39,22 @@ export default class AwcPopoverElement extends ImpulseElement {
    * Called when the element is added to the DOM.
    */
   connected() {
-    this.floatingUI = useFloatingUI(this, {
+    // Measured once: reading it on every reposition would force a style recalculation each time.
+    const arrowPadding = this.arrowPadding;
+    // Read on every reposition, so that `placement` and `strategy` follow their attributes. `placementChanged`
+    // repositions straight away; a `strategy` change applies from the next reposition.
+    this.floatingUI = useFloatingUI(this, () => ({
       referenceElement: this.button,
       popupElement: this.panel,
       arrowElement: this.arrow,
-      arrowPadding: this.arrowPadding,
+      arrowPadding,
       placement: this.placement,
       strategy: this.strategy,
       offsetOptions: 8,
       flipOptions: {
         fallbackAxisSideDirection: 'end',
       },
-    });
+    }));
 
     useOutsideClick(this, {
       boundaries: this.boundaries,
@@ -65,6 +69,10 @@ export default class AwcPopoverElement extends ImpulseElement {
     if (this.open) {
       this.show();
     }
+  }
+
+  placementChanged() {
+    this.reposition();
   }
 
   /**

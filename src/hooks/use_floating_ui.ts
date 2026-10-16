@@ -8,7 +8,7 @@ import type {
   ShiftOptions,
   Strategy,
 } from '@floating-ui/dom';
-import { createPositioner } from 'src/internal/positioning';
+import { createPositioner, type PositioningOptions } from 'src/internal/positioning';
 
 export type UseFloatingUIType = {
   start: () => void;
@@ -16,7 +16,7 @@ export type UseFloatingUIType = {
   stop: () => Promise<void>;
 };
 
-type Options = {
+export type UseFloatingUIOptions = {
   referenceElement: ReferenceElement;
   popupElement?: HTMLElement;
   arrowElement?: HTMLElement | null;
@@ -32,25 +32,22 @@ type Options = {
   autoSizePadding?: number;
 };
 
-export default function useFloatingUI(
-  element: ImpulseElement & { open: boolean },
-  {
-    referenceElement,
-    popupElement,
-    arrowElement,
-    arrowPadding = 0,
-    middleware = [],
-    offsetOptions = 0,
-    placement = 'bottom-start',
-    flipOptions,
-    shiftOptions,
-    strategy = 'fixed',
-    sync,
-    autoSize,
-    autoSizePadding = 0,
-  }: Options
-): UseFloatingUIType {
-  const positioner = createPositioner(() => ({
+function toPositioningOptions({
+  referenceElement,
+  popupElement,
+  arrowElement,
+  arrowPadding = 0,
+  middleware = [],
+  offsetOptions = 0,
+  placement = 'bottom-start',
+  flipOptions,
+  shiftOptions,
+  strategy = 'fixed',
+  sync,
+  autoSize,
+  autoSizePadding = 0,
+}: UseFloatingUIOptions): PositioningOptions {
+  return {
     anchor: referenceElement,
     floating: popupElement,
     placement,
@@ -64,7 +61,28 @@ export default function useFloatingUI(
     arrow: arrowElement,
     arrowPadding,
     floatingUI: { offset: offsetOptions, flip: flipOptions, shift: shiftOptions, middleware },
-  }));
+  };
+}
+
+function optionsReader(options: UseFloatingUIOptions | (() => UseFloatingUIOptions)): () => UseFloatingUIOptions {
+  if (typeof options === 'function') return options;
+
+  // Copied, so that changing the object later has no effect, as before the function form existed.
+  const snapshot = { ...options };
+  return () => snapshot;
+}
+
+/**
+ * Positions `popupElement` against `referenceElement` while `element` is open. Pass a function instead of an object to
+ * have the options read every time `popupElement` is repositioned, so that changes (e.g. to an attribute) are picked up.
+ * An object is read once, when the hook is created.
+ */
+export default function useFloatingUI(
+  element: ImpulseElement & { open: boolean },
+  options: UseFloatingUIOptions | (() => UseFloatingUIOptions)
+): UseFloatingUIType {
+  const getOptions = optionsReader(options);
+  const positioner = createPositioner(() => toPositioningOptions(getOptions()));
 
   function start(): void {
     positioner.start(update);

@@ -1,5 +1,5 @@
 import { ImpulseElement, registerElement } from '@ambiki/impulse';
-import type { Middleware } from '@floating-ui/dom';
+import type { Middleware, Placement } from '@floating-ui/dom';
 import { expect, fixture, html, nextFrame, waitUntil } from '@open-wc/testing';
 import useFloatingUI from './use_floating_ui';
 
@@ -271,5 +271,21 @@ describe('useFloatingUI', () => {
 
     expect(floating.style.left).to.equal('100px');
     anchor.remove();
+  });
+
+  it('reads options from a function every time it repositions', async () => {
+    const { host, anchor, floating } = await floatingFixture();
+    let placement: Placement = 'bottom-start';
+    const floatingUI = useFloatingUI(host, () => ({ referenceElement: anchor, popupElement: floating, placement }));
+
+    host.open = true;
+    await floatingUI.update();
+    expect(floating.getAttribute('x-placement')).to.equal('bottom-start');
+
+    placement = 'top';
+    await floatingUI.update();
+
+    expect(floating.style.top).to.equal('60px');
+    expect(floating.getAttribute('x-placement')).to.equal('top');
   });
 });

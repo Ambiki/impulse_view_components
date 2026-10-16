@@ -62,6 +62,21 @@ useFloatingUI(element, options);
 
 ### `options`
 
+Either an object, or a function that returns one. An object is read once, when the hook is created. A function is
+called every time the `popupElement` is repositioned, so options that change while it's open (such as a `placement`
+attribute) are picked up on the next reposition. Call the returned `update()` to reposition straight away.
+
+`start()` keeps following the `referenceElement` and `popupElement` it found when it was called. If the function
+returns different elements later, call `stop()` and then `start()` to follow the new ones.
+
+```ts
+this.floatingUI = useFloatingUI(this, () => ({
+  referenceElement: this.button,
+  popupElement: this.panel,
+  placement: this.placement,
+}));
+```
+
 | Name             | Default        | Description                                                                                                                                                                                                                                                                                                                     |
 | ---------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | referenceElement | N/A            | The anchor element.                                                                                                                                                                                                                                                                                                             |
