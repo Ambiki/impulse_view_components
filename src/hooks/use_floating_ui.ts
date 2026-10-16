@@ -1,14 +1,14 @@
 import type { ImpulseElement } from '@ambiki/impulse';
-import type {
-  FlipOptions,
-  Middleware,
-  OffsetOptions,
-  Placement,
-  ReferenceElement,
-  ShiftOptions,
-  Strategy,
-} from '@floating-ui/dom';
-import { createPositioner, type PositioningOptions } from 'src/internal/positioning';
+import type { FlipOptions, Middleware, OffsetOptions, ShiftOptions } from '@floating-ui/dom';
+// Relative and ending in `.js`, because it reaches the published declarations (see `scripts/check-exports.mjs`).
+import {
+  createPositioner,
+  type Anchor,
+  type DimensionOrBoth,
+  type Placement,
+  type PositioningOptions,
+  type Strategy,
+} from '../internal/positioning.js';
 
 export type UseFloatingUIType = {
   start: () => void;
@@ -17,7 +17,7 @@ export type UseFloatingUIType = {
 };
 
 export type UseFloatingUIOptions = {
-  anchorElement: ReferenceElement;
+  anchorElement: Anchor;
   floatingElement?: HTMLElement;
   arrowElement?: HTMLElement | null;
   arrowPadding?: number;
@@ -27,8 +27,8 @@ export type UseFloatingUIOptions = {
   flipOptions?: FlipOptions;
   shiftOptions?: ShiftOptions;
   strategy?: Strategy;
-  sync?: 'height' | 'width' | 'both';
-  autoSize?: 'height' | 'width' | 'both';
+  sync?: DimensionOrBoth;
+  autoSize?: DimensionOrBoth;
   autoSizePadding?: number;
 };
 

@@ -1,7 +1,8 @@
 import { ImpulseElement, property, registerElement, target } from '@ambiki/impulse';
-import type { Placement, Strategy } from '@floating-ui/dom';
 import useFloatingUI, { UseFloatingUIType } from 'src/hooks/use_floating_ui';
 import useOutsideClick from 'src/hooks/use_outside_click';
+// Relative and ending in `.js`, because it reaches the published declarations (see `scripts/check-exports.mjs`).
+import type { Placement, Strategy } from '../../internal/positioning.js';
 import { stripCSSUnit } from '../../helpers/string';
 
 @registerElement('awc-popover')

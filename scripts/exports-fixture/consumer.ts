@@ -41,6 +41,9 @@ import * as uniqueId from '@ambiki/impulse-view-components/dist/helpers/unique_i
 import type AmbikiAutocompleteElement from '@ambiki/impulse-view-components/dist/elements/autocomplete';
 import type AmbikiDialogElement from '@ambiki/impulse-view-components/dist/elements/dialog';
 import type AmbikiPopoverElement from '@ambiki/impulse-view-components/dist/elements/popover';
+import type AmbikiAnchorElement from '@ambiki/impulse-view-components/dist/elements/anchor';
+import type { UseFloatingUIOptions } from '@ambiki/impulse-view-components/dist/hooks/use_floating_ui';
+import type { VirtualElement } from '@floating-ui/dom';
 
 export const used = {
   root,
@@ -69,4 +72,24 @@ export type Elements = {
   autocomplete: AmbikiAutocompleteElement;
   dialog: AmbikiDialogElement;
   popover: AmbikiPopoverElement;
+};
+
+// Positioning types must reach the consumer as their real unions. A declaration that imports them through a path the
+// consumer can't resolve degrades them to `any` without an error, because library checks are skipped; each
+// `@ts-expect-error` below then has nothing to suppress and fails instead.
+// @ts-expect-error: not a placement
+export const notAPlacement: UseFloatingUIOptions['placement'] = 'middle';
+// @ts-expect-error: not a placement
+export const notAPopoverPlacement: AmbikiPopoverElement['placement'] = 'middle';
+// @ts-expect-error: not a fallback strategy
+export const notAFallbackStrategy: AmbikiAnchorElement['fallbackStrategy'] = 'nearest';
+
+// The hook still takes everything Floating UI's `ReferenceElement` does: a Floating UI `VirtualElement`, and a virtual
+// element with `getClientRects` (which Floating UI's `inline()` middleware reads).
+declare const virtualElement: VirtualElement;
+const rect = { x: 0, y: 0, width: 0, height: 0, top: 0, right: 0, bottom: 0, left: 0 };
+export const anchorFromVirtualElement: UseFloatingUIOptions['anchorElement'] = virtualElement;
+export const anchorWithClientRects: UseFloatingUIOptions['anchorElement'] = {
+  getBoundingClientRect: () => rect,
+  getClientRects: () => [rect],
 };
