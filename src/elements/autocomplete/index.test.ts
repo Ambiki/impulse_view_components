@@ -88,6 +88,14 @@ function stubFetch(): FetchStub {
   return stub;
 }
 
+/**
+ * Waits for the positioning observers' callbacks to have run, so that only the change under test can reposition.
+ * Two frames are enough today; five leaves a margin.
+ */
+async function drainObservers() {
+  for (let i = 0; i < 5; i++) await nextFrame();
+}
+
 describe('AwcAutocompleteElement', () => {
   const originalFetch = window.fetch;
 
@@ -134,6 +142,64 @@ describe('AwcAutocompleteElement', () => {
       await aTimeout(50);
       expect(el).not.to.have.attribute('error');
       expect(el).not.to.have.attribute('loading');
+    });
+  });
+
+  describe('auto size', () => {
+    it('should follow `auto-size` changes made after it connects', async () => {
+      const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
+      const listbox = el.querySelector<HTMLElement>('[role="listbox"]')!;
+      el.show();
+      await el.reposition();
+      expect(listbox.style.getPropertyValue('--awc-auto-size-height')).to.equal('');
+
+      el.autoSize = true;
+      await el.reposition();
+      expect(listbox.style.getPropertyValue('--awc-auto-size-height')).to.match(/^\d+(\.\d+)?px$/);
+
+      el.autoSize = false;
+      await el.reposition();
+      expect(listbox.style.getPropertyValue('--awc-auto-size-height')).to.equal('');
+    });
+
+    it('should apply `auto-size` straight away while it is open', async () => {
+      const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
+      const listbox = el.querySelector<HTMLElement>('[role="listbox"]')!;
+      el.show();
+      await drainObservers();
+
+      el.autoSize = true;
+      await nextFrame();
+
+      expect(listbox.style.getPropertyValue('--awc-auto-size-height')).to.match(/^\d+(\.\d+)?px$/);
+    });
+
+    it('should apply `auto-size-padding` straight away while it is open', async () => {
+      const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
+      const listbox = el.querySelector<HTMLElement>('[role="listbox"]')!;
+      const availableHeight = () => parseFloat(listbox.style.getPropertyValue('--awc-auto-size-height'));
+      el.autoSize = true;
+      el.show();
+      await drainObservers();
+      const before = availableHeight();
+
+      el.autoSizePadding = el.autoSizePadding + 16;
+      await nextFrame();
+
+      expect(availableHeight()).to.be.closeTo(before - 16, 0.5);
+    });
+
+    it('should clear `auto-size` when it is turned off while a reposition is still running', async () => {
+      const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
+      const listbox = el.querySelector<HTMLElement>('[role="listbox"]')!;
+      el.show();
+      await drainObservers();
+
+      el.autoSize = true;
+      el.autoSize = false;
+      await drainObservers();
+
+      expect(listbox.style.getPropertyValue('--awc-auto-size-height')).to.equal('');
     });
   });
 

@@ -112,6 +112,9 @@ export function createPositioner(getOptions: () => PositioningOptions): Position
   let cleanup: ReturnType<typeof autoUpdate> | undefined;
   // Only clear the auto size custom properties once they've been set here, so that an author's own are left alone.
   let autoSized = false;
+  // Bumped by every reposition. One that a later reposition has overtaken must not write anything, or its result
+  // (e.g. an auto size custom property the later one just cleared) would land on top.
+  let generation = 0;
 
   function prime() {
     const { floating, strategy = positioningDefaults.strategy } = getOptions();
@@ -126,6 +129,8 @@ export function createPositioner(getOptions: () => PositioningOptions): Position
     const options = getOptions();
     const { anchor, floating, floatingUI = {} } = options;
     if (!anchor || !floating) return;
+    const current = ++generation;
+    const isStale = () => current !== generation;
 
     // Middlewares are order dependent: https://floating-ui.com/docs/middleware
     const middleware: Middleware[] = [
@@ -137,6 +142,7 @@ export function createPositioner(getOptions: () => PositioningOptions): Position
       middleware.push(
         size({
           apply: ({ rects }) => {
+            if (isStale()) return;
             const syncWidth = sync === 'width' || sync === 'both';
             const syncHeight = sync === 'height' || sync === 'both';
             floating.style.width = syncWidth ? `${rects.reference.width}px` : '';
@@ -165,6 +171,7 @@ export function createPositioner(getOptions: () => PositioningOptions): Position
         size({
           padding: options.autoSizePadding ?? 0,
           apply: ({ availableWidth, availableHeight }) => {
+            if (isStale()) return;
             if (autoSize === 'height' || autoSize === 'both') {
               floating.style.setProperty('--awc-auto-size-height', `${availableHeight}px`);
             } else {
@@ -199,6 +206,7 @@ export function createPositioner(getOptions: () => PositioningOptions): Position
       middleware,
       strategy: options.strategy ?? positioningDefaults.strategy,
     });
+    if (isStale()) return;
 
     Object.assign(floating.style, {
       left: `${x}px`,

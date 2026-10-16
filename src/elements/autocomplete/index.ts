@@ -142,7 +142,9 @@ export default class AwcAutocompleteElement<
   connected() {
     this.form?.addEventListener('reset', this.handleFormReset);
 
-    this.floatingUI = useFloatingUI(this, {
+    // Read on every reposition, so that `auto-size` and `auto-size-padding` follow their attributes. Their `*Changed`
+    // callbacks reposition straight away.
+    this.floatingUI = useFloatingUI(this, () => ({
       anchorElement: this.control,
       floatingElement: this.listbox,
       placement: 'bottom',
@@ -150,7 +152,7 @@ export default class AwcAutocompleteElement<
       offsetOptions: 4,
       autoSize: this.autoSize ? 'height' : undefined,
       autoSizePadding: this.autoSizePadding,
-    });
+    }));
 
     useOutsideClick(this, {
       boundaries: [this.control, this.listbox],
@@ -221,6 +223,22 @@ export default class AwcAutocompleteElement<
     // the listbox of the new one.
     this.searchVariant?.disconnected();
     this.searchVariant = src ? new RemoteSearch(this) : new LocalSearch(this);
+  }
+
+  /**
+   * @private
+   * Called when the `auto-size` attribute changes.
+   */
+  autoSizeChanged() {
+    this.reposition();
+  }
+
+  /**
+   * @private
+   * Called when the `auto-size-padding` attribute changes.
+   */
+  autoSizePaddingChanged() {
+    this.reposition();
   }
 
   /**
