@@ -56,18 +56,18 @@ useFloatingUI(element, options);
 
 ### `element`
 
-| Name    | Default   | Description                           |
-| ------  | --------- | -------------                         |
-| element | N/A       | The impulse element (usually `this`). |
+| Name    | Default | Description                           |
+| ------- | ------- | ------------------------------------- |
+| element | N/A     | The impulse element (usually `this`). |
 
 ### `options`
 
 | Name             | Default        | Description                                                                                                                                                                                                                                                                                                                     |
-| ------           | ---------      | -------------                                                                                                                                                                                                                                                                                                                   |
+| ---------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | referenceElement | N/A            | The anchor element.                                                                                                                                                                                                                                                                                                             |
 | popupElement     | N/A            | The element that you want to position with respect to the `referenceElement`.                                                                                                                                                                                                                                                   |
 | arrowElement     | `undefined`    | Optional arrow element pointing to the `referenceElement`.                                                                                                                                                                                                                                                                      |
-| middleware       | `[]`           | Array of custom middleware functions for fine-grained positioning control. Read the [docs](https://floating-ui.com/docs/middleware).                                                                                                                                                                                            |
+| middleware       | `[]`           | Array of custom middleware functions for fine-grained positioning control. They run after the built-in middleware and before the arrow is aligned. Read the [docs](https://floating-ui.com/docs/middleware).                                                                                                                    |
 | offsetOptions    | `0`            | Adds distance between the `referenceElement` and the `popupElement`. Read the [docs](https://floating-ui.com/docs/offset).                                                                                                                                                                                                      |
 | placement        | `bottom-start` | The preferred placement of the `popupElement`. May change automatically to stay within the viewport. One of `top`, `top-start`, `top-end`, `right`, `right-start`, `right-end`, `bottom`, `bottom-start`, `bottom-end`, `left`, `left-start`, or `left-end`. Read the [docs](https://floating-ui.com/docs/tutorial#placements). |
 | flipOptions      | `undefined`    | Automatically flips the `popupElement` to the opposite side if there's not enough space. Read the [docs](https://floating-ui.com/docs/flip).                                                                                                                                                                                    |
