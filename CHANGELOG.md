@@ -26,6 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Fixed the autocomplete ignoring changes to `auto-size` and `auto-size-padding` after it connected ([#292](https://github.com/Ambiki/impulse_view_components/pull/292))
 - Fixed an open popover breaking after it's moved in the page ([#282](https://github.com/Ambiki/impulse_view_components/pull/282))
 - Fixed removing an open popover from the page throwing a `TypeError` ([#281](https://github.com/Ambiki/impulse_view_components/pull/281))
 - Fixed the popover ignoring changes to `placement` after it connected ([#273](https://github.com/Ambiki/impulse_view_components/pull/273))
