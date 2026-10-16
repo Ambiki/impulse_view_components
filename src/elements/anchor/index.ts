@@ -6,7 +6,7 @@ import { createPositioner, positioningDefaults, type PositioningOptions } from '
 @registerElement('awc-anchor')
 export default class AwcAnchorElement extends ImpulseElement {
   /**
-   * The `id` attribute of the anchor element that the popup will be anchored to.
+   * The `id` of the element to position against.
    */
   @property() anchorId: string;
 

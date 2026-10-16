@@ -44,8 +44,8 @@ export default class AwcPopoverElement extends ImpulseElement {
     // Read on every reposition, so that `placement` and `strategy` follow their attributes. `placementChanged`
     // repositions straight away; a `strategy` change applies from the next reposition.
     this.floatingUI = useFloatingUI(this, () => ({
-      referenceElement: this.button,
-      popupElement: this.panel,
+      anchorElement: this.button,
+      floatingElement: this.panel,
       arrowElement: this.arrow,
       arrowPadding,
       placement: this.placement,
