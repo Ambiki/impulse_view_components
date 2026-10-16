@@ -71,4 +71,17 @@ describe('awc-popover', () => {
     expect(panel.open).to.equal(false);
     expect(button.getAttribute('aria-expanded')).to.equal('false');
   });
+
+  it('keeps working after an open popover is moved', async () => {
+    const el = await popoverFixture();
+    const destination = document.createElement('section');
+    el.parentElement!.append(destination);
+    el.show();
+
+    destination.append(el);
+    await waitUntil(() => el.button !== null, 'did not re-initialize after the move');
+    el.button.click();
+
+    expect(el.open).to.equal(true);
+  });
 });
