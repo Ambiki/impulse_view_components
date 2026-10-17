@@ -1,4 +1,5 @@
 import type { ImpulseElement } from '@ambiki/impulse';
+import onDisconnect from 'src/internal/on_disconnect';
 
 export type Boundary = Element | null;
 
@@ -42,16 +43,8 @@ export default function useOutsideClick(element: ImpulseElement, { boundaries, c
     signal,
   });
 
-  function destroy() {
+  onDisconnect(element, () => {
     initialClickTarget = null;
     controller.abort();
-  }
-
-  const disconnectedCallback = element.disconnected.bind(element);
-  Object.assign(element, {
-    disconnected() {
-      destroy();
-      disconnectedCallback();
-    },
   });
 }
