@@ -18,6 +18,12 @@ _Avoid_: Reference, reference element, target
 The element positioned relative to an anchor and kept inside the viewport.
 _Avoid_: Popup, panel, content
 
+### Focus
+
+**Focus return**:
+Moving focus back to where an element was opened from, such as its trigger, when it closes while focus is inside it or lost.
+_Avoid_: Focus restore, refocus, final focus
+
 ### Events
 
 **Open**:
