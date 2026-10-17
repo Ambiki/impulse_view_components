@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- `awc-autocomplete:commit` carries `selected` in its detail, so listeners can tell whether the commit selected or deselected the option ([#311](https://github.com/Ambiki/impulse_view_components/pull/311))
 - `requestShow()` and `requestHide()` on `<awc-popover>`, `<awc-dialog>` and `<awc-autocomplete>`, which emit a cancelable `show` or `hide` before acting ([#302](https://github.com/Ambiki/impulse_view_components/pull/302))
 - `Impulse::SelectComponent`'s block form can group options with `with_group` ([#299](https://github.com/Ambiki/impulse_view_components/pull/299))
 - Added `auto-size` and `auto-size-padding` to `<awc-anchor>` (`auto_size:` and `auto_size_padding:` on `Impulse::AnchorComponent`) ([#274](https://github.com/Ambiki/impulse_view_components/pull/274))

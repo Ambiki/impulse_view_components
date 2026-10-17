@@ -82,6 +82,10 @@ export default class MultipleSelect implements SelectVariant {
     }
   }
 
+  isSelected(value: string) {
+    return this.selectedValues.has(value);
+  }
+
   // eslint-disable-next-line accessor-pairs
   set required(value: boolean) {
     if (!value || (value && this.selectedValues.size > 0)) {

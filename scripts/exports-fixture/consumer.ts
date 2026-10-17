@@ -87,6 +87,8 @@ export const notAPopoverPlacement: AmbikiPopoverElement['placement'] = 'middle';
 export const notAFallbackStrategy: AmbikiAnchorElement['fallbackStrategy'] = 'nearest';
 // @ts-expect-error: an event's `value` is a string
 export const notACommitValue: AwcAutocompleteCommitEvent['value'] = 1;
+// @ts-expect-error: an event's `selected` is a boolean
+export const notACommitSelected: AwcAutocompleteCommitEvent['selected'] = 'true';
 
 // The hook still takes everything Floating UI's `ReferenceElement` does: a Floating UI `VirtualElement`, and a virtual
 // element with `getClientRects` (which Floating UI's `inline()` middleware reads).

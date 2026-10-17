@@ -16,7 +16,13 @@ export function optionEventDetail(target: HTMLElement): BaseOptionEvent {
   };
 }
 
-export interface AwcAutocompleteCommitEvent extends BaseOptionEvent {}
+export interface AwcAutocompleteCommitEvent extends BaseOptionEvent {
+  /**
+   * Whether the option is selected after the commit: `false` when the commit deselected it in a multiple select. It
+   * reports the state, not a change, so committing the option a single select already has selected reports `true`.
+   */
+  selected: boolean;
+}
 export interface AwcAutocompleteRemoveEvent extends BaseOptionEvent {}
 
 /** The detail of an event that carries no information beyond the fact that it happened. */
