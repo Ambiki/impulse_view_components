@@ -2,7 +2,9 @@ import type { UseFloatingUIType } from 'src/hooks/use_floating_ui';
 import type { Placement, Strategy } from 'src/internal/positioning';
 import { property, registerElement, target } from '@ambiki/impulse';
 import useFloatingUI from 'src/hooks/use_floating_ui';
+import useFocusOut from 'src/hooks/use_focus_out';
 import useOutsideClick from 'src/hooks/use_outside_click';
+import { focusInto, focusIsInsideOrLost, keepFocusOn } from 'src/internal/focus';
 import OpenableElement from 'src/internal/openable_element';
 import { stripCSSUnit } from '../../helpers/string';
 
@@ -32,10 +34,16 @@ export default class AwcPopoverElement extends OpenableElement {
   @property({ type: Array }) clickBoundaries: string[] = [];
 
   @target() button: HTMLButtonElement;
-  @target() panel: HTMLDialogElement;
+  @target() panel: HTMLElement;
   @target() arrow: HTMLElement;
 
   private floatingUI: UseFloatingUIType;
+
+  /**
+   * Whether the popover is opening. The focus it moves meanwhile isn't focus leaving it: the other open popovers it hides
+   * return focus to their triggers, and focus then moves into this one, or back to where it was when it connects open.
+   */
+  private opening = false;
 
   /**
    * Called when the element is added to the DOM.
@@ -70,6 +78,15 @@ export default class AwcPopoverElement extends OpenableElement {
       },
     });
 
+    useFocusOut(this, {
+      boundaries: this.boundaries,
+      callback: () => {
+        if (this.open && !this.opening) {
+          this.requestHide();
+        }
+      },
+    });
+
     super.connected();
   }
 
@@ -86,16 +103,6 @@ export default class AwcPopoverElement extends OpenableElement {
     } else {
       this.requestShow();
     }
-  }
-
-  /**
-   * Handles the panel closing without the popover closing it, such as a `<form method="dialog">` inside it submitting.
-   * @private
-   */
-  handleClose(event: Event) {
-    // A close that the popover started can arrive after it was shown again.
-    if (this.panel.open) return;
-    this.hide(event);
   }
 
   handleKeydown(event: KeyboardEvent) {
@@ -116,35 +123,66 @@ export default class AwcPopoverElement extends OpenableElement {
   }
 
   /**
+   * Hides the popover, and the popovers nested in it first. Emits `hidden` but no `hide`: use `requestHide` to let
+   * listeners prevent it.
+   */
+  hide(event?: Event): Promise<void> {
+    // A nested popover floats in the top layer on its own, so it would stay behind. Each one reports its own close.
+    if (this.opened) {
+      for (const popover of this.nestedOpenPopovers) {
+        popover.hide();
+      }
+    }
+    return super.hide(event);
+  }
+
+  /**
    * Repositions the popover.
    */
   async reposition(): Promise<void> {
     await this.floatingUI.update();
   }
 
-  /** Shows the panel, hiding the other open popovers. */
-  protected openParts() {
-    this.closeOtherPopovers();
-    this.panel.show();
+  /** Shows the panel in the top layer, hiding the other open popovers, and moves focus into it. */
+  protected openParts({ initial }: { initial: boolean }) {
+    this.opening = true;
+    try {
+      this.closeOtherPopovers();
+      const previouslyFocused = document.activeElement;
+      this.panel.showPopover();
+      if (!initial) {
+        focusInto(this.panel);
+      } else if (this.panel.contains(document.activeElement)) {
+        // Starting out open isn't a change, so it doesn't take focus, although the browser moves it to an `autofocus`
+        // element.
+        keepFocusOn(previouslyFocused);
+      }
+    } finally {
+      this.opening = false;
+    }
     this.button.setAttribute('aria-expanded', 'true');
     this.floatingUI.start();
   }
 
   /** Closes the panel. */
-  protected async closeParts(event?: Event) {
+  protected async closeParts() {
     // Taken before awaiting: when hiding because the popover was removed, its targets are gone by the time `stop`
     // resolves.
     const button = this.button;
-    this.panel.close();
+    const panel = this.panel;
+    // A removed popover has already left the top layer, and hiding it again would throw.
+    if (panel.isConnected) {
+      // Read before hiding, which moves focus out of the panel.
+      const returnsFocus = focusIsInsideOrLost(panel);
+      panel.hidePopover();
+      if (returnsFocus) {
+        button.focus();
+      }
+    }
     await this.floatingUI.stop();
     // Shown again while stopping: the trigger already says so.
     if (this.opened) return;
     button.setAttribute('aria-expanded', 'false');
-
-    // Closed by an event, such as a click on a close button, so focus goes back to the trigger.
-    if (event) {
-      button.focus();
-    }
   }
 
   /** Showing the popover hides the other open popovers, so each of them is asked to hide first. */
@@ -171,8 +209,12 @@ export default class AwcPopoverElement extends OpenableElement {
     );
   }
 
+  private get nestedOpenPopovers() {
+    return Array.from(this.querySelectorAll<AwcPopoverElement>(this.identifier)).filter((popover) => popover.open);
+  }
+
   private get hasNestedOpenPopovers(): boolean {
-    return Array.from(this.querySelectorAll<AwcPopoverElement>(this.identifier)).some((popover) => popover.open);
+    return this.nestedOpenPopovers.length > 0;
   }
 
   private get arrowPadding() {

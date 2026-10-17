@@ -31,7 +31,7 @@ export default abstract class OpenableElement extends ImpulseElement {
   connected() {
     // Starting out open isn't a change, so it emits nothing.
     if (this.open) {
-      this.openQuietly();
+      this.openQuietly({ initial: true });
     }
   }
 
@@ -66,7 +66,7 @@ export default abstract class OpenableElement extends ImpulseElement {
 
   /**
    * Hides the element as if the user asked to. Emits a cancelable `hide`, and does nothing if it is prevented.
-   * @param event - What made the element hide, if anything did. A popover given one returns focus to its trigger.
+   * @param event - What made the element hide, if anything did.
    */
   async requestHide(event?: Event): Promise<void> {
     if (!this._opened || !this.emitRequest('hide')) return;
@@ -83,13 +83,13 @@ export default abstract class OpenableElement extends ImpulseElement {
       this.open = true;
       return;
     }
-    this.openQuietly();
+    this.openQuietly({ initial: false });
     this.emit('shown');
   }
 
   /**
    * Hides the element. Emits `hidden` but no `hide`: use `requestHide` to let listeners prevent it.
-   * @param event - What made the element hide, if anything did. A popover given one returns focus to its trigger.
+   * @param event - What made the element hide, if anything did.
    */
   async hide(event?: Event): Promise<void> {
     if (!this._opened) {
@@ -120,8 +120,10 @@ export default abstract class OpenableElement extends ImpulseElement {
 
   /**
    * Opens the element's parts: what it shows, such as its panel, dialog or listbox, and whatever follows from that.
+   * `initial` is `true` when the element connects already open, which isn't a change: it shouldn't, for example, take
+   * focus.
    */
-  protected abstract openParts(): void;
+  protected abstract openParts(options: { initial: boolean }): void;
 
   /**
    * Closes the element's parts. `event` is what made it close, if anything did. Returns a promise when closing takes
@@ -150,12 +152,12 @@ export default abstract class OpenableElement extends ImpulseElement {
   }
 
   /** Opens the element's parts without emitting, and sets `open`. */
-  private openQuietly() {
+  private openQuietly(options: { initial: boolean }) {
     this._opened = true;
     // After `_opened`, so that `openChanged` finds nothing left to do.
     this.open = true;
     try {
-      this.openParts();
+      this.openParts(options);
     } catch (error) {
       // It didn't open, so it mustn't say it did.
       this._opened = false;

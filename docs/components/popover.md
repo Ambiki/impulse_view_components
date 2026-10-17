@@ -22,7 +22,7 @@ A popover is a floating panel that can display rich content like navigation menu
 | title            | `nil`     | The title of the popover.                                                                                                                                                                                                                                              |
 | placement        | `bottom`  | The preferred placement of the popover. The actual placement may vary to keep the element inside the viewport. One of `top`, `top-start`, `top-end`, `right`, `right-start`, `right-end`, `bottom`, `bottom-start`, `bottom-end`, `left`, `left-start`, or `left-end`. |
 | strategy         | `fixed`   | The value of the `position` CSS property. One of `absolute` or `fixed`.                                                                                                                                                                                                |
-| click_boundaries | `[]`      | An array of CSS selectors for the elements that should not close the popover when clicked inside.                                                                                                                                                                      |
+| click_boundaries | `[]`      | An array of CSS selectors for the elements that should not close the popover when clicked or focused inside.                                                                                                                                                           |
 
 ## Examples
 
@@ -76,7 +76,8 @@ while a form inside it has unsaved changes. `hide` closes it without asking.
 
 ### Nesting popovers
 
-You can nest as many popovers as you want and it will be stacked on top of the parent popover.
+You can nest as many popovers as you want and it will be stacked on top of the parent popover. A nested popover counts
+as part of its parent, so moving focus or clicking into it doesn't close the parent.
 
 ```erb{4-7}
 <%= render(Impulse::PopoverComponent.new) do |c| %>
@@ -89,6 +90,20 @@ You can nest as many popovers as you want and it will be stacked on top of the p
   <% end %>
 <% end %>
 ```
+
+## Accessibility
+
+The popover is a non-modal dialog, rendered in the browser's [top
+layer](https://developer.mozilla.org/en-US/docs/Glossary/Top_layer) so that no `z-index` or `overflow` can hide it.
+
+- The popover has `role="dialog"`, labelled by the `title`, or by the trigger when there is no title or a custom header
+  replaces it. The trigger has `aria-haspopup="dialog"`, `aria-expanded` and `aria-controls`.
+- Opening it moves focus into the popover: to the element with `autofocus`, else the first element you can Tab to,
+  else the popover itself. A popover rendered open doesn't take focus.
+- Escape, a click outside, and focus moving out of the popover, such as Tab past its last element, all ask it to close.
+- Closing it returns focus to the trigger when focus was inside the popover, or lost. When focus has moved on to
+  something else, such as a field clicked outside, it stays there.
+- Closing it closes the popovers nested in it first.
 
 ## Slots
 
