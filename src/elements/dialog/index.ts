@@ -4,7 +4,7 @@ import scrollLock from 'src/helpers/scroll_lock';
 @registerElement('awc-dialog')
 export default class AwcDialogElement extends ImpulseElement {
   /**
-   * Whether the dialog is open or not. To make the dialog open by default, set it to `true`.
+   * Whether the dialog is open. Setting it shows or hides the dialog, as `show` and `hide` do.
    */
   @property({ type: Boolean }) open = false;
 
@@ -17,10 +17,20 @@ export default class AwcDialogElement extends ImpulseElement {
 
   private _scrollLockController?: AbortController;
 
+  /** Whether `connected` has run since the element last connected: until it has, the dialog target isn't wired up. */
+  private initialized = false;
+
+  /**
+   * The state the element last opened or closed the dialog to. `open` differs from it while the element is handling a
+   * change to `open`, and while the element isn't initialized.
+   */
+  private opened = false;
+
   /**
    * Called when the element is added to the DOM.
    */
   connected() {
+    this.initialized = true;
     // Starting out open isn't a change, so it emits nothing.
     if (this.open) {
       this.showWithoutEmitting();
@@ -28,18 +38,31 @@ export default class AwcDialogElement extends ImpulseElement {
   }
 
   /**
+   * Shows or hides the dialog when `open` changes, as `show` and `hide` do.
+   * @private
+   */
+  openChanged(open: boolean) {
+    if (open) {
+      this.show();
+    } else {
+      this.hide();
+    }
+  }
+
+  /**
    * Called when the element is removed from the DOM.
    */
   disconnected() {
-    // Removal emits nothing: there is no dialog left to react to.
-    this.hideWithoutEmitting();
+    this.initialized = false;
+    // Removal emits nothing, and keeps `open`, so the dialog opens again if it's reconnected.
+    this.closeDialog();
   }
 
   /**
    * Shows the dialog as if the user asked to. Emits a cancelable `show`, and does nothing if it is prevented.
    */
   requestShow() {
-    if (this.open || !this.emitRequest('show')) return;
+    if (!this.initialized || this.opened || !this.emitRequest('show')) return;
     this.show();
   }
 
@@ -54,7 +77,7 @@ export default class AwcDialogElement extends ImpulseElement {
    * </awc-dialog>
    */
   requestHide() {
-    if (!this.open || !this.emitRequest('hide')) return;
+    if (!this.opened || !this.emitRequest('hide')) return;
     this.hide();
   }
 
@@ -62,7 +85,12 @@ export default class AwcDialogElement extends ImpulseElement {
    * Shows the dialog element. Emits `shown` but no `show`: use `requestShow` to let listeners prevent it.
    */
   show() {
-    if (this.open) return;
+    if (this.opened) return;
+    if (!this.initialized) {
+      // It opens, silently, once it connects.
+      this.open = true;
+      return;
+    }
     this.showWithoutEmitting();
     this.emit('shown');
   }
@@ -71,7 +99,11 @@ export default class AwcDialogElement extends ImpulseElement {
    * Hides the dialog element. Emits `hidden` but no `hide`: use `requestHide` to let listeners prevent it.
    */
   hide() {
-    if (!this.open) return;
+    if (!this.opened) {
+      // Nothing is open, such as while the element is removed, so there is only `open` to clear.
+      this.open = false;
+      return;
+    }
     this.nestedDialog?.hide();
     this.hideWithoutEmitting();
     this.emit('hidden');
@@ -130,18 +162,30 @@ export default class AwcDialogElement extends ImpulseElement {
    */
   hideWithoutEmitting() {
     if (this.dialog.open) {
-      // Closing the parent dialog when nested dialogs are still open will break the UI.
       this.nestedDialog?.hideWithoutEmitting();
-      this.dialog.close();
     }
-    this.showOverflow();
+    this.closeDialog();
+    // After closing the dialog, so that `openChanged` finds nothing left to do.
     this.open = false;
   }
 
   private showWithoutEmitting() {
     this.dialog.showModal();
     this.hideOverflow();
+    this.opened = true;
+    // After `opened`, so that `openChanged` finds nothing left to do.
     this.open = true;
+  }
+
+  /** Closes the dialog, and any dialog nested in it, leaving `open` as it is. */
+  private closeDialog() {
+    if (this.dialog.open) {
+      // Closing the parent dialog when nested dialogs are still open will break the UI.
+      this.nestedDialog?.closeDialog();
+      this.dialog.close();
+    }
+    this.showOverflow();
+    this.opened = false;
   }
 
   /** Emits the request event `name`, returning whether the dialog may go ahead. */

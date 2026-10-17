@@ -77,11 +77,13 @@ el.setValue('1', 'One'); // text is required
 
 ### `open`
 
-Whether the listbox is visible or not.
+Whether the listbox is open. Setting it, or adding or removing the `open` attribute, shows or hides the listbox as
+`show` and `hide` do. A removed autocomplete keeps `open`, and opens its listbox again when it's added back.
 
 ```js
 autocomplete.open;
 // => false
+autocomplete.open = true;
 ```
 
 ### `show`
@@ -261,10 +263,9 @@ autocomplete.form;
 
 Events work as they do on native elements. A user action (pressing or typing in the input, Escape, Alt+ArrowDown,
 Alt+ArrowUp, an outside click, the input losing focus, committing an option, clearing), or a `requestShow` or
-`requestHide` call, first emits a
-cancelable `show` or `hide`; calling `preventDefault()` on it keeps the listbox closed or open. `show()` and `hide()`
-act directly and emit no `show` or `hide`, and neither does closing because the form reset. `shown` and `hidden` fire
-after every open and close. Removing the element emits nothing.
+`requestHide` call, first emits a cancelable `show` or `hide`; calling `preventDefault()` on it keeps the listbox closed
+or open. `show()`, `hide()` and changing `open` act directly and emit no `show` or `hide`, and neither does closing
+because the form reset. `shown` and `hidden` fire after every open and close. Removing the element emits nothing.
 
 Like `input` and `change`, `commit`, `clear`, `remove` and `reset` fire after the value has changed, and only when the
 user changed it or the form reset: `setValue`, `removeValue`, `clear` and `reset` called from code emit nothing.

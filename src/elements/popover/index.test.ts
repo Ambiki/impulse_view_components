@@ -9,8 +9,7 @@ import './index';
  * reproduced here: the targets and the actions. The trigger is fixed at (100, 100) and sized 50×20, and the panel is
  * 80×40.
  */
-async function popoverFixture() {
-  const el = await fixture<AwcPopoverElement>(`
+const POPOVER_HTML = `
     <awc-popover data-action="keydown->awc-popover#handleKeydown">
       <style>
         .trigger { position: fixed; left: 100px; top: 100px; width: 50px; height: 20px; margin: 0; padding: 0; border: 0; }
@@ -23,7 +22,10 @@ async function popoverFixture() {
         <div class="arrow" data-target="awc-popover.arrow"></div>
       </dialog>
     </awc-popover>
-  `);
+  `;
+
+async function popoverFixture() {
+  const el = await fixture<AwcPopoverElement>(POPOVER_HTML);
   await whenInitialized(el);
   return el;
 }
@@ -96,7 +98,6 @@ describe('awc-popover', () => {
     }
 
     expect(rejections).to.eql([]);
-    expect(el.open).to.equal(false);
     expect(panel.open).to.equal(false);
     expect(button.getAttribute('aria-expanded')).to.equal('false');
   });
@@ -185,6 +186,38 @@ describe('awc-popover', () => {
 
       expect(el.open).to.equal(false);
       expect(events).to.eql(['shown', 'hidden']);
+    });
+
+    it('opens and closes when `open` changes, emitting only the state events', async () => {
+      const el = await popoverFixture();
+      const events = recordEvents(el);
+      preventNext(el, 'show');
+      preventNext(el, 'hide');
+
+      el.open = true;
+      expect(el.panel.open).to.equal(true);
+      expect(el.button.getAttribute('aria-expanded')).to.equal('true');
+
+      el.removeAttribute('open');
+      await settle();
+
+      expect(el.panel.open).to.equal(false);
+      expect(el.button.getAttribute('aria-expanded')).to.equal('false');
+      expect(events).to.eql(['shown', 'hidden']);
+    });
+
+    it('hides the other open popovers when `open` is set', async () => {
+      const other = await popoverFixture();
+      const el = await popoverFixture();
+      other.show();
+      const otherEvents = recordEvents(other);
+
+      el.setAttribute('open', '');
+      await settle();
+
+      expect(other.open).to.equal(false);
+      expect(other.panel.open).to.equal(false);
+      expect(otherEvents).to.eql(['hidden']);
     });
 
     it('emits the request events from `requestShow` and `requestHide`', async () => {
@@ -289,20 +322,93 @@ describe('awc-popover', () => {
       expect(events).to.eql([]);
     });
 
-    it('closes silently when removed', async () => {
+    it('closes silently when removed, keeping `open`', async () => {
       const el = await popoverFixture();
       el.show();
+      const { panel } = el;
       const events = recordEvents(el);
 
       el.remove();
       await settle();
 
+      expect(el.open).to.equal(true);
+      expect(panel.open).to.equal(false);
+      expect(events).to.eql([]);
+    });
+
+    it('opens again silently when reconnected', async () => {
+      const el = await popoverFixture();
+      const parent = el.parentElement!;
+      el.show();
+      el.remove();
+      await settle();
+      const events = recordEvents(el);
+
+      parent.append(el);
+      await whenInitialized(el);
+
+      expect(el.panel.open).to.equal(true);
+      expect(el.button.getAttribute('aria-expanded')).to.equal('true');
+      expect(events).to.eql([]);
+    });
+
+    it('stays closed when hidden while removed', async () => {
+      const el = await popoverFixture();
+      const parent = el.parentElement!;
+      el.show();
+      el.remove();
+      await settle();
+      const events = recordEvents(el);
+
+      await el.hide();
+      parent.append(el);
+      await whenInitialized(el);
+
       expect(el.open).to.equal(false);
+      expect(el.panel.open).to.equal(false);
+      expect(events).to.eql([]);
+    });
+
+    it('emits nothing when asked to hide while removed', async () => {
+      const el = await popoverFixture();
+      el.show();
+      el.remove();
+      await settle();
+      const events = recordEvents(el);
+
+      await el.requestHide();
+      await el.toggle();
+
+      expect(events).to.eql([]);
+    });
+
+    it('opens silently once it connects when shown before', async () => {
+      const container = await fixture<HTMLElement>('<div></div>');
+      container.innerHTML = POPOVER_HTML;
+      const el = container.querySelector('awc-popover')!;
+      const events = recordEvents(el);
+
+      el.show();
+      await whenInitialized(el);
+
+      expect(el.panel.open).to.equal(true);
+      expect(events).to.eql([]);
+    });
+
+    it('does nothing when `open` is set to the value it already has', async () => {
+      const el = await popoverFixture();
+      el.show();
+      const events = recordEvents(el);
+
+      el.open = true;
+      el.setAttribute('open', 'open');
+
+      expect(el.panel.open).to.equal(true);
       expect(events).to.eql([]);
     });
   });
 
-  it('keeps working after an open popover is moved', async () => {
+  it('stays open, and keeps working, after an open popover is moved', async () => {
     const el = await popoverFixture();
     const destination = document.createElement('section');
     el.parentElement!.append(destination);
@@ -310,8 +416,12 @@ describe('awc-popover', () => {
 
     destination.append(el);
     await whenInitialized(el);
-    el.button.click();
+    expect(el.panel.open).to.equal(true);
 
-    expect(el.open).to.equal(true);
+    el.button.click();
+    await settle();
+
+    expect(el.open).to.equal(false);
+    expect(el.panel.open).to.equal(false);
   });
 });

@@ -7,6 +7,7 @@ import './index';
 interface FixtureOptions {
   src?: string;
   multiple?: boolean;
+  open?: boolean;
   options?: Array<{ value: string; text: string }>;
 }
 
@@ -14,7 +15,7 @@ interface FixtureOptions {
  * Mirrors the structure of `app/components/impulse/autocomplete_component.html.erb`. Only the parts the element reads
  * are reproduced here: the targets, the `data-behavior` hooks and the actions.
  */
-function autocompleteHtml({ src, multiple = false, options = [] }: FixtureOptions = {}) {
+function autocompleteHtml({ src, multiple = false, open = false, options = [] }: FixtureOptions = {}) {
   const optionsHtml = options
     .map(
       ({ value, text }) =>
@@ -34,7 +35,7 @@ function autocompleteHtml({ src, multiple = false, options = [] }: FixtureOption
     `<input type="hidden" data-behavior="hidden-field" value="" data-text="">`;
 
   return `
-    <awc-autocomplete ${multiple ? 'multiple' : ''} ${src ? `src="${src}"` : ''}
+    <awc-autocomplete ${multiple ? 'multiple' : ''} ${open ? 'open' : ''} ${src ? `src="${src}"` : ''}
       data-action="mousedown->awc-autocomplete#handleMousedown click->awc-autocomplete#handleClick combobox:commit->awc-autocomplete#handleCommit">
       <div class="awc-autocomplete-control" data-target="awc-autocomplete.control" data-trigger>
         ${selection}
@@ -244,6 +245,22 @@ describe('AwcAutocompleteElement', () => {
       expect(events).to.eql(['shown', 'hidden']);
     });
 
+    it('should open and close when `open` changes, emitting only the state events', async () => {
+      const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
+      const events = recordEvents(el);
+      preventNext(el, 'show');
+      preventNext(el, 'hide');
+
+      el.open = true;
+      expect(el.input.getAttribute('aria-expanded')).to.equal('true');
+
+      el.removeAttribute('open');
+      await nextFrame();
+
+      expect(el.input.getAttribute('aria-expanded')).to.equal('false');
+      expect(events).to.eql(['shown', 'hidden']);
+    });
+
     it('should stay closed when the user opens it and `show` is prevented', async () => {
       const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
       const events = recordEvents(el);
@@ -328,15 +345,86 @@ describe('AwcAutocompleteElement', () => {
       expect(events).to.eql(['reset', 'hidden']);
     });
 
-    it('should close silently when removed', async () => {
+    it('should close silently when removed, keeping `open`', async () => {
       const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
       pressInput(el);
+      const { input } = el;
       const events = recordEvents(el);
 
       el.remove();
       await nextFrame();
 
+      expect(el.open).to.equal(true);
+      expect(input.getAttribute('aria-expanded')).to.equal('false');
+      expect(events).to.eql([]);
+    });
+
+    it('should open again silently when reconnected', async () => {
+      const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
+      const parent = el.parentElement!;
+      pressInput(el);
+      el.remove();
+      await nextFrame();
+      const events = recordEvents(el);
+
+      parent.append(el);
+      await whenInitialized(el);
+
+      expect(el.input.getAttribute('aria-expanded')).to.equal('true');
+      expect(events).to.eql([]);
+    });
+
+    it('should stay closed when hidden while removed', async () => {
+      const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
+      const parent = el.parentElement!;
+      pressInput(el);
+      el.remove();
+      await nextFrame();
+      const events = recordEvents(el);
+
+      await el.hide();
+      parent.append(el);
+      await whenInitialized(el);
+
       expect(el.open).to.equal(false);
+      expect(el.input.getAttribute('aria-expanded')).to.equal('false');
+      expect(events).to.eql([]);
+    });
+
+    it('should emit nothing when asked to hide while removed', async () => {
+      const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
+      pressInput(el);
+      el.remove();
+      await nextFrame();
+      const events = recordEvents(el);
+
+      await el.requestHide();
+
+      expect(events).to.eql([]);
+    });
+
+    it('should open silently once it connects when shown before', async () => {
+      const container = await fixture<HTMLElement>('<div></div>');
+      container.innerHTML = autocompleteHtml({ options: [{ value: '1', text: 'One' }] });
+      const el = container.querySelector('awc-autocomplete')!;
+      const events = recordEvents(el);
+
+      el.show();
+      await whenInitialized(el);
+
+      expect(el.input.getAttribute('aria-expanded')).to.equal('true');
+      expect(events).to.eql([]);
+    });
+
+    it('should open silently when it connects with `open` set', async () => {
+      const events: string[] = [];
+      for (const name of OPEN_CLOSE_EVENTS) {
+        document.addEventListener(`awc-autocomplete:${name}`, () => events.push(name), { once: true });
+      }
+
+      const el = await autocompleteFixture({ open: true, options: [{ value: '1', text: 'One' }] });
+
+      expect(el.input.getAttribute('aria-expanded')).to.equal('true');
       expect(events).to.eql([]);
     });
 
