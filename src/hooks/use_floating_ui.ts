@@ -1,6 +1,7 @@
 import type { ImpulseElement } from '@ambiki/impulse';
 import type { FlipOptions, Middleware, OffsetOptions, ShiftOptions } from '@floating-ui/dom';
 import type { Anchor, DimensionOrBoth, Placement, PositioningOptions, Strategy } from 'src/internal/positioning';
+import onDisconnect from 'src/internal/on_disconnect';
 import { createPositioner } from 'src/internal/positioning';
 
 export interface UseFloatingUIType {
@@ -91,12 +92,8 @@ export default function useFloatingUI(
   positioner.prime();
   positioner.reposition();
 
-  const disconnectedCallback = element.disconnected.bind(element);
-  Object.assign(element, {
-    disconnected() {
-      stop();
-      disconnectedCallback();
-    },
+  onDisconnect(element, () => {
+    stop();
   });
 
   return { start, update, stop } as const;

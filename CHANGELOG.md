@@ -32,6 +32,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Fixed `useFloatingUI` and `useOutsideClick` wrapping an element's `disconnected` again every time it moved, which kept old positioners alive ([#307](https://github.com/Ambiki/impulse_view_components/pull/307))
 - Fixed setting or removing `open` on `<awc-popover>`, `<awc-dialog>` and `<awc-autocomplete>` not opening or closing them ([#303](https://github.com/Ambiki/impulse_view_components/pull/303))
 - Fixed an autocomplete that connects with `open` set not opening its listbox ([#303](https://github.com/Ambiki/impulse_view_components/pull/303))
 - Fixed `show()` throwing when called before the element initialized ([#303](https://github.com/Ambiki/impulse_view_components/pull/303))
