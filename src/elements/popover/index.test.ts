@@ -1,4 +1,5 @@
 import type AwcPopoverElement from './index';
+import { whenInitialized } from '@ambiki/impulse';
 import { expect, fixture, nextFrame, waitUntil } from '@open-wc/testing';
 // Registers `awc-popover`. Kept separate from the type import above, which the bundler elides.
 import './index';
@@ -23,8 +24,7 @@ async function popoverFixture() {
       </dialog>
     </awc-popover>
   `);
-  // `connected` runs asynchronously, and sets this attribute once the targets and actions are wired up.
-  await waitUntil(() => el.hasAttribute('data-impulse-element'));
+  await whenInitialized(el);
   return el;
 }
 
@@ -283,7 +283,7 @@ describe('awc-popover', () => {
           <dialog data-target="awc-popover.panel"></dialog>
         </awc-popover>
       `);
-      await waitUntil(() => el.hasAttribute('data-impulse-element'));
+      await whenInitialized(el);
 
       expect(el.panel.open).to.equal(true);
       expect(events).to.eql([]);
@@ -309,7 +309,7 @@ describe('awc-popover', () => {
     el.show();
 
     destination.append(el);
-    await waitUntil(() => el.button !== null, 'did not re-initialize after the move');
+    await whenInitialized(el);
     el.button.click();
 
     expect(el.open).to.equal(true);

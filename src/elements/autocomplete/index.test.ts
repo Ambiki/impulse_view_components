@@ -1,4 +1,5 @@
 import type AwcAutocompleteElement from './index';
+import { whenInitialized } from '@ambiki/impulse';
 import { aTimeout, expect, fixture, nextFrame, oneEvent, waitUntil } from '@open-wc/testing';
 // Registers `awc-autocomplete`. Kept separate from the type import above, which the bundler elides.
 import './index';
@@ -53,8 +54,7 @@ function autocompleteHtml({ src, multiple = false, options = [] }: FixtureOption
 
 async function autocompleteFixture(options: FixtureOptions = {}) {
   const el = await fixture<AwcAutocompleteElement>(autocompleteHtml(options));
-  // `connected` runs asynchronously, and sets this attribute once the targets and actions are wired up.
-  await waitUntil(() => el.hasAttribute('data-impulse-element'));
+  await whenInitialized(el);
   return el;
 }
 
@@ -316,7 +316,7 @@ describe('AwcAutocompleteElement', () => {
     it('should hide without a request when its form resets', async () => {
       const form = await fixture<HTMLFormElement>(`<form>${autocompleteHtml({ options: [{ value: '1', text: 'One' }] })}</form>`);
       const el = form.querySelector('awc-autocomplete')!;
-      await waitUntil(() => el.hasAttribute('data-impulse-element'));
+      await whenInitialized(el);
       pressInput(el);
       const events = recordEvents(el);
       preventNext(el, 'hide');

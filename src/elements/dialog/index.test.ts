@@ -1,5 +1,6 @@
 import type AwcDialogElement from './index';
-import { expect, fixture, nextFrame, waitUntil } from '@open-wc/testing';
+import { whenInitialized } from '@ambiki/impulse';
+import { expect, fixture, nextFrame } from '@open-wc/testing';
 // Registers `awc-dialog`. Kept separate from the type import above, which the bundler elides.
 import './index';
 
@@ -19,8 +20,7 @@ async function dialogFixture(attributes = '') {
       </dialog>
     </awc-dialog>
   `);
-  // `connected` runs asynchronously, and sets this attribute once the targets and actions are wired up.
-  await waitUntil(() => el.hasAttribute('data-impulse-element'));
+  await whenInitialized(el);
   return el;
 }
 
