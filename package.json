@@ -108,7 +108,7 @@
   },
   "dependencies": {
     "@ambiki/combobox": "^2.0.1",
-    "@ambiki/impulse": "^2.0.0-rc.0",
+    "@ambiki/impulse": "^2.0.0-rc.1",
     "@floating-ui/dom": "^1.7.4",
     "tabbable": "^6.4.0"
   },

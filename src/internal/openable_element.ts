@@ -14,16 +14,13 @@
  * declarations. It implements `openParts` and `closeParts`, and calls `super.connected()` at the end of its own
  * `connected`, and `super.disconnected()` at the start of its own `disconnected`.
  */
-import { ImpulseElement } from '@ambiki/impulse';
+import { ImpulseElement, isInitialized } from '@ambiki/impulse';
 
 export default abstract class OpenableElement extends ImpulseElement {
   /**
    * Whether the element is open. Setting it shows or hides the element, as `show` and `hide` do.
    */
   abstract open: boolean;
-
-  /** Whether `connected` has run since the element last connected: until it has, its targets aren't wired up. */
-  private initialized = false;
 
   /** See `opened`. */
   private _opened = false;
@@ -32,7 +29,6 @@ export default abstract class OpenableElement extends ImpulseElement {
    * Called when the element is added to the DOM. Subclasses call it last, once what `openParts` needs is set up.
    */
   connected() {
-    this.initialized = true;
     // Starting out open isn't a change, so it emits nothing.
     if (this.open) {
       this.openQuietly();
@@ -43,7 +39,6 @@ export default abstract class OpenableElement extends ImpulseElement {
    * Called when the element is removed from the DOM. Subclasses call it first.
    */
   disconnected() {
-    this.initialized = false;
     // Removal emits nothing, and keeps `open`, so the element opens again if it's reconnected.
     this.closeQuietly();
   }
@@ -65,7 +60,7 @@ export default abstract class OpenableElement extends ImpulseElement {
    * on, such as a popover asking the other open popovers to hide. Does nothing if any of them is prevented.
    */
   requestShow() {
-    if (!this.initialized || this._opened || !this.emitRequest('show') || !this.othersAllowShow()) return;
+    if (!isInitialized(this) || this._opened || !this.emitRequest('show') || !this.othersAllowShow()) return;
     this.show();
   }
 
@@ -83,8 +78,8 @@ export default abstract class OpenableElement extends ImpulseElement {
    */
   show() {
     if (this._opened) return;
-    if (!this.initialized) {
-      // It opens, silently, once it connects.
+    if (!isInitialized(this)) {
+      // Its targets aren't wired up yet: it opens, silently, once it connects.
       this.open = true;
       return;
     }

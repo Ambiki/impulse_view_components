@@ -171,10 +171,10 @@
   resolved "https://registry.yarnpkg.com/@ambiki/combobox/-/combobox-2.0.1.tgz#8fd059dec4d6d160331c8a4a9df82b6a095fb549"
   integrity sha512-HDbUvfh2s0v7jGULHjxuDgKsXHukJ3qMDG20i6uIeoHLghWjw+HFWMgxwNqrKzM17HEMSI3RletQGdggUDmA3g==
 
-"@ambiki/impulse@^2.0.0-rc.0":
-  version "2.0.0-rc.0"
-  resolved "https://registry.yarnpkg.com/@ambiki/impulse/-/impulse-2.0.0-rc.0.tgz#0117684d0a6dc5e1c6404cfb4ba7447dad7d93c9"
-  integrity sha512-lZGIbeX9g7fTsdtk8s1iN3Q1iWkcCHVDgXcTBNJBC2wa4PIIn5ftFEHUFhAYViByHoh++mJQJzklV9KGcM8aEQ==
+"@ambiki/impulse@^2.0.0-rc.1":
+  version "2.0.0-rc.1"
+  resolved "https://registry.yarnpkg.com/@ambiki/impulse/-/impulse-2.0.0-rc.1.tgz#40caf48bad09b3ee5d63354142f956adc8845c92"
+  integrity sha512-k4JyLgth9mynKkIG+/zJwLXvO1p0km/iZuEIPmhbC82OL1HYI74FuWj/sygPotEnjXrFgkEEHgPOQySQ3rTasA==
 
 "@antfu/eslint-config@^8.2.0":
   version "8.3.0"
