@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- `Combobox`, which `<awc-autocomplete>` is built on, is public at `@ambiki/impulse-view-components/dist/combobox`, replacing the `@ambiki/combobox` package ([#312](https://github.com/Ambiki/impulse_view_components/pull/312))
 - `awc-autocomplete:commit` carries `selected` in its detail, so listeners can tell whether the commit selected or deselected the option ([#311](https://github.com/Ambiki/impulse_view_components/pull/311))
 - `requestShow()` and `requestHide()` on `<awc-popover>`, `<awc-dialog>` and `<awc-autocomplete>`, which emit a cancelable `show` or `hide` before acting ([#302](https://github.com/Ambiki/impulse_view_components/pull/302))
 - `Impulse::SelectComponent`'s block form can group options with `with_group` ([#299](https://github.com/Ambiki/impulse_view_components/pull/299))
@@ -19,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **Breaking:** `<awc-autocomplete>`'s `combobox` is private, and no longer has `multiple`, `select()`, `deselect()`, `deselectAll()` or `isSelected()` ([#312](https://github.com/Ambiki/impulse_view_components/pull/312))
 - **Breaking:** `<awc-popover>` renders in the top layer as `<div role="dialog" popover="manual">` instead of a `<dialog>`. It moves focus in when it opens, returns it to the trigger when it closes, and closes when focus moves out. `handleClose` is gone, and a `<form method="dialog">` inside no longer closes it ([#308](https://github.com/Ambiki/impulse_view_components/pull/308))
 - `<awc-dialog>`'s `hide()` and `requestHide()` return a promise, like the popover's and the autocomplete's ([#305](https://github.com/Ambiki/impulse_view_components/pull/305))
 - **Breaking:** Removing an open `<awc-popover>`, `<awc-dialog>` or `<awc-autocomplete>` keeps `open`, so re-inserting it opens it again ([#303](https://github.com/Ambiki/impulse_view_components/pull/303))
@@ -34,6 +36,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Fixed a multiple `<awc-autocomplete>` marking its input with `aria-multiselectable` instead of its listbox ([#312](https://github.com/Ambiki/impulse_view_components/pull/312))
 - Fixed `<awc-popover>` having no accessible name: it's labelled by its title, or by its trigger ([#308](https://github.com/Ambiki/impulse_view_components/pull/308))
 - Fixed `useFloatingUI` and `useOutsideClick` wrapping an element's `disconnected` again every time it moved, which kept old positioners alive ([#307](https://github.com/Ambiki/impulse_view_components/pull/307))
 - Fixed setting or removing `open` on `<awc-popover>`, `<awc-dialog>` and `<awc-autocomplete>` not opening or closing them ([#303](https://github.com/Ambiki/impulse_view_components/pull/303))

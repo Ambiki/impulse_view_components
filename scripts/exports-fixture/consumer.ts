@@ -13,6 +13,9 @@
 import * as root from '@ambiki/impulse-view-components';
 import * as rootIndex from '@ambiki/impulse-view-components/dist/index.js';
 
+import Combobox from '@ambiki/impulse-view-components/dist/combobox';
+import * as comboboxIndex from '@ambiki/impulse-view-components/dist/combobox/index.js';
+
 import * as anchor from '@ambiki/impulse-view-components/dist/elements/anchor';
 import * as autocomplete from '@ambiki/impulse-view-components/dist/elements/autocomplete';
 import * as dialog from '@ambiki/impulse-view-components/dist/elements/dialog';
@@ -50,6 +53,8 @@ import type { AwcAutocompleteCommitEvent } from '@ambiki/impulse-view-components
 export const used = {
   root,
   rootIndex,
+  Combobox,
+  comboboxIndex,
   anchor,
   autocomplete,
   autocompleteIndex,
@@ -89,6 +94,10 @@ export const notAFallbackStrategy: AmbikiAnchorElement['fallbackStrategy'] = 'ne
 export const notACommitValue: AwcAutocompleteCommitEvent['value'] = 1;
 // @ts-expect-error: an event's `selected` is a boolean
 export const notACommitSelected: AwcAutocompleteCommitEvent['selected'] = 'true';
+// @ts-expect-error: the combobox leaves selection to the element built on it, so it takes no options
+export const comboboxWithOptions = new Combobox(document.createElement('input'), document.createElement('ul'), {
+  multiple: true,
+});
 
 // The hook still takes everything Floating UI's `ReferenceElement` does: a Floating UI `VirtualElement`, and a virtual
 // element with `getClientRects` (which Floating UI's `inline()` middleware reads).

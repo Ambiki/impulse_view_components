@@ -26,6 +26,10 @@ _Avoid_: Focus restore, refocus, final focus
 
 ### Combobox
 
+**Combobox**:
+An input paired with a list of options that the user moves through and commits from. It knows which option is active, never which options are selected: that belongs to the element built on it.
+_Avoid_: Autocomplete (an element built on a combobox), select menu, typeahead
+
 **Active option**:
 The option the user has moved to, by keyboard or pointer, that a commit would choose. Distinct from a selected option.
 _Avoid_: Highlighted option, focused option, current option

@@ -1,7 +1,7 @@
 import type { UseFloatingUIType } from 'src/hooks/use_floating_ui';
 import type { AutocompleteEventArgs, AutocompleteEventMap, AutocompleteEventName } from './events';
-import Combobox from '@ambiki/combobox';
 import { property, registerElement, target, targets } from '@ambiki/impulse';
+import Combobox from 'src/combobox/index';
 import { isLooselyFocusable } from 'src/helpers/focus';
 import useFloatingUI from 'src/hooks/use_floating_ui';
 import useOutsideClick from 'src/hooks/use_outside_click';
@@ -123,6 +123,9 @@ export default class AwcAutocompleteElement<
   @targets() tagDismissButtons: HTMLButtonElement[];
   @targets() groups: HTMLElement[];
 
+  /**
+   * @private
+   */
   combobox: Combobox;
   /**
    * @private
@@ -172,7 +175,7 @@ export default class AwcAutocompleteElement<
       },
     });
 
-    this.combobox = new Combobox(this.input, this.listbox, { multiple: this.multiple });
+    this.combobox = new Combobox(this.input, this.listbox);
     this.selectVariant = this.multiple ? new MultipleSelect(this) : new SingleSelect(this);
     this.selectVariant.connected();
     this.searchVariant = this.src ? new RemoteSearch(this) : new LocalSearch(this);
@@ -528,6 +531,17 @@ export default class AwcAutocompleteElement<
    */
   toggleSelectedClass(value: boolean) {
     this.classList.toggle('awc-autocomplete--selected', value);
+  }
+
+  /**
+   * Marks every option with `aria-selected`, from the selection the select variant holds.
+   * @private
+   */
+  markSelectedOptions() {
+    for (const option of this.options) {
+      const value = option.getAttribute('value');
+      option.setAttribute('aria-selected', String(value !== null && this.selectVariant.isSelected(value)));
+    }
   }
 
   /**

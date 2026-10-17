@@ -14,6 +14,7 @@ export default [
   {
     input: [
       './src/index.ts',
+      './src/combobox/index.ts',
       // Need to export these in package.json
       ...(await globby('./src/elements/**/!(*.test).ts')),
       ...(await globby('./src/hooks/**/!(*.test).ts')),
@@ -28,7 +29,7 @@ export default [
         preserveModulesRoot: 'src',
       },
     ],
-    external: ['@ambiki/combobox', '@ambiki/impulse', '@floating-ui/dom', 'tabbable'],
+    external: ['@ambiki/impulse', '@floating-ui/dom', 'tabbable'],
     plugins: [
       resolve(),
       typescript({ tsconfig: './tsconfig.prod.json' }),
