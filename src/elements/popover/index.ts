@@ -8,7 +8,7 @@ import { stripCSSUnit } from '../../helpers/string';
 @registerElement('awc-popover')
 export default class AwcPopoverElement extends ImpulseElement {
   /**
-   * When the popover is open or not. To make the popover open by default, set it to `true`.
+   * Whether the popover is open. Setting it shows or hides the popover, as `show` and `hide` do.
    * Make sure you aren't opening multiple popovers on page load, as this may degrade the user experience.
    */
   @property({ type: Boolean }) open = false;
@@ -36,10 +36,20 @@ export default class AwcPopoverElement extends ImpulseElement {
 
   private floatingUI: UseFloatingUIType;
 
+  /** Whether `connected` has run since the popover last connected: until it has, the targets aren't wired up. */
+  private initialized = false;
+
+  /**
+   * The state the popover last opened or closed itself to. `open` differs from it while the popover is handling a
+   * change to `open`, and while the popover isn't initialized.
+   */
+  private opened = false;
+
   /**
    * Called when the element is added to the DOM.
    */
   connected() {
+    this.initialized = true;
     // Measured once: reading it on every reposition would force a style recalculation each time.
     const arrowPadding = this.arrowPadding;
     // Read on every reposition, so that `placement` and `strategy` follow their attributes. `placementChanged`
@@ -80,18 +90,31 @@ export default class AwcPopoverElement extends ImpulseElement {
   }
 
   /**
+   * Shows or hides the popover when `open` changes, as `show` and `hide` do.
+   * @private
+   */
+  openChanged(open: boolean) {
+    if (open) {
+      this.show();
+    } else {
+      this.hide();
+    }
+  }
+
+  /**
    * Called when the element is removed from the DOM.
    */
   disconnected() {
-    // Removal emits nothing: there is no popover left to react to.
-    this.hideWithoutEmitting();
+    this.initialized = false;
+    // Removal emits nothing, and keeps `open`, so the popover opens again if it's reconnected.
+    this.closePanel();
   }
 
   /**
    * Shows or hides the popover as if its trigger was clicked, emitting a cancelable `show` or `hide` first.
    */
   async toggle() {
-    if (this.open) {
+    if (this.opened) {
       await this.requestHide();
     } else {
       this.requestShow();
@@ -103,7 +126,7 @@ export default class AwcPopoverElement extends ImpulseElement {
    * with a cancelable `hide` each. Does nothing if any of them is prevented.
    */
   requestShow() {
-    if (this.open || !this.emitRequest('show')) return;
+    if (!this.initialized || this.opened || !this.emitRequest('show')) return;
     for (const popover of this.otherOpenPopovers) {
       if (!popover.emitRequest('hide')) return;
     }
@@ -114,7 +137,7 @@ export default class AwcPopoverElement extends ImpulseElement {
    * Hides the popover as if the user asked to. Emits a cancelable `hide`, and does nothing if it is prevented.
    */
   async requestHide(event?: Event): Promise<void> {
-    if (!this.open || !this.emitRequest('hide')) return;
+    if (!this.opened || !this.emitRequest('hide')) return;
     await this.hide(event);
   }
 
@@ -123,7 +146,12 @@ export default class AwcPopoverElement extends ImpulseElement {
    * listeners prevent it.
    */
   show() {
-    if (this.open) return;
+    if (this.opened) return;
+    if (!this.initialized) {
+      // It opens, silently, once it connects.
+      this.open = true;
+      return;
+    }
     this.showWithoutEmitting();
     this.emit('shown');
   }
@@ -132,10 +160,17 @@ export default class AwcPopoverElement extends ImpulseElement {
    * Hides the popover. Emits `hidden` but no `hide`: use `requestHide` to let listeners prevent it.
    */
   async hide(event?: Event): Promise<void> {
-    if (!this.open) return;
-    await this.hideWithoutEmitting(event);
+    if (!this.opened) {
+      // Nothing is open, such as while the popover is removed, so there is only `open` to clear.
+      this.open = false;
+      return;
+    }
+    const closed = this.closePanel(event);
+    // After closing the panel, so that `openChanged` finds nothing left to do.
+    this.open = false;
+    await closed;
     // Shown again before the hide finished, so there is no close left to report.
-    if (!this.open) {
+    if (!this.opened) {
       this.emit('hidden');
     }
   }
@@ -176,22 +211,25 @@ export default class AwcPopoverElement extends ImpulseElement {
 
   private showWithoutEmitting() {
     this.closeOtherPopovers();
+    this.opened = true;
+    // After `opened`, so that `openChanged` finds nothing left to do.
     this.open = true;
     this.panel.show();
     this.button.setAttribute('aria-expanded', 'true');
     this.floatingUI.start();
   }
 
-  private async hideWithoutEmitting(event?: Event) {
-    if (!this.open) return;
+  /** Closes the panel, leaving `open` as it is. */
+  private async closePanel(event?: Event) {
+    if (!this.opened) return;
     // Taken before awaiting: when hiding because the popover was removed, its targets are gone by the time `stop`
     // resolves.
     const button = this.button;
-    this.open = false;
+    this.opened = false;
     this.panel.close();
     await this.floatingUI.stop();
     // Shown again while stopping: the trigger already says so.
-    if (this.open) return;
+    if (this.opened) return;
     button.setAttribute('aria-expanded', 'false');
 
     // Closed by an event, such as a click on a close button, so focus goes back to the trigger.

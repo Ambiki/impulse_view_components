@@ -22,5 +22,5 @@ Each element emitted its open and close events its own way: the popover only fro
 - An element that connects already open, moves, or is removed emits nothing.
 - A close the element didn't start, such as a `<form method="dialog">` submitting, still emits `hidden`. So does a dialog's second Escape: browsers let a page cancel only the first Escape after a user interaction, so the dialog emits no `hide` it couldn't honour.
 - The dialog's existing `hideWithoutEmitting()` stays as the one way to close without a state event.
-- Changing the `open` attribute counts as code: if it ever opens or closes an element, it does so directly.
+- Changing the `open` attribute counts as code: it opens or closes the element directly ([ADR 0003](0003-open-is-the-element-state.md)).
 - **Value events** (`commit`, `remove`, `clear`, `reset`) follow `input` and `change`: they are emitted after the user changes the value, never for value methods called from code, and are not cancelable. A veto would be a separate `before*` event, as `beforeinput` is. `reset` follows the form's own `reset`, whoever reset it.

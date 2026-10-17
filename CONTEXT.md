@@ -20,6 +20,10 @@ _Avoid_: Popup, panel, content
 
 ### Events
 
+**Open**:
+The state of an element that is showing its floating element or dialog, recorded by its `open` attribute.
+_Avoid_: Shown, visible, expanded
+
 **Request**:
 An attempt to open or close an element that listeners may refuse, made by a user action or a `request*` call.
 _Avoid_: Intent, user action

@@ -8,10 +8,12 @@ const popover = document.querySelector('awc-popover');
 
 ### `open`
 
-Whether the popover is open or not.
+Whether the popover is open. Setting it, or adding or removing the `open` attribute, shows or hides the popover as
+`show` and `hide` do. A removed popover keeps `open`, and opens again when it's added back.
 
 ```js
 popover.open;
+popover.open = true;
 ```
 
 ### `show`
@@ -68,9 +70,9 @@ await popover.reposition();
 ## Events
 
 Events work as they do on native elements. A user action, or a `requestShow`, `requestHide` or `toggle` call, first
-emits a cancelable `show` or `hide`; calling `preventDefault()` on it stops the popover from opening or closing. `show()`
-and `hide()` act directly, like `dialog.close()`, and emit no `show` or `hide`. `shown` and `hidden` fire after every
-open and close, whatever caused it. Connecting, moving and removing the element emit nothing.
+emits a cancelable `show` or `hide`; calling `preventDefault()` on it stops the popover from opening or closing.
+`show()`, `hide()` and changing `open` act directly, like `dialog.close()`, and emit no `show` or `hide`. `shown` and
+`hidden` fire after every open and close, whatever caused it. Connecting, moving and removing the element emit nothing.
 
 Like the other events, `show` and `hide` bubble. A listener on an element that contains other popovers receives their
 `show` and `hide` too, so check `event.target` before preventing one.
