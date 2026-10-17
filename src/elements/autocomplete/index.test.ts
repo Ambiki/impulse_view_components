@@ -1,4 +1,5 @@
 import type AwcAutocompleteElement from './index';
+import { whenInitialized } from '@ambiki/impulse';
 import { aTimeout, expect, fixture, nextFrame, oneEvent, waitUntil } from '@open-wc/testing';
 // Registers `awc-autocomplete`. Kept separate from the type import above, which the bundler elides.
 import './index';
@@ -53,8 +54,7 @@ function autocompleteHtml({ src, multiple = false, options = [] }: FixtureOption
 
 async function autocompleteFixture(options: FixtureOptions = {}) {
   const el = await fixture<AwcAutocompleteElement>(autocompleteHtml(options));
-  // `connected` runs asynchronously, and sets this attribute once the targets and actions are wired up.
-  await waitUntil(() => el.hasAttribute('data-impulse-element'));
+  await whenInitialized(el);
   return el;
 }
 
@@ -94,6 +94,33 @@ function stubFetch(): FetchStub {
  */
 async function drainObservers() {
   for (let i = 0; i < 5; i++) await nextFrame();
+}
+
+const OPEN_CLOSE_EVENTS = ['show', 'shown', 'hide', 'hidden'] as const;
+
+/** Records, in order, the `awc-autocomplete:*` open, close, `clear` and `reset` events `el` dispatches. */
+function recordEvents(el: AwcAutocompleteElement) {
+  const events: string[] = [];
+  for (const name of [...OPEN_CLOSE_EVENTS, 'clear', 'reset'] as const) {
+    el.addEventListener(`awc-autocomplete:${name}`, (event) => {
+      if (event.target === el) events.push(name);
+    });
+  }
+  return events;
+}
+
+/** Prevents the next `awc-autocomplete:<name>` event `el` dispatches. */
+function preventNext(el: AwcAutocompleteElement, name: 'show' | 'hide') {
+  el.addEventListener(`awc-autocomplete:${name}`, (event) => event.preventDefault(), { once: true });
+}
+
+/** Opens the listbox the way a user does, by pressing on the input. */
+function pressInput(el: AwcAutocompleteElement) {
+  el.input.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, buttons: 1 }));
+}
+
+function pressKey(el: AwcAutocompleteElement, key: string) {
+  el.input.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
 }
 
 describe('AwcAutocompleteElement', () => {
@@ -204,6 +231,115 @@ describe('AwcAutocompleteElement', () => {
   });
 
   describe('events', () => {
+    it('should emit only the state events when shown and hidden from code', async () => {
+      const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
+      const events = recordEvents(el);
+      preventNext(el, 'show');
+      preventNext(el, 'hide');
+
+      el.show();
+      await el.hide();
+
+      expect(el.open).to.equal(false);
+      expect(events).to.eql(['shown', 'hidden']);
+    });
+
+    it('should stay closed when the user opens it and `show` is prevented', async () => {
+      const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
+      const events = recordEvents(el);
+      preventNext(el, 'show');
+
+      pressInput(el);
+      expect(el.open).to.equal(false);
+
+      pressInput(el);
+      expect(el.open).to.equal(true);
+      expect(events).to.eql(['show', 'show', 'shown']);
+    });
+
+    it('should stay open when the user closes it with Escape and `hide` is prevented', async () => {
+      const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
+      pressInput(el);
+      const events = recordEvents(el);
+      preventNext(el, 'hide');
+
+      pressKey(el, 'Escape');
+      expect(el.open).to.equal(true);
+
+      pressKey(el, 'Escape');
+      await nextFrame();
+      expect(el.open).to.equal(false);
+      expect(events).to.eql(['hide', 'hide', 'hidden']);
+    });
+
+    it('should request to hide when the input loses focus', async () => {
+      const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
+      pressInput(el);
+      const events = recordEvents(el);
+      preventNext(el, 'hide');
+
+      el.input.dispatchEvent(new FocusEvent('blur'));
+      await nextFrame();
+
+      expect(el.open).to.equal(true);
+      expect(events).to.eql(['hide']);
+    });
+
+    it('should request to hide when an option is committed', async () => {
+      const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
+      pressInput(el);
+      await nextFrame();
+      const events = recordEvents(el);
+      preventNext(el, 'hide');
+
+      el.options[0].click();
+      await nextFrame();
+
+      expect(el.value).to.equal('1');
+      expect(el.open).to.equal(true);
+      expect(events).to.eql(['hide']);
+    });
+
+    it('should request to hide when cleared', async () => {
+      const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
+      pressInput(el);
+      const events = recordEvents(el);
+      preventNext(el, 'hide');
+
+      el.clearButton!.click();
+      await nextFrame();
+
+      expect(el.open).to.equal(true);
+      expect(events).to.eql(['hide', 'clear']);
+    });
+
+    it('should hide without a request when its form resets', async () => {
+      const form = await fixture<HTMLFormElement>(`<form>${autocompleteHtml({ options: [{ value: '1', text: 'One' }] })}</form>`);
+      const el = form.querySelector('awc-autocomplete')!;
+      await whenInitialized(el);
+      pressInput(el);
+      const events = recordEvents(el);
+      preventNext(el, 'hide');
+
+      form.reset();
+      await nextFrame();
+
+      expect(el.open).to.equal(false);
+      expect(events).to.eql(['reset', 'hidden']);
+    });
+
+    it('should close silently when removed', async () => {
+      const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
+      pressInput(el);
+      const events = recordEvents(el);
+
+      el.remove();
+      await nextFrame();
+
+      expect(el.open).to.equal(false);
+      expect(events).to.eql([]);
+    });
+
     it('should emit a commit event carrying the option, its value and its text', async () => {
       const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
 

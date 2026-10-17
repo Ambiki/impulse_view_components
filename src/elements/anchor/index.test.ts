@@ -1,4 +1,5 @@
 import type AwcAnchorElement from './index';
+import { whenInitialized } from '@ambiki/impulse';
 import { expect, fixture, nextFrame, waitUntil } from '@open-wc/testing';
 // Registers `awc-anchor`. Kept separate from the type import above, which the bundler elides.
 import './index';
@@ -23,8 +24,7 @@ async function anchorFixture(attributes = 'active') {
   const anchor = container.querySelector<HTMLElement>('#anchor')!;
   const floating = container.querySelector<AwcAnchorElement>('awc-anchor')!;
   const arrow = floating.querySelector<HTMLElement>('[data-arrow]')!;
-  // `connected` runs asynchronously, and sets this attribute once the element is started.
-  await waitUntil(() => floating.hasAttribute('data-impulse-element'));
+  await whenInitialized(floating);
   return { container, anchor, floating, arrow };
 }
 

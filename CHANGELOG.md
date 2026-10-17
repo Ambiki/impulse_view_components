@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- `requestShow()` and `requestHide()` on `<awc-popover>`, `<awc-dialog>` and `<awc-autocomplete>`, which emit a cancelable `show` or `hide` before acting ([#302](https://github.com/Ambiki/impulse_view_components/pull/302))
 - `Impulse::SelectComponent`'s block form can group options with `with_group` ([#299](https://github.com/Ambiki/impulse_view_components/pull/299))
 - Added `auto-size` and `auto-size-padding` to `<awc-anchor>` (`auto_size:` and `auto_size_padding:` on `Impulse::AnchorComponent`) ([#274](https://github.com/Ambiki/impulse_view_components/pull/274))
 - `useFloatingUI` accepts a function for its options, read on every reposition, and exports its options type as `UseFloatingUIOptions` ([#273](https://github.com/Ambiki/impulse_view_components/pull/273))
@@ -17,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **Breaking:** Open and close events now follow native elements: user actions, `requestShow()`, `requestHide()` and `toggle()` emit a cancelable `show` or `hide`, `show()` and `hide()` emit only `shown` or `hidden`, and connecting or removing an element emits nothing. Hand-written `<awc-dialog>` markup needs the `cancel->awc-dialog#handleCancel` and `close->awc-dialog#handleClose` actions for Escape ([#302](https://github.com/Ambiki/impulse_view_components/pull/302))
 - The JavaScript now compiles to ES2020, so `?.`, `??` and object spread ship untranspiled. No supported browser is dropped, but bundlers that can't parse ES2020, such as webpack 4, need to transpile the package ([#298](https://github.com/Ambiki/impulse_view_components/pull/298))
 - **Breaking:** Renamed `useFloatingUI`'s `referenceElement` and `popupElement` options to `anchorElement` and `floatingElement` ([#278](https://github.com/Ambiki/impulse_view_components/pull/278))
 - **Breaking:** `<awc-anchor>`'s `start()` and `stop()` now turn `active` on and off ([#277](https://github.com/Ambiki/impulse_view_components/pull/277))
@@ -28,6 +30,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Fixed `preventDefault()` on a `show` or `hide` event not stopping the open or close ([#302](https://github.com/Ambiki/impulse_view_components/pull/302))
+- Fixed a popover that connects with `open` set not opening ([#302](https://github.com/Ambiki/impulse_view_components/pull/302))
 - Fixed `Impulse::TimeZoneSelectComponent` with `multiple: true` not preselecting its `selected` values ([#299](https://github.com/Ambiki/impulse_view_components/pull/299))
 - Fixed type declarations that apps using `moduleResolution: node16` couldn't resolve, which turned some types into `any` ([#296](https://github.com/Ambiki/impulse_view_components/pull/296))
 - Fixed `<awc-anchor>`'s `fallbackPlacements` being typed as `never[]` ([#295](https://github.com/Ambiki/impulse_view_components/pull/295))

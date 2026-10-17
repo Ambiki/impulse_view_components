@@ -1,5 +1,5 @@
 <%= render(Impulse::BaseRenderer.new(**@system_args)) do %>
-  <dialog class="<%= class_names("awc-dialog-dialog", "awc-dialog-dialog--centered": @center) %>" data-action="click->awc-dialog#handleClick keydown->awc-dialog#handleKeydown close->awc-dialog#hideWithoutEmitting" data-target="awc-dialog.dialog" aria-labelledby="<%= title_id %>">
+  <dialog class="<%= class_names("awc-dialog-dialog", "awc-dialog-dialog--centered": @center) %>" data-action="click->awc-dialog#handleClick keydown->awc-dialog#handleKeydown cancel->awc-dialog#handleCancel close->awc-dialog#handleClose" data-target="awc-dialog.dialog" aria-labelledby="<%= title_id %>">
     <%= header %>
     <% if content.present? %>
       <%= content %>

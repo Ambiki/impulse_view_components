@@ -1,5 +1,5 @@
 import type { Middleware, Placement } from '@floating-ui/dom';
-import { ImpulseElement, registerElement } from '@ambiki/impulse';
+import { ImpulseElement, registerElement, whenInitialized } from '@ambiki/impulse';
 import { expect, fixture, html, nextFrame, waitUntil } from '@open-wc/testing';
 import useFloatingUI from './use_floating_ui';
 
@@ -46,8 +46,7 @@ async function floatingFixture() {
       <div class="floating"><div class="arrow"></div></div>
     </floating-ui-host>
   `);
-  // `connected` runs asynchronously; the hook relies on the element's lifecycle being started.
-  await waitUntil(() => host.hasAttribute('data-impulse-element'));
+  await whenInitialized(host);
   const anchor = host.querySelector<HTMLElement>('.anchor')!;
   const floating = host.querySelector<HTMLElement>('.floating')!;
   const arrow = host.querySelector<HTMLElement>('.arrow')!;

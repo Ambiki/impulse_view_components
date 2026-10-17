@@ -11,7 +11,7 @@
       <%= render(Impulse::DialogComponent.new(id: "dialog-2", title: "Nested dialog", size: :sm)) do |s| %>
         <% s.with_body(data: {test_id: "nested-dialog"}) { "This is a nested dialog." } %>
         <% s.with_footer do %>
-          <button type="button" class="btn btn-secondary btn-sm" data-action="click->awc-dialog#hide" data-test-id="nested-dialog-close-btn">
+          <button type="button" class="btn btn-secondary btn-sm" data-action="click->awc-dialog#requestHide" data-test-id="nested-dialog-close-btn">
             Close
           </button>
         <% end %>
@@ -31,7 +31,7 @@
     const dialogId = event.target.getAttribute('data-dialog-trigger-for');
     const dialog = document.getElementById(dialogId);
     if (dialog) {
-      dialog.show();
+      dialog.requestShow();
     }
   }
 </script>

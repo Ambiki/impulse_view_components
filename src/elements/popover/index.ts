@@ -59,16 +59,19 @@ export default class AwcPopoverElement extends ImpulseElement {
 
     useOutsideClick(this, {
       boundaries: this.boundaries,
-      callback: () => {
+      callback: (_event, target) => {
+        // Pressing a closed popover's trigger opens that popover, which asks this one to hide itself.
+        if (this.isClosedPopoverTrigger(target)) return;
         // Only proceed if element is open and nested popovers are hidden.
         if (this.open && !this.hasNestedOpenPopovers) {
-          this.hide();
+          this.requestHide();
         }
       },
     });
 
+    // Starting out open isn't a change, so it emits nothing.
     if (this.open) {
-      this.show();
+      this.showWithoutEmitting();
     }
   }
 
@@ -80,53 +83,71 @@ export default class AwcPopoverElement extends ImpulseElement {
    * Called when the element is removed from the DOM.
    */
   disconnected() {
-    this.hide();
+    // Removal emits nothing: there is no popover left to react to.
+    this.hideWithoutEmitting();
   }
 
   /**
-   * Shows/hides the popover.
+   * Shows or hides the popover as if its trigger was clicked, emitting a cancelable `show` or `hide` first.
    */
   async toggle() {
     if (this.open) {
-      this.emit('hide');
-      await this.hide();
-      this.emit('hidden');
+      await this.requestHide();
     } else {
-      this.emit('show');
-      this.show();
-      this.emit('shown');
+      this.requestShow();
     }
   }
 
   /**
-   * Shows the popover.
+   * Shows the popover as if the user asked to. Emits a cancelable `show`, then asks the other open popovers to hide
+   * with a cancelable `hide` each. Does nothing if any of them is prevented.
+   */
+  requestShow() {
+    if (this.open || !this.emitRequest('show')) return;
+    for (const popover of this.otherOpenPopovers) {
+      if (!popover.emitRequest('hide')) return;
+    }
+    this.show();
+  }
+
+  /**
+   * Hides the popover as if the user asked to. Emits a cancelable `hide`, and does nothing if it is prevented.
+   */
+  async requestHide(event?: Event): Promise<void> {
+    if (!this.open || !this.emitRequest('hide')) return;
+    await this.hide(event);
+  }
+
+  /**
+   * Shows the popover and hides the other open popovers. Emits `shown` but no `show`: use `requestShow` to let
+   * listeners prevent it.
    */
   show() {
     if (this.open) return;
-    this.closeOtherPopovers();
-    this.open = true;
-    this.panel.show();
-    this.button.setAttribute('aria-expanded', 'true');
-    this.floatingUI.start();
+    this.showWithoutEmitting();
+    this.emit('shown');
   }
 
   /**
-   * Hides a popover.
+   * Hides the popover. Emits `hidden` but no `hide`: use `requestHide` to let listeners prevent it.
    */
   async hide(event?: Event): Promise<void> {
     if (!this.open) return;
-    // Taken before awaiting: when hiding because the popover was removed, its targets are gone by the time `stop`
-    // resolves.
-    const button = this.button;
-    this.open = false;
-    this.panel.close();
-    await this.floatingUI.stop();
-    button.setAttribute('aria-expanded', 'false');
-
-    // This event originated from a button click.
-    if (event) {
-      button.focus();
+    await this.hideWithoutEmitting(event);
+    // Shown again before the hide finished, so there is no close left to report.
+    if (!this.open) {
+      this.emit('hidden');
     }
+  }
+
+  /**
+   * Handles the panel closing without the popover closing it, such as a `<form method="dialog">` inside it submitting.
+   * @private
+   */
+  handleClose(event: Event) {
+    // A close that the popover started can arrive after it was shown again.
+    if (this.panel.open) return;
+    this.hide(event);
   }
 
   handleKeydown(event: KeyboardEvent) {
@@ -139,8 +160,7 @@ export default class AwcPopoverElement extends ImpulseElement {
           // prevent modals from accidentally closing.
           event.preventDefault();
           event.stopPropagation();
-          this.hide();
-          this.button.focus();
+          this.requestHide(event);
         }
         break;
       }
@@ -154,12 +174,54 @@ export default class AwcPopoverElement extends ImpulseElement {
     await this.floatingUI.update();
   }
 
+  private showWithoutEmitting() {
+    this.closeOtherPopovers();
+    this.open = true;
+    this.panel.show();
+    this.button.setAttribute('aria-expanded', 'true');
+    this.floatingUI.start();
+  }
+
+  private async hideWithoutEmitting(event?: Event) {
+    if (!this.open) return;
+    // Taken before awaiting: when hiding because the popover was removed, its targets are gone by the time `stop`
+    // resolves.
+    const button = this.button;
+    this.open = false;
+    this.panel.close();
+    await this.floatingUI.stop();
+    // Shown again while stopping: the trigger already says so.
+    if (this.open) return;
+    button.setAttribute('aria-expanded', 'false');
+
+    // Closed by an event, such as a click on a close button, so focus goes back to the trigger.
+    if (event) {
+      button.focus();
+    }
+  }
+
+  /** Emits the request event `name`, returning whether the popover may go ahead. */
+  private emitRequest(name: 'show' | 'hide') {
+    return !this.emit(name, { cancelable: true }).defaultPrevented;
+  }
+
   private closeOtherPopovers() {
-    const popovers = Array.from(document.querySelectorAll<AwcPopoverElement>(this.identifier));
-    for (const popover of popovers) {
-      if (popover === this || popover.contains(this)) continue;
+    for (const popover of this.otherOpenPopovers) {
       popover.hide();
     }
+  }
+
+  /** Whether `target` is in the trigger of another popover that is closed, so pressing it opens that popover. */
+  private isClosedPopoverTrigger(target: HTMLElement) {
+    const popover = target.closest<AwcPopoverElement>(this.identifier);
+    return !!popover && popover !== this && !popover.open && popover.button.contains(target);
+  }
+
+  /** The open popovers that showing this one hides: every other one except its ancestors. */
+  private get otherOpenPopovers() {
+    return Array.from(document.querySelectorAll<AwcPopoverElement>(this.identifier)).filter(
+      (popover) => popover !== this && !popover.contains(this) && popover.open,
+    );
   }
 
   private get hasNestedOpenPopovers(): boolean {

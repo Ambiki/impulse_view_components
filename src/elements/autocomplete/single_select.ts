@@ -39,7 +39,7 @@ export default class SingleSelect implements SelectVariant {
     const value = option.getAttribute('value') ?? '';
     const { text } = option.dataset;
     this.setValue(value, text || '');
-    this.autocomplete.hide();
+    this.autocomplete.requestHide();
   }
 
   setValue(value: string, text: string) {

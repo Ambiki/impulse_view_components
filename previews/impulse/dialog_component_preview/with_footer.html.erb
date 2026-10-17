@@ -3,7 +3,7 @@
 <%= render(Impulse::DialogComponent.new(id: "dialog-1", title: "Edit your profile")) do |c| %>
   <% c.with_body { "Make changes to your profile here. Click save when you're done." } %>
   <% c.with_footer do %>
-    <button type="button" class="btn btn-secondary btn-sm" data-action="click->awc-dialog#hide">Cancel</button>
+    <button type="button" class="btn btn-secondary btn-sm" data-action="click->awc-dialog#requestHide">Cancel</button>
     <button type="button" class="btn btn-primary btn-sm">Save</button>
   <% end %>
 <% end %>
@@ -19,7 +19,7 @@
     const dialogId = event.target.getAttribute('data-dialog-trigger-for');
     const dialog = document.getElementById(dialogId);
     if (dialog) {
-      dialog.show();
+      dialog.requestShow();
     }
   }
 </script>
