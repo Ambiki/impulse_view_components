@@ -92,6 +92,22 @@ describe('awc-dialog', () => {
     expect(events).to.eql(['shown', 'hidden']);
   });
 
+  it('stays closed, and can be shown later, when opening fails', async () => {
+    const el = await dialogFixture();
+    // Already open without being modal, so `showModal()` throws.
+    el.dialog.setAttribute('open', '');
+    const events = recordEvents(el);
+
+    expect(() => el.show()).to.throw();
+    expect(el.open).to.equal(false);
+
+    el.dialog.removeAttribute('open');
+    el.show();
+
+    expect(el.dialog.matches(':modal')).to.equal(true);
+    expect(events).to.eql(['shown']);
+  });
+
   it('stays closed when `show` is prevented', async () => {
     const el = await dialogFixture();
     const events = recordEvents(el);

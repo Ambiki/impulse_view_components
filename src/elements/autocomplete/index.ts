@@ -1,10 +1,11 @@
 import type { UseFloatingUIType } from 'src/hooks/use_floating_ui';
-import type { AutocompleteEventArgs, AutocompleteEventDetails, AutocompleteEventMap, AutocompleteEventName } from './events';
+import type { AutocompleteEventArgs, AutocompleteEventMap, AutocompleteEventName } from './events';
 import Combobox from '@ambiki/combobox';
-import { ImpulseElement, property, registerElement, target, targets } from '@ambiki/impulse';
+import { property, registerElement, target, targets } from '@ambiki/impulse';
 import { isLooselyFocusable } from 'src/helpers/focus';
 import useFloatingUI from 'src/hooks/use_floating_ui';
 import useOutsideClick from 'src/hooks/use_outside_click';
+import OpenableElement from 'src/internal/openable_element';
 import { optionEventDetail } from './events';
 import LocalSearch from './local_search';
 import MultipleSelect from './multiple_select';
@@ -69,7 +70,7 @@ export interface SearchVariant {
 export default class AwcAutocompleteElement<
   Mode extends SelectionMode = SelectionMode,
   Src extends Source = Source,
-> extends ImpulseElement {
+> extends OpenableElement {
   /**
    * Whether the listbox is open. Setting it shows or hides the listbox, as `show` and `hide` do.
    */
@@ -130,15 +131,6 @@ export default class AwcAutocompleteElement<
   private firstFocus = true;
   private preventOutsideClickEvent = false;
 
-  /** Whether `connected` has run since the element last connected: until it has, the targets aren't wired up. */
-  private initialized = false;
-
-  /**
-   * The state the element last opened or closed the listbox to. `open` differs from it while the element is handling a
-   * change to `open`, and while the element isn't initialized.
-   */
-  private opened = false;
-
   constructor() {
     super();
     this.handleFormReset = this.handleFormReset.bind(this);
@@ -149,7 +141,6 @@ export default class AwcAutocompleteElement<
    * @private
    */
   connected() {
-    this.initialized = true;
     this.form?.addEventListener('reset', this.handleFormReset);
 
     // Read on every reposition, so that `auto-size` and `auto-size-padding` follow their attributes. Their `*Changed`
@@ -184,23 +175,7 @@ export default class AwcAutocompleteElement<
     this.selectVariant.connected();
     this.searchVariant = this.src ? new RemoteSearch(this) : new LocalSearch(this);
     this.selectVariant.required = this.required;
-
-    // Starting out open isn't a change, so it emits nothing.
-    if (this.open) {
-      this.showWithoutEmitting();
-    }
-  }
-
-  /**
-   * Shows or hides the listbox when `open` changes, as `show` and `hide` do.
-   * @private
-   */
-  openChanged(open: boolean) {
-    if (open) {
-      this.show();
-    } else {
-      this.hide();
-    }
+    super.connected();
   }
 
   /**
@@ -208,9 +183,7 @@ export default class AwcAutocompleteElement<
    * @private
    */
   disconnected() {
-    this.initialized = false;
-    // Removal emits nothing, and keeps `open`, so the listbox opens again if the element is reconnected.
-    this.closeListbox();
+    super.disconnected();
     this.searchVariant?.disconnected();
     this.form?.removeEventListener('reset', this.handleFormReset);
     this.firstFocus = true;
@@ -417,55 +390,6 @@ export default class AwcAutocompleteElement<
     this.searchVariant.search(query);
   }
 
-  /**
-   * Shows the listbox as if the user asked to. Emits a cancelable `show`, and does nothing if it is prevented.
-   */
-  requestShow() {
-    if (!this.initialized || this.opened || !this.emitRequest('show')) return;
-    this.show();
-  }
-
-  /**
-   * Hides the listbox as if the user asked to. Emits a cancelable `hide`, and does nothing if it is prevented.
-   */
-  async requestHide(): Promise<void> {
-    if (!this.opened || !this.emitRequest('hide')) return;
-    await this.hide();
-  }
-
-  /**
-   * Shows the listbox element. Emits `shown` but no `show`: use `requestShow` to let listeners prevent it.
-   */
-  show() {
-    if (this.opened) return;
-    if (!this.initialized) {
-      // It opens, silently, once it connects.
-      this.open = true;
-      return;
-    }
-    this.showWithoutEmitting();
-    this.emitEvent('shown');
-  }
-
-  /**
-   * Hides the listbox element. Emits `hidden` but no `hide`: use `requestHide` to let listeners prevent it.
-   */
-  async hide() {
-    if (!this.opened) {
-      // Nothing is open, such as while the element is removed, so there is only `open` to clear.
-      this.open = false;
-      return;
-    }
-    const closed = this.closeListbox();
-    // After closing the listbox, so that `openChanged` finds nothing left to do.
-    this.open = false;
-    await closed;
-    // Shown again before the hide finished, so there is no close left to report.
-    if (!this.opened) {
-      this.emitEvent('hidden');
-    }
-  }
-
   /* eslint-disable jsdoc/check-param-names -- documents the arguments the rest tuples resolve to */
   /**
    * Sets the value of the element. If options are fetched from a remote source, the `text` param is required.
@@ -550,33 +474,23 @@ export default class AwcAutocompleteElement<
   /**
    * Emits one of the events declared in `./events`. Going through here rather than `emit` is what keeps the set of
    * events the element dispatches and the set it declares to listeners in step: an undeclared name or a detail of the
-   * wrong shape does not compile. `emitRequest` is the one other way out, for the cancelable request events.
+   * wrong shape does not compile. `OpenableElement` emits the request and state events, which `./events` declares too.
    */
   private emitEvent<Name extends AutocompleteEventName>(name: Name, ...args: AutocompleteEventArgs<Name>) {
     const [detail] = args;
     return this.emit(name, { detail });
   }
 
-  /** Emits the cancelable request event `name`, returning whether the element may go ahead. */
-  private emitRequest(name: Extract<AutocompleteEventName, 'show' | 'hide'>) {
-    const detail: AutocompleteEventDetails[typeof name] = {};
-    return !this.emit(name, { detail, cancelable: true }).defaultPrevented;
-  }
-
-  private showWithoutEmitting() {
-    this.opened = true;
-    // After `opened`, so that `openChanged` finds nothing left to do.
-    this.open = true;
+  /** Shows the listbox. */
+  protected openParts() {
     this.floatingUI.start();
     this.combobox.start();
     this.selectVariant.start();
     this.searchVariant.start();
   }
 
-  /** Closes the listbox, leaving `open` as it is. */
-  private async closeListbox() {
-    if (!this.opened) return;
-    this.opened = false;
+  /** Hides the listbox. */
+  protected async closeParts() {
     this.combobox.stop();
     this.selectVariant.stop();
     this.searchVariant.stop();

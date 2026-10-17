@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- `<awc-dialog>`'s `hide()` and `requestHide()` return a promise, like the popover's and the autocomplete's ([#305](https://github.com/Ambiki/impulse_view_components/pull/305))
 - **Breaking:** Removing an open `<awc-popover>`, `<awc-dialog>` or `<awc-autocomplete>` keeps `open`, so re-inserting it opens it again ([#303](https://github.com/Ambiki/impulse_view_components/pull/303))
 - **Breaking:** Open and close events now follow native elements: user actions, `requestShow()`, `requestHide()` and `toggle()` emit a cancelable `show` or `hide`, `show()` and `hide()` emit only `shown` or `hidden`, and connecting or removing an element emits nothing. Hand-written `<awc-dialog>` markup needs the `cancel->awc-dialog#handleCancel` and `close->awc-dialog#handleClose` actions for Escape ([#302](https://github.com/Ambiki/impulse_view_components/pull/302))
 - The JavaScript now compiles to ES2020, so `?.`, `??` and object spread ship untranspiled. No supported browser is dropped, but bundlers that can't parse ES2020, such as webpack 4, need to transpile the package ([#298](https://github.com/Ambiki/impulse_view_components/pull/298))
