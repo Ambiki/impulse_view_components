@@ -18,6 +18,10 @@ jobs:
         run: |
           yarn install --frozen-lockfile
           yarn lint
+      - name: Run typecheck
+        # Also after ESLint fails, so both report their errors in one run.
+        if: ${{ !cancelled() }}
+        run: yarn typecheck
 
   check_exports:
     runs-on: ubuntu-latest
@@ -44,6 +48,22 @@ jobs:
           rubygems: latest
       - name: Run rubocop
         run: ./bin/rubocop
+
+  test_js:
+    needs:
+      - lint_js
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .tool-versions
+          cache: yarn
+      - name: Run test
+        run: |
+          yarn install --frozen-lockfile
+          yarn playwright install --with-deps
+          yarn test
 
   test_system:
     needs:
@@ -85,8 +105,8 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: ${{ failure() }}
         with:
-          path: |
-            /home/runner/work/view_components/view_components/demo/tmp/capybara/
+          name: screenshots-ruby-${{ matrix.ruby }}-${{ matrix.gemfile }}
+          path: demo/tmp/capybara/
           if-no-files-found: ignore
           retention-days: 7
           overwrite: true

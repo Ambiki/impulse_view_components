@@ -103,7 +103,8 @@
     "docs:preview": "vitepress preview docs",
     "test": "web-test-runner",
     "test:exports": "node scripts/check-exports.mjs",
-    "test:watch": "yarn test --watch"
+    "test:watch": "yarn test --watch",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@ambiki/combobox": "^2.0.1",
