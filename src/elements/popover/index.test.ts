@@ -7,10 +7,11 @@ import './index';
 /**
  * Mirrors the structure of `app/components/impulse/popover_component.html.erb`. Only the parts the element reads are
  * reproduced here: the targets and the actions. The trigger is fixed at (100, 100) and sized 50×20, and the panel is
- * 80×40.
+ * 80×40. `content` goes inside the panel.
  */
-const POPOVER_HTML = `
-    <awc-popover data-action="keydown->awc-popover#handleKeydown">
+function popoverHtml({ attributes = '', content = '' } = {}) {
+  return `
+    <awc-popover ${attributes} data-action="keydown->awc-popover#handleKeydown">
       <style>
         .trigger { position: fixed; left: 100px; top: 100px; width: 50px; height: 20px; margin: 0; padding: 0; border: 0; }
         .panel { width: 80px; height: 40px; margin: 0; padding: 0; border: 0; }
@@ -18,19 +19,34 @@ const POPOVER_HTML = `
       <button type="button" class="trigger" data-target="awc-popover.button" data-action="click->awc-popover#toggle">
         Open
       </button>
-      <dialog class="panel" data-target="awc-popover.panel" data-action="close->awc-popover#handleClose">
+      <div class="panel" role="dialog" popover="manual" tabindex="-1" data-target="awc-popover.panel">
         <div class="arrow" data-target="awc-popover.arrow"></div>
-      </dialog>
+        ${content}
+      </div>
     </awc-popover>
   `;
+}
 
-async function popoverFixture() {
-  const el = await fixture<AwcPopoverElement>(POPOVER_HTML);
+async function popoverFixture(options: Parameters<typeof popoverHtml>[0] = {}) {
+  const el = await fixture<AwcPopoverElement>(popoverHtml(options));
   await whenInitialized(el);
   return el;
 }
 
 const EVENTS = ['show', 'shown', 'hide', 'hidden'] as const;
+
+/**
+ * Whether `element` has focus. Compared here rather than with `expect(document.activeElement).to.equal(element)`, whose
+ * failure message serializes both elements, which hangs the browser when one of them is `<body>`.
+ */
+function isFocused(element: Element | null) {
+  return element !== null && document.activeElement === element;
+}
+
+/** Whether `panel` is showing in the top layer. */
+function isPopoverOpen(panel: HTMLElement) {
+  return panel.matches(':popover-open');
+}
 
 /** Records, in order, the `awc-popover:*` open and close events `el` dispatches. */
 function recordEvents(el: AwcPopoverElement) {
@@ -98,7 +114,7 @@ describe('awc-popover', () => {
     }
 
     expect(rejections).to.eql([]);
-    expect(panel.open).to.equal(false);
+    expect(isPopoverOpen(panel)).to.equal(false);
     expect(button.getAttribute('aria-expanded')).to.equal('false');
   });
 
@@ -112,7 +128,7 @@ describe('awc-popover', () => {
       await settle();
 
       expect(el.open).to.equal(false);
-      expect(el.panel.open).to.equal(false);
+      expect(isPopoverOpen(el.panel)).to.equal(false);
       expect(events).to.eql(['show']);
     });
 
@@ -138,7 +154,7 @@ describe('awc-popover', () => {
       await settle();
 
       expect(el.open).to.equal(true);
-      expect(el.panel.open).to.equal(true);
+      expect(isPopoverOpen(el.panel)).to.equal(true);
       expect(events).to.eql(['hide']);
     });
 
@@ -195,15 +211,51 @@ describe('awc-popover', () => {
       preventNext(el, 'hide');
 
       el.open = true;
-      expect(el.panel.open).to.equal(true);
+      expect(isPopoverOpen(el.panel)).to.equal(true);
       expect(el.button.getAttribute('aria-expanded')).to.equal('true');
 
       el.removeAttribute('open');
       await settle();
 
-      expect(el.panel.open).to.equal(false);
+      expect(isPopoverOpen(el.panel)).to.equal(false);
       expect(el.button.getAttribute('aria-expanded')).to.equal('false');
       expect(events).to.eql(['shown', 'hidden']);
+    });
+
+    it('hides the popovers nested in it first, each emitting only `hidden`', async () => {
+      const outer = await popoverFixture({ content: popoverHtml({ content: '<button type="button">Inside</button>' }) });
+      const inner = outer.querySelector<AwcPopoverElement>('awc-popover')!;
+      await whenInitialized(inner);
+      outer.show();
+      inner.show();
+      const outerEvents = recordEvents(outer);
+      const innerEvents = recordEvents(inner);
+
+      await outer.hide();
+      await settle();
+
+      expect(isPopoverOpen(inner.panel)).to.equal(false);
+      expect(innerEvents).to.eql(['hidden']);
+      expect(outerEvents).to.eql(['hidden']);
+      expect(isFocused(outer.button)).to.equal(true);
+    });
+
+    it('hides another popover and the ones nested in it, each emitting only `hidden`', async () => {
+      const outer = await popoverFixture({ content: popoverHtml({ content: '<button type="button">Inside</button>' }) });
+      const inner = outer.querySelector<AwcPopoverElement>('awc-popover')!;
+      const el = await popoverFixture();
+      await whenInitialized(inner);
+      outer.show();
+      inner.show();
+      const outerEvents = recordEvents(outer);
+      const innerEvents = recordEvents(inner);
+
+      el.show();
+      await settle();
+
+      expect(innerEvents).to.eql(['hidden']);
+      expect(outerEvents).to.eql(['hidden']);
+      expect(el.open).to.equal(true);
     });
 
     it('hides the other open popovers when `open` is set', async () => {
@@ -216,7 +268,7 @@ describe('awc-popover', () => {
       await settle();
 
       expect(other.open).to.equal(false);
-      expect(other.panel.open).to.equal(false);
+      expect(isPopoverOpen(other.panel)).to.equal(false);
       expect(otherEvents).to.eql(['hidden']);
     });
 
@@ -300,7 +352,7 @@ describe('awc-popover', () => {
       await settle();
 
       expect(el.open).to.equal(true);
-      expect(el.panel.open).to.equal(true);
+      expect(isPopoverOpen(el.panel)).to.equal(true);
       expect(events).to.eql(['shown']);
     });
 
@@ -310,15 +362,11 @@ describe('awc-popover', () => {
         document.addEventListener(`awc-popover:${name}`, () => events.push(name), { once: true });
       }
 
-      const el = await fixture<AwcPopoverElement>(`
-        <awc-popover open>
-          <button type="button" data-target="awc-popover.button">Open</button>
-          <dialog data-target="awc-popover.panel"></dialog>
-        </awc-popover>
-      `);
-      await whenInitialized(el);
+      const el = await popoverFixture({ attributes: 'open', content: '<button type="button" autofocus>Inside</button>' });
 
-      expect(el.panel.open).to.equal(true);
+      expect(isPopoverOpen(el.panel)).to.equal(true);
+      // Starting out open isn't a change, so it doesn't take focus either.
+      expect(el.panel.contains(document.activeElement)).to.equal(false);
       expect(events).to.eql([]);
     });
 
@@ -332,7 +380,7 @@ describe('awc-popover', () => {
       await settle();
 
       expect(el.open).to.equal(true);
-      expect(panel.open).to.equal(false);
+      expect(isPopoverOpen(panel)).to.equal(false);
       expect(events).to.eql([]);
     });
 
@@ -347,7 +395,7 @@ describe('awc-popover', () => {
       parent.append(el);
       await whenInitialized(el);
 
-      expect(el.panel.open).to.equal(true);
+      expect(isPopoverOpen(el.panel)).to.equal(true);
       expect(el.button.getAttribute('aria-expanded')).to.equal('true');
       expect(events).to.eql([]);
     });
@@ -365,7 +413,7 @@ describe('awc-popover', () => {
       await whenInitialized(el);
 
       expect(el.open).to.equal(false);
-      expect(el.panel.open).to.equal(false);
+      expect(isPopoverOpen(el.panel)).to.equal(false);
       expect(events).to.eql([]);
     });
 
@@ -384,14 +432,14 @@ describe('awc-popover', () => {
 
     it('opens silently once it connects when shown before', async () => {
       const container = await fixture<HTMLElement>('<div></div>');
-      container.innerHTML = POPOVER_HTML;
+      container.innerHTML = popoverHtml();
       const el = container.querySelector('awc-popover')!;
       const events = recordEvents(el);
 
       el.show();
       await whenInitialized(el);
 
-      expect(el.panel.open).to.equal(true);
+      expect(isPopoverOpen(el.panel)).to.equal(true);
       expect(events).to.eql([]);
     });
 
@@ -403,8 +451,237 @@ describe('awc-popover', () => {
       el.open = true;
       el.setAttribute('open', 'open');
 
-      expect(el.panel.open).to.equal(true);
+      expect(isPopoverOpen(el.panel)).to.equal(true);
       expect(events).to.eql([]);
+    });
+  });
+
+  describe('focus', () => {
+    it('moves focus to the first focusable element when it opens', async () => {
+      const el = await popoverFixture({
+        content: '<p>Text</p><button type="button" class="first">First</button><button type="button">Second</button>',
+      });
+
+      el.show();
+
+      expect(isFocused(el.querySelector('.first'))).to.equal(true);
+    });
+
+    it('moves focus to the element with `autofocus` when it opens', async () => {
+      const el = await popoverFixture({
+        content: '<button type="button">First</button><button type="button" class="close" autofocus>Close</button>',
+      });
+
+      el.show();
+
+      expect(isFocused(el.querySelector('.close'))).to.equal(true);
+    });
+
+    it('returns focus to the trigger when it closes with focus inside', async () => {
+      const el = await popoverFixture({ content: '<button type="button">Inside</button>' });
+      el.show();
+
+      await el.hide();
+
+      expect(isFocused(el.button)).to.equal(true);
+    });
+
+    it('returns focus to the trigger when it closes with focus lost', async () => {
+      const el = await popoverFixture({ content: '<button type="button">Inside</button>' });
+      el.show();
+      // A press on something that can't take focus, such as plain text, moves focus to `<body>`.
+      (document.activeElement as HTMLElement).blur();
+
+      await el.hide();
+
+      expect(isFocused(el.button)).to.equal(true);
+    });
+
+    it('leaves focus where it is when it closes with focus elsewhere', async () => {
+      const el = await popoverFixture({ content: '<button type="button">Inside</button>' });
+      const input = document.createElement('input');
+      el.after(input);
+      el.show();
+      input.focus();
+
+      await el.hide();
+
+      expect(isFocused(input)).to.equal(true);
+    });
+
+    it('requests to hide when focus moves out of it', async () => {
+      const el = await popoverFixture({ content: '<button type="button">Inside</button>' });
+      const outside = document.createElement('button');
+      el.after(outside);
+      el.show();
+      const events = recordEvents(el);
+      preventNext(el, 'hide');
+
+      outside.focus();
+      await settle();
+      expect(el.open).to.equal(true);
+
+      el.querySelector<HTMLButtonElement>('.panel button')!.focus();
+      outside.focus();
+      await settle();
+
+      expect(el.open).to.equal(false);
+      expect(events).to.eql(['hide', 'hide', 'hidden']);
+    });
+
+    it('stays open when focus moves within it or to its trigger', async () => {
+      const el = await popoverFixture({ content: '<button type="button" class="a">A</button><button type="button" class="b">B</button>' });
+      el.show();
+      const events = recordEvents(el);
+
+      el.querySelector<HTMLButtonElement>('.b')!.focus();
+      el.button.focus();
+      await settle();
+
+      expect(el.open).to.equal(true);
+      expect(events).to.eql([]);
+    });
+
+    it('requests to hide once when a press outside moves focus', async () => {
+      const el = await popoverFixture({ content: '<button type="button">Inside</button>' });
+      const outside = document.createElement('input');
+      el.after(outside);
+      el.show();
+      const events = recordEvents(el);
+      preventNext(el, 'hide');
+
+      // A press focuses what it lands on between `pointerdown` and `click`.
+      outside.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+      outside.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      outside.focus();
+      outside.click();
+      await settle();
+
+      expect(el.open).to.equal(true);
+      expect(events).to.eql(['hide']);
+    });
+
+    it('keeps focus where it is, and stays open, when it connects open', async () => {
+      const container = await fixture<HTMLElement>('<div><input></div>');
+      const input = container.querySelector('input')!;
+      input.focus();
+
+      container.insertAdjacentHTML('beforeend', popoverHtml({ attributes: 'open', content: '<button type="button" autofocus>Inside</button>' }));
+      const el = container.querySelector('awc-popover')!;
+      const events = recordEvents(el);
+      await whenInitialized(el);
+      await settle();
+
+      expect(el.open).to.equal(true);
+      expect(isPopoverOpen(el.panel)).to.equal(true);
+      expect(isFocused(input)).to.equal(true);
+      expect(events).to.eql([]);
+    });
+
+    it('requests to hide when a press inside it moves focus out', async () => {
+      const el = await popoverFixture({ content: '<button type="button" class="inside">Inside</button>' });
+      const outside = document.createElement('button');
+      el.after(outside);
+      el.show();
+      const events = recordEvents(el);
+
+      // Such as a button inside that opens a dialog elsewhere on the page.
+      el.querySelector('.inside')!.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+      outside.focus();
+      await settle();
+
+      expect(el.open).to.equal(false);
+      expect(events).to.eql(['hide', 'hidden']);
+    });
+
+    it('requests to hide when focus moves out after a press that ended without a click', async () => {
+      const el = await popoverFixture({ content: '<button type="button">Inside</button>' });
+      const pressed = document.createElement('div');
+      const outside = document.createElement('button');
+      el.after(pressed, outside);
+      el.show();
+      const events = recordEvents(el);
+
+      // Such as a right-click, or a touch that turned into a scroll.
+      pressed.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+      outside.focus();
+      await settle();
+
+      expect(el.open).to.equal(false);
+      expect(events).to.eql(['hide', 'hidden']);
+    });
+
+    it('moves focus to the panel when it has nothing focusable', async () => {
+      const el = await popoverFixture({ content: '<p>Text</p>' });
+
+      el.show();
+
+      expect(isFocused(el.panel)).to.equal(true);
+    });
+  });
+
+  describe('stress', () => {
+    // The popover API was used once before and dropped after random Chromium crashes on toggle (#174). These open and
+    // close popovers as fast as each path allows, so that a crash fails the run.
+    const ROUNDS = 100;
+
+    it('survives rapid toggling through its trigger, `show` and `hide`, and `open`', async function () {
+      this.timeout(20000);
+      const el = await popoverFixture({ content: '<button type="button">Inside</button>' });
+
+      for (let i = 0; i < ROUNDS; i++) {
+        el.button.click();
+        el.button.click();
+        el.show();
+        el.hide();
+        el.open = true;
+        el.open = false;
+      }
+      await settle();
+
+      expect(el.open).to.equal(false);
+      expect(isPopoverOpen(el.panel)).to.equal(false);
+      expect(el.button.getAttribute('aria-expanded')).to.equal('false');
+    });
+
+    it('survives nested popovers and removal while open', async function () {
+      this.timeout(20000);
+      const container = await fixture<HTMLElement>('<div></div>');
+
+      for (let i = 0; i < ROUNDS; i++) {
+        container.innerHTML = popoverHtml({ content: popoverHtml({ content: '<button type="button">Inside</button>' }) });
+        const [outer, inner] = Array.from(container.querySelectorAll('awc-popover'));
+        await whenInitialized(outer);
+        await whenInitialized(inner);
+        outer.show();
+        inner.show();
+        if (i % 2 === 0) {
+          outer.remove();
+        } else {
+          await outer.hide();
+        }
+      }
+      await settle();
+
+      expect(document.querySelectorAll(':popover-open').length).to.equal(0);
+    });
+
+    it('survives toggling inside a modal dialog', async function () {
+      this.timeout(20000);
+      const dialog = await fixture<HTMLDialogElement>(`<dialog>${popoverHtml({ content: '<button type="button">Inside</button>' })}</dialog>`);
+      const el = dialog.querySelector('awc-popover')!;
+      await whenInitialized(el);
+      dialog.showModal();
+
+      for (let i = 0; i < ROUNDS; i++) {
+        el.button.click();
+        el.button.click();
+      }
+      await settle();
+      dialog.close();
+
+      expect(el.open).to.equal(false);
+      expect(isPopoverOpen(el.panel)).to.equal(false);
     });
   });
 
@@ -416,12 +693,12 @@ describe('awc-popover', () => {
 
     destination.append(el);
     await whenInitialized(el);
-    expect(el.panel.open).to.equal(true);
+    expect(isPopoverOpen(el.panel)).to.equal(true);
 
     el.button.click();
     await settle();
 
     expect(el.open).to.equal(false);
-    expect(el.panel.open).to.equal(false);
+    expect(isPopoverOpen(el.panel)).to.equal(false);
   });
 });

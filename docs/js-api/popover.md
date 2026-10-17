@@ -18,8 +18,8 @@ popover.open = true;
 
 ### `show`
 
-Shows the popover and hides any other open popover. Emits `awc-popover:shown`, but not the cancelable
-`awc-popover:show`.
+Shows the popover, hides any other open popover, and moves focus into it. Emits `awc-popover:shown`, but not the
+cancelable `awc-popover:show`.
 
 ```js
 popover.show();
@@ -27,7 +27,8 @@ popover.show();
 
 ### `hide`
 
-Hides the popover. Emits `awc-popover:hidden`, but not the cancelable `awc-popover:hide`.
+Hides the popover, and the popovers nested in it first. Focus returns to the trigger if it was inside the popover, or
+lost. Emits `awc-popover:hidden`, but not the cancelable `awc-popover:hide`.
 
 ```js
 await popover.hide();
@@ -77,9 +78,9 @@ emits a cancelable `show` or `hide`; calling `preventDefault()` on it stops the 
 Like the other events, `show` and `hide` bubble. A listener on an element that contains other popovers receives their
 `show` and `hide` too, so check `event.target` before preventing one.
 
-| Name                 | Bubbles | Cancelable | Description                                                                                                                                         |
-| ------               | ------- | ---------- | ------------                                                                                                                                        |
-| `awc-popover:show`   | `true`  | `true`     | Fires before the popover opens for a user action or `requestShow`. Opening the popover also asks the other open popovers to hide.                   |
-| `awc-popover:shown`  | `true`  | `false`    | Fires after the popover has opened.                                                                                                                 |
-| `awc-popover:hide`   | `true`  | `true`     | Fires before the popover closes for a user action or `requestHide`: its trigger, a close button, Escape, an outside click, or another popover opening. |
-| `awc-popover:hidden` | `true`  | `false`    | Fires after the popover has closed.                                                                                                                 |
+| Name                 | Bubbles | Cancelable | Description                                                                                                                                                                    |
+| ------               | ------- | ---------- | ------------                                                                                                                                                                   |
+| `awc-popover:show`   | `true`  | `true`     | Fires before the popover opens for a user action or `requestShow`. Opening the popover also asks the other open popovers to hide.                                              |
+| `awc-popover:shown`  | `true`  | `false`    | Fires after the popover has opened.                                                                                                                                            |
+| `awc-popover:hide`   | `true`  | `true`     | Fires before the popover closes for a user action or `requestHide`: its trigger, a close button, Escape, an outside click, focus moving out of it, or another popover opening. |
+| `awc-popover:hidden` | `true`  | `false`    | Fires after the popover has closed.                                                                                                                                            |

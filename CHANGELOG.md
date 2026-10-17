@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **Breaking:** `<awc-popover>` renders in the top layer as `<div role="dialog" popover="manual">` instead of a `<dialog>`. It moves focus in when it opens, returns it to the trigger when it closes, and closes when focus moves out. `handleClose` is gone, and a `<form method="dialog">` inside no longer closes it ([#308](https://github.com/Ambiki/impulse_view_components/pull/308))
 - `<awc-dialog>`'s `hide()` and `requestHide()` return a promise, like the popover's and the autocomplete's ([#305](https://github.com/Ambiki/impulse_view_components/pull/305))
 - **Breaking:** Removing an open `<awc-popover>`, `<awc-dialog>` or `<awc-autocomplete>` keeps `open`, so re-inserting it opens it again ([#303](https://github.com/Ambiki/impulse_view_components/pull/303))
 - **Breaking:** Open and close events now follow native elements: user actions, `requestShow()`, `requestHide()` and `toggle()` emit a cancelable `show` or `hide`, `show()` and `hide()` emit only `shown` or `hidden`, and connecting or removing an element emits nothing. Hand-written `<awc-dialog>` markup needs the `cancel->awc-dialog#handleCancel` and `close->awc-dialog#handleClose` actions for Escape ([#302](https://github.com/Ambiki/impulse_view_components/pull/302))
@@ -32,6 +33,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Fixed `<awc-popover>` having no accessible name: it's labelled by its title, or by its trigger ([#308](https://github.com/Ambiki/impulse_view_components/pull/308))
 - Fixed `useFloatingUI` and `useOutsideClick` wrapping an element's `disconnected` again every time it moved, which kept old positioners alive ([#307](https://github.com/Ambiki/impulse_view_components/pull/307))
 - Fixed setting or removing `open` on `<awc-popover>`, `<awc-dialog>` and `<awc-autocomplete>` not opening or closing them ([#303](https://github.com/Ambiki/impulse_view_components/pull/303))
 - Fixed an autocomplete that connects with `open` set not opening its listbox ([#303](https://github.com/Ambiki/impulse_view_components/pull/303))
