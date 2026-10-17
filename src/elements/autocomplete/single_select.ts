@@ -62,6 +62,10 @@ export default class SingleSelect implements SelectVariant {
     this.clear();
   }
 
+  isSelected(value: string) {
+    return this.hiddenField.value === value;
+  }
+
   // eslint-disable-next-line accessor-pairs
   set required(value: boolean) {
     this.autocomplete.input.required = value;

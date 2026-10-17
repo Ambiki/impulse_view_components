@@ -54,6 +54,8 @@ export interface SelectVariant {
    * clears whatever is selected.
    */
   removeValue: (value: string) => void;
+  /** Whether `value` is part of the selection. */
+  isSelected: (value: string) => boolean;
   set required(value: boolean);
 }
 
@@ -344,7 +346,8 @@ export default class AwcAutocompleteElement<
     if (!(option instanceof HTMLElement)) return;
 
     this.selectVariant.select(option);
-    this.emitEvent('commit', optionEventDetail(option));
+    const detail = optionEventDetail(option);
+    this.emitEvent('commit', { ...detail, selected: this.selectVariant.isSelected(detail.value) });
   }
 
   /**

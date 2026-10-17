@@ -270,13 +270,29 @@ because the form reset. `shown` and `hidden` fire after every open and close. Re
 Like `input` and `change`, `commit`, `clear`, `remove` and `reset` fire after the value has changed, and only when the
 user changed it or the form reset: `setValue`, `removeValue`, `clear` and `reset` called from code emit nothing.
 
+`commit` reports the option's state after the commit in `event.detail.selected`: `true` when the commit selected it,
+`false` when it deselected it in a multiple select.
+
+```js
+autocomplete.addEventListener('awc-autocomplete:commit', (event) => {
+  const { value, selected } = event.detail;
+  console.log(selected ? `Selected ${value}` : `Deselected ${value}`);
+});
+```
+
+::: warning
+In a single select, committing the option that is already selected emits `commit` with `selected: true`, although the
+value doesn't change. A future release will stop emitting it, as a native `<select>` emits no `change` when the user
+selects the option that is already selected ([#310](https://github.com/Ambiki/impulse_view_components/issues/310)).
+:::
+
 | Name                      | Bubbles | Cancelable | Description                                                                                                                                                                            |
 | ------------------------- | ------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `awc-autocomplete:show`   | `true`  | `true`     | Fires before the listbox opens for a user action or `requestShow`.                                                                                                                     |
 | `awc-autocomplete:shown`  | `true`  | `false`    | Fires after the listbox has opened.                                                                                                                                                    |
 | `awc-autocomplete:hide`   | `true`  | `true`     | Fires before the listbox closes for a user action or `requestHide`.                                                                                                                    |
 | `awc-autocomplete:hidden` | `true`  | `false`    | Fires after the listbox has closed.                                                                                                                                                    |
-| `awc-autocomplete:commit` | `true`  | `false`    | This event fires when an option is selected or deselected by clicking the option element. You can access the committed option, its value, and its text from the `event.detail` object. |
+| `awc-autocomplete:commit` | `true`  | `false`    | Fires when the user commits an option. `event.detail` carries the option, its value, its text, and `selected`: whether the option is selected after the commit.                        |
 | `awc-autocomplete:clear`  | `true`  | `false`    | This event fires when all the selected options have been deselected by clicking on the "Clear" button.                                                                                 |
 | `awc-autocomplete:remove` | `true`  | `false`    | This event fires when a tag has been removed. You can access the removed tag, its value, and its text from the `event.detail` object.                                                  |
 | `awc-autocomplete:reset`  | `true`  | `false`    | This event fires when the parent form has been reset.                                                                                                                                  |

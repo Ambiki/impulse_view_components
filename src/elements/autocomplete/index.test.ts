@@ -120,6 +120,12 @@ function pressInput(el: AwcAutocompleteElement) {
   el.input.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, buttons: 1 }));
 }
 
+/** Commits `option` the way a user does, by clicking it, and resolves with the `commit` event it emits. */
+function commit(el: AwcAutocompleteElement, option: HTMLElement) {
+  setTimeout(() => option.click());
+  return oneEvent(el, 'awc-autocomplete:commit');
+}
+
 function pressKey(el: AwcAutocompleteElement, key: string) {
   el.input.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
 }
@@ -440,6 +446,41 @@ describe('AwcAutocompleteElement', () => {
       expect(event.detail.target).to.equal(option);
       expect(event.detail.value).to.equal('1');
       expect(event.detail.text).to.equal('One');
+    });
+
+    it('should report a committed option as selected in a single select', async () => {
+      const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
+
+      el.show();
+      await nextFrame();
+      const event = await commit(el, el.options[0]);
+
+      expect(event.detail.selected).to.equal(true);
+    });
+
+    it('should emit a commit event for the option a single select already has selected', async () => {
+      const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
+      el.setValue('1');
+
+      el.show();
+      await nextFrame();
+      const event = await commit(el, el.options[0]);
+
+      expect(el.value).to.equal('1');
+      expect(event.detail.selected).to.equal(true);
+    });
+
+    it('should report whether a commit selected or deselected the option in a multiple select', async () => {
+      const el = await autocompleteFixture({ multiple: true, options: [{ value: '1', text: 'One' }] });
+
+      el.show();
+      await nextFrame();
+      const selectEvent = await commit(el, el.options[0]);
+      const deselectEvent = await commit(el, el.options[0]);
+
+      expect(selectEvent.detail.selected).to.equal(true);
+      expect(deselectEvent.detail.selected).to.equal(false);
+      expect(el.value).to.eql([]);
     });
 
     it('should emit a remove event carrying the tag, its value and its text', async () => {

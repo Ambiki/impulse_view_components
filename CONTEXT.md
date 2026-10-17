@@ -24,6 +24,24 @@ _Avoid_: Popup, panel, content
 Moving focus back to where an element was opened from, such as its trigger, when it closes while focus is inside it or lost.
 _Avoid_: Focus restore, refocus, final focus
 
+### Combobox
+
+**Active option**:
+The option the user has moved to, by keyboard or pointer, that a commit would choose. Distinct from a selected option.
+_Avoid_: Highlighted option, focused option, current option
+
+**Commit**:
+The user choosing the active option, by Enter, Tab or a click. What it does to the selection is decided by the element built on the combobox.
+_Avoid_: Pick, choose, submit
+
+**Selected option**:
+An option whose value is part of the element's value.
+_Avoid_: Chosen option, checked option
+
+**Deselect**:
+Taking an option's value out of the element's value, by committing it again in a multiple select or by removing its tag.
+_Avoid_: Unselect
+
 ### Events
 
 **Open**:
