@@ -8,6 +8,8 @@ interface FixtureOptions {
   src?: string;
   multiple?: boolean;
   open?: boolean;
+  /** The value a single select is rendered with. */
+  value?: string;
   options?: Array<{ value: string; text: string }>;
 }
 
@@ -15,7 +17,7 @@ interface FixtureOptions {
  * Mirrors the structure of `app/components/impulse/autocomplete_component.html.erb`. Only the parts the element reads
  * are reproduced here: the targets, the `data-behavior` hooks and the actions.
  */
-function autocompleteHtml({ src, multiple = false, open = false, options = [] }: FixtureOptions = {}) {
+function autocompleteHtml({ src, multiple = false, open = false, value = '', options = [] }: FixtureOptions = {}) {
   const optionsHtml = options
     .map(
       ({ value, text }) =>
@@ -32,7 +34,7 @@ function autocompleteHtml({ src, multiple = false, open = false, options = [] }:
            <input type="hidden" data-behavior="hidden-field">
          </div>
        </template>` :
-    `<input type="hidden" data-behavior="hidden-field" value="" data-text="">`;
+    `<input type="hidden" data-behavior="hidden-field" value="${value}" data-text="">`;
 
   return `
     <awc-autocomplete ${multiple ? 'multiple' : ''} ${open ? 'open' : ''} ${src ? `src="${src}"` : ''}
@@ -500,6 +502,87 @@ describe('AwcAutocompleteElement', () => {
       expect(event.detail.target).to.equal(tag);
       expect(event.detail.value).to.equal('1');
       expect(event.detail.text).to.equal('One');
+    });
+  });
+
+  describe('selection', () => {
+    const OPTIONS = [
+      { value: '1', text: 'One' },
+      { value: '2', text: 'Two' },
+    ];
+
+    /** The `aria-selected` of each option, in order. */
+    function ariaSelected(el: AwcAutocompleteElement) {
+      return el.options.map((option) => option.getAttribute('aria-selected'));
+    }
+
+    it('should mark only the committed option as selected in a single select', async () => {
+      const el = await autocompleteFixture({ options: OPTIONS });
+
+      el.show();
+      await nextFrame();
+      await commit(el, el.options[1]);
+      el.show();
+      await nextFrame();
+
+      expect(ariaSelected(el)).to.eql(['false', 'true']);
+    });
+
+    it('should keep the committed option marked when the listbox stays open in a single select', async () => {
+      const el = await autocompleteFixture({ options: OPTIONS });
+      el.addEventListener('awc-autocomplete:hide', (event) => event.preventDefault());
+
+      el.show();
+      await nextFrame();
+      await commit(el, el.options[0]);
+
+      expect(el.open).to.equal(true);
+      expect(ariaSelected(el)).to.eql(['true', 'false']);
+    });
+
+    it('should toggle the committed option in a multiple select', async () => {
+      const el = await autocompleteFixture({ multiple: true, options: OPTIONS });
+
+      el.show();
+      await nextFrame();
+      await commit(el, el.options[0]);
+      await commit(el, el.options[1]);
+      expect(ariaSelected(el)).to.eql(['true', 'true']);
+
+      await commit(el, el.options[0]);
+      expect(ariaSelected(el)).to.eql(['false', 'true']);
+    });
+
+    it('should mark the option a single select is rendered with as selected', async () => {
+      const el = await autocompleteFixture({ value: '2', options: OPTIONS });
+
+      expect(ariaSelected(el)).to.eql(['false', 'true']);
+    });
+
+    it('should mark the listbox, not the input, as multiselectable in a multiple select', async () => {
+      const el = await autocompleteFixture({ multiple: true, options: OPTIONS });
+
+      expect(el.listbox.getAttribute('aria-multiselectable')).to.equal('true');
+      expect(el.input.hasAttribute('aria-multiselectable')).to.equal(false);
+    });
+
+    it('should stop marking the listbox as multiselectable when it reconnects as a single select', async () => {
+      const el = await autocompleteFixture({ multiple: true, options: OPTIONS });
+      const parent = el.parentElement!;
+
+      el.remove();
+      el.multiple = false;
+      parent.append(el);
+      await whenInitialized(el);
+
+      expect(el.listbox.hasAttribute('aria-multiselectable')).to.equal(false);
+    });
+
+    it('should not mark a single select as multiselectable', async () => {
+      const el = await autocompleteFixture({ options: OPTIONS });
+
+      expect(el.listbox.hasAttribute('aria-multiselectable')).to.equal(false);
+      expect(el.input.hasAttribute('aria-multiselectable')).to.equal(false);
     });
   });
 });

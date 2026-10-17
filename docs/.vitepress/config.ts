@@ -112,6 +112,10 @@ exposed through a small JS API (Autocomplete, Dialog, Popover) and reusable hook
             link: '/js-api/autocomplete',
           },
           {
+            text: 'Combobox',
+            link: '/js-api/combobox',
+          },
+          {
             text: 'Dialog',
             link: '/js-api/dialog',
           },

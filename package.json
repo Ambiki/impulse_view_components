@@ -34,6 +34,14 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./dist/combobox": {
+      "types": "./dist/combobox/index.d.ts",
+      "default": "./dist/combobox/index.js"
+    },
+    "./dist/combobox/index.js": {
+      "types": "./dist/combobox/index.d.ts",
+      "default": "./dist/combobox/index.js"
+    },
     "./dist/elements/anchor": {
       "types": "./dist/elements/anchor/index.d.ts",
       "default": "./dist/elements/anchor/index.js"
@@ -107,7 +115,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ambiki/combobox": "^2.0.1",
     "@ambiki/impulse": "^2.0.0-rc.1",
     "@floating-ui/dom": "^1.7.4",
     "tabbable": "^6.4.0"

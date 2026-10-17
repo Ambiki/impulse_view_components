@@ -13,6 +13,7 @@ export default class MultipleSelect implements SelectVariant {
   }
 
   connected() {
+    this.autocomplete.listbox.setAttribute('aria-multiselectable', 'true');
     this.defaultSelectedValues = this.tags.reduce<Array<TDefaultSelectedValue>>((array, tag) => {
       const hiddenField = tag.querySelector<HTMLInputElement>('[data-behavior="hidden-field"]')!;
       const value = hiddenField.value;
@@ -20,10 +21,11 @@ export default class MultipleSelect implements SelectVariant {
       array.push({ value, text: hiddenField.getAttribute('data-text') || '' });
       return array;
     }, []);
+    this.autocomplete.markSelectedOptions();
   }
 
   start() {
-    this.selectOrDeselectOptions();
+    this.autocomplete.markSelectedOptions();
     if (this.firstActivableOption) {
       this.autocomplete.combobox.activate(this.firstActivableOption, { scroll: true });
     }
@@ -56,14 +58,7 @@ export default class MultipleSelect implements SelectVariant {
     this.insertTag(value, text.trim());
     this.toggleSelectedClass();
     this.required = this.autocomplete.required;
-    // Only select the option if autocomplete is open, otherwise leave it as it is because aria-selected will be
-    // "false" when the autocomplete is hidden.
-    if (!this.autocomplete.open) return;
-
-    const option = this.autocomplete.options.find(this.findByValue(value));
-    if (option) {
-      this.autocomplete.combobox.select(option);
-    }
+    this.markOption(value);
   }
 
   clear() {
@@ -76,10 +71,7 @@ export default class MultipleSelect implements SelectVariant {
     this.removeTag(value);
     this.toggleSelectedClass();
     this.required = this.autocomplete.required;
-    const option = this.autocomplete.options.find(this.findByValue(value));
-    if (option) {
-      this.autocomplete.combobox.deselect(option);
-    }
+    this.markOption(value);
   }
 
   isSelected(value: string) {
@@ -96,15 +88,10 @@ export default class MultipleSelect implements SelectVariant {
     this.autocomplete.input.required = true;
   }
 
-  private selectOrDeselectOptions() {
-    for (const option of this.autocomplete.options) {
-      const value = option.getAttribute('value');
-      if (value && this.selectedValues.has(value)) {
-        this.autocomplete.combobox.select(option);
-      } else {
-        this.autocomplete.combobox.deselect(option);
-      }
-    }
+  /** Marks the option holding `value` with `aria-selected`, from the selection. */
+  private markOption(value: string) {
+    const option = this.autocomplete.options.find(this.findByValue(value));
+    option?.setAttribute('aria-selected', String(this.isSelected(value)));
   }
 
   private insertTag(value: string, text: string): void {

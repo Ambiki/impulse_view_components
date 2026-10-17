@@ -96,6 +96,8 @@ const flatModules = ['hooks', 'helpers'].flatMap((group) =>
 const scriptSpecifiers = [
   pkg.name,
   subpath('dist', 'index.js'),
+  subpath('dist', 'combobox'),
+  subpath('dist', 'combobox', 'index.js'),
   ...elementDirs.map((name) => subpath('dist', 'elements', name)),
   ...elementDirs.map((name) => subpath('dist', 'elements', name, 'index.js')),
   ...flatModules.map(([group, name]) => subpath('dist', group, name)),

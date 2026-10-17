@@ -13,11 +13,13 @@ export default class SingleSelect implements SelectVariant {
   connected() {
     this.defaultValue = this.hiddenField.value;
     this.defaultText = this.hiddenField.getAttribute('data-text') ?? '';
+    this.autocomplete.listbox.removeAttribute('aria-multiselectable');
+    this.autocomplete.markSelectedOptions();
   }
 
   start() {
+    this.autocomplete.markSelectedOptions();
     if (this.selectedOption) {
-      this.autocomplete.combobox.select(this.selectedOption);
       this.autocomplete.combobox.activate(this.selectedOption, { scroll: true });
     } else {
       const firstOption = this.autocomplete.visibleOptions[0];
@@ -48,6 +50,7 @@ export default class SingleSelect implements SelectVariant {
     this.hiddenField.setAttribute('data-text', trimmedText);
     this.autocomplete.input.value = trimmedText;
     this.autocomplete.toggleSelectedClass(!!value);
+    this.autocomplete.markSelectedOptions();
   }
 
   clear() {
