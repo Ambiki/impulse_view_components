@@ -41,6 +41,12 @@ For example, to use the [Select](/components/select) component:
 import '@ambiki/impulse-view-components/autocomplete';
 ```
 
+To register every component at once, import the package itself:
+
+```js
+import '@ambiki/impulse-view-components';
+```
+
 ```scss
 @import '~@ambiki/impulse-view-components/dist/elements/autocomplete';
 ```

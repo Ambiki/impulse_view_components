@@ -87,5 +87,5 @@ _Avoid_: Change event
 ### Building blocks
 
 **Hook**:
-A function that gives an Impulse element a behavior while it stays connected, and removes the behavior when it disconnects (`useFloatingUI`, `useOutsideClick`, `useFocusOut`).
+A function that attaches to an Impulse element for as long as it stays connected, and cleans up after itself when the element disconnects (`useFloatingUI`, `useOutsideClick`, `useFocusOut`).
 _Avoid_: Mixin, behavior, controller

@@ -1,8 +1,7 @@
 /**
  * The positioning engine behind `useFloatingUI` and `<awc-anchor>`. It is internal: the package's `exports` map doesn't
- * list it, so `createPositioner` and its options can change freely. Its vocabulary types (`Placement`, `Side`,
- * `Strategy`, `Anchor`, `VirtualAnchor`, `AnchorRect`, `Dimension`, `DimensionOrBoth`, `FallbackStrategy`) are public,
- * though: each public face's import path exports the ones its API uses, so changing them changes the public API. See
+ * list it, so `createPositioner` and its options can change freely. Its exported types are public, though: each public
+ * face's import path re-exports the ones its API uses, so changing them changes the public API. See
  * docs/adr/0001-single-positioning-engine-two-faces.md and docs/adr/0008-one-import-path-per-thing.md.
  *
  * The engine owns the defaults that every public face shares (`positioningDefaults`), so the faces can't drift apart.

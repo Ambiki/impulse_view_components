@@ -91,7 +91,7 @@ const styledElementDirs = elementDirs.filter((name) =>
 const flatModules = ['hooks', 'helpers'].flatMap((group) =>
   fs
     .readdirSync(path.join(distDir, group))
-    .filter((file) => file.endsWith('.js'))
+    .filter((file) => file.endsWith('.js') && file !== 'index.js')
     .map((file) => [group, path.basename(file, '.js')]),
 );
 
@@ -127,6 +127,14 @@ const styleSpecifiers = [
 
 for (const specifier of [...scriptSpecifiers, ...styleSpecifiers]) {
   check(`node: ${specifier}`, () => resolvesToFile(specifier));
+}
+
+// The entry files behind the new paths stay off the `dist/` wildcards, which are frozen: anything they reach can never
+// change again.
+for (const specifier of ['hooks', 'helpers'].flatMap((group) => [subpath('dist', group, 'index'), subpath('dist', group, 'index.js')])) {
+  check(`node: ${specifier} is not exported`, () => {
+    assert.throws(() => import.meta.resolve(specifier), { code: 'ERR_PACKAGE_PATH_NOT_EXPORTED' });
+  });
 }
 
 // 2. Element stylesheets under the conditions sass-loader resolves with. Without them the

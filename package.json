@@ -95,6 +95,8 @@
       "types": "./dist/elements/*.d.ts",
       "default": "./dist/elements/*.js"
     },
+    "./dist/hooks/index": null,
+    "./dist/hooks/index.js": null,
     "./dist/hooks/*.js": {
       "types": "./dist/hooks/*.d.ts",
       "default": "./dist/hooks/*.js"
@@ -103,6 +105,8 @@
       "types": "./dist/hooks/*.d.ts",
       "default": "./dist/hooks/*.js"
     },
+    "./dist/helpers/index": null,
+    "./dist/helpers/index.js": null,
     "./dist/helpers/*.js": {
       "types": "./dist/helpers/*.d.ts",
       "default": "./dist/helpers/*.js"
