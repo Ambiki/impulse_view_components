@@ -18,6 +18,14 @@ _Avoid_: Reference, reference element, target
 The element positioned relative to an anchor and kept inside the viewport.
 _Avoid_: Popup, panel, content
 
+**Available space**:
+The room the viewport leaves a floating element where it is placed against its anchor, which the floating element may cap its size to.
+_Avoid_: Remaining space, free space, viewport space
+
+**Squashed**:
+Of a floating element capped to its available space: needing more room than that space gives it.
+_Avoid_: Clipped, cramped, overflowing
+
 ### Focus
 
 **Focus return**:

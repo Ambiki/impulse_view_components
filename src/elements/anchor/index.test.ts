@@ -189,6 +189,56 @@ describe('awc-anchor', () => {
     expect(floating.style.getPropertyValue('--awc-auto-size-width')).to.equal('');
   });
 
+  describe('when its size is capped by `auto-size`', () => {
+    /**
+     * Caps the element's height to its available space, as an app's stylesheet would. Its content grows to `height` once
+     * it is given the `grown` class.
+     */
+    async function cappedFixture(height: number) {
+      const fixtureParts = await anchorFixture('active auto-size="height" auto-size-padding="4"');
+      fixtureParts.container.insertAdjacentHTML(
+        'afterbegin',
+        `<style>
+          awc-anchor { max-height: var(--awc-auto-size-height); }
+          awc-anchor.grown { height: ${height}px; }
+        </style>`,
+      );
+      return fixtureParts;
+    }
+
+    it('flips once it is squashed and the other side fits it', async () => {
+      const { anchor, floating } = await cappedFixture(200);
+      // 130px below the anchor, and more than 200px above it.
+      moveAnchor(anchor, { top: `${window.innerHeight - 150}px` });
+      await floating.reposition();
+      expect(floating.getAttribute('x-placement')).to.equal('bottom');
+
+      // Grows past the 126px left below it, which squashes it to exactly that height.
+      floating.classList.add('grown');
+      await floating.reposition();
+
+      expect(floating.getAttribute('x-placement')).to.equal('top');
+    });
+
+    it('stays squashed on its side when neither side fits it and its side has more room', async () => {
+      const { anchor, floating } = await cappedFixture(window.innerHeight);
+      // 40px more below the anchor than above it.
+      const above = Math.floor((window.innerHeight - 20 - 40) / 2);
+      moveAnchor(anchor, { top: `${above}px` });
+      await floating.reposition();
+      expect(floating.getAttribute('x-placement')).to.equal('bottom');
+
+      floating.classList.add('grown');
+      await floating.reposition();
+      await settle();
+
+      expect(floating.getAttribute('x-placement')).to.equal('bottom');
+      expect(floating.style.getPropertyValue('--awc-auto-size-height')).to.equal(
+        `${window.innerHeight - above - 20 - 4}px`,
+      );
+    });
+  });
+
   it('points its `[data-arrow]` at the anchor', async () => {
     const { floating, arrow } = await anchorFixture();
     await floating.reposition();

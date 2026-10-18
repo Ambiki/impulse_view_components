@@ -32,7 +32,7 @@ Select allows a user to filter through a list of pre-defined sets of options and
 | required          | `false`   | Makes the select control a required field.                                                                                                        |
 | multiple          | `false`   | Whether multiple values can be selected or not.                                                                                                   |
 | clearable         | `true`    | Whether the clear button should be shown or not.                                                                                                  |
-| auto_size         | `false`   | If `true`, caps the listbox's height to the space between it and the edge of the viewport, so a long list scrolls instead of running off screen.  |
+| auto_size         | `true`    | If `true`, caps the listbox's height to the space between it and the edge of the viewport, so a long list scrolls instead of running off screen.  |
 | auto_size_padding | `4`       | The space in pixels to keep between the listbox and the edge of the viewport when `auto_size` is enabled.                                         |
 
 ## Examples

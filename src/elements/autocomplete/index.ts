@@ -106,9 +106,10 @@ export default class AwcAutocompleteElement<
 
   /**
    * If `true`, caps the listbox's height to the space between it and the edge of the viewport, so a long list scrolls
-   * instead of running off screen.
+   * instead of running off screen. The listbox is never taller than `--awc-autocomplete-listbox-max-height` either way.
+   * Set the `auto-size` attribute to `"false"` to turn it off.
    */
-  @property({ type: Boolean }) autoSize = false;
+  @property({ type: Boolean }) autoSize = true;
 
   /**
    * The space in pixels to keep between the listbox and the edge of the viewport when `autoSize` is enabled.
