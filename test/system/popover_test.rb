@@ -59,7 +59,7 @@ module Impulse
       assert_selector "[data-test-id='nested-popover']"
     end
 
-    test "closes the popover in order when there are nested popovers when clicking outside" do
+    test "closes the popover and the ones nested in it on one click outside" do
       visit_preview(:nested)
 
       click_on "Open"
@@ -70,10 +70,19 @@ module Impulse
 
       click_on "Outside button"
       refute_selector "[data-test-id='nested-popover']"
-      assert_selector "[data-test-id='parent-popover']"
-
-      click_on "Outside button"
       refute_selector "[data-test-id='parent-popover']"
+    end
+
+    test "closes only the nested popover on a click inside the parent popover" do
+      visit_preview(:nested)
+
+      click_on "Open"
+      click_on "Open nested popover"
+      assert_selector "[data-test-id='nested-popover']"
+
+      find("[data-test-id='parent-popover']").click
+      refute_selector "[data-test-id='nested-popover']"
+      assert_selector "[data-test-id='parent-popover']"
     end
 
     test "closes all nested popovers when clicking on the parent popover's trigger button" do

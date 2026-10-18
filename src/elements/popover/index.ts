@@ -41,6 +41,12 @@ export default class AwcPopoverElement extends OpenableElement {
   private opening = false;
 
   /**
+   * What the popover was last asked to hide for, so that one press asks it once. A press on the trigger or close button
+   * of the popover it is nested in asks it as the click lands, then asks that popover, which would ask it again.
+   */
+  private askedToHideFor?: Event;
+
+  /**
    * Called when the element is added to the DOM.
    */
   connected() {
@@ -63,21 +69,20 @@ export default class AwcPopoverElement extends OpenableElement {
 
     useOutsideClick(this, {
       boundaries: this.boundaries,
-      callback: (_event, target) => {
+      callback: (event, target) => {
         // Pressing a closed popover's trigger opens that popover, which asks this one to hide itself.
         if (this.isClosedPopoverTrigger(target)) return;
-        // Only proceed if element is open and nested popovers are hidden.
-        if (this.open && !this.hasNestedOpenPopovers) {
-          this.requestHide();
+        if (this.open && !this.parentAsksFor(target)) {
+          this.requestHide(event);
         }
       },
     });
 
     useFocusOut(this, {
       boundaries: this.boundaries,
-      callback: () => {
-        if (this.open && !this.opening) {
-          this.requestHide();
+      callback: (event, target) => {
+        if (this.open && !this.opening && !this.parentAsksFor(target)) {
+          this.requestHide(event);
         }
       },
     });
@@ -91,10 +96,11 @@ export default class AwcPopoverElement extends OpenableElement {
 
   /**
    * Shows or hides the popover as if its trigger was clicked, emitting a cancelable `show` or `hide` first.
+   * @param event - What made the popover toggle, if anything did.
    */
-  async toggle() {
+  async toggle(event?: Event) {
     if (this.opened) {
-      await this.requestHide();
+      await this.requestHide(event);
     } else {
       this.requestShow();
     }
@@ -115,6 +121,21 @@ export default class AwcPopoverElement extends OpenableElement {
         break;
       }
     }
+  }
+
+  /**
+   * Hides the popover as if the user asked to. Hiding it hides the popovers nested in it, so they are asked first,
+   * innermost first, and one that refuses keeps this one open too. Emits a cancelable `hide` for each.
+   * @param event - What made the popover hide, if anything did.
+   */
+  async requestHide(event?: Event): Promise<void> {
+    if (!this.opened || (event && event === this.askedToHideFor)) return;
+    for (const popover of this.nestedOpenPopovers.reverse()) {
+      await popover.requestHide(event);
+      if (popover.opened) return;
+    }
+    this.askedToHideFor = event;
+    await super.requestHide(event);
   }
 
   /**
@@ -208,8 +229,13 @@ export default class AwcPopoverElement extends OpenableElement {
     return Array.from(this.querySelectorAll<AwcPopoverElement>(this.identifier)).filter((popover) => popover.open);
   }
 
-  private get hasNestedOpenPopovers(): boolean {
-    return this.nestedOpenPopovers.length > 0;
+  /**
+   * Whether the popover this one is nested in is open, and `target` is outside it too. That popover then makes the
+   * request, and asks this one first.
+   */
+  private parentAsksFor(target: Node) {
+    const parent = this.parentElement?.closest<AwcPopoverElement>(this.identifier);
+    return !!parent?.open && !parent.boundaries.some((boundary) => boundary.contains(target));
   }
 
   private get arrowPadding() {

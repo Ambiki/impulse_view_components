@@ -60,9 +60,14 @@ function recordEvents(el: AwcPopoverElement) {
   return events;
 }
 
-/** Prevents the next `awc-popover:<name>` event `el` dispatches. */
+/** Prevents the next `awc-popover:<name>` event `el` dispatches, leaving alone those bubbling from popovers nested in it. */
 function preventNext(el: AwcPopoverElement, name: 'show' | 'hide') {
-  el.addEventListener(`awc-popover:${name}`, (event) => event.preventDefault(), { once: true });
+  const type = `awc-popover:${name}` as const;
+  el.addEventListener(type, function prevent(event) {
+    if (event.target !== el) return;
+    event.preventDefault();
+    el.removeEventListener(type, prevent);
+  });
 }
 
 /** Presses and releases `element` the way a mouse does, so that outside click handling sees the click too. */
@@ -618,6 +623,163 @@ describe('awc-popover', () => {
       el.show();
 
       expect(isFocused(el.panel)).to.equal(true);
+    });
+  });
+
+  describe('nested popovers', () => {
+    /**
+     * A popover with a popover nested in it, both open. The outer panel holds a close button, as the header renders one,
+     * and the nested panel holds a button.
+     */
+    async function nestedFixture() {
+      const outer = await popoverFixture({
+        content: `
+          <button type="button" class="outer-close" data-action="click->awc-popover#requestHide">Close</button>
+          ${popoverHtml({ content: '<button type="button" class="inner-button">Inner</button>' })}
+        `,
+      });
+      const inner = outer.querySelector<AwcPopoverElement>('awc-popover')!;
+      await whenInitialized(inner);
+      outer.show();
+      inner.show();
+      return { outer, inner };
+    }
+
+    /** Records, in order, the open and close events of each popover in `popovers`, named after its key. */
+    function recordEventsOf(popovers: Record<string, AwcPopoverElement>) {
+      const events: string[] = [];
+      for (const [key, el] of Object.entries(popovers)) {
+        for (const name of EVENTS) {
+          el.addEventListener(`awc-popover:${name}`, (event) => {
+            if (event.target === el) events.push(`${key}:${name}`);
+          });
+        }
+      }
+      return events;
+    }
+
+    it('requests to hide with the popovers nested in it on one outside click, innermost first', async () => {
+      const { outer, inner } = await nestedFixture();
+      const events = recordEventsOf({ outer, inner });
+
+      clickOutside();
+      await settle();
+
+      expect(inner.open).to.equal(false);
+      expect(outer.open).to.equal(false);
+      expect(events).to.eql(['inner:hide', 'inner:hidden', 'outer:hide', 'outer:hidden']);
+    });
+
+    it('stays open, and asks nothing more, when a popover nested in it refuses to hide on an outside click', async () => {
+      const { outer, inner } = await nestedFixture();
+      const events = recordEventsOf({ outer, inner });
+      preventNext(inner, 'hide');
+
+      clickOutside();
+      await settle();
+
+      expect(inner.open).to.equal(true);
+      expect(outer.open).to.equal(true);
+      expect(events).to.eql(['inner:hide']);
+    });
+
+    it('hides the popovers nested in it when it refuses to hide itself', async () => {
+      const { outer, inner } = await nestedFixture();
+      const events = recordEventsOf({ outer, inner });
+      preventNext(outer, 'hide');
+
+      clickOutside();
+      await settle();
+
+      expect(inner.open).to.equal(false);
+      expect(outer.open).to.equal(true);
+      expect(events).to.eql(['inner:hide', 'inner:hidden', 'outer:hide']);
+    });
+
+    it('asks a popover nested in it once when focus moves out of both', async () => {
+      const { outer, inner } = await nestedFixture();
+      const outside = document.createElement('button');
+      outer.after(outside);
+      const events = recordEventsOf({ outer, inner });
+      preventNext(inner, 'hide');
+
+      outside.focus();
+      await settle();
+      expect(outer.open).to.equal(true);
+      expect(events).to.eql(['inner:hide']);
+
+      inner.querySelector<HTMLButtonElement>('.inner-button')!.focus();
+      outside.focus();
+      await settle();
+
+      expect(inner.open).to.equal(false);
+      expect(outer.open).to.equal(false);
+      expect(events).to.eql(['inner:hide', 'inner:hide', 'inner:hidden', 'outer:hide', 'outer:hidden']);
+    });
+
+    it('asks a popover nested in it once when its close button is pressed', async () => {
+      const { outer, inner } = await nestedFixture();
+      const events = recordEventsOf({ outer, inner });
+      preventNext(inner, 'hide');
+
+      press(outer.querySelector<HTMLButtonElement>('.outer-close')!);
+      await settle();
+
+      expect(inner.open).to.equal(true);
+      expect(outer.open).to.equal(true);
+      expect(events).to.eql(['inner:hide']);
+    });
+
+    it('asks a popover nested in it once when its trigger is pressed', async () => {
+      const { outer, inner } = await nestedFixture();
+      const events = recordEventsOf({ outer, inner });
+      preventNext(inner, 'hide');
+
+      press(outer.button);
+      await settle();
+
+      expect(inner.open).to.equal(true);
+      expect(outer.open).to.equal(true);
+      expect(events).to.eql(['inner:hide']);
+    });
+
+    it('stays open on Escape and `requestHide` when a popover nested in it refuses to hide', async () => {
+      const { outer, inner } = await nestedFixture();
+      const events = recordEventsOf({ outer, inner });
+      // Such as a popover guarding unsaved input.
+      inner.addEventListener('awc-popover:hide', (event) => event.preventDefault());
+
+      outer.panel.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      await outer.requestHide();
+      await settle();
+
+      expect(inner.open).to.equal(true);
+      expect(outer.open).to.equal(true);
+      expect(events).to.eql(['inner:hide', 'inner:hide']);
+    });
+
+    it('hides only the innermost popover on Escape inside it', async () => {
+      const { outer, inner } = await nestedFixture();
+      const events = recordEventsOf({ outer, inner });
+
+      inner.panel.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      await settle();
+
+      expect(inner.open).to.equal(false);
+      expect(outer.open).to.equal(true);
+      expect(events).to.eql(['inner:hide', 'inner:hidden']);
+    });
+
+    it('stays open when a click inside it hides a popover nested in it', async () => {
+      const { outer, inner } = await nestedFixture();
+      const events = recordEventsOf({ outer, inner });
+
+      press(outer.panel);
+      await settle();
+
+      expect(inner.open).to.equal(false);
+      expect(outer.open).to.equal(true);
+      expect(events).to.eql(['inner:hide', 'inner:hidden']);
     });
   });
 

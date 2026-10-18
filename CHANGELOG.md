@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **Breaking:** One click outside, or focus moving out, closes `<awc-popover>` and the popovers nested in it together. A request to hide a popover asks its nested popovers first, and one that refuses keeps it open ([#324](https://github.com/Ambiki/impulse_view_components/pull/324))
 - **Breaking:** Elements no longer write their defaults to attributes when they connect, so a selector like `awc-popover[placement="bottom"]` stops matching. Read the property, or render the attribute explicitly. To turn off a Boolean that defaults to on, such as `flip`, set it to `"false"`: removing the attribute now turns it back on ([#321](https://github.com/Ambiki/impulse_view_components/pull/321))
 - **Breaking:** `<awc-autocomplete>` auto sizes by default (`auto-size="false"` or `auto_size: false` turns it off), and its listbox is never taller than `--awc-autocomplete-listbox-max-height`. Compiling the SCSS now needs Dart Sass ([#318](https://github.com/Ambiki/impulse_view_components/pull/318))
 - **Breaking:** `<awc-popover>` renders in the top layer as `<div role="dialog" popover="manual">` instead of a `<dialog>`. It moves focus in when it opens, returns it to the trigger when it closes, and closes when focus moves out. `handleClose` is gone, and a `<form method="dialog">` inside no longer closes it ([#308](https://github.com/Ambiki/impulse_view_components/pull/308))

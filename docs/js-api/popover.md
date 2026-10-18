@@ -45,7 +45,9 @@ popover.requestShow();
 
 ### `requestHide`
 
-Hides the popover as if the user asked to. Emits a cancelable `awc-popover:hide`, and does nothing if it is prevented.
+Hides the popover as if the user asked to. Emits a cancelable `awc-popover:hide` on each popover nested in it,
+innermost first, then on the popover itself. Stops at the first one prevented: that popover and the ones it is nested
+in stay open, and the ones nested in it that allowed it close.
 
 ```js
 await popover.requestHide();
@@ -53,7 +55,8 @@ await popover.requestHide();
 
 ### `toggle`
 
-Shows or hides the popover as if its trigger was clicked: calls `requestShow` or `requestHide`.
+Shows or hides the popover as if its trigger was clicked: calls `requestShow` or `requestHide`. Pass the event that
+toggled it, if any, so that a popover the same press already asked to hide isn't asked again.
 
 ```js
 await popover.toggle();
@@ -78,9 +81,9 @@ emits a cancelable `show` or `hide`; calling `preventDefault()` on it stops the 
 Like the other events, `show` and `hide` bubble. A listener on an element that contains other popovers receives their
 `show` and `hide` too, so check `event.target` before preventing one.
 
-| Name                 | Bubbles | Cancelable | Description                                                                                                                                                                    |
-| ------               | ------- | ---------- | ------------                                                                                                                                                                   |
-| `awc-popover:show`   | `true`  | `true`     | Fires before the popover opens for a user action or `requestShow`. Opening the popover also asks the other open popovers to hide.                                              |
-| `awc-popover:shown`  | `true`  | `false`    | Fires after the popover has opened.                                                                                                                                            |
-| `awc-popover:hide`   | `true`  | `true`     | Fires before the popover closes for a user action or `requestHide`: its trigger, a close button, Escape, an outside click, focus moving out of it, or another popover opening. |
-| `awc-popover:hidden` | `true`  | `false`    | Fires after the popover has closed.                                                                                                                                            |
+| Name                 | Bubbles | Cancelable | Description                                                                                                                                                                                                                   |
+| ------               | ------- | ---------- | ------------                                                                                                                                                                                                                  |
+| `awc-popover:show`   | `true`  | `true`     | Fires before the popover opens for a user action or `requestShow`. Opening the popover also asks the other open popovers to hide.                                                                                             |
+| `awc-popover:shown`  | `true`  | `false`    | Fires after the popover has opened.                                                                                                                                                                                           |
+| `awc-popover:hide`   | `true`  | `true`     | Fires before the popover closes for a user action or `requestHide`: its trigger, a close button, Escape, an outside click, focus moving out of it, another popover opening, or a request to hide the popover it is nested in. |
+| `awc-popover:hidden` | `true`  | `false`    | Fires after the popover has closed.                                                                                                                                                                                           |
