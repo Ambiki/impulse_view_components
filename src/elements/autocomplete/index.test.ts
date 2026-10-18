@@ -32,7 +32,7 @@ function optionsHtml(options: Option[]) {
   return options
     .map(
       ({ value, text }) =>
-        `<div role="option" tabindex="-1" value="${value}" data-text="${text}" aria-selected="false">${text}</div>`,
+        `<div role="option" id="option-${value}" tabindex="-1" value="${value}" data-text="${text}" aria-selected="false">${text}</div>`,
     )
     .join('');
 }
@@ -103,22 +103,31 @@ interface FetchStub {
   urls: string[];
   /** The signal of the most recent request. */
   signal?: AbortSignal;
+  /** Answers the most recent request with `body`, with the status `status`. */
+  respond: (body: string, status?: number) => void;
 }
 
 /**
- * Replaces `window.fetch` with a request that never resolves on its own and rejects with an `AbortError` once its
- * signal is aborted — the way a real request behaves. Aborting is the whole mechanism by which a response from an
- * abandoned source is prevented from landing, so there is no state in which a stale response can still arrive to
- * assert against.
+ * Replaces `window.fetch` with a request that resolves only when the test answers it with `respond`, and rejects with
+ * an `AbortError` once its signal is aborted — the way a real request behaves. Aborting is the whole mechanism by
+ * which a response from an abandoned source is prevented from landing, so there is no state in which a stale response
+ * can still arrive to assert against.
  */
 function stubFetch(): FetchStub {
-  const stub: FetchStub = { urls: [] };
+  let resolveLatest: ((response: Response) => void) | undefined;
+  const stub: FetchStub = {
+    urls: [],
+    respond(body, status = 200) {
+      resolveLatest?.(new Response(body, { status }));
+    },
+  };
 
   window.fetch = ((url: string, init?: RequestInit) => {
     stub.urls.push(url);
     stub.signal = init?.signal ?? undefined;
 
-    return new Promise<Response>((_resolve, reject) => {
+    return new Promise<Response>((resolve, reject) => {
+      resolveLatest = resolve;
       init?.signal?.addEventListener('abort', () => {
         reject(new DOMException('The operation was aborted.', 'AbortError'));
       });
@@ -127,6 +136,20 @@ function stubFetch(): FetchStub {
 
   return stub;
 }
+
+/** Waits for request number `count` to go out, once the debounce has passed. */
+async function requested(stub: FetchStub, count = 1) {
+  await waitUntil(() => stub.urls.length === count, `request ${count} was never made`);
+}
+
+/** Answers the latest request, and waits for the element to finish handling the response. */
+async function respond(el: AwcAutocompleteElement, stub: FetchStub, body: string, status?: number) {
+  const loadend = oneEvent(el, 'loadend');
+  stub.respond(body, status);
+  await loadend;
+}
+
+const AJAX_EVENTS = ['loadstart', 'load', 'error', 'loadend'] as const;
 
 /**
  * Waits for the positioning observers' callbacks to have run, so that only the change under test can reposition.
@@ -941,6 +964,124 @@ describe('AwcAutocompleteElement', () => {
       expect(el.activeOption).to.equal(null);
       expect(el.value).to.equal('');
       expect(events).to.eql([]);
+    });
+  });
+
+  describe('ajax fetching', () => {
+    /** Records, in order, the request events dispatched on `target`. */
+    function recordAjaxEvents(target: HTMLElement) {
+      const events: string[] = [];
+      for (const name of AJAX_EVENTS) {
+        target.addEventListener(name, () => events.push(name));
+      }
+      return events;
+    }
+
+    const valuesOf = (el: AwcAutocompleteElement) => el.options.map((option) => option.getAttribute('value'));
+
+    it('should request what is typed under `param`, keeping the query string of `src`', async () => {
+      const el = await autocompleteFixture({ src: '/fruits?scope=all', attributes: 'param="term"' });
+      const stub = stubFetch();
+
+      pressInput(el);
+      type(el, 'ap');
+      await requested(stub);
+
+      const url = new URL(stub.urls[0]);
+      expect(url.pathname + url.search).to.equal('/fruits?scope=all&term=ap');
+    });
+
+    it('should show the options the server responds with, marking `loading` until they arrive', async () => {
+      const el = await autocompleteFixture({ src: '/fruits' });
+      const stub = stubFetch();
+
+      pressInput(el);
+      await requested(stub);
+      expect(el).to.have.attribute('loading');
+
+      await respond(el, stub, optionsHtml(FRUITS));
+
+      expect(el).not.to.have.attribute('loading');
+      expect(valuesOf(el)).to.eql(['1', '2', '3']);
+      expect(el.activeOption).to.equal(el.options[0]);
+    });
+
+    it('should emit loadstart, load and loadend, without bubbling, around a request that succeeds', async () => {
+      const el = await autocompleteFixture({ src: '/fruits' });
+      const stub = stubFetch();
+      const events = recordAjaxEvents(el);
+      const bubbled = recordAjaxEvents(el.parentElement!);
+
+      pressInput(el);
+      await requested(stub);
+      await respond(el, stub, optionsHtml(FRUITS));
+
+      expect(events).to.eql(['loadstart', 'load', 'loadend']);
+      expect(bubbled).to.eql([]);
+    });
+
+    it('should mark `error` and emit error when the request fails, until it searches again', async () => {
+      const el = await autocompleteFixture({ src: '/fruits' });
+      const stub = stubFetch();
+      const events = recordAjaxEvents(el);
+
+      pressInput(el);
+      await requested(stub);
+      await respond(el, stub, 'Server error', 500);
+
+      expect(el).to.have.attribute('error');
+      expect(el).not.to.have.attribute('loading');
+      expect(events).to.eql(['loadstart', 'error', 'loadend']);
+
+      type(el, 'ap');
+      expect(el).not.to.have.attribute('error');
+    });
+
+    it('should show the options for an empty query again when it reopens, without another request', async () => {
+      const el = await autocompleteFixture({ src: '/fruits' });
+      const stub = stubFetch();
+      pressInput(el);
+      await requested(stub);
+      await respond(el, stub, optionsHtml(FRUITS));
+      type(el, 'ap');
+      await requested(stub, 2);
+      await respond(el, stub, optionsHtml([FRUITS[0]]));
+      await el.hide();
+
+      pressInput(el);
+      // Longer than the 300ms debounce, so a request would have been made by now.
+      await aTimeout(400);
+
+      expect(stub.urls).to.have.length(2);
+      expect(valuesOf(el)).to.eql(['1', '2', '3']);
+    });
+
+    it('should abort the request for an older query when a newer one goes out', async () => {
+      const el = await autocompleteFixture({ src: '/fruits' });
+      const stub = stubFetch();
+      pressInput(el);
+      await requested(stub);
+      const olderSignal = stub.signal!;
+
+      type(el, 'ch');
+      await requested(stub, 2);
+      await respond(el, stub, optionsHtml([FRUITS[2]]));
+
+      expect(olderSignal.aborted).to.equal(true);
+      expect(valuesOf(el)).to.eql(['3']);
+      expect(el).not.to.have.attribute('error');
+    });
+
+    it('should select and activate the selected values among the fetched options in a multiple select', async () => {
+      const el = await autocompleteFixture({ src: '/fruits', multiple: true, selected: [FRUITS[1]] });
+      const stub = stubFetch();
+
+      pressInput(el);
+      await requested(stub);
+      await respond(el, stub, optionsHtml(FRUITS));
+
+      expect(el.options.map((option) => option.getAttribute('aria-selected'))).to.eql(['false', 'true', 'false']);
+      expect(el.activeOption).to.equal(el.options[1]);
     });
   });
 
