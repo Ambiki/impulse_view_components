@@ -2,6 +2,9 @@
 
 Listen for clicks that occur outside the defined `boundaries`.
 
+A click counts when the press that starts it, with the primary button, lands outside every boundary. A click without a
+press, such as from Enter or `click()`, doesn't count, and neither does one that another handler has prevented.
+
 ::: tip Pair it with `useFocusOut`
 Keyboard users leave a popover with Tab, not a click. Use [`useFocusOut`](./use-focus-out.md), with the same
 `boundaries`, to catch focus moving out.
