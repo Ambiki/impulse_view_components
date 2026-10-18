@@ -1,0 +1,4 @@
+// The `base` import path (see docs/adr/0008-one-import-path-per-thing.md): what every element stylesheet needs, imported
+// once before them. It expects Bootstrap 4's Sass functions, variables and mixins to be loaded already.
+@import './variables';
+@import './base';

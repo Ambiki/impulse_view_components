@@ -34,7 +34,7 @@ jobs:
       - name: Check package exports
         run: |
           yarn install --frozen-lockfile
-          NODE_ENV=production yarn build:js
+          yarn build:prod
           yarn test:exports
 
   lint_ruby:

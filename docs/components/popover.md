@@ -142,9 +142,11 @@ import '@ambiki/impulse-view-components/popover';
 ```
 
 ```scss
-@import '~@ambiki/impulse-view-components/dist/elements/popover';
+@import '@ambiki/impulse-view-components/popover';
 ```
 :::
+
+The styles need Bootstrap's Sass and the base styles loaded first. See [Import the styles](/introduction/getting-started#import-the-styles).
 
 ## JS API
 [Read here](../js-api/popover.md).

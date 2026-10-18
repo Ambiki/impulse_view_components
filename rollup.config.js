@@ -40,7 +40,7 @@ export default [
           copy({
             patterns: '**/*.scss',
             rootDir: './src',
-            exclude: ['node_modules', 'index.scss'],
+            exclude: ['node_modules', 'precompiled.scss'],
           }),
         ] :
         []),

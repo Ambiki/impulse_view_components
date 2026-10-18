@@ -1,14 +1,7 @@
-@import 'bootstrap/scss/functions';
-@import 'bootstrap/scss/variables';
-@import 'bootstrap/scss/mixins';
-@import 'bootstrap/scss/root';
+// All styles, behind the bare import path's `sass` condition (see docs/adr/0008-one-import-path-per-thing.md). It expects
+// Bootstrap 4's Sass functions, variables and mixins to be loaded already.
+@import './styles/index';
 
-// Variables
-@import './styles/variables';
-// Base
-@import './styles/base';
-
-// Components
 @import './elements/autocomplete/index';
 @import './elements/dialog/index';
 @import './elements/popover/index';

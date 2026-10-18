@@ -33,6 +33,8 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "sass": "./dist/index.scss",
+      "style": "./dist/styles.css",
       "default": "./dist/index.js"
     },
     "./package.json": "./package.json",
@@ -42,14 +44,17 @@
     },
     "./autocomplete": {
       "types": "./dist/elements/autocomplete/index.d.ts",
+      "sass": "./dist/elements/autocomplete/index.scss",
       "default": "./dist/elements/autocomplete/index.js"
     },
     "./dialog": {
       "types": "./dist/elements/dialog/index.d.ts",
+      "sass": "./dist/elements/dialog/index.scss",
       "default": "./dist/elements/dialog/index.js"
     },
     "./popover": {
       "types": "./dist/elements/popover/index.d.ts",
+      "sass": "./dist/elements/popover/index.scss",
       "default": "./dist/elements/popover/index.js"
     },
     "./hooks": {
@@ -60,6 +65,10 @@
       "types": "./dist/helpers/index.d.ts",
       "default": "./dist/helpers/index.js"
     },
+    "./base": {
+      "sass": "./dist/styles/index.scss"
+    },
+    "./styles.css": "./dist/styles.css",
     "./dist/index.js": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
@@ -115,6 +124,7 @@
       "types": "./dist/helpers/*.d.ts",
       "default": "./dist/helpers/*.js"
     },
+    "./dist/styles/index.scss": null,
     "./dist/styles/*": "./dist/styles/*"
   },
   "types": "./dist/index.d.ts",
@@ -122,12 +132,13 @@
     "dist"
   ],
   "scripts": {
-    "build": "concurrently \"yarn build:js\" \"yarn build:css && yarn prefix:css\"",
-    "build:css": "sass -I node_modules --style=compressed --source-map --embed-source-map --precision=6 src/index.scss app/assets/dist/impulse_view_components.css",
+    "build": "concurrently \"yarn build:js\" \"yarn build:css && yarn prefix:css && yarn copy:css\"",
+    "build:css": "sass -I node_modules --style=compressed --source-map --embed-source-map --precision=6 src/precompiled.scss app/assets/dist/impulse_view_components.css",
     "build:js": "rollup --config rollup.config.js",
     "build:prod": "NODE_ENV=production yarn build",
     "build:watch": "concurrently \"yarn build:js --watch\" \"yarn build:css --watch\"",
     "clean": "rm -rf dist app/assets/dist",
+    "copy:css": "mkdir -p dist && sed \"/sourceMappingURL=/d\" app/assets/dist/impulse_view_components.css > dist/styles.css",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "prefix:css": "postcss --replace ./app/assets/dist/impulse_view_components.css --use autoprefixer --map",
