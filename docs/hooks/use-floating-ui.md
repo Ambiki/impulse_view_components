@@ -13,7 +13,7 @@ closes a floating element. If you only need something positioned from markup, us
 
 ```ts
 import { ImpulseElement, registerElement, target } from '@ambiki/impulse';
-import useFloatingUI from '@ambiki/impulse-view-components/dist/hooks/use_floating_ui';
+import { useFloatingUI } from '@ambiki/impulse-view-components/hooks';
 
 @registerElement('pop-over')
 export default class PopoverElement extends ImpulseElement {

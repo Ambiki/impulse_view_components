@@ -263,6 +263,9 @@ export default class AwcPopoverElement extends OpenableElement {
   }
 }
 
+export { AwcPopoverElement };
+export type { Placement, Side, Strategy } from 'src/internal/positioning';
+
 declare global {
   interface Window {
     AwcPopoverElement: typeof AwcPopoverElement;

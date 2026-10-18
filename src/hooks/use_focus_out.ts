@@ -2,7 +2,7 @@ import type { ImpulseElement } from '@ambiki/impulse';
 import type { Boundary } from 'src/hooks/use_outside_click';
 import onDisconnect from 'src/internal/on_disconnect';
 
-interface UseFocusOutOptions {
+export interface UseFocusOutOptions {
   boundaries: Boundary[];
   callback: (event: FocusEvent, target: HTMLElement) => void;
 }

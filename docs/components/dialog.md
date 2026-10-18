@@ -158,7 +158,7 @@ The footer of the dialog.
 
 ::: code-group
 ```js
-import '@ambiki/impulse-view-components/dist/elements/dialog';
+import '@ambiki/impulse-view-components/dialog';
 ```
 
 ```scss

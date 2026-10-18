@@ -3,7 +3,7 @@ import onDisconnect from 'src/internal/on_disconnect';
 
 export type Boundary = Element | null;
 
-interface UseOutsideClickOptions {
+export interface UseOutsideClickOptions {
   boundaries: Boundary[];
   callback: (event: Event, element: HTMLElement) => void;
 }

@@ -85,7 +85,7 @@ flips there.
 ## Imports
 
 ```js
-import '@ambiki/impulse-view-components/dist/elements/anchor';
+import '@ambiki/impulse-view-components/anchor';
 ```
 
 ## JS API

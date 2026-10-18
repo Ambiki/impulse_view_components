@@ -12,8 +12,7 @@ popover. Use it to close a floating element that keyboard users have left, so it
 
 ```ts
 import { ImpulseElement, registerElement, target } from '@ambiki/impulse';
-import useFocusOut from '@ambiki/impulse-view-components/dist/hooks/use_focus_out';
-import useOutsideClick from '@ambiki/impulse-view-components/dist/hooks/use_outside_click';
+import { useFocusOut, useOutsideClick } from '@ambiki/impulse-view-components/hooks';
 
 @registerElement('pop-over')
 export default class PopoverElement extends ImpulseElement {

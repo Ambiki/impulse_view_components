@@ -138,7 +138,7 @@ The body of the popover.
 
 ::: code-group
 ```js
-import '@ambiki/impulse-view-components/dist/elements/popover';
+import '@ambiki/impulse-view-components/popover';
 ```
 
 ```scss

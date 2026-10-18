@@ -599,6 +599,8 @@ export type AjaxAutocompleteElement<Mode extends SelectionMode = SelectionMode> 
   'ajax'
 >;
 
+export { AwcAutocompleteElement };
+
 declare global {
   interface Window {
     AwcAutocompleteElement: typeof AwcAutocompleteElement;

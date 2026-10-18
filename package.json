@@ -24,12 +24,42 @@
     "rails",
     "components"
   ],
+  "sideEffects": [
+    "./dist/index.js",
+    "./dist/elements/*/index.js",
+    "*.scss",
+    "*.css"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
     "./package.json": "./package.json",
+    "./anchor": {
+      "types": "./dist/elements/anchor/index.d.ts",
+      "default": "./dist/elements/anchor/index.js"
+    },
+    "./autocomplete": {
+      "types": "./dist/elements/autocomplete/index.d.ts",
+      "default": "./dist/elements/autocomplete/index.js"
+    },
+    "./dialog": {
+      "types": "./dist/elements/dialog/index.d.ts",
+      "default": "./dist/elements/dialog/index.js"
+    },
+    "./popover": {
+      "types": "./dist/elements/popover/index.d.ts",
+      "default": "./dist/elements/popover/index.js"
+    },
+    "./hooks": {
+      "types": "./dist/hooks/index.d.ts",
+      "default": "./dist/hooks/index.js"
+    },
+    "./helpers": {
+      "types": "./dist/helpers/index.d.ts",
+      "default": "./dist/helpers/index.js"
+    },
     "./dist/index.js": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
@@ -127,6 +157,7 @@
     "autoprefixer": "^10.6.1",
     "bootstrap": "4.6",
     "concurrently": "^10.0.6",
+    "esbuild": "^0.28.2",
     "eslint": "^10.12.0",
     "eslint-plugin-format": "^2.0.1",
     "globby": "^16.2.4",

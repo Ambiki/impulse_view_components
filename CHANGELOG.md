@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Shorter import paths: `/<element>` (such as `/popover`), `/hooks` and `/helpers`, which export by name and with the types their APIs use. Bundlers drop what an app doesn't import ([#330](https://github.com/Ambiki/impulse_view_components/pull/330))
 - `toggle()` on `<awc-popover>` takes the event that toggled it, so that one press asks each popover to hide once ([#324](https://github.com/Ambiki/impulse_view_components/pull/324))
 - `useFocusOut`, a hook that calls back when focus moves to an element outside its boundaries, such as on Tab past a popover's last element ([#322](https://github.com/Ambiki/impulse_view_components/pull/322))
 - `keep-flipped` on `<awc-anchor>` (`keep_flipped:` on `Impulse::AnchorComponent`) and `keepFlipped` on `useFloatingUI`, which keep the side a floating element flipped to while it's positioned ([#320](https://github.com/Ambiki/impulse_view_components/pull/320))
@@ -33,6 +34,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Breaking:** Renamed `useFloatingUI`'s `referenceElement` and `popupElement` options to `anchorElement` and `floatingElement` ([#278](https://github.com/Ambiki/impulse_view_components/pull/278))
 - **Breaking:** `<awc-anchor>`'s `start()` and `stop()` now turn `active` on and off ([#277](https://github.com/Ambiki/impulse_view_components/pull/277))
 - **Breaking:** `useFloatingUI` and `<awc-anchor>` now share their defaults: `bottom` placement, with flip and shift on. Hook callers that omit `placement` get `bottom` instead of `bottom-start`, and `<awc-anchor>` now shifts unless `shift` is `false` ([#276](https://github.com/Ambiki/impulse_view_components/pull/276))
+
+### Deprecated
+
+- Import paths under `@ambiki/impulse-view-components/dist/`. They keep working; see Getting Started for the paths that replace them ([#330](https://github.com/Ambiki/impulse_view_components/pull/330))
 
 ### Removed
 

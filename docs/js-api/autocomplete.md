@@ -36,7 +36,7 @@ of narrowing:
 import type {
   MultipleAutocompleteElement,
   SingleAutocompleteElement,
-} from '@ambiki/impulse-view-components/dist/elements/autocomplete';
+} from '@ambiki/impulse-view-components/autocomplete';
 
 const multi = document.querySelector<MultipleAutocompleteElement>('awc-autocomplete')!;
 multi.value; // string[]
@@ -52,7 +52,7 @@ If you already know the source at the call site, you can also pass the exported 
 import type {
   AjaxAutocompleteElement,
   LocalAutocompleteElement,
-} from '@ambiki/impulse-view-components/dist/elements/autocomplete';
+} from '@ambiki/impulse-view-components/autocomplete';
 
 const ajax = document.querySelector<AjaxAutocompleteElement>('awc-autocomplete')!;
 ajax.setValue('1', 'One'); // text is required

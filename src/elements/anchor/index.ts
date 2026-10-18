@@ -189,6 +189,9 @@ export default class AwcAnchorElement extends ImpulseElement {
   }
 }
 
+export { AwcAnchorElement };
+export type { Dimension, DimensionOrBoth, FallbackStrategy, Placement, Side, Strategy } from 'src/internal/positioning';
+
 declare global {
   interface Window {
     AwcAnchorElement: typeof AwcAnchorElement;

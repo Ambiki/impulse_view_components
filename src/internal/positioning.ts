@@ -1,8 +1,9 @@
 /**
  * The positioning engine behind `useFloatingUI` and `<awc-anchor>`. It is internal: the package's `exports` map doesn't
- * list it, so `createPositioner` and its options can change freely. Its vocabulary types (`Placement`, `Strategy`,
- * `Anchor`, `DimensionOrBoth`, `FallbackStrategy`) do reach apps, though, through the public faces' declarations, so
- * changing those changes the public API. See docs/adr/0001-single-positioning-engine-two-faces.md.
+ * list it, so `createPositioner` and its options can change freely. Its vocabulary types (`Placement`, `Side`,
+ * `Strategy`, `Anchor`, `VirtualAnchor`, `AnchorRect`, `Dimension`, `DimensionOrBoth`, `FallbackStrategy`) are public,
+ * though: each public face's import path exports the ones its API uses, so changing them changes the public API. See
+ * docs/adr/0001-single-positioning-engine-two-faces.md and docs/adr/0008-one-import-path-per-thing.md.
  *
  * The engine owns the defaults that every public face shares (`positioningDefaults`), so the faces can't drift apart.
  * Options are read through a function on every reposition, so a face can reflect changes (e.g. to an attribute) without
@@ -12,7 +13,7 @@ import type { FlipOptions, Middleware, OffsetOptions, Padding, ShiftOptions } fr
 import { arrow, autoUpdate, computePosition, flip, offset, shift, size } from '@floating-ui/dom';
 
 /** A side of the anchor. */
-type Side = 'top' | 'right' | 'bottom' | 'left';
+export type Side = 'top' | 'right' | 'bottom' | 'left';
 
 /** Where the floating element sits against its anchor: a side, optionally aligned to that side's start or end. */
 export type Placement = Side | `${Side}-${'start' | 'end'}`;
@@ -21,7 +22,7 @@ export type Placement = Side | `${Side}-${'start' | 'end'}`;
 export type Strategy = 'absolute' | 'fixed';
 
 /** A rectangle in viewport coordinates. */
-interface AnchorRect {
+export interface AnchorRect {
   x: number;
   y: number;
   width: number;

@@ -118,6 +118,8 @@ export default class AwcDialogElement extends OpenableElement {
   }
 }
 
+export { AwcDialogElement };
+
 declare global {
   interface Window {
     AwcDialogElement: typeof AwcDialogElement;
