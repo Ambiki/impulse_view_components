@@ -34,6 +34,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Fixed Enter committing an option hidden by the query in `<awc-autocomplete>`, after pasting text that matches no option ([#314](https://github.com/Ambiki/impulse_view_components/pull/314))
 - Fixed a single select `<awc-autocomplete>` leaving the old option marked selected when its value changed while open ([#314](https://github.com/Ambiki/impulse_view_components/pull/314))
 - Fixed `<awc-popover>` having no accessible name: it's labelled by its title, or by its trigger ([#308](https://github.com/Ambiki/impulse_view_components/pull/308))
 - Fixed `useFloatingUI` and `useOutsideClick` wrapping an element's `disconnected` again every time it moved, which kept old positioners alive ([#307](https://github.com/Ambiki/impulse_view_components/pull/307))

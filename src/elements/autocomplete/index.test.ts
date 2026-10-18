@@ -917,6 +917,33 @@ describe('AwcAutocompleteElement', () => {
     });
   });
 
+  describe('local filtering', () => {
+    it('should activate the first option that matches what is typed', async () => {
+      const el = await autocompleteFixture({ options: FRUITS });
+      pressInput(el);
+
+      type(el, 'ERR');
+
+      expect(el.visibleOptions).to.eql([el.options[2]]);
+      expect(el.activeOption).to.equal(el.options[2]);
+    });
+
+    it('should commit nothing on Enter when no option matches', async () => {
+      const el = await autocompleteFixture({ options: FRUITS });
+      pressInput(el);
+      expect(el.activeOption).to.equal(el.options[0]);
+      const events = recordEvents(el, VALUE_EVENTS);
+
+      // Typed without a keydown the combobox sees, as pasting does.
+      type(el, 'Fig');
+      pressKey(el, 'Enter');
+
+      expect(el.activeOption).to.equal(null);
+      expect(el.value).to.equal('');
+      expect(events).to.eql([]);
+    });
+  });
+
   describe('closing after typing', () => {
     it('should put the selected option\'s text back in a single select', async () => {
       const el = await autocompleteFixture({ options: FRUITS, selected: [FRUITS[0]] });
