@@ -19,6 +19,7 @@ export interface UseFloatingUIOptions {
   offsetOptions?: OffsetOptions;
   placement?: Placement;
   flipOptions?: FlipOptions;
+  keepFlipped?: boolean;
   shiftOptions?: ShiftOptions;
   strategy?: Strategy;
   sync?: DimensionOrBoth;
@@ -36,6 +37,7 @@ function toPositioningOptions({
   placement,
   flipOptions,
   shiftOptions,
+  keepFlipped,
   strategy,
   sync,
   autoSize,
@@ -45,6 +47,7 @@ function toPositioningOptions({
     anchor: anchorElement,
     floating: floatingElement,
     placement,
+    keepFlipped,
     strategy,
     sync,
     autoSize,

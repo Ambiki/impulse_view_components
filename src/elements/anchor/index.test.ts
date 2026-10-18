@@ -239,6 +239,124 @@ describe('awc-anchor', () => {
     });
   });
 
+  describe('with `keep-flipped`', () => {
+    /**
+     * An element that is 200px tall while it has the `tall` class, against an anchor with 130px below it and far more
+     * above it, so it flips above the anchor while tall and fits below it once it shrinks.
+     */
+    async function flippedFixture(attributes: string) {
+      const fixtureParts = await anchorFixture(attributes);
+      fixtureParts.container.insertAdjacentHTML('afterbegin', '<style>awc-anchor.tall { height: 200px; }</style>');
+      fixtureParts.floating.classList.add('tall');
+      moveAnchor(fixtureParts.anchor, { top: `${window.innerHeight - 150}px` });
+      await fixtureParts.floating.reposition();
+      expect(fixtureParts.floating.getAttribute('x-placement')).to.equal('top');
+      return fixtureParts;
+    }
+
+    it('keeps the side it flipped to once it shrinks', async () => {
+      const { floating } = await flippedFixture('active keep-flipped');
+
+      floating.classList.remove('tall');
+      await floating.reposition();
+
+      expect(floating.getAttribute('x-placement')).to.equal('top');
+    });
+
+    it('keeps the placement it flipped to among its own fallback placements', async () => {
+      const { container, anchor, floating } = await anchorFixture(
+        `active keep-flipped placement="bottom-start" fallback-placements='["right"]'`,
+      );
+      container.insertAdjacentHTML('afterbegin', '<style>awc-anchor.tall { height: 120px; }</style>');
+      floating.classList.add('tall');
+      // 110px below the anchor, too little for it, and room for it to the right whether centred or aligned to the start.
+      moveAnchor(anchor, { top: `${window.innerHeight - 130}px` });
+      await floating.reposition();
+      expect(floating.getAttribute('x-placement')).to.equal('right');
+
+      await floating.reposition();
+
+      expect(floating.getAttribute('x-placement')).to.equal('right');
+    });
+
+    it('goes back to its placement once `keep-flipped` is turned off', async () => {
+      const { floating } = await flippedFixture('active keep-flipped');
+      floating.classList.remove('tall');
+      await floating.reposition();
+      expect(floating.getAttribute('x-placement')).to.equal('top');
+
+      floating.keepFlipped = false;
+      await floating.reposition();
+
+      expect(floating.getAttribute('x-placement')).to.equal('bottom');
+    });
+
+    it('takes a new `placement` straight away while it keeps a side', async () => {
+      const { floating } = await flippedFixture('active keep-flipped');
+      floating.classList.remove('tall');
+      await floating.reposition();
+      expect(floating.getAttribute('x-placement')).to.equal('top');
+
+      floating.placement = 'bottom-start';
+      await floating.reposition();
+
+      expect(floating.getAttribute('x-placement')).to.equal('bottom-start');
+    });
+
+    it('goes back to its placement once `flip` is turned off', async () => {
+      const { floating } = await flippedFixture('active keep-flipped');
+      floating.classList.remove('tall');
+      await floating.reposition();
+      expect(floating.getAttribute('x-placement')).to.equal('top');
+
+      floating.flip = false;
+      await floating.reposition();
+
+      expect(floating.getAttribute('x-placement')).to.equal('bottom');
+    });
+
+    it('tries its placement first again once it is deactivated and activated', async () => {
+      const { floating } = await flippedFixture('active keep-flipped');
+      floating.classList.remove('tall');
+      await floating.reposition();
+      expect(floating.getAttribute('x-placement')).to.equal('top');
+
+      await floating.stop();
+      floating.start();
+      await floating.reposition();
+
+      expect(floating.getAttribute('x-placement')).to.equal('bottom');
+    });
+
+    it('flips again once the side it kept no longer fits', async () => {
+      const { anchor, floating } = await flippedFixture('active keep-flipped');
+
+      // 30px above the anchor, and far more below it.
+      moveAnchor(anchor, { top: '30px' });
+      await floating.reposition();
+
+      expect(floating.getAttribute('x-placement')).to.equal('bottom');
+    });
+
+    it('flips back to its placement once the side it kept no longer fits, among its own fallback placements', async () => {
+      const { anchor, floating } = await flippedFixture(`active keep-flipped fallback-placements='["top"]'`);
+
+      moveAnchor(anchor, { top: '30px' });
+      await floating.reposition();
+
+      expect(floating.getAttribute('x-placement')).to.equal('bottom');
+    });
+
+    it('goes back to its placement once it shrinks, without `keep-flipped`', async () => {
+      const { floating } = await flippedFixture('active');
+
+      floating.classList.remove('tall');
+      await floating.reposition();
+
+      expect(floating.getAttribute('x-placement')).to.equal('bottom');
+    });
+  });
+
   it('points its `[data-arrow]` at the anchor', async () => {
     const { floating, arrow } = await anchorFixture();
     await floating.reposition();

@@ -153,6 +153,8 @@ export default class AwcAutocompleteElement<
       floatingElement: this.listbox,
       placement: 'bottom',
       sync: 'width',
+      // Filtering shrinks and grows the listbox, which would otherwise make it jump between sides while typing.
+      keepFlipped: true,
       offsetOptions: 4,
       autoSize: this.autoSize ? 'height' : undefined,
       autoSizePadding: this.autoSizePadding,

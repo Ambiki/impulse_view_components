@@ -60,6 +60,42 @@ function covers(value: DimensionOrBoth, dimension: Dimension): boolean {
   return value === dimension || value === 'both';
 }
 
+function sideOf(placement: Placement): Side {
+  return placement.split('-')[0] as Side;
+}
+
+/**
+ * The placements to try when `preferred` doesn't fit. While `keepFlipped` prefers a side other than the `requested`
+ * one, `requested` is tried first, so that the floating element can still flip back to it. Without `fallbacks`,
+ * Floating UI tries the opposite of `preferred`, which is already `requested`.
+ */
+function fallbacksWithRequestedFirst(
+  fallbacks: Placement[] | undefined,
+  requested: Placement,
+  preferred: Placement,
+): Placement[] | undefined {
+  if (!fallbacks || preferred === requested) return fallbacks;
+  return [requested, ...fallbacks].filter((placement) => placement !== preferred);
+}
+
+/**
+ * The placement to try first while `keepFlipped` keeps the side of `kept`, the placement last used. On the `requested`
+ * side, that's `requested`, so that its alignment can still flip back. On another side, it's `kept` itself when there
+ * are `fallbacks`, so that it stays among the placements they allow. Otherwise it's `requested` moved to that side,
+ * the opposite placement Floating UI falls back to.
+ */
+function keptPlacement(requested: Placement, kept: Placement, fallbacks: Placement[] | undefined): Placement {
+  const side = sideOf(kept);
+  if (side === sideOf(requested)) return requested;
+  return fallbacks ? kept : withSide(requested, side);
+}
+
+/** `placement` moved to `side`, keeping its alignment. */
+function withSide(placement: Placement, side: Side): Placement {
+  const alignment = placement.split('-')[1];
+  return (alignment ? `${side}-${alignment}` : side) as Placement;
+}
+
 /**
  * A floating element capped to its available space fills that space exactly once it is squashed, so it never
  * overflows, and flip would leave it squashed even when the other side has more room. Keeping flip's padding past
@@ -112,11 +148,13 @@ export const positioningDefaults: {
   placement: Placement;
   strategy: Strategy;
   flip: boolean;
+  keepFlipped: boolean;
   shift: boolean;
 } = {
   placement: 'bottom',
   strategy: 'fixed',
   flip: true,
+  keepFlipped: false,
   shift: true,
 };
 
@@ -131,6 +169,11 @@ export interface PositioningOptions {
   skidding?: number;
   /** Flips to another placement to stay inside the viewport, or `false` to keep the placement. */
   flip?: FlipConfig | boolean;
+  /**
+   * Keeps the side the floating element flipped to until `stop` is called, instead of trying `placement` first on every
+   * reposition, so that it doesn't jump back once its content shrinks. It still flips again when that side stops fitting.
+   */
+  keepFlipped?: boolean;
   /** Shifts along the anchor to stay inside the viewport, or `false` to let it overflow. */
   shift?: ShiftConfig | boolean;
   /** Matches the floating element's size to the anchor's. */
@@ -166,6 +209,9 @@ export function createPositioner(getOptions: () => PositioningOptions): Position
   // Bumped by every reposition. One that a later reposition has overtaken must not write anything, or its result
   // (e.g. an auto size custom property the later one just cleared) would land on top.
   let generation = 0;
+  // The placement the floating element was last placed at while `keepFlipped` was set, and the placement that was
+  // requested then. Cleared by `stop`, so that the next start tries the requested placement first.
+  let kept: { placement: Placement; requested: Placement } | undefined;
 
   function prime() {
     const { floating, strategy = positioningDefaults.strategy } = getOptions();
@@ -182,6 +228,14 @@ export function createPositioner(getOptions: () => PositioningOptions): Position
     if (!anchor || !floating) return;
     const current = ++generation;
     const isStale = () => current !== generation;
+
+    const requestedPlacement = options.placement ?? positioningDefaults.placement;
+    const flipConfig = options.flip ?? positioningDefaults.flip;
+    const flipSettings = flipConfig === true || !flipConfig ? {} : flipConfig;
+    // The passthrough wins over the engine's own fallbacks, as it does over every flip option.
+    const fallbacks = floatingUI.flip?.fallbackPlacements ?? flipSettings.fallbackPlacements;
+    if (!flipConfig || !options.keepFlipped || kept?.requested !== requestedPlacement) kept = undefined;
+    const preferredPlacement = kept ? keptPlacement(requestedPlacement, kept.placement, fallbacks) : requestedPlacement;
 
     // Middlewares are order dependent: https://floating-ui.com/docs/middleware
     const middleware: Middleware[] = [
@@ -204,10 +258,15 @@ export function createPositioner(getOptions: () => PositioningOptions): Position
       floating.style.height = '';
     }
 
-    const flipConfig = options.flip ?? positioningDefaults.flip;
     if (flipConfig) {
-      const config = flipConfig === true ? {} : flipConfig;
-      middleware.push(flip({ ...config, padding: flipPadding(config.padding, options), ...floatingUI.flip }));
+      middleware.push(
+        flip({
+          ...flipSettings,
+          padding: flipPadding(flipSettings.padding, options),
+          ...floatingUI.flip,
+          fallbackPlacements: fallbacksWithRequestedFirst(fallbacks, requestedPlacement, preferredPlacement),
+        }),
+      );
     }
 
     const shiftConfig = options.shift ?? positioningDefaults.shift;
@@ -252,7 +311,7 @@ export function createPositioner(getOptions: () => PositioningOptions): Position
     }
 
     const { x, y, placement, strategy, middlewareData } = await computePosition(anchor, floating, {
-      placement: options.placement ?? positioningDefaults.placement,
+      placement: preferredPlacement,
       middleware,
       strategy: options.strategy ?? positioningDefaults.strategy,
     });
@@ -274,6 +333,9 @@ export function createPositioner(getOptions: () => PositioningOptions): Position
 
     // Bootstrap's arrow depends on this attribute.
     floating.setAttribute('x-placement', placement);
+
+    // Only kept while started, so that a reposition before `start` doesn't pin the side for the next start.
+    if (options.keepFlipped && cleanup) kept = { placement, requested: requestedPlacement };
   }
 
   function start(onUpdate: () => void) {
@@ -286,6 +348,7 @@ export function createPositioner(getOptions: () => PositioningOptions): Position
   }
 
   async function stop(): Promise<void> {
+    kept = undefined;
     return new Promise((resolve) => {
       if (cleanup) {
         cleanup();
