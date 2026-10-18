@@ -1099,6 +1099,26 @@ describe('AwcAutocompleteElement', () => {
     });
   });
 
+  describe('element API', () => {
+    it('should report whether its options come from the server, following `src`', async () => {
+      const el = await autocompleteFixture({ options: FRUITS });
+      expect(el.ajax).to.equal(false);
+
+      el.src = '/fruits';
+      expect(el.ajax).to.equal(true);
+    });
+
+    it('should move focus out of its input with `blur`', async () => {
+      const el = await autocompleteFixture({ options: FRUITS });
+      el.focus();
+      expect(document.activeElement === el.input).to.equal(true);
+
+      el.blur();
+
+      expect(document.activeElement === el.input).to.equal(false);
+    });
+  });
+
   describe('closing after typing', () => {
     it('should put the selected option\'s text back in a single select', async () => {
       const el = await autocompleteFixture({ options: FRUITS, selected: [FRUITS[0]] });
