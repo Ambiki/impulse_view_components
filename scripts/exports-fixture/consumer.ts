@@ -22,9 +22,9 @@ import * as popover from '@ambiki/impulse-view-components/dist/elements/popover'
 import * as autocompleteIndex from '@ambiki/impulse-view-components/dist/elements/autocomplete/index.js';
 
 // Addressable non-index modules inside an element directory.
+import * as ajaxSearch from '@ambiki/impulse-view-components/dist/elements/autocomplete/ajax_search';
 import * as localSearch from '@ambiki/impulse-view-components/dist/elements/autocomplete/local_search';
 import * as multipleSelect from '@ambiki/impulse-view-components/dist/elements/autocomplete/multiple_select';
-import * as remoteSearch from '@ambiki/impulse-view-components/dist/elements/autocomplete/remote_search';
 import * as singleSelect from '@ambiki/impulse-view-components/dist/elements/autocomplete/single_select';
 
 import useFloatingUI from '@ambiki/impulse-view-components/dist/hooks/use_floating_ui';
@@ -55,9 +55,9 @@ export const used = {
   autocompleteIndex,
   dialog,
   popover,
+  ajaxSearch,
   localSearch,
   multipleSelect,
-  remoteSearch,
   singleSelect,
   useFloatingUI,
   useOutsideClick,

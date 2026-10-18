@@ -1,11 +1,11 @@
 import type { Cancelable } from 'src/helpers/debounce';
-import type { RemoteEventName } from './events';
+import type { AjaxEventName } from './events';
 import type AwcAutocompleteElement from './index';
 import type { SearchVariant } from './index';
 import debounce from 'src/helpers/debounce';
-import { REMOTE_EVENT_INIT } from './events';
+import { AJAX_EVENT_INIT } from './events';
 
-export default class RemoteSearch implements SearchVariant {
+export default class AjaxSearch implements SearchVariant {
   readonly autocomplete: AwcAutocompleteElement;
   private abortController?: AbortController;
   private cachedOptions: string = '';
@@ -108,7 +108,7 @@ export default class RemoteSearch implements SearchVariant {
     await this.autocomplete.reposition();
   }
 
-  private emit(name: RemoteEventName) {
-    this.autocomplete.emit(name, REMOTE_EVENT_INIT);
+  private emit(name: AjaxEventName) {
+    this.autocomplete.emit(name, AJAX_EVENT_INIT);
   }
 }
