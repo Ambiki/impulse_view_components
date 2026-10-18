@@ -102,6 +102,10 @@ export default class AjaxSearch implements SearchVariant {
     if (!cached) {
       this.autocomplete.combobox.initializeOptions();
     }
+    // The response can land after the listbox closed, which deselected and deactivated every option. Opening it again
+    // selects and activates them.
+    if (!this.autocomplete.open) return;
+
     // Start the select variant to select the option(s).
     this.autocomplete.selectVariant.start();
     // Update the floating UI position after the listbox content has been updated.

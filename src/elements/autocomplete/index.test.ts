@@ -1083,6 +1083,20 @@ describe('AwcAutocompleteElement', () => {
       expect(el.options.map((option) => option.getAttribute('aria-selected'))).to.eql(['false', 'true', 'false']);
       expect(el.activeOption).to.equal(el.options[1]);
     });
+
+    it('should leave the options alone when a response lands after it closed', async () => {
+      const el = await autocompleteFixture({ src: '/fruits', selected: [FRUITS[1]] });
+      const stub = stubFetch();
+      pressInput(el);
+      await requested(stub);
+
+      await el.hide();
+      await respond(el, stub, optionsHtml(FRUITS));
+
+      expect(el.input.hasAttribute('aria-activedescendant')).to.equal(false);
+      expect(el.activeOption).to.equal(null);
+      expect(el.options.map((option) => option.getAttribute('aria-selected'))).to.eql(['false', 'false', 'false']);
+    });
   });
 
   describe('closing after typing', () => {
