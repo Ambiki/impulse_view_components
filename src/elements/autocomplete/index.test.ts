@@ -353,6 +353,52 @@ describe('AwcAutocompleteElement', () => {
     });
   });
 
+  describe('flipping', () => {
+    const ITEMS = Array.from({ length: 20 }, (_, index) => {
+      const value = String(index + 1).padStart(2, '0');
+      return { value, text: `Item ${value}` };
+    });
+
+    /** Opens a listbox too tall for the 130px below its control, so that it flips above it. */
+    async function flippedFixture() {
+      const el = await autocompleteFixture({ options: ITEMS });
+      const listbox = el.querySelector<HTMLElement>('[role="listbox"]')!;
+      Object.assign(el.control.style, {
+        position: 'fixed',
+        top: `${window.innerHeight - 150}px`,
+        left: '0px',
+        width: '200px',
+        height: '20px',
+      });
+      el.show();
+      await el.reposition();
+      expect(listbox.getAttribute('x-placement')).to.equal('top');
+      return { el, listbox };
+    }
+
+    it('should keep the listbox above its control while filtering shrinks it', async () => {
+      const { el, listbox } = await flippedFixture();
+
+      type(el, 'Item 07');
+      await el.reposition();
+
+      expect(el.visibleOptions.length).to.equal(1);
+      expect(listbox.getAttribute('x-placement')).to.equal('top');
+    });
+
+    it('should open the listbox below its control again once it fits there', async () => {
+      const { el, listbox } = await flippedFixture();
+      await el.hide();
+
+      type(el, 'Item 07');
+      await el.reposition();
+
+      expect(el.open).to.equal(true);
+      expect(el.visibleOptions.length).to.equal(1);
+      expect(listbox.getAttribute('x-placement')).to.equal('bottom');
+    });
+  });
+
   describe('events', () => {
     it('should emit only the state events when shown and hidden from code', async () => {
       const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });

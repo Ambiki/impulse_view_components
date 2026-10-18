@@ -62,6 +62,12 @@ export default class AwcAnchorElement extends ImpulseElement {
   @property() fallbackStrategy: FallbackStrategy = 'bestFit';
 
   /**
+   * When `true`, the element keeps the side it flipped to until it is deactivated, instead of trying `placement` first
+   * on every reposition, so that it doesn't jump back once its content shrinks.
+   */
+  @property({ type: Boolean }) keepFlipped: boolean = positioningDefaults.keepFlipped;
+
+  /**
    * When `true`, the element will be shifted along its axis to keep the element inside the viewport.
    */
   @property({ type: Boolean }) shift: boolean = positioningDefaults.shift;
@@ -172,6 +178,7 @@ export default class AwcAnchorElement extends ImpulseElement {
         fallbackPlacements: this.fallbackPlacements.length ? this.fallbackPlacements : undefined,
         fallbackStrategy: this.fallbackStrategy,
       },
+      keepFlipped: this.keepFlipped,
       shift: this.shift && { padding: this.shiftPadding },
       sync: this.sync,
       autoSize: this.autoSize,

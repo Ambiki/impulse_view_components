@@ -141,6 +141,28 @@ describe('useFloatingUI', () => {
     expect(floating.getAttribute('x-placement')).to.equal('top');
   });
 
+  it('flips back from the side `keepFlipped` keeps, among the fallback placements in `flipOptions`', async () => {
+    const { host, anchor, floating } = await floatingFixture();
+    moveAnchor(anchor, { top: `${window.innerHeight - 30}px` });
+    const floatingUI = useFloatingUI(host, {
+      anchorElement: anchor,
+      floatingElement: floating,
+      keepFlipped: true,
+      flipOptions: { fallbackPlacements: ['top'] },
+    });
+    host.open = true;
+    floatingUI.start();
+    await floatingUI.update();
+    expect(floating.getAttribute('x-placement')).to.equal('top');
+
+    // 10px above the anchor, and far more below it.
+    moveAnchor(anchor, { top: '10px' });
+    await floatingUI.update();
+
+    expect(floating.getAttribute('x-placement')).to.equal('bottom');
+    await floatingUI.stop();
+  });
+
   it('flips the alignment when the floating element would overflow along the anchor', async () => {
     const { host, anchor, floating } = await floatingFixture();
     moveAnchor(anchor, { left: `${window.innerWidth - 60}px` });

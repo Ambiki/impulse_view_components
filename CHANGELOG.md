@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- `keep-flipped` on `<awc-anchor>` (`keep_flipped:` on `Impulse::AnchorComponent`) and `keepFlipped` on `useFloatingUI`, which keep the side a floating element flipped to while it's positioned ([#320](https://github.com/Ambiki/impulse_view_components/pull/320))
 - `awc-autocomplete:commit` carries `selected` in its detail, so listeners can tell whether the commit selected or deselected the option ([#311](https://github.com/Ambiki/impulse_view_components/pull/311))
 - `requestShow()` and `requestHide()` on `<awc-popover>`, `<awc-dialog>` and `<awc-autocomplete>`, which emit a cancelable `show` or `hide` before acting ([#302](https://github.com/Ambiki/impulse_view_components/pull/302))
 - `Impulse::SelectComponent`'s block form can group options with `with_group` ([#299](https://github.com/Ambiki/impulse_view_components/pull/299))
@@ -35,6 +36,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Fixed the `<awc-autocomplete>` listbox jumping between sides of its control while filtering ([#320](https://github.com/Ambiki/impulse_view_components/pull/320))
 - Fixed an auto sized `<awc-anchor>`, `useFloatingUI` floating element or `<awc-autocomplete>` listbox staying squashed instead of flipping to the side of its anchor with more room ([#318](https://github.com/Ambiki/impulse_view_components/pull/318))
 - Fixed Enter after a paste committing an option from the previous results in an ajax `<awc-autocomplete>` ([#316](https://github.com/Ambiki/impulse_view_components/pull/316))
 - Fixed a response that lands after an ajax `<awc-autocomplete>` closes setting its active option, selection, `no-options` or `error` ([#314](https://github.com/Ambiki/impulse_view_components/pull/314))
