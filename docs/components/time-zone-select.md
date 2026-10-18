@@ -103,7 +103,7 @@ Overwrite the default blankslate message by passing a custom block.
 
 ::: code-group
 ```js
-import '@ambiki/impulse-view-components/dist/elements/autocomplete';
+import '@ambiki/impulse-view-components/autocomplete';
 ```
 
 ```scss

@@ -83,3 +83,9 @@ _Avoid_: After event, notification, lifecycle event
 **Value event**:
 The event emitted after the user changes an element's value, or its form resets (`commit`, `remove`, `clear`, `reset`).
 _Avoid_: Change event
+
+### Building blocks
+
+**Hook**:
+A function that attaches to an Impulse element for as long as it stays connected, and cleans up after itself when the element disconnects (`useFloatingUI`, `useOutsideClick`, `useFocusOut`).
+_Avoid_: Mixin, behavior, controller

@@ -13,7 +13,7 @@ the `hidden` attribute from the `pop-over` element.
 
 ```ts
 import { ImpulseElement, registerElement } from '@ambiki/impulse';
-import useOutsideClick from '@ambiki/impulse-view-components/dist/hooks/use_outside_click';
+import { useOutsideClick } from '@ambiki/impulse-view-components/hooks';
 
 @registerElement('pop-over')
 export default class PopoverElement extends ImpulseElement {

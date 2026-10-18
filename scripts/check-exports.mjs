@@ -15,7 +15,9 @@
 //      repo-only `src/` path alias, and every relative one names an emitted declaration with
 //      the `.js` extension `node16` needs,
 //   5. `tsc --noEmit` passes on a fixture that imports all of them and asserts that the types
-//      it reads aren't `any`, with library checks on under `bundler`.
+//      it reads aren't `any`, with library checks on under `bundler`,
+//   6. a bundler keeps what an app imports and drops the rest: one hook doesn't bring the
+//      others, and importing an element keeps its registration.
 //
 // Resolution works without linking the package into `node_modules`: a package with an
 // `exports` map can reference itself by name, and both this script and the fixture live
@@ -30,6 +32,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
+import * as esbuild from 'esbuild';
 import { declarationSpecifiers, SOURCE_ALIAS } from './rewrite-declaration-imports.mjs';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -88,12 +91,21 @@ const styledElementDirs = elementDirs.filter((name) =>
 const flatModules = ['hooks', 'helpers'].flatMap((group) =>
   fs
     .readdirSync(path.join(distDir, group))
-    .filter((file) => file.endsWith('.js'))
+    .filter((file) => file.endsWith('.js') && file !== 'index.js')
     .map((file) => [group, path.basename(file, '.js')]),
 );
 
-// 1. Runtime resolution through Node's ESM resolver.
+// The import paths the docs teach (ADR 0008).
+const publicSpecifiers = [
+  ...elementDirs.map((name) => subpath(name)),
+  subpath('hooks'),
+  subpath('helpers'),
+];
+
+// 1. Runtime resolution through Node's ESM resolver. The `dist/` paths are deprecated, but apps
+// still import them.
 const scriptSpecifiers = [
+  ...publicSpecifiers,
   pkg.name,
   subpath('dist', 'index.js'),
   ...elementDirs.map((name) => subpath('dist', 'elements', name)),
@@ -117,6 +129,14 @@ for (const specifier of [...scriptSpecifiers, ...styleSpecifiers]) {
   check(`node: ${specifier}`, () => resolvesToFile(specifier));
 }
 
+// The entry files behind the new paths stay off the `dist/` wildcards, which are frozen: anything they reach can never
+// change again.
+for (const specifier of ['hooks', 'helpers'].flatMap((group) => [subpath('dist', group, 'index'), subpath('dist', group, 'index.js')])) {
+  check(`node: ${specifier} is not exported`, () => {
+    assert.throws(() => import.meta.resolve(specifier), { code: 'ERR_PACKAGE_PATH_NOT_EXPORTED' });
+  });
+}
+
 // 2. Element stylesheets under the conditions sass-loader resolves with. Without them the
 // bare specifier lands on the element's JavaScript, and sass-loader reports the subpath as
 // missing rather than falling back.
@@ -134,11 +154,11 @@ for (const name of styledElementDirs) {
 // Element directories need an exact key: a pattern cannot append `/index`, so a new element
 // silently stops resolving without one.
 for (const name of elementDirs) {
-  const key = `./dist/elements/${name}`;
-
-  check(`exports["${key}"]`, () => {
-    assert.ok(pkg.exports[key], 'missing. Element directories need an exact key, patterns cannot append /index');
-  });
+  for (const key of [`./${name}`, `./dist/elements/${name}`]) {
+    check(`exports["${key}"]`, () => {
+      assert.ok(pkg.exports[key], 'missing. Element directories need an exact key, patterns cannot append /index');
+    });
+  }
 }
 
 // 3. Types must resolve alongside every runtime file, otherwise `tsc` reports TS2307 even
@@ -210,6 +230,54 @@ for (const [moduleKind, moduleResolution, skipLibCheck] of [
   }
 }
 
+// 6. An app's bundle holds what it imports and nothing else. A bundler keeps every module a shared path such as
+// `hooks` reaches, along with that module's own imports, unless `sideEffects` in package.json says it can drop the
+// unused ones. That must not drop an element's registration, which is all a bare `import '…/popover'` is for.
+function bundle(contents) {
+  const result = esbuild.buildSync({
+    stdin: { contents, resolveDir: rootDir },
+    bundle: true,
+    write: false,
+    format: 'esm',
+    external: Object.keys(pkg.dependencies),
+    metafile: true,
+    logLevel: 'silent',
+  });
+  const [output] = Object.values(result.metafile.outputs);
+
+  return {
+    text: result.outputFiles[0].text,
+    modules: Object.entries(output.inputs)
+      .filter(([, { bytesInOutput }]) => bytesInOutput > 0)
+      .map(([file]) => file),
+    imports: output.imports.map((entry) => entry.path),
+  };
+}
+
+check(`bundle: one hook from ${subpath('hooks')}`, () => {
+  const { modules, imports } = bundle(`import { useOutsideClick } from '${subpath('hooks')}'; useOutsideClick;`);
+  assert.deepEqual(modules.filter((file) => /use_floating_ui|use_focus_out|positioning/.test(file)), [], 'bundles hooks it does not import');
+  assert.ok(!imports.includes('@floating-ui/dom'), 'imports @floating-ui/dom, which only useFloatingUI needs');
+});
+
+check(`bundle: ${subpath('helpers')}`, () => {
+  const { modules } = bundle(`import { isLooselyFocusable } from '${subpath('helpers')}'; isLooselyFocusable;`);
+  assert.deepEqual(modules.filter((file) => !/helpers\/(?:focus|index)\.js$/.test(file)), [], 'bundles modules it does not import');
+});
+
+for (const name of elementDirs) {
+  for (const specifier of [subpath(name), subpath('dist', 'elements', name)]) {
+    check(`bundle: import '${specifier}'`, () => {
+      assert.match(bundle(`import '${specifier}';`).text, new RegExp(`['"]awc-${name}['"]`), 'drops the registration');
+    });
+  }
+}
+
+check(`bundle: import '${pkg.name}'`, () => {
+  const { text } = bundle(`import '${pkg.name}';`);
+  for (const name of elementDirs) assert.match(text, new RegExp(`['"]awc-${name}['"]`), `drops <awc-${name}>`);
+});
+
 if (failures.length > 0) {
   console.error(`\n${failures.length} exports check(s) failed:\n`);
   for (const failure of failures) console.error(`  ✗ ${failure}\n`);
@@ -217,4 +285,4 @@ if (failures.length > 0) {
 }
 
 const total = scriptSpecifiers.length + styleSpecifiers.length;
-console.log(`✓ ${total} subpaths resolve in Node and type-check under moduleResolution bundler/node16`);
+console.log(`✓ ${total} subpaths resolve in Node, type-check under moduleResolution bundler/node16, and bundle what they import`);

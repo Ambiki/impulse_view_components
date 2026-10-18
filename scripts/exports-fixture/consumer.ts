@@ -47,6 +47,53 @@ import type { UseFloatingUIOptions } from '@ambiki/impulse-view-components/dist/
 import type { VirtualElement } from '@floating-ui/dom';
 import type { AwcAutocompleteCommitEvent } from '@ambiki/impulse-view-components/dist/elements/autocomplete';
 
+// The import paths the docs teach (ADR 0008). Everything above imports the deprecated `dist/` paths, which apps still
+// use.
+import { AwcAnchorElement } from '@ambiki/impulse-view-components/anchor';
+import type {
+  Placement as AnchorPlacement,
+  Side as AnchorSide,
+  Strategy as AnchorStrategy,
+  Dimension,
+  DimensionOrBoth,
+  FallbackStrategy,
+} from '@ambiki/impulse-view-components/anchor';
+import { AwcAutocompleteElement } from '@ambiki/impulse-view-components/autocomplete';
+import { AwcDialogElement } from '@ambiki/impulse-view-components/dialog';
+import { AwcPopoverElement } from '@ambiki/impulse-view-components/popover';
+import type {
+  Placement as PopoverPlacement,
+  Side as PopoverSide,
+  Strategy as PopoverStrategy,
+} from '@ambiki/impulse-view-components/popover';
+
+import {
+  useFloatingUI as namedUseFloatingUI,
+  useFocusOut as namedUseFocusOut,
+  useOutsideClick as namedUseOutsideClick,
+} from '@ambiki/impulse-view-components/hooks';
+import type {
+  Anchor,
+  AnchorRect,
+  Boundary,
+  Dimension as HookDimension,
+  DimensionOrBoth as HookDimensionOrBoth,
+  Placement as HookPlacement,
+  Side as HookSide,
+  Strategy as HookStrategy,
+  UseFloatingUIOptions as NamedUseFloatingUIOptions,
+  UseFloatingUIType,
+  UseFocusOutOptions,
+  UseOutsideClickOptions,
+  VirtualAnchor,
+} from '@ambiki/impulse-view-components/hooks';
+
+import {
+  // @ts-expect-error: only the public helpers are on the helpers path; the rest stay on the `dist/` paths
+  uniqueId as internalUniqueId,
+  isLooselyFocusable as namedIsLooselyFocusable,
+} from '@ambiki/impulse-view-components/helpers';
+
 export const used = {
   root,
   rootIndex,
@@ -99,3 +146,78 @@ export const anchorWithClientRects: UseFloatingUIOptions['anchorElement'] = {
   getBoundingClientRect: () => rect,
   getClientRects: () => [rect],
 };
+
+// Each element path exports its class by name, alongside the default export.
+export const namedClasses: [typeof anchor.default, typeof autocomplete.default, typeof dialog.default, typeof popover.default] = [
+  AwcAnchorElement,
+  AwcAutocompleteElement,
+  AwcDialogElement,
+  AwcPopoverElement,
+];
+// @ts-expect-error: a plain element is not an anchor
+export const notAnAnchorElement: AwcAnchorElement = document.createElement('div');
+// @ts-expect-error: a plain element is not an autocomplete
+export const notAnAutocomplete: AwcAutocompleteElement = document.createElement('div');
+// @ts-expect-error: a plain element is not a dialog
+export const notADialog: AwcDialogElement = document.createElement('div');
+// @ts-expect-error: a plain element is not a popover
+export const notAPopover: AwcPopoverElement = document.createElement('div');
+
+// ...and the positioning types its properties use, as their real unions.
+// @ts-expect-error: not a placement
+export const notAnAnchorPlacement: AnchorPlacement = 'middle';
+// @ts-expect-error: not a side
+export const notAnAnchorSide: AnchorSide = 'middle';
+// @ts-expect-error: not a strategy
+export const notAnAnchorStrategy: AnchorStrategy = 'sticky';
+// @ts-expect-error: not a fallback strategy
+export const notAnAnchorFallbackStrategy: FallbackStrategy = 'nearest';
+// @ts-expect-error: not a dimension
+export const notADimension: Dimension = 'depth';
+// @ts-expect-error: not a dimension or both
+export const notADimensionOrBoth: DimensionOrBoth = 'neither';
+// @ts-expect-error: not a placement
+export const notAPopoverPlacementByName: PopoverPlacement = 'middle';
+// @ts-expect-error: not a side
+export const notAPopoverSide: PopoverSide = 'middle';
+// @ts-expect-error: not a strategy
+export const notAPopoverStrategy: PopoverStrategy = 'sticky';
+
+// The hooks path exports each hook by name, the same function as its default export on the `dist/` path...
+export const namedHooks: [typeof useFloatingUI, typeof useFocusOut, typeof useOutsideClick] = [
+  namedUseFloatingUI,
+  namedUseFocusOut,
+  namedUseOutsideClick,
+];
+
+// ...and every type the hooks' APIs mention, as their real types.
+// @ts-expect-error: not a placement
+export const notAHookPlacement: HookPlacement = 'middle';
+// @ts-expect-error: not a side
+export const notAHookSide: HookSide = 'middle';
+// @ts-expect-error: not a strategy
+export const notAHookStrategy: HookStrategy = 'sticky';
+// @ts-expect-error: not a dimension
+export const notAHookDimension: HookDimension = 'depth';
+// @ts-expect-error: not a dimension or both
+export const notAHookDimensionOrBoth: HookDimensionOrBoth = 'neither';
+// @ts-expect-error: a rectangle has numeric sides
+export const notAnAnchorRect: AnchorRect = { ...rect, top: '0' };
+// @ts-expect-error: a virtual anchor reports where it is
+export const notAVirtualAnchor: VirtualAnchor = {};
+// @ts-expect-error: an anchor is an element or a virtual anchor
+export const notAnAnchor: Anchor = 'button';
+// @ts-expect-error: a boundary is an element or null
+export const notABoundary: Boundary = 'button';
+// @ts-expect-error: the options need an anchor
+export const notFloatingUIOptions: NamedUseFloatingUIOptions = {};
+// @ts-expect-error: a hook's controls are functions
+export const notFloatingUIControls: UseFloatingUIType = { start: true, update: true, stop: true };
+// @ts-expect-error: focus-out options need boundaries and a callback
+export const notFocusOutOptions: UseFocusOutOptions = {};
+// @ts-expect-error: outside-click options need boundaries and a callback
+export const notOutsideClickOptions: UseOutsideClickOptions = {};
+
+// The helpers path exports `isLooselyFocusable` by name. `internalUniqueId` is listed only so that its import, which
+// must fail, counts as used.
+export const namedHelpers: [typeof isLooselyFocusable, unknown] = [namedIsLooselyFocusable, internalUniqueId];
