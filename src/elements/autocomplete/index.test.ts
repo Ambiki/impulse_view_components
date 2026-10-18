@@ -156,6 +156,9 @@ function valuesOf(el: AwcAutocompleteElement) {
   return el.options.map((option) => option.getAttribute('value'));
 }
 
+// Assertions on the element check a boolean, such as `el.hasAttribute(name)`, rather than using
+// `expect(el).to.have.attribute(name)`, whose failure message serializes the element and hangs the browser.
+
 /** The `aria-selected` of each option, in order. */
 function selectionOf(el: AwcAutocompleteElement) {
   return el.options.map((option) => option.getAttribute('aria-selected'));
@@ -268,8 +271,8 @@ describe('AwcAutocompleteElement', () => {
 
       // Abandoning a request is not a failure, and it must not leave the element stuck mid-flight.
       await aTimeout(50);
-      expect(el).not.to.have.attribute('error');
-      expect(el).not.to.have.attribute('loading');
+      expect(el.hasAttribute('error')).to.equal(false);
+      expect(el.hasAttribute('loading')).to.equal(false);
     });
   });
 
@@ -605,7 +608,7 @@ describe('AwcAutocompleteElement', () => {
 
       expect(el.value).to.equal('2');
       expect(el.input.value).to.equal('Banana');
-      expect(el).to.have.class('awc-autocomplete--selected');
+      expect(el.classList.contains('awc-autocomplete--selected')).to.equal(true);
     });
 
     it('should select a value that has no option, with the text it is given', async () => {
@@ -642,7 +645,7 @@ describe('AwcAutocompleteElement', () => {
 
       expect(el.value).to.equal('');
       expect(el.input.value).to.equal('');
-      expect(el).not.to.have.class('awc-autocomplete--selected');
+      expect(el.classList.contains('awc-autocomplete--selected')).to.equal(false);
     });
 
     it('should clear the value with `removeValue`, whatever value it is given', async () => {
@@ -702,7 +705,7 @@ describe('AwcAutocompleteElement', () => {
 
       expect(el.value).to.eql(['1', '9']);
       expect(tagsOf(el)).to.eql([{ value: '1', text: 'Apple' }, { value: '9', text: 'Fig' }]);
-      expect(el).to.have.class('awc-autocomplete--selected');
+      expect(el.classList.contains('awc-autocomplete--selected')).to.equal(true);
     });
 
     it('should not add a second tag for a value that is already selected', async () => {
@@ -756,7 +759,7 @@ describe('AwcAutocompleteElement', () => {
 
       expect(el.value).to.eql([]);
       expect(el.tags).to.have.length(0);
-      expect(el).not.to.have.class('awc-autocomplete--selected');
+      expect(el.classList.contains('awc-autocomplete--selected')).to.equal(false);
     });
 
     it('should restore the tags the server rendered with `reset`', async () => {
@@ -1014,11 +1017,11 @@ describe('AwcAutocompleteElement', () => {
 
       pressInput(el);
       await requested(stub);
-      expect(el).to.have.attribute('loading');
+      expect(el.hasAttribute('loading')).to.equal(true);
 
       await respondAndWait(el, stub, optionsHtml(FRUITS));
 
-      expect(el).not.to.have.attribute('loading');
+      expect(el.hasAttribute('loading')).to.equal(false);
       expect(valuesOf(el)).to.eql(['1', '2', '3']);
       expect(el.activeOption).to.equal(el.options[0]);
     });
@@ -1046,12 +1049,12 @@ describe('AwcAutocompleteElement', () => {
       await requested(stub);
       await respondAndWait(el, stub, 'Server error', 500);
 
-      expect(el).to.have.attribute('error');
-      expect(el).not.to.have.attribute('loading');
+      expect(el.hasAttribute('error')).to.equal(true);
+      expect(el.hasAttribute('loading')).to.equal(false);
       expect(events).to.eql(['loadstart', 'error', 'loadend']);
 
       type(el, 'ap');
-      expect(el).not.to.have.attribute('error');
+      expect(el.hasAttribute('error')).to.equal(false);
     });
 
     it('should show the options for an empty query again when it reopens, without another request', async () => {
@@ -1086,7 +1089,7 @@ describe('AwcAutocompleteElement', () => {
 
       expect(olderSignal.aborted).to.equal(true);
       expect(valuesOf(el)).to.eql(['3']);
-      expect(el).not.to.have.attribute('error');
+      expect(el.hasAttribute('error')).to.equal(false);
     });
 
     it('should select and activate the selected values among the fetched options in a multiple select', async () => {
