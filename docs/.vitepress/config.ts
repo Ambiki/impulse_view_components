@@ -31,7 +31,8 @@ enhancement without a heavy client framework.
 
 Components include Ajax select, Anchor, Dialog, Popover, Select, Spinner, and Time zone select. JavaScript behavior is \
 exposed through a small JS API (Autocomplete, Dialog, Popover) and reusable hooks (\`useFloatingUI\`, \
-\`useOutsideClick\`). Components are imported individually for both JS and styles, so you only ship what you use.`,
+\`useFocusOut\`, \`useOutsideClick\`). Components are imported individually for both JS and styles, so you only ship \
+what you use.`,
       }),
     ],
   },
@@ -132,6 +133,10 @@ exposed through a small JS API (Autocomplete, Dialog, Popover) and reusable hook
           {
             text: 'useFloatingUI',
             link: '/hooks/use-floating-ui',
+          },
+          {
+            text: 'useFocusOut',
+            link: '/hooks/use-focus-out',
           },
           {
             text: 'useOutsideClick',
