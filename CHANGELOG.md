@@ -41,7 +41,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
-- Fixed `useOutsideClick` calling back for a click without a press, such as from Enter or `click()`, after a right-click, a drag or a prevented click ([#325](https://github.com/Ambiki/impulse_view_components/pull/325))
+- Fixed `useOutsideClick` calling back for a click without a press, such as from Enter or `click()`, after a right-click, a drag or a prevented click ([#326](https://github.com/Ambiki/impulse_view_components/pull/326))
 - Fixed a page morph resetting the defaults of `<awc-autocomplete>`, `<awc-dialog>`, `<awc-popover>` and `<awc-anchor>` ([#321](https://github.com/Ambiki/impulse_view_components/pull/321))
 - Fixed the `<awc-autocomplete>` listbox jumping between sides of its control while filtering ([#320](https://github.com/Ambiki/impulse_view_components/pull/320))
 - Fixed an auto sized `<awc-anchor>`, `useFloatingUI` floating element or `<awc-autocomplete>` listbox staying squashed instead of flipping to the side of its anchor with more room ([#318](https://github.com/Ambiki/impulse_view_components/pull/318))
