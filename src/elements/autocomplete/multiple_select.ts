@@ -112,6 +112,14 @@ export default class MultipleSelect implements SelectVariant {
     const tagField = templateClone.querySelector<HTMLElement>('[data-behavior="tag"]')!;
     const tagText = templateClone.querySelector<HTMLElement>('[data-behavior="text"]')!;
     const tagHiddenField = templateClone.querySelector<HTMLInputElement>('[data-behavior="hidden-field"]')!;
+    const tagDismissButton = templateClone.querySelector<HTMLButtonElement>(
+      '[data-target~="awc-autocomplete.tagDismissButtons"]',
+    );
+    // `disabledChanged` only reaches the tags that exist when `disabled` changes, so a new tag's dismiss button starts
+    // out matching it.
+    if (tagDismissButton) {
+      tagDismissButton.disabled = this.autocomplete.disabled;
+    }
     tagField.setAttribute('value', value);
     tagField.setAttribute('data-text', text);
     // eslint-disable-next-line unicorn/prefer-dom-node-text-content

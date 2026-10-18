@@ -47,6 +47,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Fixed the dismiss button of a tag added to a disabled multiple `<awc-autocomplete>`, such as by a form reset or `setValue`, removing the tag ([#337](https://github.com/Ambiki/impulse_view_components/pull/337))
 - Fixed `useOutsideClick` calling back for a click without a press, such as from Enter or `click()`, after a right-click, a drag or a prevented click ([#326](https://github.com/Ambiki/impulse_view_components/pull/326))
 - Fixed a page morph resetting the defaults of `<awc-autocomplete>`, `<awc-dialog>`, `<awc-popover>` and `<awc-anchor>` ([#321](https://github.com/Ambiki/impulse_view_components/pull/321))
 - Fixed the `<awc-autocomplete>` listbox jumping between sides of its control while filtering ([#320](https://github.com/Ambiki/impulse_view_components/pull/320))
