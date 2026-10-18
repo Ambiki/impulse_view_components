@@ -88,12 +88,6 @@ import type {
   VirtualAnchor,
 } from '@ambiki/impulse-view-components/hooks';
 
-import {
-  // @ts-expect-error: only the public helpers are on the helpers path; the rest stay on the `dist/` paths
-  uniqueId as internalUniqueId,
-  isLooselyFocusable as namedIsLooselyFocusable,
-} from '@ambiki/impulse-view-components/helpers';
-
 export const used = {
   root,
   rootIndex,
@@ -217,7 +211,3 @@ export const notFloatingUIControls: UseFloatingUIType = { start: true, update: t
 export const notFocusOutOptions: UseFocusOutOptions = {};
 // @ts-expect-error: outside-click options need boundaries and a callback
 export const notOutsideClickOptions: UseOutsideClickOptions = {};
-
-// The helpers path exports `isLooselyFocusable` by name. `internalUniqueId` is listed only so that its import, which
-// must fail, counts as used.
-export const namedHelpers: [typeof isLooselyFocusable, unknown] = [namedIsLooselyFocusable, internalUniqueId];

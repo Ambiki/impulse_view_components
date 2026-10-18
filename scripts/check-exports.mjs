@@ -103,7 +103,6 @@ const flatModules = ['hooks', 'helpers'].flatMap((group) =>
 const publicSpecifiers = [
   ...elementDirs.map((name) => subpath(name)),
   subpath('hooks'),
-  subpath('helpers'),
 ];
 
 // 1. Runtime resolution through Node's ESM resolver. The `dist/` paths are deprecated, but apps
@@ -139,7 +138,8 @@ for (const specifier of [...scriptSpecifiers, ...styleSpecifiers]) {
 // The entry files behind the new paths stay off the `dist/` wildcards, which are frozen: anything they reach can never
 // change again.
 for (const specifier of [
-  ...['hooks', 'helpers'].flatMap((group) => [subpath('dist', group, 'index'), subpath('dist', group, 'index.js')]),
+  subpath('dist', 'hooks', 'index'),
+  subpath('dist', 'hooks', 'index.js'),
   subpath('dist', 'styles', 'index.scss'),
 ]) {
   check(`node: ${specifier} is not exported`, () => {
@@ -282,11 +282,6 @@ check(`bundle: one hook from ${subpath('hooks')}`, () => {
   const { modules, imports } = bundle(`import { useOutsideClick } from '${subpath('hooks')}'; useOutsideClick;`);
   assert.deepEqual(modules.filter((file) => /use_floating_ui|use_focus_out|positioning/.test(file)), [], 'bundles hooks it does not import');
   assert.ok(!imports.includes('@floating-ui/dom'), 'imports @floating-ui/dom, which only useFloatingUI needs');
-});
-
-check(`bundle: ${subpath('helpers')}`, () => {
-  const { modules } = bundle(`import { isLooselyFocusable } from '${subpath('helpers')}'; isLooselyFocusable;`);
-  assert.deepEqual(modules.filter((file) => !/helpers\/(?:focus|index)\.js$/.test(file)), [], 'bundles modules it does not import');
 });
 
 for (const name of elementDirs) {

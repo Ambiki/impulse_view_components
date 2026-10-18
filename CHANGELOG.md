@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Style import paths: `/base`, then `/<element>` or the bare path for Sass, and `/styles.css` precompiled for apps without Sass ([#331](https://github.com/Ambiki/impulse_view_components/pull/331))
-- Shorter import paths: `/<element>` (such as `/popover`), `/hooks` and `/helpers`, which export by name and with the types their APIs use. Bundlers drop what an app doesn't import ([#330](https://github.com/Ambiki/impulse_view_components/pull/330))
+- Shorter import paths: `/<element>` (such as `/popover`) and `/hooks`, which export by name and with the types their APIs use. Bundlers drop what an app doesn't import ([#330](https://github.com/Ambiki/impulse_view_components/pull/330))
 - `toggle()` on `<awc-popover>` takes the event that toggled it, so that one press asks each popover to hide once ([#324](https://github.com/Ambiki/impulse_view_components/pull/324))
 - `useFocusOut`, a hook that calls back when focus moves to an element outside its boundaries, such as on Tab past a popover's last element ([#322](https://github.com/Ambiki/impulse_view_components/pull/322))
 - `keep-flipped` on `<awc-anchor>` (`keep_flipped:` on `Impulse::AnchorComponent`) and `keepFlipped` on `useFloatingUI`, which keep the side a floating element flipped to while it's positioned ([#320](https://github.com/Ambiki/impulse_view_components/pull/320))

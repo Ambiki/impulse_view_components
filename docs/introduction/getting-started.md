@@ -115,10 +115,9 @@ use the shorter paths below.
 | `import useFloatingUI from '…/dist/hooks/use_floating_ui'`       | `import { useFloatingUI } from '@ambiki/impulse-view-components/hooks'`        |
 | `import useFocusOut from '…/dist/hooks/use_focus_out'`           | `import { useFocusOut } from '@ambiki/impulse-view-components/hooks'`          |
 | `import useOutsideClick from '…/dist/hooks/use_outside_click'`   | `import { useOutsideClick } from '@ambiki/impulse-view-components/hooks'`      |
-| `import { isLooselyFocusable } from '…/dist/helpers/focus'`      | `import { isLooselyFocusable } from '@ambiki/impulse-view-components/helpers'` |
 | `@import '~…/dist/elements/<name>'`                              | `@import '@ambiki/impulse-view-components/<name>'`                             |
 | `@import '~…/dist/styles/variables'` and `'~…/dist/styles/base'` | `@import '@ambiki/impulse-view-components/base'`                               |
-| Any other `…/dist/helpers/*`, or `…/dist/elements/autocomplete/<module>` such as `ajax_search` | None. These modules are internal, and stay reachable only through their `dist/` paths. |
+| Any `…/dist/helpers/*`, or `…/dist/elements/autocomplete/<module>` such as `ajax_search` | None. These modules are internal, and stay reachable only through their `dist/` paths. |
 
 The Sass rows need a setup that reads the package's `exports`. See [Import the styles](#import-the-styles).
 
