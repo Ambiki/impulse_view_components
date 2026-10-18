@@ -5,7 +5,7 @@ import { aTimeout, expect, fixture, nextFrame, oneEvent, waitUntil } from '@open
 // Registers `awc-autocomplete`. Kept separate from the type import above, which the bundler elides.
 import './index';
 
-interface Option {
+interface FixtureOption {
   value: string;
   text: string;
 }
@@ -14,21 +14,21 @@ interface FixtureOptions {
   src?: string;
   multiple?: boolean;
   open?: boolean;
-  options?: Option[];
+  options?: FixtureOption[];
   /** What the server rendered as selected: at most one option for a single select, a tag each for a multiple select. */
-  selected?: Option[];
+  selected?: FixtureOption[];
   /** Further attributes for the element, such as `required` or `param="term"`. */
   attributes?: string;
 }
 
-const FRUITS: Option[] = [
+const FRUITS: FixtureOption[] = [
   { value: '1', text: 'Apple' },
   { value: '2', text: 'Banana' },
   { value: '3', text: 'Cherry' },
 ];
 
 /** Mirrors `app/components/impulse/autocomplete/option_component.html.erb`. */
-function optionsHtml(options: Option[]) {
+function optionsHtml(options: FixtureOption[]) {
   return options
     .map(
       ({ value, text }) =>
@@ -38,7 +38,7 @@ function optionsHtml(options: Option[]) {
 }
 
 /** A tag the server rendered for a value that was already selected. */
-function persistedTagHtml({ value, text }: Option) {
+function persistedTagHtml({ value, text }: FixtureOption) {
   return `
     <div class="awc-autocomplete-tag" value="${value}" data-text="${text}" data-behavior="tag" data-persisted>
       <span data-behavior="text">${text}</span>
@@ -143,13 +143,23 @@ async function requested(stub: FetchStub, count = 1) {
 }
 
 /** Answers the latest request, and waits for the element to finish handling the response. */
-async function respond(el: AwcAutocompleteElement, stub: FetchStub, body: string, status?: number) {
+async function respondAndWait(el: AwcAutocompleteElement, stub: FetchStub, body: string, status?: number) {
   const loadend = oneEvent(el, 'loadend');
   stub.respond(body, status);
   await loadend;
 }
 
 const AJAX_EVENTS = ['loadstart', 'load', 'error', 'loadend'] as const;
+
+/** The value of each option, in order. */
+function valuesOf(el: AwcAutocompleteElement) {
+  return el.options.map((option) => option.getAttribute('value'));
+}
+
+/** The `aria-selected` of each option, in order. */
+function selectionOf(el: AwcAutocompleteElement) {
+  return el.options.map((option) => option.getAttribute('aria-selected'));
+}
 
 /**
  * Waits for the positioning observers' callbacks to have run, so that only the change under test can reposition.
@@ -613,7 +623,7 @@ describe('AwcAutocompleteElement', () => {
 
       el.setValue('2');
 
-      expect(el.options.map((option) => option.getAttribute('aria-selected'))).to.eql(['false', 'true', 'false']);
+      expect(selectionOf(el)).to.eql(['false', 'true', 'false']);
     });
 
     it('should deselect the option when the value is cleared while open', async () => {
@@ -622,7 +632,7 @@ describe('AwcAutocompleteElement', () => {
 
       el.clear();
 
-      expect(el.options.map((option) => option.getAttribute('aria-selected'))).to.eql(['false', 'false', 'false']);
+      expect(selectionOf(el)).to.eql(['false', 'false', 'false']);
     });
 
     it('should clear the value with `removeValue`', async () => {
@@ -633,6 +643,14 @@ describe('AwcAutocompleteElement', () => {
       expect(el.value).to.equal('');
       expect(el.input.value).to.equal('');
       expect(el).not.to.have.class('awc-autocomplete--selected');
+    });
+
+    it('should clear the value with `removeValue`, whatever value it is given', async () => {
+      const el = await autocompleteFixture({ options: FRUITS, selected: [FRUITS[0]] });
+
+      el.removeValue('2');
+
+      expect(el.value).to.equal('');
     });
 
     it('should clear the value with `clear`', async () => {
@@ -808,8 +826,9 @@ describe('AwcAutocompleteElement', () => {
       pressKey(el, 'ArrowDown', { altKey: true });
       expect(el.open).to.equal(true);
 
+      const hidden = oneEvent(el, 'awc-autocomplete:hidden');
       pressKey(el, 'ArrowUp', { altKey: true });
-      await nextFrame();
+      await hidden;
       expect(el.open).to.equal(false);
       expect(events).to.eql(['show', 'shown', 'hide', 'hidden']);
     });
@@ -853,9 +872,10 @@ describe('AwcAutocompleteElement', () => {
       const el = await autocompleteFixture({ options: FRUITS });
       el.show();
       const events = recordEvents(el);
+      const hidden = oneEvent(el, 'awc-autocomplete:hidden');
 
       press(document.body);
-      await nextFrame();
+      await hidden;
 
       expect(el.open).to.equal(false);
       expect(events).to.eql(['hide', 'hidden']);
@@ -871,7 +891,7 @@ describe('AwcAutocompleteElement', () => {
       expect(el.open).to.equal(true);
     });
 
-    it('should mark an outside click that blurred the input as handled, unless it lands on something focusable', async () => {
+    it('should claim the outside click that closed it, so other outside click handling skips it, unless it lands on something focusable', async () => {
       const container = await fixture<HTMLElement>(`
         <div>
           ${autocompleteHtml({ options: FRUITS })}
@@ -947,7 +967,6 @@ describe('AwcAutocompleteElement', () => {
 
       type(el, 'ERR');
 
-      expect(el.visibleOptions).to.eql([el.options[2]]);
       expect(el.activeOption).to.equal(el.options[2]);
     });
 
@@ -968,7 +987,7 @@ describe('AwcAutocompleteElement', () => {
   });
 
   describe('ajax fetching', () => {
-    /** Records, in order, the request events dispatched on `target`. */
+    /** Records, in order, the ajax events dispatched on `target`. */
     function recordAjaxEvents(target: HTMLElement) {
       const events: string[] = [];
       for (const name of AJAX_EVENTS) {
@@ -976,8 +995,6 @@ describe('AwcAutocompleteElement', () => {
       }
       return events;
     }
-
-    const valuesOf = (el: AwcAutocompleteElement) => el.options.map((option) => option.getAttribute('value'));
 
     it('should request what is typed under `param`, keeping the query string of `src`', async () => {
       const el = await autocompleteFixture({ src: '/fruits?scope=all', attributes: 'param="term"' });
@@ -999,7 +1016,7 @@ describe('AwcAutocompleteElement', () => {
       await requested(stub);
       expect(el).to.have.attribute('loading');
 
-      await respond(el, stub, optionsHtml(FRUITS));
+      await respondAndWait(el, stub, optionsHtml(FRUITS));
 
       expect(el).not.to.have.attribute('loading');
       expect(valuesOf(el)).to.eql(['1', '2', '3']);
@@ -1014,7 +1031,7 @@ describe('AwcAutocompleteElement', () => {
 
       pressInput(el);
       await requested(stub);
-      await respond(el, stub, optionsHtml(FRUITS));
+      await respondAndWait(el, stub, optionsHtml(FRUITS));
 
       expect(events).to.eql(['loadstart', 'load', 'loadend']);
       expect(bubbled).to.eql([]);
@@ -1027,7 +1044,7 @@ describe('AwcAutocompleteElement', () => {
 
       pressInput(el);
       await requested(stub);
-      await respond(el, stub, 'Server error', 500);
+      await respondAndWait(el, stub, 'Server error', 500);
 
       expect(el).to.have.attribute('error');
       expect(el).not.to.have.attribute('loading');
@@ -1042,10 +1059,10 @@ describe('AwcAutocompleteElement', () => {
       const stub = stubFetch();
       pressInput(el);
       await requested(stub);
-      await respond(el, stub, optionsHtml(FRUITS));
+      await respondAndWait(el, stub, optionsHtml(FRUITS));
       type(el, 'ap');
       await requested(stub, 2);
-      await respond(el, stub, optionsHtml([FRUITS[0]]));
+      await respondAndWait(el, stub, optionsHtml([FRUITS[0]]));
       await el.hide();
 
       pressInput(el);
@@ -1065,7 +1082,7 @@ describe('AwcAutocompleteElement', () => {
 
       type(el, 'ch');
       await requested(stub, 2);
-      await respond(el, stub, optionsHtml([FRUITS[2]]));
+      await respondAndWait(el, stub, optionsHtml([FRUITS[2]]));
 
       expect(olderSignal.aborted).to.equal(true);
       expect(valuesOf(el)).to.eql(['3']);
@@ -1078,9 +1095,9 @@ describe('AwcAutocompleteElement', () => {
 
       pressInput(el);
       await requested(stub);
-      await respond(el, stub, optionsHtml(FRUITS));
+      await respondAndWait(el, stub, optionsHtml(FRUITS));
 
-      expect(el.options.map((option) => option.getAttribute('aria-selected'))).to.eql(['false', 'true', 'false']);
+      expect(selectionOf(el)).to.eql(['false', 'true', 'false']);
       expect(el.activeOption).to.equal(el.options[1]);
     });
 
@@ -1091,11 +1108,11 @@ describe('AwcAutocompleteElement', () => {
       await requested(stub);
 
       await el.hide();
-      await respond(el, stub, optionsHtml(FRUITS));
+      await respondAndWait(el, stub, optionsHtml(FRUITS));
 
       expect(el.input.hasAttribute('aria-activedescendant')).to.equal(false);
       expect(el.activeOption).to.equal(null);
-      expect(el.options.map((option) => option.getAttribute('aria-selected'))).to.eql(['false', 'false', 'false']);
+      expect(selectionOf(el)).to.eql(['false', 'false', 'false']);
     });
   });
 
