@@ -1,8 +1,14 @@
 import type AwcAnchorElement from './index';
 import { whenInitialized } from '@ambiki/impulse';
 import { expect, fixture, nextFrame, waitUntil } from '@open-wc/testing';
+import { Idiomorph } from 'idiomorph';
 // Registers `awc-anchor`. Kept separate from the type import above, which the bundler elides.
 import './index';
+
+/** The `awc-anchor` in `anchorFixture`, with `attributes`. */
+function anchorHtml(attributes: string) {
+  return `<awc-anchor anchor-id="anchor" ${attributes}><div data-arrow></div></awc-anchor>`;
+}
 
 /**
  * An anchor at (100, 100) sized 50×20, and an 80×40 `awc-anchor`. The anchor is fixed so its geometry doesn't depend
@@ -18,7 +24,7 @@ async function anchorFixture(attributes = 'active') {
         [data-arrow] { position: absolute; width: 8px; height: 8px; }
       </style>
       <button id="anchor" class="anchor">Anchor</button>
-      <awc-anchor anchor-id="anchor" ${attributes}><div data-arrow></div></awc-anchor>
+      ${anchorHtml(attributes)}
     </div>
   `);
   const anchor = container.querySelector<HTMLElement>('#anchor')!;
@@ -407,5 +413,36 @@ describe('awc-anchor', () => {
     await settle();
 
     expect(floating.style.left).to.equal('85px');
+  });
+
+  it('keeps its defaults through a morph to markup without them', async () => {
+    const { floating } = await anchorFixture();
+
+    Idiomorph.morph(floating, anchorHtml('active'));
+
+    expect(floating.placement).to.equal('bottom');
+    expect(floating.strategy).to.equal('fixed');
+    expect(floating.flip).to.equal(true);
+    expect(floating.shift).to.equal(true);
+    expect(floating.fallbackStrategy).to.equal('bestFit');
+  });
+
+  it('falls back to its defaults when a morph removes their attributes', async () => {
+    const { floating } = await anchorFixture(
+      'active placement="top" strategy="absolute" flip="false" shift="false" fallback-strategy="initialPlacement"',
+    );
+    expect(floating.placement).to.equal('top');
+    expect(floating.strategy).to.equal('absolute');
+    expect(floating.flip).to.equal(false);
+    expect(floating.shift).to.equal(false);
+    expect(floating.fallbackStrategy).to.equal('initialPlacement');
+
+    Idiomorph.morph(floating, anchorHtml('active'));
+
+    expect(floating.placement).to.equal('bottom');
+    expect(floating.strategy).to.equal('fixed');
+    expect(floating.flip).to.equal(true);
+    expect(floating.shift).to.equal(true);
+    expect(floating.fallbackStrategy).to.equal('bestFit');
   });
 });

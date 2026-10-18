@@ -1,6 +1,7 @@
 import type AwcPopoverElement from './index';
 import { whenInitialized } from '@ambiki/impulse';
 import { expect, fixture, nextFrame, waitUntil } from '@open-wc/testing';
+import { Idiomorph } from 'idiomorph';
 // Registers `awc-popover`. Kept separate from the type import above, which the bundler elides.
 import './index';
 
@@ -700,5 +701,25 @@ describe('awc-popover', () => {
 
     expect(el.open).to.equal(false);
     expect(isPopoverOpen(el.panel)).to.equal(false);
+  });
+
+  it('keeps its defaults through a morph to markup without them', async () => {
+    const el = await popoverFixture();
+
+    Idiomorph.morph(el, popoverHtml());
+
+    expect(el.placement).to.equal('bottom');
+    expect(el.strategy).to.equal('fixed');
+  });
+
+  it('falls back to its defaults when a morph removes their attributes', async () => {
+    const el = await popoverFixture({ attributes: 'placement="top" strategy="absolute"' });
+    expect(el.placement).to.equal('top');
+    expect(el.strategy).to.equal('absolute');
+
+    Idiomorph.morph(el, popoverHtml());
+
+    expect(el.placement).to.equal('bottom');
+    expect(el.strategy).to.equal('fixed');
   });
 });

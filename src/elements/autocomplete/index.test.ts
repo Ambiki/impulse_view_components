@@ -2,6 +2,7 @@ import type { AutocompleteEventName } from './events';
 import type AwcAutocompleteElement from './index';
 import { whenInitialized } from '@ambiki/impulse';
 import { aTimeout, expect, fixture, nextFrame, oneEvent, waitUntil } from '@open-wc/testing';
+import { Idiomorph } from 'idiomorph';
 // Registers `awc-autocomplete`. Kept separate from the type import above, which the bundler elides.
 import './index';
 
@@ -1305,6 +1306,34 @@ describe('AwcAutocompleteElement', () => {
       await el.hide();
 
       expect(el.input.value).to.equal('');
+    });
+  });
+
+  describe('morphing', () => {
+    it('should keep its defaults through a morph to markup without them', async () => {
+      const el = await autocompleteFixture({ options: FRUITS });
+
+      Idiomorph.morph(el, autocompleteHtml({ options: FRUITS }));
+
+      expect(el.param).to.equal('q');
+      expect(el.autoSize).to.equal(true);
+      expect(el.autoSizePadding).to.equal(4);
+    });
+
+    it('should fall back to its defaults when a morph removes their attributes', async () => {
+      const el = await autocompleteFixture({
+        options: FRUITS,
+        attributes: 'param="term" auto-size="false" auto-size-padding="10"',
+      });
+      expect(el.param).to.equal('term');
+      expect(el.autoSize).to.equal(false);
+      expect(el.autoSizePadding).to.equal(10);
+
+      Idiomorph.morph(el, autocompleteHtml({ options: FRUITS }));
+
+      expect(el.param).to.equal('q');
+      expect(el.autoSize).to.equal(true);
+      expect(el.autoSizePadding).to.equal(4);
     });
   });
 });

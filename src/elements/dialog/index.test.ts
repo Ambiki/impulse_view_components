@@ -1,6 +1,7 @@
 import type AwcDialogElement from './index';
 import { whenInitialized } from '@ambiki/impulse';
 import { expect, fixture, nextFrame } from '@open-wc/testing';
+import { Idiomorph } from 'idiomorph';
 // Registers `awc-dialog`. Kept separate from the type import above, which the bundler elides.
 import './index';
 
@@ -304,5 +305,22 @@ describe('awc-dialog', () => {
     expect(el.open).to.equal(false);
     expect(el.dialog.open).to.equal(false);
     expect(events).to.eql([]);
+  });
+
+  it('keeps its defaults through a morph to markup without them', async () => {
+    const el = await dialogFixture();
+
+    Idiomorph.morph(el, dialogHtml());
+
+    expect(el.hideOnOutsideClick).to.equal(true);
+  });
+
+  it('falls back to its defaults when a morph removes their attributes', async () => {
+    const el = await dialogFixture('hide-on-outside-click="false"');
+    expect(el.hideOnOutsideClick).to.equal(false);
+
+    Idiomorph.morph(el, dialogHtml());
+
+    expect(el.hideOnOutsideClick).to.equal(true);
   });
 });

@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **Breaking:** Elements no longer write their defaults to attributes when they connect, so a selector like `awc-popover[placement="bottom"]` stops matching. Read the property, or render the attribute explicitly. To turn off a Boolean that defaults to on, such as `flip`, set it to `"false"`: removing the attribute now turns it back on ([#321](https://github.com/Ambiki/impulse_view_components/pull/321))
 - **Breaking:** `<awc-autocomplete>` auto sizes by default (`auto-size="false"` or `auto_size: false` turns it off), and its listbox is never taller than `--awc-autocomplete-listbox-max-height`. Compiling the SCSS now needs Dart Sass ([#318](https://github.com/Ambiki/impulse_view_components/pull/318))
 - **Breaking:** `<awc-popover>` renders in the top layer as `<div role="dialog" popover="manual">` instead of a `<dialog>`. It moves focus in when it opens, returns it to the trigger when it closes, and closes when focus moves out. `handleClose` is gone, and a `<form method="dialog">` inside no longer closes it ([#308](https://github.com/Ambiki/impulse_view_components/pull/308))
 - `<awc-dialog>`'s `hide()` and `requestHide()` return a promise, like the popover's and the autocomplete's ([#305](https://github.com/Ambiki/impulse_view_components/pull/305))
@@ -36,6 +37,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Fixed a page morph resetting the defaults of `<awc-autocomplete>`, `<awc-dialog>`, `<awc-popover>` and `<awc-anchor>` ([#321](https://github.com/Ambiki/impulse_view_components/pull/321))
 - Fixed the `<awc-autocomplete>` listbox jumping between sides of its control while filtering ([#320](https://github.com/Ambiki/impulse_view_components/pull/320))
 - Fixed an auto sized `<awc-anchor>`, `useFloatingUI` floating element or `<awc-autocomplete>` listbox staying squashed instead of flipping to the side of its anchor with more room ([#318](https://github.com/Ambiki/impulse_view_components/pull/318))
 - Fixed Enter after a paste committing an option from the previous results in an ajax `<awc-autocomplete>` ([#316](https://github.com/Ambiki/impulse_view_components/pull/316))
