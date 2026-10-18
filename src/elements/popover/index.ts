@@ -28,11 +28,6 @@ export default class AwcPopoverElement extends OpenableElement {
    */
   @property() strategy: Strategy = 'fixed';
 
-  /**
-   * The CSS selector of the element that should avoid closing the popover when clicked inside.
-   */
-  @property({ type: Array }) clickBoundaries: string[] = [];
-
   @target() button: HTMLButtonElement;
   @target() panel: HTMLElement;
   @target() arrow: HTMLElement;
@@ -223,8 +218,7 @@ export default class AwcPopoverElement extends OpenableElement {
   }
 
   private get boundaries() {
-    const elements = this.clickBoundaries.map((s) => document.querySelector<HTMLElement>(s));
-    return elements.concat([this.button, this.panel]);
+    return [this.button, this.panel];
   }
 }
 

@@ -30,11 +30,10 @@ module Impulse
       Impulse::BaseRenderer.new(**system_args)
     }
 
-    def initialize(title: nil, click_boundaries: [], **system_args)
+    def initialize(title: nil, **system_args)
       @title = title
       @system_args = system_args
       @system_args[:tag] = :"awc-popover"
-      @system_args[:"click-boundaries"] = click_boundaries.to_json
       @panel_id = self.class.generate_id
       @title_id = "#{@panel_id}-title"
 

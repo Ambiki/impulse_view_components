@@ -34,6 +34,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Removed
 
+- **Breaking:** `click_boundaries:` on `Impulse::PopoverComponent` and `click-boundaries` on `<awc-popover>` ([#323](https://github.com/Ambiki/impulse_view_components/pull/323))
 - Dropped support for Rails 6.1 and Ruby 3.3. The minimum supported versions are now Rails 7.0.9 and Ruby 3.4. Earlier Rails 7.0 releases fail to load on Ruby 3.4 because they don't declare `base64`, `bigdecimal`, `drb` and `mutex_m`, which Ruby 3.4 moved to bundled gems
 
 ### Fixed
