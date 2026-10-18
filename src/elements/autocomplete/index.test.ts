@@ -569,6 +569,24 @@ describe('AwcAutocompleteElement', () => {
       expect(el.input.value).to.equal('Fig');
     });
 
+    it('should select the option when a value is set while open', async () => {
+      const el = await autocompleteFixture({ options: FRUITS, selected: [FRUITS[0]] });
+      el.show();
+
+      el.setValue('2');
+
+      expect(el.options.map((option) => option.getAttribute('aria-selected'))).to.eql(['false', 'true', 'false']);
+    });
+
+    it('should deselect the option when the value is cleared while open', async () => {
+      const el = await autocompleteFixture({ options: FRUITS, selected: [FRUITS[0]] });
+      el.show();
+
+      el.clear();
+
+      expect(el.options.map((option) => option.getAttribute('aria-selected'))).to.eql(['false', 'false', 'false']);
+    });
+
     it('should clear the value with `removeValue`', async () => {
       const el = await autocompleteFixture({ options: FRUITS, selected: [FRUITS[0]] });
 
