@@ -1076,6 +1076,62 @@ describe('AwcAutocompleteElement', () => {
       expect(valuesOf(el)).to.eql(['1', '2', '3']);
     });
 
+    it('should commit nothing on Enter after a paste, until the options for it arrive', async () => {
+      const el = await autocompleteFixture({ src: '/fruits' });
+      const stub = stubFetch();
+      pressInput(el);
+      await requested(stub);
+      await respondAndWait(el, stub, optionsHtml(FRUITS));
+      const events = recordEvents(el, VALUE_EVENTS);
+
+      // Typed without a keydown the combobox sees, as pasting does.
+      type(el, 'Cherry');
+      expect(el.hasAttribute('loading')).to.equal(true);
+      expect(el.activeOption).to.equal(null);
+      pressKey(el, 'Enter');
+      await requested(stub, 2);
+      expect(el.activeOption).to.equal(null);
+      pressKey(el, 'Enter');
+
+      expect(el.value).to.equal('');
+      expect(events).to.eql([]);
+    });
+
+    it('should commit nothing on Enter when the options for the previous query arrive after a paste', async () => {
+      const el = await autocompleteFixture({ src: '/fruits' });
+      const stub = stubFetch();
+      pressInput(el);
+      await requested(stub);
+      const events = recordEvents(el, VALUE_EVENTS);
+
+      type(el, 'Cherry');
+      // Answers the request for the empty query, as the one for "Cherry" waits out the debounce.
+      stub.respond(optionsHtml(FRUITS));
+      await nextFrame();
+      pressKey(el, 'Enter');
+
+      expect(el.value).to.equal('');
+      expect(events).to.eql([]);
+      expect(el.hasAttribute('loading')).to.equal(true);
+    });
+
+    it('should leave no option active while it fetches the options for reopening', async () => {
+      const el = await autocompleteFixture({ src: '/fruits' });
+      const stub = stubFetch();
+      pressInput(el);
+      await requested(stub);
+      // A failed request for the empty query leaves nothing to reuse on reopening.
+      await respondAndWait(el, stub, 'Server error', 500);
+      type(el, 'Cherry');
+      await requested(stub, 2);
+      await respondAndWait(el, stub, optionsHtml([FRUITS[2]]));
+      await el.hide();
+
+      pressInput(el);
+
+      expect(el.activeOption).to.equal(null);
+    });
+
     it('should abort the request for an older query when a newer one goes out', async () => {
       const el = await autocompleteFixture({ src: '/fruits' });
       const stub = stubFetch();

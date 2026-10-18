@@ -21,6 +21,11 @@ export default class AjaxSearch implements SearchVariant {
   search(value: string) {
     this.autocomplete.setAttribute('loading', '');
     this.autocomplete.removeAttribute('error');
+    // The options on show, and any still on their way, are for an older query until the ones for `value` arrive, so
+    // none of them may be active for a commit. A typed key already deactivates through the combobox, but a paste sends
+    // no keydown it handles. The controller stays, as the request's `loadstart` still waits for its `loadend`.
+    this.autocomplete.combobox.deactivate();
+    this.abortController?.abort();
     this.debouncedRequest(value);
   }
 

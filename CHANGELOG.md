@@ -34,6 +34,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Fixed Enter after a paste committing an option from the previous results in an ajax `<awc-autocomplete>` ([#316](https://github.com/Ambiki/impulse_view_components/pull/316))
 - Fixed a response that lands after an ajax `<awc-autocomplete>` closes setting its active option, selection, `no-options` or `error` ([#314](https://github.com/Ambiki/impulse_view_components/pull/314))
 - Fixed Enter committing an option hidden by the query in `<awc-autocomplete>`, after pasting text that matches no option ([#314](https://github.com/Ambiki/impulse_view_components/pull/314))
 - Fixed a single select `<awc-autocomplete>` leaving the old option marked selected when its value changed while open ([#314](https://github.com/Ambiki/impulse_view_components/pull/314))
