@@ -171,10 +171,10 @@
   resolved "https://registry.yarnpkg.com/@ambiki/combobox/-/combobox-2.0.1.tgz#8fd059dec4d6d160331c8a4a9df82b6a095fb549"
   integrity sha512-HDbUvfh2s0v7jGULHjxuDgKsXHukJ3qMDG20i6uIeoHLghWjw+HFWMgxwNqrKzM17HEMSI3RletQGdggUDmA3g==
 
-"@ambiki/impulse@^2.0.0-rc.1":
-  version "2.0.0-rc.1"
-  resolved "https://registry.yarnpkg.com/@ambiki/impulse/-/impulse-2.0.0-rc.1.tgz#40caf48bad09b3ee5d63354142f956adc8845c92"
-  integrity sha512-k4JyLgth9mynKkIG+/zJwLXvO1p0km/iZuEIPmhbC82OL1HYI74FuWj/sygPotEnjXrFgkEEHgPOQySQ3rTasA==
+"@ambiki/impulse@^2.0.0-rc.2":
+  version "2.0.0-rc.2"
+  resolved "https://registry.yarnpkg.com/@ambiki/impulse/-/impulse-2.0.0-rc.2.tgz#87ae46c2c2ee3c74f9744eda1b86bf52b09ce3ed"
+  integrity sha512-mYD1HAH2rwFJFJWX20i90aNgcza9rXkojUhNtPr2BlNqcZHh8E3cv2cl3W2JNBP2lnVAizthqQlm1i9HP0l8Cg==
 
 "@antfu/eslint-config@^8.2.0":
   version "8.3.0"
@@ -4025,6 +4025,11 @@ iconv-lite@0.4.24:
   integrity sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==
   dependencies:
     safer-buffer ">= 2.1.2 < 3"
+
+idiomorph@^0.8.0:
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/idiomorph/-/idiomorph-0.8.0.tgz#ef5ad8cef99027fa1e961d6ce194bd5edbda06f7"
+  integrity sha512-R47JBL+6jHDQvcnbppIUtXXcxi5h6+wuCEEZXnRhUltsgzPFKzThL5PuHppP9ypJuy+7WawcY1TsSBD/iQbMhw==
 
 ignore@^5.2.0:
   version "5.2.4"

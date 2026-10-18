@@ -109,7 +109,7 @@
   },
   "dependencies": {
     "@ambiki/combobox": "^2.0.1",
-    "@ambiki/impulse": "^2.0.0-rc.1",
+    "@ambiki/impulse": "^2.0.0-rc.2",
     "@floating-ui/dom": "^1.7.4",
     "tabbable": "^6.4.0"
   },
@@ -130,6 +130,7 @@
     "eslint": "^10.12.0",
     "eslint-plugin-format": "^2.0.1",
     "globby": "^16.2.4",
+    "idiomorph": "^0.8.0",
     "postcss": "^8.5.30",
     "postcss-cli": "^12.0.0",
     "rollup": "^4.64.7",
