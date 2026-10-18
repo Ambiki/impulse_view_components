@@ -1,30 +1,69 @@
+import type { AutocompleteEventName } from './events';
 import type AwcAutocompleteElement from './index';
 import { whenInitialized } from '@ambiki/impulse';
 import { aTimeout, expect, fixture, nextFrame, oneEvent, waitUntil } from '@open-wc/testing';
 // Registers `awc-autocomplete`. Kept separate from the type import above, which the bundler elides.
 import './index';
 
+interface Option {
+  value: string;
+  text: string;
+}
+
 interface FixtureOptions {
   src?: string;
   multiple?: boolean;
   open?: boolean;
-  options?: Array<{ value: string; text: string }>;
+  options?: Option[];
+  /** What the server rendered as selected: at most one option for a single select, a tag each for a multiple select. */
+  selected?: Option[];
+  /** Further attributes for the element, such as `required` or `param="term"`. */
+  attributes?: string;
+}
+
+const FRUITS: Option[] = [
+  { value: '1', text: 'Apple' },
+  { value: '2', text: 'Banana' },
+  { value: '3', text: 'Cherry' },
+];
+
+/** Mirrors `app/components/impulse/autocomplete/option_component.html.erb`. */
+function optionsHtml(options: Option[]) {
+  return options
+    .map(
+      ({ value, text }) =>
+        `<div role="option" tabindex="-1" value="${value}" data-text="${text}" aria-selected="false">${text}</div>`,
+    )
+    .join('');
+}
+
+/** A tag the server rendered for a value that was already selected. */
+function persistedTagHtml({ value, text }: Option) {
+  return `
+    <div class="awc-autocomplete-tag" value="${value}" data-text="${text}" data-behavior="tag" data-persisted>
+      <span data-behavior="text">${text}</span>
+      <button type="button" data-action="click->awc-autocomplete#handleTagRemove" data-target="awc-autocomplete.tagDismissButtons"></button>
+      <input type="hidden" data-behavior="hidden-field" value="${value}" data-text="${text}">
+    </div>
+  `;
 }
 
 /**
  * Mirrors the structure of `app/components/impulse/autocomplete_component.html.erb`. Only the parts the element reads
  * are reproduced here: the targets, the `data-behavior` hooks and the actions.
  */
-function autocompleteHtml({ src, multiple = false, open = false, options = [] }: FixtureOptions = {}) {
-  const optionsHtml = options
-    .map(
-      ({ value, text }) =>
-        `<div role="option" tabindex="-1" value="${value}" data-text="${text}" aria-selected="false">${text}</div>`,
-    )
-    .join('');
-
+function autocompleteHtml({
+  src,
+  multiple = false,
+  open = false,
+  options = [],
+  selected = [],
+  attributes = '',
+}: FixtureOptions = {}) {
+  const [singleSelection] = selected;
   const selection = multiple ?
     `<input type="hidden" data-behavior="hidden-field" value="">
+       ${selected.map(persistedTagHtml).join('')}
        <template data-behavior="tag-template">
          <div class="awc-autocomplete-tag" data-behavior="tag">
            <span data-behavior="text"></span>
@@ -32,14 +71,14 @@ function autocompleteHtml({ src, multiple = false, open = false, options = [] }:
            <input type="hidden" data-behavior="hidden-field">
          </div>
        </template>` :
-    `<input type="hidden" data-behavior="hidden-field" value="" data-text="">`;
+    `<input type="hidden" data-behavior="hidden-field" value="${singleSelection?.value ?? ''}" data-text="${singleSelection?.text ?? ''}">`;
 
   return `
-    <awc-autocomplete ${multiple ? 'multiple' : ''} ${open ? 'open' : ''} ${src ? `src="${src}"` : ''}
+    <awc-autocomplete ${multiple ? 'multiple' : ''} ${open ? 'open' : ''} ${src ? `src="${src}"` : ''} ${attributes}
       data-action="mousedown->awc-autocomplete#handleMousedown click->awc-autocomplete#handleClick combobox:commit->awc-autocomplete#handleCommit">
       <div class="awc-autocomplete-control" data-target="awc-autocomplete.control" data-trigger>
         ${selection}
-        <input class="awc-autocomplete-input" type="text" autocomplete="off"
+        <input class="awc-autocomplete-input" type="text" autocomplete="off" value="${multiple ? '' : (singleSelection?.text ?? '')}"
           data-target="awc-autocomplete.input"
           data-action="mousedown->awc-autocomplete#handleInputMousedown blur->awc-autocomplete#handleInputBlur keydown->awc-autocomplete#handleInputKeydown input->awc-autocomplete#handleInput">
         <div class="awc-autocomplete-end-adornment" data-trigger>
@@ -47,7 +86,7 @@ function autocompleteHtml({ src, multiple = false, open = false, options = [] }:
         </div>
       </div>
       <div role="listbox" tabindex="-1" data-target="awc-autocomplete.listbox">
-        <div role="presentation" data-target="awc-autocomplete.optionsContainer">${optionsHtml}</div>
+        <div role="presentation" data-target="awc-autocomplete.optionsContainer">${optionsHtml(options)}</div>
       </div>
     </awc-autocomplete>
   `;
@@ -98,11 +137,18 @@ async function drainObservers() {
 }
 
 const OPEN_CLOSE_EVENTS = ['show', 'shown', 'hide', 'hidden'] as const;
+const VALUE_EVENTS = ['commit', 'remove', 'clear', 'reset'] as const;
 
-/** Records, in order, the `awc-autocomplete:*` open, close, `clear` and `reset` events `el` dispatches. */
-function recordEvents(el: AwcAutocompleteElement) {
+/**
+ * Records, in order, the `awc-autocomplete:<name>` events `el` dispatches, for each of `names`. By default, the open,
+ * close, `clear` and `reset` events.
+ */
+function recordEvents(
+  el: AwcAutocompleteElement,
+  names: readonly AutocompleteEventName[] = [...OPEN_CLOSE_EVENTS, 'clear', 'reset'],
+) {
   const events: string[] = [];
-  for (const name of [...OPEN_CLOSE_EVENTS, 'clear', 'reset'] as const) {
+  for (const name of names) {
     el.addEventListener(`awc-autocomplete:${name}`, (event) => {
       if (event.target === el) events.push(name);
     });
@@ -500,6 +546,176 @@ describe('AwcAutocompleteElement', () => {
       expect(event.detail.target).to.equal(tag);
       expect(event.detail.value).to.equal('1');
       expect(event.detail.text).to.equal('One');
+    });
+  });
+
+  describe('selection API in a single select', () => {
+    it('should select a value, reading its text from the option', async () => {
+      const el = await autocompleteFixture({ options: FRUITS });
+
+      el.setValue('2');
+
+      expect(el.value).to.equal('2');
+      expect(el.input.value).to.equal('Banana');
+      expect(el).to.have.class('awc-autocomplete--selected');
+    });
+
+    it('should select a value that has no option, with the text it is given', async () => {
+      const el = await autocompleteFixture({ options: FRUITS });
+
+      el.setValue('9', '  Fig ');
+
+      expect(el.value).to.equal('9');
+      expect(el.input.value).to.equal('Fig');
+    });
+
+    it('should clear the value with `removeValue`', async () => {
+      const el = await autocompleteFixture({ options: FRUITS, selected: [FRUITS[0]] });
+
+      el.removeValue();
+
+      expect(el.value).to.equal('');
+      expect(el.input.value).to.equal('');
+      expect(el).not.to.have.class('awc-autocomplete--selected');
+    });
+
+    it('should clear the value with `clear`', async () => {
+      const el = await autocompleteFixture({ options: FRUITS, selected: [FRUITS[0]] });
+
+      el.clear();
+
+      expect(el.value).to.equal('');
+      expect(el.input.value).to.equal('');
+    });
+
+    it('should restore the value the server rendered with `reset`', async () => {
+      const el = await autocompleteFixture({ options: FRUITS, selected: [FRUITS[0]] });
+      el.setValue('2');
+
+      el.reset();
+
+      expect(el.value).to.equal('1');
+      expect(el.input.value).to.equal('Apple');
+    });
+
+    it('should emit no value events when the value changes from code', async () => {
+      const el = await autocompleteFixture({ options: FRUITS, selected: [FRUITS[0]] });
+      const events = recordEvents(el, VALUE_EVENTS);
+
+      el.setValue('2');
+      el.removeValue();
+      el.clear();
+      el.reset();
+
+      expect(events).to.eql([]);
+    });
+  });
+
+  describe('selection API in a multiple select', () => {
+    /** The value and text of each tag, as the form submits the value and the user reads the text. */
+    function tagsOf(el: AwcAutocompleteElement) {
+      return el.tags.map((tag) => {
+        const hiddenField = tag.querySelector<HTMLInputElement>('[data-behavior="hidden-field"]')!;
+        return { value: hiddenField.value, text: tag.querySelector('[data-behavior="text"]')!.textContent };
+      });
+    }
+
+    it('should add a tag for each value, reading its text from the option', async () => {
+      const el = await autocompleteFixture({ multiple: true, options: FRUITS });
+
+      el.setValue('1');
+      el.setValue('9', 'Fig');
+
+      expect(el.value).to.eql(['1', '9']);
+      expect(tagsOf(el)).to.eql([{ value: '1', text: 'Apple' }, { value: '9', text: 'Fig' }]);
+      expect(el).to.have.class('awc-autocomplete--selected');
+    });
+
+    it('should not add a second tag for a value that is already selected', async () => {
+      const el = await autocompleteFixture({ multiple: true, options: FRUITS, selected: [FRUITS[0]] });
+
+      el.setValue('1');
+
+      expect(el.value).to.eql(['1']);
+    });
+
+    it('should select the option when a value is set while open', async () => {
+      const el = await autocompleteFixture({ multiple: true, options: FRUITS });
+      el.show();
+
+      el.setValue('2');
+
+      expect(el.options[1].getAttribute('aria-selected')).to.equal('true');
+    });
+
+    it('should remove only the given value', async () => {
+      const el = await autocompleteFixture({ multiple: true, options: FRUITS, selected: [FRUITS[0], FRUITS[1]] });
+
+      el.removeValue('1');
+
+      expect(el.value).to.eql(['2']);
+      expect(tagsOf(el)).to.eql([{ value: '2', text: 'Banana' }]);
+    });
+
+    it('should deselect the option when its value is removed while open', async () => {
+      const el = await autocompleteFixture({ multiple: true, options: FRUITS, selected: [FRUITS[0]] });
+      el.show();
+      expect(el.options[0].getAttribute('aria-selected')).to.equal('true');
+
+      el.removeValue('1');
+
+      expect(el.options[0].getAttribute('aria-selected')).to.equal('false');
+    });
+
+    it('should ignore removing a value that is not selected', async () => {
+      const el = await autocompleteFixture({ multiple: true, options: FRUITS, selected: [FRUITS[0]] });
+
+      el.removeValue('2');
+
+      expect(el.value).to.eql(['1']);
+    });
+
+    it('should remove every value with `clear`', async () => {
+      const el = await autocompleteFixture({ multiple: true, options: FRUITS, selected: [FRUITS[0], FRUITS[1]] });
+
+      el.clear();
+
+      expect(el.value).to.eql([]);
+      expect(el.tags).to.have.length(0);
+      expect(el).not.to.have.class('awc-autocomplete--selected');
+    });
+
+    it('should restore the tags the server rendered with `reset`', async () => {
+      const el = await autocompleteFixture({ multiple: true, options: FRUITS, selected: [FRUITS[0], FRUITS[1]] });
+      el.removeValue('1');
+      el.setValue('3');
+
+      el.reset();
+
+      expect(tagsOf(el)).to.eql([{ value: '1', text: 'Apple' }, { value: '2', text: 'Banana' }]);
+    });
+
+    it('should require the input only while no value is selected', async () => {
+      const el = await autocompleteFixture({ multiple: true, options: FRUITS, attributes: 'required' });
+      expect(el.input.required).to.equal(true);
+
+      el.setValue('1');
+      expect(el.input.required).to.equal(false);
+
+      el.removeValue('1');
+      expect(el.input.required).to.equal(true);
+    });
+
+    it('should emit no value events when the value changes from code', async () => {
+      const el = await autocompleteFixture({ multiple: true, options: FRUITS, selected: [FRUITS[0]] });
+      const events = recordEvents(el, VALUE_EVENTS);
+
+      el.setValue('2');
+      el.removeValue('1');
+      el.clear();
+      el.reset();
+
+      expect(events).to.eql([]);
     });
   });
 });
