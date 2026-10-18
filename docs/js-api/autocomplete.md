@@ -7,9 +7,9 @@ const autocomplete = document.querySelector('awc-autocomplete');
 ## TypeScript
 
 The selection mode (single vs. multiple) determines the type of `value` and the arguments
-`removeValue` accepts, and the source (local vs. remote) determines whether `setValue` requires
+`removeValue` accepts, and the source (local vs. ajax) determines whether `setValue` requires
 the `text` argument. TypeScript resolves these automatically when you narrow on the `multiple` and
-`remote` properties:
+`ajax` properties:
 
 ```ts
 const autocomplete = document.querySelector('awc-autocomplete')!;
@@ -22,7 +22,7 @@ if (autocomplete.multiple) {
   autocomplete.removeValue(); // no argument
 }
 
-if (autocomplete.remote) {
+if (autocomplete.ajax) {
   autocomplete.setValue('1', 'One'); // text is required
 } else {
   autocomplete.setValue('1'); // text is optional
@@ -46,17 +46,17 @@ single.value; // string
 ```
 
 If you already know the source at the call site, you can also pass the exported type to
-`querySelector` instead of narrowing on `remote`:
+`querySelector` instead of narrowing on `ajax`:
 
 ```ts
 import type {
+  AjaxAutocompleteElement,
   LocalAutocompleteElement,
-  RemoteAutocompleteElement,
 } from '@ambiki/impulse-view-components/dist/elements/autocomplete';
 
-const remote = document.querySelector<RemoteAutocompleteElement>('awc-autocomplete')!;
-remote.setValue('1', 'One'); // text is required
-remote.setValue('1'); // ✗ type error
+const ajax = document.querySelector<AjaxAutocompleteElement>('awc-autocomplete')!;
+ajax.setValue('1', 'One'); // text is required
+ajax.setValue('1'); // ✗ type error
 
 const local = document.querySelector<LocalAutocompleteElement>('awc-autocomplete')!;
 local.setValue('1'); // text is optional
@@ -66,11 +66,11 @@ Each alias leaves the other dimension open, but they are composable — pass the
 type argument to pin both at once:
 
 ```ts
-const el = document.querySelector<MultipleAutocompleteElement<'remote'>>('awc-autocomplete')!;
+const el = document.querySelector<MultipleAutocompleteElement<'ajax'>>('awc-autocomplete')!;
 el.value; // string[]
 el.setValue('1', 'One'); // text is required
 
-// `RemoteAutocompleteElement<'multiple'>` resolves to the same type.
+// `AjaxAutocompleteElement<'multiple'>` resolves to the same type.
 ```
 
 ## Methods
@@ -135,19 +135,19 @@ autocomplete.value;
 // => '1'
 ```
 
-### `remote`
+### `ajax`
 
-Whether the options are fetched from a remote source (i.e. the `src` attribute is set). Narrowing
+Whether the options are fetched from the server (i.e. the `src` attribute is set). Narrowing
 on this resolves source-dependent types — see [TypeScript](#typescript).
 
 ```js
-autocomplete.remote;
+autocomplete.ajax;
 // => true
 ```
 
 ### `setValue`
 
-Sets the value of the element. When the options are fetched from a remote source, the `text`
+Sets the value of the element. When the options are fetched from the server, the `text`
 argument is required (the option is not in the DOM, so its text cannot be derived); for local
 options it is optional. See [TypeScript](#typescript) for how to enforce this at compile time.
 

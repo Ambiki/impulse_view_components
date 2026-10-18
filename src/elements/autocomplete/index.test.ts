@@ -137,7 +137,7 @@ describe('AwcAutocompleteElement', () => {
     window.fetch = originalFetch;
   });
 
-  describe('remote source lifecycle', () => {
+  describe('ajax source lifecycle', () => {
     it('should not issue a pending debounced request after `src` changes', async () => {
       const el = await autocompleteFixture({ src: '/a' });
       const fetchStub = stubFetch();

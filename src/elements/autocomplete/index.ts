@@ -6,10 +6,10 @@ import { isLooselyFocusable } from 'src/helpers/focus';
 import useFloatingUI from 'src/hooks/use_floating_ui';
 import useOutsideClick from 'src/hooks/use_outside_click';
 import OpenableElement from 'src/internal/openable_element';
+import AjaxSearch from './ajax_search';
 import { optionEventDetail } from './events';
 import LocalSearch from './local_search';
 import MultipleSelect from './multiple_select';
-import RemoteSearch from './remote_search';
 import SingleSelect from './single_select';
 
 export type { AwcAutocompleteCommitEvent, AwcAutocompleteRemoveEvent } from './events';
@@ -17,14 +17,14 @@ export type { AwcAutocompleteCommitEvent, AwcAutocompleteRemoveEvent } from './e
 /** Whether multiple values can be selected. */
 export type SelectionMode = 'single' | 'multiple';
 
-/** Where the options come from: the DOM (`local`) or a remote endpoint (`remote`). */
-export type Source = 'local' | 'remote';
+/** Where the options come from: the page (`local`) or the server (`ajax`). */
+export type Source = 'local' | 'ajax';
 
 /** Resolves the runtime `multiple` property type from the selection mode. */
 type IsMultiple<Mode extends SelectionMode> = Mode extends 'multiple' ? true : false;
 
-/** Resolves the runtime `remote` getter type from the source. */
-type IsRemote<Src extends Source> = Src extends 'remote' ? true : false;
+/** Resolves the runtime `ajax` getter type from the source. */
+type IsAjax<Src extends Source> = Src extends 'ajax' ? true : false;
 
 /** Resolves the `value` type based on the selection mode. */
 export type AutocompleteValue<Mode extends SelectionMode> = Mode extends 'multiple' ? string[] : string;
@@ -32,8 +32,8 @@ export type AutocompleteValue<Mode extends SelectionMode> = Mode extends 'multip
 /** Resolves the `removeValue` arguments: required for multi-select, none for single-select. */
 type RemoveValueArgs<Mode extends SelectionMode> = Mode extends 'multiple' ? [value: string] : [];
 
-/** Resolves the `setValue` text argument: required for a remote source, optional otherwise. */
-type SetValueTextArgs<Src extends Source> = Src extends 'remote' ? [text: string] : [text?: string];
+/** Resolves the `setValue` text argument: required for an ajax source, optional otherwise. */
+type SetValueTextArgs<Src extends Source> = Src extends 'ajax' ? [text: string] : [text?: string];
 
 /**
  * The contract implemented by the single and multiple select variants.
@@ -59,7 +59,7 @@ export interface SelectVariant {
   set required(value: boolean);
 }
 
-/** The contract implemented by the local and remote search variants. */
+/** The contract implemented by the local and ajax search variants. */
 export interface SearchVariant {
   search: (value: string) => void | Promise<void>;
   start: () => void;
@@ -175,7 +175,7 @@ export default class AwcAutocompleteElement<
     this.combobox = new Combobox(this.input, this.listbox, { multiple: this.multiple });
     this.selectVariant = this.multiple ? new MultipleSelect(this) : new SingleSelect(this);
     this.selectVariant.connected();
-    this.searchVariant = this.src ? new RemoteSearch(this) : new LocalSearch(this);
+    this.searchVariant = this.src ? new AjaxSearch(this) : new LocalSearch(this);
     this.selectVariant.required = this.required;
     super.connected();
   }
@@ -226,7 +226,7 @@ export default class AwcAutocompleteElement<
     // Release the outgoing variant before replacing it, so a request made against the previous source cannot land in
     // the listbox of the new one.
     this.searchVariant?.disconnected();
-    this.searchVariant = src ? new RemoteSearch(this) : new LocalSearch(this);
+    this.searchVariant = src ? new AjaxSearch(this) : new LocalSearch(this);
   }
 
   /**
@@ -395,7 +395,7 @@ export default class AwcAutocompleteElement<
 
   /* eslint-disable jsdoc/check-param-names -- documents the arguments the rest tuples resolve to */
   /**
-   * Sets the value of the element. If options are fetched from a remote source, the `text` param is required.
+   * Sets the value of the element. If the options are fetched from the server, the `text` param is required.
    * @param value - The value of the option.
    * @param text - The text of the option.
    */
@@ -531,11 +531,11 @@ export default class AwcAutocompleteElement<
   }
 
   /**
-   * Whether the options are fetched from a remote source (i.e. the `src` attribute is set).
-   * Narrowing on this (`if (el.remote)`) resolves source-dependent types such as `setValue`.
+   * Whether the options are fetched from the server (i.e. the `src` attribute is set).
+   * Narrowing on this (`if (el.ajax)`) resolves source-dependent types such as `setValue`.
    */
-  get remote(): IsRemote<Src> {
-    return Boolean(this.src) as IsRemote<Src>;
+  get ajax(): IsAjax<Src> {
+    return Boolean(this.src) as IsAjax<Src>;
   }
 
   /**
@@ -591,9 +591,9 @@ export type LocalAutocompleteElement<Mode extends SelectionMode = SelectionMode>
   Mode,
   'local'
 >;
-export type RemoteAutocompleteElement<Mode extends SelectionMode = SelectionMode> = AwcAutocompleteElement<
+export type AjaxAutocompleteElement<Mode extends SelectionMode = SelectionMode> = AwcAutocompleteElement<
   Mode,
-  'remote'
+  'ajax'
 >;
 
 declare global {
@@ -601,12 +601,12 @@ declare global {
     AwcAutocompleteElement: typeof AwcAutocompleteElement;
   }
   interface HTMLElementTagNameMap {
-    // The full cross-product of both dimensions so `if (el.multiple)` and `if (el.remote)` each narrow.
+    // The full cross-product of both dimensions so `if (el.multiple)` and `if (el.ajax)` each narrow.
     'awc-autocomplete':
       SingleAutocompleteElement<'local'> |
-      SingleAutocompleteElement<'remote'> |
+      SingleAutocompleteElement<'ajax'> |
       MultipleAutocompleteElement<'local'> |
-      MultipleAutocompleteElement<'remote'>;
+      MultipleAutocompleteElement<'ajax'>;
   }
   // Derived from the event map so that declaring an event and typing it for listeners are the same act.
   interface GlobalEventHandlersEventMap extends AutocompleteEventMap {}

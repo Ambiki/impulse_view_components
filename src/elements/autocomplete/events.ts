@@ -59,7 +59,7 @@ export type AutocompleteEventArgs<Name extends AutocompleteEventName> = Autocomp
   [detail: AutocompleteEventDetails[Name]];
 
 /**
- * The events emitted while fetching options from a remote source.
+ * The events emitted while fetching options from the server.
  *
  * These four are deliberately unlike the events above: they are emitted without the `awc-autocomplete:` prefix and
  * they do not bubble, mirroring the native resource-loading events they are named after. Three of them — `load`,
@@ -67,7 +67,7 @@ export type AutocompleteEventArgs<Name extends AutocompleteEventName> = Autocomp
  * `ErrorEvent`, so they cannot join `AutocompleteEventMap` without conflicting with those declarations, and renaming
  * them would break every listener that exists today. They stay as they are, and stay untyped.
  */
-export type RemoteEventName = 'loadstart' | 'load' | 'error' | 'loadend';
+export type AjaxEventName = 'loadstart' | 'load' | 'error' | 'loadend';
 
 /** The dispatch policy that sets those four apart, kept next to the names it applies to. */
-export const REMOTE_EVENT_INIT = { bubbles: false, prefix: false } as const;
+export const AJAX_EVENT_INIT = { bubbles: false, prefix: false } as const;

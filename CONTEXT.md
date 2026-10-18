@@ -42,6 +42,14 @@ _Avoid_: Chosen option, checked option
 Taking an option's value out of the element's value, by committing it again in a multiple select or by removing its tag.
 _Avoid_: Unselect
 
+**Ajax**:
+Options fetched from the server rather than read from the page. An ajax select is a select whose options come this way.
+_Avoid_: Remote, async, server-side
+
+**Local**:
+Options read from the page rather than fetched. The counterpart of ajax.
+_Avoid_: Static, inline, client-side
+
 ### Events
 
 **Open**:
