@@ -14,16 +14,22 @@ export default function useOutsideClick(element: ImpulseElement, { boundaries, c
 
   let initialClickTarget: HTMLElement | null = null;
 
-  function setInitialClickTarget(event: Event) {
-    initialClickTarget = (event.composedPath?.()?.[0] || event.target) as HTMLElement;
+  function setInitialClickTarget(event: MouseEvent) {
+    // A press with a button other than the primary one ends in no click, so it would linger. A plain `Event` has no
+    // `button`, and counts.
+    initialClickTarget = event.button > 0 ? null : ((event.composedPath?.()?.[0] || event.target) as HTMLElement);
   }
 
-  function handleOutsideClick(event: Event, resolveTarget: (event: Event) => HTMLElement | null) {
-    if (!initialClickTarget) return;
-    if (event.defaultPrevented) return;
+  function forgetPress() {
+    initialClickTarget = null;
+  }
 
-    const target = resolveTarget(event);
+  function handleOutsideClick(event: Event) {
+    // A click ends its press, whatever becomes of it, so that a later click without a press isn't taken for it.
+    const target = initialClickTarget;
+    initialClickTarget = null;
     if (!target) return;
+    if (event.defaultPrevented) return;
     // Return if the target is not present in the DOM anymore.
     if (!target.getRootNode().contains(target) || !target.isConnected) return;
 
@@ -34,17 +40,16 @@ export default function useOutsideClick(element: ImpulseElement, { boundaries, c
     }
 
     callback(event, target);
-    initialClickTarget = null;
   }
 
   document.addEventListener('mousedown', setInitialClickTarget, { capture: true, signal });
-  document.addEventListener('click', (event) => handleOutsideClick(event, () => initialClickTarget), {
-    capture: true,
-    signal,
-  });
+  document.addEventListener('click', handleOutsideClick, { capture: true, signal });
+  // A press that opens the context menu, such as ctrl+click on macOS, or that starts a drag ends in no click either.
+  document.addEventListener('contextmenu', forgetPress, { capture: true, signal });
+  document.addEventListener('dragstart', forgetPress, { capture: true, signal });
 
   onDisconnect(element, () => {
-    initialClickTarget = null;
+    forgetPress();
     controller.abort();
   });
 }
