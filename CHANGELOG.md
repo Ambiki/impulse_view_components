@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- `useFocusOut`, a hook that calls back when focus moves to an element outside its boundaries, such as on Tab past a popover's last element ([#322](https://github.com/Ambiki/impulse_view_components/pull/322))
 - `keep-flipped` on `<awc-anchor>` (`keep_flipped:` on `Impulse::AnchorComponent`) and `keepFlipped` on `useFloatingUI`, which keep the side a floating element flipped to while it's positioned ([#320](https://github.com/Ambiki/impulse_view_components/pull/320))
 - `awc-autocomplete:commit` carries `selected` in its detail, so listeners can tell whether the commit selected or deselected the option ([#311](https://github.com/Ambiki/impulse_view_components/pull/311))
 - `requestShow()` and `requestHide()` on `<awc-popover>`, `<awc-dialog>` and `<awc-autocomplete>`, which emit a cancelable `show` or `hide` before acting ([#302](https://github.com/Ambiki/impulse_view_components/pull/302))

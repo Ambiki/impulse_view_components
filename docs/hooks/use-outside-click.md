@@ -2,6 +2,11 @@
 
 Listen for clicks that occur outside the defined `boundaries`.
 
+::: tip Pair it with `useFocusOut`
+Keyboard users leave a popover with Tab, not a click. Use [`useFocusOut`](./use-focus-out.md), with the same
+`boundaries`, to catch focus moving out.
+:::
+
 ## Usage
 
 ```ts
