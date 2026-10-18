@@ -1086,8 +1086,11 @@ describe('AwcAutocompleteElement', () => {
 
       // Typed without a keydown the combobox sees, as pasting does.
       type(el, 'Cherry');
+      expect(el.hasAttribute('loading')).to.equal(true);
+      expect(el.activeOption).to.equal(null);
       pressKey(el, 'Enter');
       await requested(stub, 2);
+      expect(el.activeOption).to.equal(null);
       pressKey(el, 'Enter');
 
       expect(el.value).to.equal('');
