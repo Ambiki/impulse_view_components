@@ -28,6 +28,7 @@ import * as multipleSelect from '@ambiki/impulse-view-components/dist/elements/a
 import * as singleSelect from '@ambiki/impulse-view-components/dist/elements/autocomplete/single_select';
 
 import useFloatingUI from '@ambiki/impulse-view-components/dist/hooks/use_floating_ui';
+import useFocusOut from '@ambiki/impulse-view-components/dist/hooks/use_focus_out';
 import useOutsideClick from '@ambiki/impulse-view-components/dist/hooks/use_outside_click';
 
 import { isLooselyFocusable } from '@ambiki/impulse-view-components/dist/helpers/focus';
@@ -59,6 +60,7 @@ export const used = {
   multipleSelect,
   singleSelect,
   useFloatingUI,
+  useFocusOut,
   useOutsideClick,
   isLooselyFocusable,
   array,
