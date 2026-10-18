@@ -47,7 +47,8 @@ popover.requestShow();
 
 Hides the popover as if the user asked to. Emits a cancelable `awc-popover:hide` on each popover nested in it,
 innermost first, then on the popover itself. Stops at the first one prevented: that popover and the ones it is nested
-in stay open, and the ones nested in it that allowed it close.
+in stay open, and the ones nested in it that allowed it close. Called again with the same event, it asks no popover a
+second time.
 
 ```js
 await popover.requestHide();

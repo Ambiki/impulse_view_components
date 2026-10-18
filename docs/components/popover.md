@@ -77,7 +77,7 @@ while a form inside it has unsaved changes. `hide` closes it without asking.
 
 You can nest as many popovers as you want and it will be stacked on top of the parent popover. A nested popover counts
 as part of its parent, so moving focus or clicking into it doesn't close the parent. A click outside both, or focus
-moving out of both, closes them together, the nested popover first. Escape closes one popover at a time.
+moving out of both, closes them together, the nested popover first. Escape closes the popover focus is in.
 
 ```erb{4-7}
 <%= render(Impulse::PopoverComponent.new) do |c| %>

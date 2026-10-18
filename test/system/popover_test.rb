@@ -80,7 +80,8 @@ module Impulse
       click_on "Open nested popover"
       assert_selector "[data-test-id='nested-popover']"
 
-      find("[data-test-id='parent-popover']").click
+      # The title, away from the nested popover's trigger in the body.
+      find("span", text: "Activity feed").click
       refute_selector "[data-test-id='nested-popover']"
       assert_selector "[data-test-id='parent-popover']"
     end
