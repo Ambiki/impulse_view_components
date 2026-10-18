@@ -17,11 +17,11 @@ A popover is a floating panel that can display rich content like navigation menu
 
 ### Keyword arguments
 
-| Name             | Default   | Description                                                                                                                                                                                                                                                            |
-| ------           | --------- | -------------                                                                                                                                                                                                                                                          |
-| title            | `nil`     | The title of the popover.                                                                                                                                                                                                                                              |
-| placement        | `bottom`  | The preferred placement of the popover. The actual placement may vary to keep the element inside the viewport. One of `top`, `top-start`, `top-end`, `right`, `right-start`, `right-end`, `bottom`, `bottom-start`, `bottom-end`, `left`, `left-start`, or `left-end`. |
-| strategy         | `fixed`   | The value of the `position` CSS property. One of `absolute` or `fixed`.                                                                                                                                                                                                |
+| Name      | Default   | Description                                                                                                                                                                                                                                                            |
+| ------    | --------- | -------------                                                                                                                                                                                                                                                          |
+| title     | `nil`     | The title of the popover.                                                                                                                                                                                                                                              |
+| placement | `bottom`  | The preferred placement of the popover. The actual placement may vary to keep the element inside the viewport. One of `top`, `top-start`, `top-end`, `right`, `right-start`, `right-end`, `bottom`, `bottom-start`, `bottom-end`, `left`, `left-start`, or `left-end`. |
+| strategy  | `fixed`   | The value of the `position` CSS property. One of `absolute` or `fixed`.                                                                                                                                                                                                |
 
 ## Examples
 
