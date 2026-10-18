@@ -124,6 +124,7 @@
       "types": "./dist/helpers/*.d.ts",
       "default": "./dist/helpers/*.js"
     },
+    "./dist/styles/index.scss": null,
     "./dist/styles/*": "./dist/styles/*"
   },
   "types": "./dist/index.d.ts",
@@ -137,7 +138,7 @@
     "build:prod": "NODE_ENV=production yarn build",
     "build:watch": "concurrently \"yarn build:js --watch\" \"yarn build:css --watch\"",
     "clean": "rm -rf dist app/assets/dist",
-    "copy:css": "mkdir -p dist && cp app/assets/dist/impulse_view_components.css dist/styles.css",
+    "copy:css": "mkdir -p dist && sed \"/sourceMappingURL=/d\" app/assets/dist/impulse_view_components.css > dist/styles.css",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "prefix:css": "postcss --replace ./app/assets/dist/impulse_view_components.css --use autoprefixer --map",
@@ -150,14 +151,6 @@
     "test:exports": "node scripts/check-exports.mjs",
     "test:watch": "yarn test --watch",
     "typecheck": "tsc --noEmit"
-  },
-  "peerDependencies": {
-    "bootstrap": "^4.6.0"
-  },
-  "peerDependenciesMeta": {
-    "bootstrap": {
-      "optional": true
-    }
   },
   "dependencies": {
     "@ambiki/combobox": "^2.0.1",

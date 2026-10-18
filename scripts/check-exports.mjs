@@ -17,7 +17,9 @@
 //   5. `tsc --noEmit` passes on a fixture that imports all of them and asserts that the types
 //      it reads aren't `any`, with library checks on under `bundler`,
 //   6. a bundler keeps what an app imports and drops the rest: one hook doesn't bring the
-//      others, and importing an element keeps its registration.
+//      others, and importing an element keeps its registration,
+//   7. the stylesheets compile the way the docs import them, through Dart Sass's `pkg:`
+//      importer, and they and the precompiled CSS define every custom property they read.
 //
 // Resolution works without linking the package into `node_modules`: a package with an
 // `exports` map can reference itself by name, and both this script and the fixture live
@@ -124,7 +126,10 @@ const scriptSpecifiers = [
 // Stylesheets addressed with their extension, which needs no condition.
 const styleSpecifiers = [
   ...styledElementDirs.map((name) => subpath('dist', 'elements', name, 'index.scss')),
-  ...fs.readdirSync(path.join(distDir, 'styles')).map((file) => subpath('dist', 'styles', file)),
+  ...fs
+    .readdirSync(path.join(distDir, 'styles'))
+    .filter((file) => file !== 'index.scss')
+    .map((file) => subpath('dist', 'styles', file)),
 ];
 
 for (const specifier of [...scriptSpecifiers, ...styleSpecifiers]) {
@@ -133,7 +138,10 @@ for (const specifier of [...scriptSpecifiers, ...styleSpecifiers]) {
 
 // The entry files behind the new paths stay off the `dist/` wildcards, which are frozen: anything they reach can never
 // change again.
-for (const specifier of ['hooks', 'helpers'].flatMap((group) => [subpath('dist', group, 'index'), subpath('dist', group, 'index.js')])) {
+for (const specifier of [
+  ...['hooks', 'helpers'].flatMap((group) => [subpath('dist', group, 'index'), subpath('dist', group, 'index.js')]),
+  subpath('dist', 'styles', 'index.scss'),
+]) {
   check(`node: ${specifier} is not exported`, () => {
     assert.throws(() => import.meta.resolve(specifier), { code: 'ERR_PACKAGE_PATH_NOT_EXPORTED' });
   });
@@ -294,10 +302,21 @@ check(`bundle: import '${pkg.name}'`, () => {
   for (const name of elementDirs) assert.match(text, new RegExp(`['"]awc-${name}['"]`), `drops <awc-${name}>`);
 });
 
-// 7. Sass that follows the docs compiles, through Dart Sass's own `pkg:` importer, and defines every custom property
-// the element stylesheets read, other than those the elements set at runtime. The importer only finds packages in a
-// `node_modules`, so the stylesheets compile from a throwaway app that links this package in.
-const RUNTIME_PROPERTIES = /^--awc-auto-size-/;
+// 7. Stylesheets that follow the docs hold each element's rules, and define every custom property they read, other than
+// those the elements set at runtime.
+const RUNTIME_PROPERTY = /^--awc-auto-size-/;
+
+function assertStyles(css, names) {
+  for (const name of names) assert.match(css, new RegExp(`\\.awc-${name}`), `has no .awc-${name} rules`);
+
+  const defined = new Set(css.match(/--[\w-]+(?=\s*:)/g));
+  const read = new Set([...css.matchAll(/var\((--[\w-]+)/g)].map(([, property]) => property));
+  const undefinedProperties = [...read].filter((property) => !defined.has(property) && !RUNTIME_PROPERTY.test(property));
+  assert.deepEqual(undefinedProperties, [], 'reads custom properties nothing defines');
+}
+
+// The Sass compiles through Dart Sass's own `pkg:` importer, after Bootstrap. The importer only finds packages in a
+// `node_modules`, so it compiles from a throwaway app that links this package in.
 const sassApp = fs.mkdtempSync(path.join(os.tmpdir(), 'ivc-sass-'));
 
 try {
@@ -305,49 +324,38 @@ try {
   fs.symlinkSync(rootDir, path.join(sassApp, 'node_modules', pkg.name), 'dir');
   fs.symlinkSync(path.join(rootDir, 'node_modules', 'bootstrap'), path.join(sassApp, 'node_modules', 'bootstrap'), 'dir');
 
-  const bootstrap = ['functions', 'variables', 'mixins'].map((file) => `@import 'pkg:bootstrap/scss/${file}';`);
-  const compile = (imports) =>
-    sass.compileString([...bootstrap, ...imports.map((specifier) => `@import 'pkg:${specifier}';`)].join('\n'), {
+  const bootstrapImports = ['functions', 'variables', 'mixins'].map((file) => `@import 'pkg:bootstrap/scss/${file}';`);
+  const compile = (specifiers) =>
+    sass.compileString([...bootstrapImports, ...specifiers.map((specifier) => `@import 'pkg:${specifier}';`)].join('\n'), {
       importers: [new sass.NodePackageImporter(sassApp)],
       logger: sass.Logger.silent,
     }).css;
 
-  const undefinedProperties = (css) => {
-    const defined = new Set(css.match(/--[\w-]+(?=\s*:)/g));
-    const read = new Set([...css.matchAll(/var\((--[\w-]+)/g)].map(([, property]) => property));
-    return [...read].filter((property) => !defined.has(property) && !RUNTIME_PROPERTIES.test(property));
-  };
-
   for (const name of styledElementDirs) {
-    const imports = [subpath('base'), subpath(name)];
-
-    check(`sass: ${imports.join(' + ')}`, () => {
-      const css = compile(imports);
-      assert.match(css, new RegExp(`\\.awc-${name}`), `has no .awc-${name} rules`);
-      assert.deepEqual(undefinedProperties(css), [], 'reads custom properties nothing defines');
-    });
+    const specifiers = [subpath('base'), subpath(name)];
+    check(`sass: ${specifiers.join(' + ')}`, () => assertStyles(compile(specifiers), [name]));
   }
 
-  check(`sass: ${pkg.name}`, () => {
-    const css = compile([pkg.name]);
-    for (const name of styledElementDirs) assert.match(css, new RegExp(`\\.awc-${name}`), `has no .awc-${name} rules`);
-    assert.deepEqual(undefinedProperties(css), [], 'reads custom properties nothing defines');
-  });
-
-  // The precompiled CSS stands alone, so an app without Sass or Bootstrap can use it. CSS tools reach it through the
-  // bare path's `style` condition.
-  for (const [conditions, specifier] of [[[], subpath('styles.css')], [['style'], pkg.name]]) {
-    check(`css: ${conditions.map((condition) => `--conditions ${condition} `).join('')}${specifier}`, () => {
-      const file = resolvesToFileUnder(conditions, specifier);
-      assert.ok(file.endsWith('.css'), `resolved to ${path.relative(rootDir, file)}`);
-
-      const css = fs.readFileSync(file, 'utf8');
-      for (const name of styledElementDirs) assert.match(css, new RegExp(`\\.awc-${name}`), `has no .awc-${name} rules`);
-      assert.deepEqual(undefinedProperties(css), [], 'reads custom properties nothing defines');
-    });
-  }
+  check(`sass: ${pkg.name}`, () => assertStyles(compile([pkg.name]), styledElementDirs));
 } finally {
   fs.rmSync(sassApp, { recursive: true, force: true });
+}
+
+// The precompiled CSS stands alone, so an app without Sass or Bootstrap can use it. CSS tools reach it through the bare
+// path's `style` condition.
+for (const [conditions, specifier] of [[[], subpath('styles.css')], [['style'], pkg.name]]) {
+  check(`css: ${conditions.map((condition) => `--conditions ${condition} `).join('')}${specifier}`, () => {
+    const file = resolvesToFileUnder(conditions, specifier);
+    assert.ok(file.endsWith('.css'), `resolved to ${path.relative(rootDir, file)}`);
+
+    const css = fs.readFileSync(file, 'utf8');
+    assertStyles(css, styledElementDirs);
+
+    const sourceMap = css.match(/sourceMappingURL=(\S+)/)?.[1];
+    if (sourceMap && !sourceMap.startsWith('data:')) {
+      assert.ok(fs.existsSync(path.resolve(path.dirname(file), sourceMap)), `points at ${sourceMap}, which isn't published`);
+    }
+  });
 }
 
 if (failures.length > 0) {
@@ -357,4 +365,4 @@ if (failures.length > 0) {
 }
 
 const total = scriptSpecifiers.length + styleSpecifiers.length;
-console.log(`✓ ${total} subpaths resolve in Node, type-check under moduleResolution bundler/node16, and bundle what they import`);
+console.log(`✓ ${total} subpaths resolve in Node, type-check under moduleResolution bundler/node16, bundle what they import, and compile their styles`);

@@ -67,6 +67,10 @@ component's styles:
 To include every component's styles, import the package itself instead of `base` and each component:
 
 ```scss
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins';
+
 @import '@ambiki/impulse-view-components';
 ```
 
@@ -77,6 +81,15 @@ later:
 ```scss
 @import 'pkg:@ambiki/impulse-view-components/base';
 @import 'pkg:@ambiki/impulse-view-components/autocomplete';
+```
+
+A setup that only passes `--load-path=node_modules` can't read these paths, because it looks for files rather than
+reading the package's `exports`. It can keep importing the files directly:
+
+```scss
+@import '@ambiki/impulse-view-components/dist/styles/variables';
+@import '@ambiki/impulse-view-components/dist/styles/base';
+@import '@ambiki/impulse-view-components/dist/elements/autocomplete';
 ```
 
 ### Without Sass
@@ -106,6 +119,8 @@ use the shorter paths below.
 | `@import '~…/dist/elements/<name>'`                              | `@import '@ambiki/impulse-view-components/<name>'`                             |
 | `@import '~…/dist/styles/variables'` and `'~…/dist/styles/base'` | `@import '@ambiki/impulse-view-components/base'`                               |
 | Any other `…/dist/helpers/*`, or `…/dist/elements/autocomplete/<module>` such as `ajax_search` | None. These modules are internal, and stay reachable only through their `dist/` paths. |
+
+The Sass rows need a setup that reads the package's `exports`. See [Import the styles](#import-the-styles).
 
 Each element path exports its class by name, such as `AwcPopoverElement`, along with the types its properties use.
 `…/hooks` exports the types the hooks take and return.
