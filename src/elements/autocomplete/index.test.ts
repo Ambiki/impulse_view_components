@@ -1104,7 +1104,33 @@ describe('AwcAutocompleteElement', () => {
       expect(el.activeOption).to.equal(el.options[1]);
     });
 
-    it('should leave the options alone when a response lands after it closed', async () => {
+    it('should leave `no-options` off when an empty response lands after it closed', async () => {
+      const el = await autocompleteFixture({ src: '/fruits' });
+      const stub = stubFetch();
+      pressInput(el);
+      await requested(stub);
+
+      await el.hide();
+      await respondAndWait(el, stub, '');
+
+      expect(el.hasAttribute('no-options')).to.equal(false);
+    });
+
+    it('should leave `error` off when a request fails after it closed', async () => {
+      const el = await autocompleteFixture({ src: '/fruits' });
+      const stub = stubFetch();
+      const events = recordAjaxEvents(el);
+      pressInput(el);
+      await requested(stub);
+
+      await el.hide();
+      await respondAndWait(el, stub, 'Server error', 500);
+
+      expect(el.hasAttribute('error')).to.equal(false);
+      expect(events).to.eql(['loadstart', 'error', 'loadend']);
+    });
+
+    it('should leave the options inactive and unselected when a response lands after it closed', async () => {
       const el = await autocompleteFixture({ src: '/fruits', selected: [FRUITS[1]] });
       const stub = stubFetch();
       pressInput(el);

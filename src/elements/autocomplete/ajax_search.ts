@@ -89,7 +89,10 @@ export default class AjaxSearch implements SearchVariant {
       }
 
       this.abortController = undefined;
-      this.autocomplete.setAttribute('error', '');
+      // Closing clears `error`, so a request that fails after the listbox closed leaves it off.
+      if (this.autocomplete.open) {
+        this.autocomplete.setAttribute('error', '');
+      }
       this.emit('error');
       this.autocomplete.removeAttribute('loading');
       this.emit('loadend');
@@ -98,14 +101,14 @@ export default class AjaxSearch implements SearchVariant {
 
   private async insertOptions(options: string, { cached = false } = {}) {
     this.autocomplete.optionsContainer.innerHTML = options;
-    this.autocomplete.checkIfListIsEmpty();
     if (!cached) {
       this.autocomplete.combobox.initializeOptions();
     }
-    // The response can land after the listbox closed, which deselected and deactivated every option. Opening it again
-    // selects and activates them.
+    // The response can land after the listbox closed, which deselected and deactivated every option and cleared
+    // `no-options`. Opening it again does all three afresh.
     if (!this.autocomplete.open) return;
 
+    this.autocomplete.checkIfListIsEmpty();
     // Start the select variant to select the option(s).
     this.autocomplete.selectVariant.start();
     // Update the floating UI position after the listbox content has been updated.
