@@ -61,10 +61,6 @@
       "types": "./dist/hooks/index.d.ts",
       "default": "./dist/hooks/index.js"
     },
-    "./helpers": {
-      "types": "./dist/helpers/index.d.ts",
-      "default": "./dist/helpers/index.js"
-    },
     "./base": {
       "sass": "./dist/styles/index.scss"
     },
@@ -114,8 +110,6 @@
       "types": "./dist/hooks/*.d.ts",
       "default": "./dist/hooks/*.js"
     },
-    "./dist/helpers/index": null,
-    "./dist/helpers/index.js": null,
     "./dist/helpers/*.js": {
       "types": "./dist/helpers/*.d.ts",
       "default": "./dist/helpers/*.js"

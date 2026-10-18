@@ -54,37 +54,3 @@ useOutsideClick(element, options);
 | ------     | --------- | -------------                                                                                                               |
 | boundaries | N/A       | An array of HTML elements that should avoid invoking the `callback` function when clicking inside of it.                    |
 | callback   | N/A       | The function to call when an outside click is detected. Signature: `callback: (event: Event, element: HTMLElement) => void` |
-
-## Ambiki teammates
-
-In the `callback` function, you will need to prevent the default behavior of the event so that parent dialogs and
-popovers remain open when clicking outside of it.
-
-```ts{3,10,15-17}
-import { ImpulseElement, registerElement } from '@ambiki/impulse';
-import { useOutsideClick } from '@ambiki/impulse-view-components/hooks';
-import { isLooselyFocusable } from '@ambiki/impulse-view-components/helpers';
-
-@registerElement('pop-over')
-export default class PopoverElement extends ImpulseElement {
-  connected() {
-    useOutsideClick(this, {
-      boundaries: [document.querySelector('#button')],
-      callback: (event: Event, target: HTMLElement) => {
-        // Only proceed if the popover element is open.
-        if (this.open) {
-          this.hidden = true;
-          // Prevent modals from closing accidentally.
-          if (!isLooselyFocusable(target)) {
-            event.preventDefault();
-          }
-        }
-      },
-    });
-  }
-
-  get open() {
-    return !this.hasAttribute('hidden');
-  }
-}
-```
