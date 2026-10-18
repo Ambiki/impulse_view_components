@@ -19,4 +19,4 @@
 
 ## File names
 
-- Name files inside `src/` with underscores, never dashes: `use_floating_ui.ts`, `focus_trap.test.ts`.
+- Name files inside `src/` with underscores, never dashes: `use_floating_ui.ts`, `use_outside_click.test.ts`.

@@ -33,7 +33,6 @@ import useOutsideClick from '@ambiki/impulse-view-components/dist/hooks/use_outs
 import { isLooselyFocusable } from '@ambiki/impulse-view-components/dist/helpers/focus';
 import * as array from '@ambiki/impulse-view-components/dist/helpers/array';
 import * as debounce from '@ambiki/impulse-view-components/dist/helpers/debounce';
-import * as focusTrap from '@ambiki/impulse-view-components/dist/helpers/focus_trap';
 import * as scrollLock from '@ambiki/impulse-view-components/dist/helpers/scroll_lock';
 import * as string from '@ambiki/impulse-view-components/dist/helpers/string';
 import * as uniqueId from '@ambiki/impulse-view-components/dist/helpers/unique_id';
@@ -64,7 +63,6 @@ export const used = {
   isLooselyFocusable,
   array,
   debounce,
-  focusTrap,
   scrollLock,
   string,
   uniqueId,
