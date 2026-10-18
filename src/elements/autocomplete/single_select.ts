@@ -48,6 +48,15 @@ export default class SingleSelect implements SelectVariant {
     this.hiddenField.setAttribute('data-text', trimmedText);
     this.autocomplete.input.value = trimmedText;
     this.autocomplete.toggleSelectedClass(!!value);
+    // Only while open: the options are all deselected while it is closed, and `start` selects the option on opening.
+    if (!this.autocomplete.open) return;
+
+    const option = this.selectedOption;
+    if (option) {
+      this.autocomplete.combobox.select(option);
+    } else {
+      this.autocomplete.combobox.deselectAll();
+    }
   }
 
   clear() {

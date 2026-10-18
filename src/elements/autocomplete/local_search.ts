@@ -13,6 +13,9 @@ export default class LocalSearch implements SearchVariant {
     const firstOption = this.autocomplete.visibleOptions[0];
     if (firstOption) {
       this.autocomplete.combobox.activate(firstOption);
+    } else {
+      // The active option may be one the query just hid, which Enter would otherwise commit.
+      this.autocomplete.combobox.deactivate();
     }
 
     this.autocomplete.checkIfListIsEmpty();

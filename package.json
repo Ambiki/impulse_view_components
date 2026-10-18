@@ -102,6 +102,7 @@
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
     "test": "web-test-runner",
+    "test:coverage": "web-test-runner --coverage",
     "test:exports": "node scripts/check-exports.mjs",
     "test:watch": "yarn test --watch",
     "typecheck": "tsc --noEmit"

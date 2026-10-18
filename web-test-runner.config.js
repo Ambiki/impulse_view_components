@@ -6,6 +6,12 @@ import { playwrightLauncher } from '@web/test-runner-playwright';
 export default {
   rootDir: '.',
   files: ['./src/**/*.test.ts'],
+  // Read by `yarn test:coverage`. Only Chromium reports coverage, so the report covers the Chromium run.
+  coverageConfig: {
+    include: ['src/**/*.ts'],
+    exclude: ['src/**/*.test.ts'],
+    reporters: ['text', 'lcov'],
+  },
   concurrentBrowsers: 3,
   nodeResolve: true,
   preserveSymlinks: true,
