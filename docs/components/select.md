@@ -214,9 +214,11 @@ import '@ambiki/impulse-view-components/autocomplete';
 ```
 
 ```scss
-@import '~@ambiki/impulse-view-components/dist/elements/autocomplete';
+@import '@ambiki/impulse-view-components/autocomplete';
 ```
 :::
+
+The styles need Bootstrap's Sass and the base styles loaded first. See [Import the styles](/introduction/getting-started#import-the-styles).
 
 ## JS API
 

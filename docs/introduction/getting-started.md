@@ -47,11 +47,48 @@ To register every component at once, import the package itself:
 import '@ambiki/impulse-view-components';
 ```
 
+See the **Imports** section on each component's page for the exact paths.
+
+## Import the styles
+
+The styles are written in Sass on top of [Bootstrap 4](https://getbootstrap.com/docs/4.6/). Load Bootstrap's Sass
+functions, variables and mixins first (importing all of `bootstrap` does that), then the base styles once, then each
+component's styles:
+
 ```scss
-@import '~@ambiki/impulse-view-components/dist/elements/autocomplete';
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins';
+
+@import '@ambiki/impulse-view-components/base';
+@import '@ambiki/impulse-view-components/autocomplete';
 ```
 
-See the **Imports** section on each component's page for the exact paths.
+To include every component's styles, import the package itself instead of `base` and each component:
+
+```scss
+@import '@ambiki/impulse-view-components';
+```
+
+These paths work through webpack's `sass-loader` and Vite. When you run the `sass` command line directly, as
+`cssbundling-rails` does, prefix each path with `pkg:` and pass `--pkg-importer=node`, which needs Dart Sass 1.71 or
+later:
+
+```scss
+@import 'pkg:@ambiki/impulse-view-components/base';
+@import 'pkg:@ambiki/impulse-view-components/autocomplete';
+```
+
+### Without Sass
+
+If your app doesn't use Sass or Bootstrap, import the precompiled CSS, which holds every component's styles:
+
+```js
+import '@ambiki/impulse-view-components/styles.css';
+```
+
+It's built with Bootstrap's default variables. Change colors and sizes through the CSS custom properties it defines
+on `:root`, such as `--awc-autocomplete-control-min-height`.
 
 ## Upgrading from `dist/` paths
 
@@ -66,6 +103,8 @@ use the shorter paths below.
 | `import useFocusOut from '…/dist/hooks/use_focus_out'`           | `import { useFocusOut } from '@ambiki/impulse-view-components/hooks'`          |
 | `import useOutsideClick from '…/dist/hooks/use_outside_click'`   | `import { useOutsideClick } from '@ambiki/impulse-view-components/hooks'`      |
 | `import { isLooselyFocusable } from '…/dist/helpers/focus'`      | `import { isLooselyFocusable } from '@ambiki/impulse-view-components/helpers'` |
+| `@import '~…/dist/elements/<name>'`                              | `@import '@ambiki/impulse-view-components/<name>'`                             |
+| `@import '~…/dist/styles/variables'` and `'~…/dist/styles/base'` | `@import '@ambiki/impulse-view-components/base'`                               |
 | Any other `…/dist/helpers/*`, or `…/dist/elements/autocomplete/<module>` such as `ajax_search` | None. These modules are internal, and stay reachable only through their `dist/` paths. |
 
 Each element path exports its class by name, such as `AwcPopoverElement`, along with the types its properties use.

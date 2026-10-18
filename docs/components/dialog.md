@@ -162,9 +162,11 @@ import '@ambiki/impulse-view-components/dialog';
 ```
 
 ```scss
-@import '~@ambiki/impulse-view-components/dist/elements/dialog';
+@import '@ambiki/impulse-view-components/dialog';
 ```
 :::
+
+The styles need Bootstrap's Sass and the base styles loaded first. See [Import the styles](/introduction/getting-started#import-the-styles).
 
 ## JS API
 [Read here](../js-api/dialog.md).

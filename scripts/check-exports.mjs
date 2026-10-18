@@ -23,16 +23,18 @@
 // `exports` map can reference itself by name, and both this script and the fixture live
 // inside it.
 //
-// Run with `yarn test:exports` (requires `NODE_ENV=production yarn build:js` first).
+// Run with `yarn test:exports` (requires `yarn build:prod` first).
 
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
+import os from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import * as esbuild from 'esbuild';
+import * as sass from 'sass';
 import { declarationSpecifiers, SOURCE_ALIAS } from './rewrite-declaration-imports.mjs';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -72,10 +74,10 @@ function subpath(...segments) {
   return [pkg.name, ...segments].join('/');
 }
 
-// Stylesheets are only copied into dist/ by the production build, and they are part of the
-// published surface, so the check needs that build rather than the development one.
-if (!fs.existsSync(distDir) || !fs.existsSync(path.join(distDir, 'styles'))) {
-  console.error('dist/ is missing or incomplete. Run `NODE_ENV=production yarn build:js` before `yarn test:exports`.');
+// Stylesheets are only copied into dist/ by the production build, and the precompiled CSS only by the CSS build. Both
+// are part of the published surface, so the check needs the full production build.
+if (!fs.existsSync(distDir) || !fs.existsSync(path.join(distDir, 'styles')) || !fs.existsSync(path.join(distDir, 'styles.css'))) {
+  console.error('dist/ is missing or incomplete. Run `yarn build:prod` before `yarn test:exports`.');
   process.exit(1);
 }
 
@@ -149,6 +151,20 @@ for (const name of styledElementDirs) {
       assert.equal(resolvesToFileUnder([condition], specifier), stylesheet);
     });
   }
+}
+
+// The paths the docs teach follow the conditions' convention: `sass` names Sass and `style` names CSS. An element has
+// no CSS of its own, so its path has no `style`, and a CSS tool doesn't get Sass it can't parse.
+for (const name of styledElementDirs) {
+  const specifier = subpath(name);
+  const stylesheet = path.join(distDir, 'elements', name, 'index.scss');
+
+  check(`node --conditions sass: ${specifier}`, () => {
+    assert.equal(resolvesToFileUnder(['sass'], specifier), stylesheet);
+  });
+  check(`node --conditions style: ${specifier}`, () => {
+    assert.notEqual(resolvesToFileUnder(['style'], specifier), stylesheet, 'a `style` condition names Sass');
+  });
 }
 
 // Element directories need an exact key: a pattern cannot append `/index`, so a new element
@@ -277,6 +293,62 @@ check(`bundle: import '${pkg.name}'`, () => {
   const { text } = bundle(`import '${pkg.name}';`);
   for (const name of elementDirs) assert.match(text, new RegExp(`['"]awc-${name}['"]`), `drops <awc-${name}>`);
 });
+
+// 7. Sass that follows the docs compiles, through Dart Sass's own `pkg:` importer, and defines every custom property
+// the element stylesheets read, other than those the elements set at runtime. The importer only finds packages in a
+// `node_modules`, so the stylesheets compile from a throwaway app that links this package in.
+const RUNTIME_PROPERTIES = /^--awc-auto-size-/;
+const sassApp = fs.mkdtempSync(path.join(os.tmpdir(), 'ivc-sass-'));
+
+try {
+  fs.mkdirSync(path.join(sassApp, 'node_modules', '@ambiki'), { recursive: true });
+  fs.symlinkSync(rootDir, path.join(sassApp, 'node_modules', pkg.name), 'dir');
+  fs.symlinkSync(path.join(rootDir, 'node_modules', 'bootstrap'), path.join(sassApp, 'node_modules', 'bootstrap'), 'dir');
+
+  const bootstrap = ['functions', 'variables', 'mixins'].map((file) => `@import 'pkg:bootstrap/scss/${file}';`);
+  const compile = (imports) =>
+    sass.compileString([...bootstrap, ...imports.map((specifier) => `@import 'pkg:${specifier}';`)].join('\n'), {
+      importers: [new sass.NodePackageImporter(sassApp)],
+      logger: sass.Logger.silent,
+    }).css;
+
+  const undefinedProperties = (css) => {
+    const defined = new Set(css.match(/--[\w-]+(?=\s*:)/g));
+    const read = new Set([...css.matchAll(/var\((--[\w-]+)/g)].map(([, property]) => property));
+    return [...read].filter((property) => !defined.has(property) && !RUNTIME_PROPERTIES.test(property));
+  };
+
+  for (const name of styledElementDirs) {
+    const imports = [subpath('base'), subpath(name)];
+
+    check(`sass: ${imports.join(' + ')}`, () => {
+      const css = compile(imports);
+      assert.match(css, new RegExp(`\\.awc-${name}`), `has no .awc-${name} rules`);
+      assert.deepEqual(undefinedProperties(css), [], 'reads custom properties nothing defines');
+    });
+  }
+
+  check(`sass: ${pkg.name}`, () => {
+    const css = compile([pkg.name]);
+    for (const name of styledElementDirs) assert.match(css, new RegExp(`\\.awc-${name}`), `has no .awc-${name} rules`);
+    assert.deepEqual(undefinedProperties(css), [], 'reads custom properties nothing defines');
+  });
+
+  // The precompiled CSS stands alone, so an app without Sass or Bootstrap can use it. CSS tools reach it through the
+  // bare path's `style` condition.
+  for (const [conditions, specifier] of [[[], subpath('styles.css')], [['style'], pkg.name]]) {
+    check(`css: ${conditions.map((condition) => `--conditions ${condition} `).join('')}${specifier}`, () => {
+      const file = resolvesToFileUnder(conditions, specifier);
+      assert.ok(file.endsWith('.css'), `resolved to ${path.relative(rootDir, file)}`);
+
+      const css = fs.readFileSync(file, 'utf8');
+      for (const name of styledElementDirs) assert.match(css, new RegExp(`\\.awc-${name}`), `has no .awc-${name} rules`);
+      assert.deepEqual(undefinedProperties(css), [], 'reads custom properties nothing defines');
+    });
+  }
+} finally {
+  fs.rmSync(sassApp, { recursive: true, force: true });
+}
 
 if (failures.length > 0) {
   console.error(`\n${failures.length} exports check(s) failed:\n`);
