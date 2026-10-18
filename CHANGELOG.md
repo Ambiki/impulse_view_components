@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **Breaking:** `<awc-autocomplete>` auto sizes by default (`auto-size="false"` or `auto_size: false` turns it off), and its listbox is never taller than `--awc-autocomplete-listbox-max-height`. Compiling the SCSS now needs Dart Sass ([#318](https://github.com/Ambiki/impulse_view_components/pull/318))
 - **Breaking:** `<awc-popover>` renders in the top layer as `<div role="dialog" popover="manual">` instead of a `<dialog>`. It moves focus in when it opens, returns it to the trigger when it closes, and closes when focus moves out. `handleClose` is gone, and a `<form method="dialog">` inside no longer closes it ([#308](https://github.com/Ambiki/impulse_view_components/pull/308))
 - `<awc-dialog>`'s `hide()` and `requestHide()` return a promise, like the popover's and the autocomplete's ([#305](https://github.com/Ambiki/impulse_view_components/pull/305))
 - **Breaking:** Removing an open `<awc-popover>`, `<awc-dialog>` or `<awc-autocomplete>` keeps `open`, so re-inserting it opens it again ([#303](https://github.com/Ambiki/impulse_view_components/pull/303))
@@ -34,6 +35,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Fixed an auto sized `<awc-anchor>`, `useFloatingUI` floating element or `<awc-autocomplete>` listbox staying squashed instead of flipping to the side of its anchor with more room ([#318](https://github.com/Ambiki/impulse_view_components/pull/318))
 - Fixed Enter after a paste committing an option from the previous results in an ajax `<awc-autocomplete>` ([#316](https://github.com/Ambiki/impulse_view_components/pull/316))
 - Fixed a response that lands after an ajax `<awc-autocomplete>` closes setting its active option, selection, `no-options` or `error` ([#314](https://github.com/Ambiki/impulse_view_components/pull/314))
 - Fixed Enter committing an option hidden by the query in `<awc-autocomplete>`, after pasting text that matches no option ([#314](https://github.com/Ambiki/impulse_view_components/pull/314))

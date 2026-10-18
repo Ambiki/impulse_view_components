@@ -37,7 +37,7 @@ Use `Impulse::AnchorComponent` when you are writing markup and want something po
 | skidding            | `0`       | The distance in pixels along the anchor.                                                                                                                                                                                                                       |
 | sync                | `nil`     | Matches the element's size to the anchor's. One of `height`, `width`, or `both`.                                                                                                                                                                               |
 | flip                | `true`    | Flips the element to another placement when the preferred one doesn't fit.                                                                                                                                                                                     |
-| flip_padding        | `0`       | The padding in pixels to keep from the viewport edge before flipping.                                                                                                                                                                                          |
+| flip_padding        | `0`       | The padding in pixels to keep from the viewport edge before flipping. Raised past `auto_size_padding` on the auto sized axis while `auto_size` is set.                                                                                                         |
 | fallback_placements | `[]`      | The placements to try, in order, when the preferred one doesn't fit. By default, the opposite side is tried.                                                                                                                                                   |
 | fallback_strategy   | `bestFit` | What to do when no placement fits. `bestFit` uses the placement that fits best, and `initialPlacement` uses `placement`.                                                                                                                                       |
 | shift               | `true`    | Shifts the element along the anchor to keep it inside the viewport.                                                                                                                                                                                            |
@@ -65,7 +65,8 @@ Mark a child element with `data-arrow` to have it point at the anchor. The eleme
 ### Fitting the viewport
 
 Set `auto_size` and cap the element's size with the custom property it exposes, so a tall menu scrolls instead of
-overflowing the viewport.
+overflowing the viewport. When the cap squashes the element and the other side of the anchor has more room, the element
+flips there.
 
 ```erb
 <%= render(Impulse::AnchorComponent.new(anchor_id: "anchor-button", active: true, auto_size: "height", auto_size_padding: 8, class: "menu")) do %>

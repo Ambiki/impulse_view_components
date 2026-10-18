@@ -8,7 +8,7 @@
  * Options are read through a function on every reposition, so a face can reflect changes (e.g. to an attribute) without
  * re-creating the positioner.
  */
-import type { FlipOptions, Middleware, OffsetOptions, ShiftOptions } from '@floating-ui/dom';
+import type { FlipOptions, Middleware, OffsetOptions, Padding, ShiftOptions } from '@floating-ui/dom';
 import { arrow, autoUpdate, computePosition, flip, offset, shift, size } from '@floating-ui/dom';
 
 /** A side of the anchor. */
@@ -60,8 +60,26 @@ function covers(value: DimensionOrBoth, dimension: Dimension): boolean {
   return value === dimension || value === 'both';
 }
 
+/**
+ * A floating element capped to its available space fills that space exactly once it is squashed, so it never
+ * overflows, and flip would leave it squashed even when the other side has more room. Keeping flip's padding past
+ * `autoSizePadding` on the auto sized axis makes a squashed element count as overflowing, so it flips whenever the other
+ * side fits it better. Base UI's positioning does the same.
+ */
+function flipPadding(padding = 0, { autoSize, autoSizePadding = 0 }: PositioningOptions): Padding {
+  if (!autoSize) return padding;
+
+  const squashedPadding = Math.max(padding, autoSizePadding + 1);
+  const vertical = covers(autoSize, 'height') ? squashedPadding : padding;
+  const horizontal = covers(autoSize, 'width') ? squashedPadding : padding;
+  return { top: vertical, bottom: vertical, left: horizontal, right: horizontal };
+}
+
 export interface FlipConfig {
-  /** Padding in pixels to keep from the viewport edge before flipping. */
+  /**
+   * Padding in pixels to keep from the viewport edge before flipping. Raised past `autoSizePadding` on the auto sized
+   * axis while `autoSize` is set.
+   */
   padding?: number;
   /** Placements to try, in order, when the preferred one doesn't fit. */
   fallbackPlacements?: Placement[];
@@ -188,7 +206,8 @@ export function createPositioner(getOptions: () => PositioningOptions): Position
 
     const flipConfig = options.flip ?? positioningDefaults.flip;
     if (flipConfig) {
-      middleware.push(flip({ ...(flipConfig === true ? {} : flipConfig), ...floatingUI.flip }));
+      const config = flipConfig === true ? {} : flipConfig;
+      middleware.push(flip({ ...config, padding: flipPadding(config.padding, options), ...floatingUI.flip }));
     }
 
     const shiftConfig = options.shift ?? positioningDefaults.shift;
