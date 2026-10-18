@@ -21,6 +21,9 @@ export default class AjaxSearch implements SearchVariant {
   search(value: string) {
     this.autocomplete.setAttribute('loading', '');
     this.autocomplete.removeAttribute('error');
+    // The options on show are for the previous query until the new ones arrive, so Enter must not commit one of them.
+    // A typed key already deactivates through the combobox, but a paste sends no keydown it handles.
+    this.autocomplete.combobox.deactivate();
     this.debouncedRequest(value);
   }
 

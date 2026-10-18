@@ -1076,6 +1076,39 @@ describe('AwcAutocompleteElement', () => {
       expect(valuesOf(el)).to.eql(['1', '2', '3']);
     });
 
+    it('should commit nothing on Enter after a paste, until the options for it arrive', async () => {
+      const el = await autocompleteFixture({ src: '/fruits' });
+      const stub = stubFetch();
+      pressInput(el);
+      await requested(stub);
+      await respondAndWait(el, stub, optionsHtml(FRUITS));
+      const events = recordEvents(el, VALUE_EVENTS);
+
+      // Typed without a keydown the combobox sees, as pasting does.
+      type(el, 'Cherry');
+      pressKey(el, 'Enter');
+      await requested(stub, 2);
+      pressKey(el, 'Enter');
+
+      expect(el.value).to.equal('');
+      expect(events).to.eql([]);
+    });
+
+    it('should activate the first of the options for a paste once they arrive', async () => {
+      const el = await autocompleteFixture({ src: '/fruits' });
+      const stub = stubFetch();
+      pressInput(el);
+      await requested(stub);
+      await respondAndWait(el, stub, optionsHtml(FRUITS));
+
+      type(el, 'Cherry');
+      await requested(stub, 2);
+      await respondAndWait(el, stub, optionsHtml([FRUITS[2]]));
+
+      expect(el.activeOption).to.equal(el.options[0]);
+      expect(valuesOf(el)).to.eql(['3']);
+    });
+
     it('should abort the request for an older query when a newer one goes out', async () => {
       const el = await autocompleteFixture({ src: '/fruits' });
       const stub = stubFetch();
