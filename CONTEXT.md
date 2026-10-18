@@ -18,6 +18,10 @@ _Avoid_: Reference, reference element, target
 The element positioned relative to an anchor and kept inside the viewport.
 _Avoid_: Popup, panel, content
 
+**Nested popover**:
+A popover inside another popover's floating element, its parent popover. It counts as part of the parent, so pressing or focusing it isn't outside the parent.
+_Avoid_: Child popover, sub-popover, inner popover
+
 **Available space**:
 The room the viewport leaves a floating element where it is placed against its anchor, which the floating element may cap its size to.
 _Avoid_: Remaining space, free space, viewport space

@@ -76,7 +76,8 @@ while a form inside it has unsaved changes. `hide` closes it without asking.
 ### Nesting popovers
 
 You can nest as many popovers as you want and it will be stacked on top of the parent popover. A nested popover counts
-as part of its parent, so moving focus or clicking into it doesn't close the parent.
+as part of its parent, so moving focus or clicking into it doesn't close the parent. A click outside both, or focus
+moving out of both, closes them together, the nested popover first. Escape closes the popover focus is in.
 
 ```erb{4-7}
 <%= render(Impulse::PopoverComponent.new) do |c| %>
@@ -102,7 +103,8 @@ layer](https://developer.mozilla.org/en-US/docs/Glossary/Top_layer) so that no `
 - Escape, a click outside, and focus moving out of the popover, such as Tab past its last element, all ask it to close.
 - Closing it returns focus to the trigger when focus was inside the popover, or lost. When focus has moved on to
   something else, such as a field clicked outside, it stays there.
-- Closing it closes the popovers nested in it first.
+- Closing it closes the popovers nested in it first. A user action asks them first, and one that refuses keeps the
+  popover open.
 
 ## Slots
 
