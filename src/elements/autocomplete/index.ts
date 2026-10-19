@@ -206,11 +206,7 @@ export default class AwcAutocompleteElement<
       this.clearButton.disabled = value;
     }
 
-    // Read from the DOM: `tagDismissButtons` only catches up with a new tag once its mutation observer runs.
-    const tagDismissButtons = this.querySelectorAll<HTMLButtonElement>(
-      '[data-target~="awc-autocomplete.tagDismissButtons"]',
-    );
-    for (const button of tagDismissButtons) {
+    for (const button of this.tagDismissButtons) {
       button.disabled = value;
     }
   }

@@ -998,7 +998,7 @@ describe('AwcAutocompleteElement', () => {
   });
 
   describe('disabled and required', () => {
-    /** The dismiss button of each tag, read from the tags rather than `tagDismissButtons`, which updates later. */
+    /** The dismiss button of each tag, read from the DOM so that the assertions don't rely on `tagDismissButtons`. */
     function dismissButtonsOf(el: AwcAutocompleteElement) {
       return el.tags.map((tag) => tag.querySelector('button')!);
     }
