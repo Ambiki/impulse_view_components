@@ -898,6 +898,9 @@ Metrics/PerceivedComplexity:
 Migration/DepartmentName:
   Enabled: true
 
+Minitest/AssertWithExpectedArgument:
+  Enabled: true
+
 Naming/AccessorMethodName:
   Enabled: false
 
