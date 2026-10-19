@@ -21,7 +21,7 @@ module Impulse
       render_inline(Impulse::AnchorComponent.new(anchor_id: "awc-button", fallback_placements: ["top"]))
 
       assert JSON.parse(page.find("awc-anchor")["fallback-placements"]).is_a?(Array)
-      assert "top", JSON.parse(page.find("awc-anchor")["fallback-placements"])[0]
+      assert_equal "top", JSON.parse(page.find("awc-anchor")["fallback-placements"])[0]
     end
   end
 end
