@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- `--rounded-xl` (12px) in the border radius scale ([#344](https://github.com/Ambiki/impulse_view_components/pull/344))
 - Style import paths: `/base`, then `/<element>` or the bare path for Sass, and `/styles.css` precompiled for apps without Sass ([#331](https://github.com/Ambiki/impulse_view_components/pull/331))
 - Shorter import paths: `/<element>` (such as `/popover`) and `/hooks`, which export by name and with the types their APIs use. Bundlers drop what an app doesn't import ([#330](https://github.com/Ambiki/impulse_view_components/pull/330))
 - `toggle()` on `<awc-popover>` takes the event that toggled it, so that one press asks each popover to hide once ([#324](https://github.com/Ambiki/impulse_view_components/pull/324))
@@ -24,6 +25,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- `<awc-dialog>`'s corners are 12px (`--rounded-xl`), up from 4px ([#344](https://github.com/Ambiki/impulse_view_components/pull/344))
 - Requires `view_component` 3.27, for its security fixes. It raises `ViewComponent::ReusedInstanceError` when an app renders one component instance more than once ([#341](https://github.com/Ambiki/impulse_view_components/pull/341))
 - **Breaking:** One click outside, or focus moving out, closes `<awc-popover>` and the popovers nested in it together. A request to hide a popover asks its nested popovers first, and one that refuses keeps it open ([#324](https://github.com/Ambiki/impulse_view_components/pull/324))
 - **Breaking:** Elements no longer write their defaults to attributes when they connect, so a selector like `awc-popover[placement="bottom"]` stops matching. Read the property, or render the attribute explicitly. To turn off a Boolean that defaults to on, such as `flip`, set it to `"false"`: removing the attribute now turns it back on ([#321](https://github.com/Ambiki/impulse_view_components/pull/321))
