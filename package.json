@@ -153,7 +153,7 @@
     "tabbable": "^6.4.0"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^8.2.0",
+    "@antfu/eslint-config": "^9.5.1",
     "@open-wc/testing": "^5.0.0",
     "@rollup/plugin-commonjs": "^29.0.3",
     "@rollup/plugin-node-resolve": "^16.0.3",
@@ -167,15 +167,15 @@
     "bootstrap": "4.6",
     "concurrently": "^10.0.6",
     "esbuild": "^0.28.2",
-    "eslint": "^10.12.0",
+    "eslint": "^10.13.0",
     "eslint-plugin-format": "^2.0.1",
     "globby": "^16.2.4",
     "idiomorph": "^0.8.0",
-    "postcss": "^8.5.30",
+    "postcss": "^8.5.31",
     "postcss-cli": "^12.0.0",
-    "rollup": "^4.64.7",
+    "rollup": "^4.64.10",
     "rollup-plugin-uglify": "^6.0.4",
-    "sass": "^1.105.1",
+    "sass": "^1.105.2",
     "typescript": "^6.0.3",
     "vitepress": "^1.6.4",
     "vitepress-plugin-llms": "^1.14.0"
