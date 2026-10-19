@@ -1,6 +1,13 @@
 # Omakase Ruby styling for Rails
 inherit_gem: { rubocop-rails-omakase: rubocop.yml }
 
+plugins:
+  - rubocop-minitest
+
+# Only the cops this file enables run, as under rubocop-rails-omakase 1.0.
+AllCops:
+  DisabledByDefault: true
+
 Bundler/DuplicatedGem:
   Enabled: true
   Include:
@@ -615,7 +622,7 @@ Lint/Loop:
 
 Lint/MissingCopEnableDirective:
   Enabled: true
-  MaximumRangeSize: .inf
+  MaxRangeSize: .inf
 
 Lint/MissingSuper:
   Enabled: false
@@ -783,9 +790,6 @@ Lint/SuppressedException:
 Lint/SymbolConversion:
   Enabled: true
 
-Lint/Syntax:
-  Enabled: true
-
 Lint/ToEnumArguments:
   Enabled: false
 
@@ -948,7 +952,7 @@ Naming/MethodName:
 Naming/MethodParameterName:
   Enabled: false
 
-Naming/PredicateName:
+Naming/PredicatePrefix:
   Enabled: false
 
 Naming/RescuedExceptionsVariableName:
@@ -1141,9 +1145,6 @@ Style/Documentation:
   Enabled: false
 
 Style/DocumentationMethod:
-  Enabled: false
-
-Style/DoubleCopDisableDirective:
   Enabled: false
 
 Style/DoubleNegation:
