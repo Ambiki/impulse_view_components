@@ -377,6 +377,8 @@ export default class AwcAutocompleteElement<
    * @private
    */
   handleTagRemove(event: Event) {
+    if (this.disabled) return;
+
     const tag = (event.target as HTMLElement).closest<HTMLElement>('[data-behavior="tag"]');
     if (!tag) return;
 

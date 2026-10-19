@@ -998,6 +998,11 @@ describe('AwcAutocompleteElement', () => {
   });
 
   describe('disabled and required', () => {
+    /** The dismiss button of each tag, read from the DOM so that the assertions don't rely on `tagDismissButtons`. */
+    function dismissButtonsOf(el: AwcAutocompleteElement) {
+      return el.tags.map((tag) => tag.querySelector('button')!);
+    }
+
     it('should disable its input and buttons when `disabled` changes', async () => {
       const el = await autocompleteFixture({ multiple: true, options: FRUITS, selected: [FRUITS[0]] });
       const controls = () => [el.input, el.clearButton!, ...el.tagDismissButtons].map((control) => control.disabled);
@@ -1007,6 +1012,55 @@ describe('AwcAutocompleteElement', () => {
 
       el.disabled = false;
       expect(controls()).to.eql([false, false, false]);
+    });
+
+    it('should disable the dismiss button of a tag its form reset puts back while disabled', async () => {
+      const form = await fixture<HTMLFormElement>(
+        `<form>${autocompleteHtml({ multiple: true, options: FRUITS, selected: [FRUITS[0]], attributes: 'disabled' })}</form>`,
+      );
+      const el = form.querySelector('awc-autocomplete')!;
+      await whenInitialized(el);
+
+      form.reset();
+
+      expect(dismissButtonsOf(el).map((button) => button.disabled)).to.eql([true]);
+    });
+
+    it('should disable the dismiss button of a tag added from code while disabled', async () => {
+      const el = await autocompleteFixture({ multiple: true, options: FRUITS, attributes: 'disabled' });
+
+      el.setValue('2');
+
+      expect(dismissButtonsOf(el).map((button) => button.disabled)).to.eql([true]);
+    });
+
+    it('should disable the dismiss button of a tag added in the same task as `disabled` turns on', async () => {
+      const el = await autocompleteFixture({ multiple: true, options: FRUITS });
+
+      el.setValue('2');
+      el.disabled = true;
+
+      expect(dismissButtonsOf(el).map((button) => button.disabled)).to.eql([true]);
+    });
+
+    it('should enable the dismiss button of a tag added in the same task as `disabled` turns off', async () => {
+      const el = await autocompleteFixture({ multiple: true, options: FRUITS, attributes: 'disabled' });
+
+      el.setValue('2');
+      el.disabled = false;
+
+      expect(dismissButtonsOf(el).map((button) => button.disabled)).to.eql([false]);
+    });
+
+    it('should keep a tag whose dismiss button is clicked while disabled', async () => {
+      // Markup written by hand may leave the button enabled, as this fixture's server rendered tag does.
+      const el = await autocompleteFixture({ multiple: true, options: FRUITS, selected: [FRUITS[0]], attributes: 'disabled' });
+      const events = recordEvents(el, VALUE_EVENTS);
+
+      dismissButtonsOf(el)[0].click();
+
+      expect(el.value).to.eql(['1']);
+      expect(events).to.eql([]);
     });
 
     it('should not open when pressed or clicked while disabled', async () => {

@@ -119,6 +119,11 @@ export default class MultipleSelect implements SelectVariant {
     tagHiddenField.value = value;
     tagHiddenField.setAttribute('data-text', text);
     this.autocomplete.control.insertBefore(templateClone, this.template);
+    // The template's button has no `disabled`, and `disabledChanged` only runs when `disabled` changes, so a tag
+    // inserted while the select is disabled would get an enabled button.
+    for (const button of this.autocomplete.tagDismissButtons) {
+      button.disabled = this.autocomplete.disabled;
+    }
   }
 
   private removeTag(value: string) {
