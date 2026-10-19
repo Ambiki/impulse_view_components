@@ -17,7 +17,7 @@ Gem::Specification.new do |spec|
   spec.files = Dir["CHANGELOG.md", "LICENSE.txt", "README.md", "lib/**/*", "app/**/*"]
   spec.require_paths = ["lib"]
 
-  spec.add_runtime_dependency "view_component", "~> 3.24.0"
+  spec.add_runtime_dependency "view_component", "~> 3.27.0"
   # 7.0.9 is the first Rails 7.0 release whose activesupport declares base64,
   # bigdecimal, drb and mutex_m as dependencies. Ruby 3.4 moved those to bundled
   # gems, so earlier 7.0.x releases fail to load there.
@@ -25,6 +25,6 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "capybara", "~> 3.40"
   spec.add_development_dependency "ostruct", "~> 0.6"
-  spec.add_development_dependency "byebug", "~> 11.1", ">= 11.1.3"
+  spec.add_development_dependency "byebug", "~> 13.0"
   spec.add_development_dependency "webmock", "~> 3.18", ">= 3.18.1"
 end

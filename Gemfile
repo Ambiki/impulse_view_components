@@ -10,7 +10,7 @@ gem "activerecord", rails_version
 gem "appraisal", "~> 2.5"
 gem "bootsnap", require: false
 gem "lookbook", "~> 2.0", ">= 2.0.5"
-gem "puma", "~> 6.4", ">= 6.4.3"
+gem "puma", "~> 8.0"
 gem "rake", "~> 13.0"
 gem "railties", rails_version
 gem "sprockets"
@@ -22,6 +22,7 @@ group :development, :test do
 end
 
 group :development do
+  gem "rubocop-minitest", require: false
   gem "rubocop-rails-omakase", require: false
 end
 
