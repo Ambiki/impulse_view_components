@@ -112,14 +112,6 @@ export default class MultipleSelect implements SelectVariant {
     const tagField = templateClone.querySelector<HTMLElement>('[data-behavior="tag"]')!;
     const tagText = templateClone.querySelector<HTMLElement>('[data-behavior="text"]')!;
     const tagHiddenField = templateClone.querySelector<HTMLInputElement>('[data-behavior="hidden-field"]')!;
-    const tagDismissButton = templateClone.querySelector<HTMLButtonElement>(
-      '[data-target~="awc-autocomplete.tagDismissButtons"]',
-    );
-    // `disabledChanged` only reaches the tags that exist when `disabled` changes, so a new tag's dismiss button starts
-    // out matching it.
-    if (tagDismissButton) {
-      tagDismissButton.disabled = this.autocomplete.disabled;
-    }
     tagField.setAttribute('value', value);
     tagField.setAttribute('data-text', text);
     // eslint-disable-next-line unicorn/prefer-dom-node-text-content
@@ -127,6 +119,11 @@ export default class MultipleSelect implements SelectVariant {
     tagHiddenField.value = value;
     tagHiddenField.setAttribute('data-text', text);
     this.autocomplete.control.insertBefore(templateClone, this.template);
+    // The template's button has no `disabled`, and `disabledChanged` only runs when `disabled` changes, so a tag
+    // inserted while the select is disabled would get an enabled button.
+    for (const button of this.autocomplete.tagDismissButtons) {
+      button.disabled = this.autocomplete.disabled;
+    }
   }
 
   private removeTag(value: string) {
