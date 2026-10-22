@@ -136,6 +136,8 @@ export const notACommitValue: AwcAutocompleteCommitEvent['value'] = 1;
 export const notACommitSelected: AwcAutocompleteCommitEvent['selected'] = 'true';
 // @ts-expect-error: the copied text is a string
 export const notACopiedText: AwcClipboardCopyCopiedEvent['text'] = 1;
+// `copy()` is public and resolves to nothing.
+export const copied: Promise<void> = document.createElement('awc-clipboard-copy').copy();
 // Listeners get the clipboard copy's events typed, without a cast.
 document.addEventListener('awc-clipboard-copy:copied', (event) => {
   const text: string = event.detail.text;

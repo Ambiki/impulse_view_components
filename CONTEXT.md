@@ -91,7 +91,7 @@ The cancelable event a request emits before the element opens or closes (`show`,
 _Avoid_: Before event, intent event
 
 **State event**:
-The event emitted after an element has opened or closed, whatever caused it (`shown`, `hidden`).
+The event emitted after an element has opened or closed, or a clipboard copy has copied or failed to, whatever caused it (`shown`, `hidden`, `copied`, `error`).
 _Avoid_: After event, notification, lifecycle event
 
 **Value event**:

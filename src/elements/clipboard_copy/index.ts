@@ -132,7 +132,12 @@ export default class AwcClipboardCopyElement extends ImpulseElement {
     return event.composedPath()[0] === this;
   }
 
-  private async copy() {
+  /**
+   * Copies the text as a press does: emits `copied` or `error`, and enters the feedback state. Unlike a press, it copies
+   * even when the element is disabled. Resolves once the event has been emitted, and never rejects. Firefox and Safari
+   * only let a page write to the clipboard during a user gesture, so call it from one, such as a click handler.
+   */
+  async copy(): Promise<void> {
     let text: string;
     try {
       text = this.copiedText();
@@ -174,8 +179,9 @@ export default class AwcClipboardCopyElement extends ImpulseElement {
     if (value !== null) return value;
 
     const id = this.getAttribute('for');
-    // Looked up in the element's own tree, as a label's `for` is.
-    const copySource = id ? (this.getRootNode() as Document | ShadowRoot).getElementById(id) : null;
+    // Looked up in the element's own tree, as a label's `for` is. A removed element is in neither.
+    const root = this.getRootNode();
+    const copySource = id && (root instanceof Document || root instanceof ShadowRoot) ? root.getElementById(id) : null;
     if (!copySource) throw new DOMException(`No copy source has the id "${id ?? ''}".`, 'NotFoundError');
 
     if (

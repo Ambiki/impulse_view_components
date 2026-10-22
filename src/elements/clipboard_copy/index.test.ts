@@ -486,4 +486,51 @@ describe('awc-clipboard-copy', () => {
       expect(feedback(el)).to.equal('copied');
     });
   });
+
+  describe('copy()', () => {
+    it('copies as a press does: emits copied and enters the feedback state, once it resolves', async () => {
+      const written = stubClipboard();
+      const el = await clipboardCopyFixture('value="Hello"');
+      const events = recordEvents();
+
+      await el.copy();
+
+      expect(written).to.eql(['Hello']);
+      expect(events).to.eql([{ type: 'awc-clipboard-copy:copied', detail: { text: 'Hello' } }]);
+      expect(feedback(el)).to.equal('copied');
+    });
+
+    it('copies even when disabled, which only stops presses', async () => {
+      const written = stubClipboard();
+      const el = await clipboardCopyFixture('value="Hello" disabled');
+
+      await el.copy();
+
+      expect(written).to.eql(['Hello']);
+    });
+
+    it('resolves rather than rejects when nothing was copied, and emits error', async () => {
+      stubClipboard(new DOMException('Write permission denied.', 'NotAllowedError'));
+      const el = await clipboardCopyFixture('value="Hello"');
+      const events = recordEvents();
+
+      await el.copy();
+
+      expect(events.map(({ type }) => type)).to.eql(['awc-clipboard-copy:error']);
+      expect(feedback(el)).to.equal('error');
+    });
+
+    it('finds no copy source while the element is removed from the page', async () => {
+      const written = stubClipboard();
+      const el = await clipboardCopyFixture('for="source"', '<input id="source" value="From input">');
+      const errors: string[] = [];
+      el.addEventListener('awc-clipboard-copy:error', (event) => errors.push((event.detail.error as DOMException).name));
+
+      el.remove();
+      await el.copy();
+
+      expect(written).to.eql([]);
+      expect(errors).to.eql(['NotFoundError']);
+    });
+  });
 });

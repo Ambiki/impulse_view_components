@@ -42,6 +42,24 @@ clipboardCopy.disabled = true;
 How long, in milliseconds, the element stays in its feedback state after a press. Defaults to `2000`. Set it with the
 `feedback-duration` attribute.
 
+## Methods
+
+### `copy`
+
+Copies the text as a press does: emits `copied` or `error`, and enters the feedback state. Unlike a press, it copies
+even when the element is disabled, since `disabled` only stops the user. Resolves once the event has been emitted,
+and never rejects: a failure is reported by `error`.
+
+Firefox and Safari only let a page write to the clipboard during a user gesture. Call `copy` from one, such as another
+element's click handler; called later, from a timer or after a fetch, it emits `error` with a `NotAllowedError`.
+
+```js
+menuItem.addEventListener('click', async () => {
+  await clipboardCopy.copy();
+  menu.hide();
+});
+```
+
 ## States
 
 For `feedbackDuration` after a press, the element is in one of two
@@ -59,9 +77,10 @@ clipboardCopy.matches(':state(copied)');
 
 ## Events
 
-A press (a click, Enter, or Space) copies the text and then emits `copied`, or emits `error` when nothing was copied.
+A press (a click, Enter, or Space) or a `copy` call copies the text and then emits `copied`, or emits `error` when
+nothing was copied.
 Pressing with a key clicks the element, as a native button does, so `click` listeners hear every press. A disabled
-element ignores presses and emits nothing.
+element ignores presses and emits nothing for them; `copy` still copies.
 
 The element hears a click, Enter or Space before listeners on it and its ancestors do, so calling `preventDefault()`
 on one doesn't stop the copy. To keep the element from copying, disable it.
