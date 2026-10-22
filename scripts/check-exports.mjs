@@ -88,6 +88,15 @@ const elementDirs = fs
   .filter((entry) => entry.isDirectory())
   .map((entry) => entry.name);
 
+// The elements that had a `dist/` path when ADR 0008 deprecated them. Those paths are frozen; an element added since
+// has only its public path, and `package.json` closes the `dist/` wildcards to it.
+const distElementDirs = ['anchor', 'autocomplete', 'dialog', 'popover'];
+const hasDistPath = (name) => distElementDirs.includes(name);
+
+// An element's directory is named with underscores, its public path and its tag with dashes: `clipboard_copy` is
+// `…/clipboard-copy` and `<awc-clipboard-copy>`.
+const elementName = (dir) => dir.replaceAll('_', '-');
+
 const styledElementDirs = elementDirs.filter((name) =>
   fs.existsSync(path.join(distDir, 'elements', name, 'index.scss')),
 );
@@ -101,7 +110,7 @@ const flatModules = ['hooks', 'helpers'].flatMap((group) =>
 
 // The import paths the docs teach (ADR 0008).
 const publicSpecifiers = [
-  ...elementDirs.map((name) => subpath(name)),
+  ...elementDirs.map((name) => subpath(elementName(name))),
   subpath('hooks'),
 ];
 
@@ -111,8 +120,8 @@ const scriptSpecifiers = [
   ...publicSpecifiers,
   pkg.name,
   subpath('dist', 'index.js'),
-  ...elementDirs.map((name) => subpath('dist', 'elements', name)),
-  ...elementDirs.map((name) => subpath('dist', 'elements', name, 'index.js')),
+  ...distElementDirs.map((name) => subpath('dist', 'elements', name)),
+  ...distElementDirs.map((name) => subpath('dist', 'elements', name, 'index.js')),
   ...flatModules.map(([group, name]) => subpath('dist', group, name)),
   ...flatModules.map(([group, name]) => subpath('dist', group, `${name}.js`)),
   // Non-index modules inside an element directory.
@@ -141,6 +150,13 @@ for (const specifier of [
   subpath('dist', 'hooks', 'index'),
   subpath('dist', 'hooks', 'index.js'),
   subpath('dist', 'styles', 'index.scss'),
+  ...elementDirs
+    .filter((name) => !hasDistPath(name))
+    .flatMap((name) => [
+      subpath('dist', 'elements', name),
+      subpath('dist', 'elements', name, 'index'),
+      subpath('dist', 'elements', name, 'index.js'),
+    ]),
 ]) {
   check(`node: ${specifier} is not exported`, () => {
     assert.throws(() => import.meta.resolve(specifier), { code: 'ERR_PACKAGE_PATH_NOT_EXPORTED' });
@@ -164,7 +180,7 @@ for (const name of styledElementDirs) {
 // The paths the docs teach follow the conditions' convention: `sass` names Sass and `style` names CSS. An element has
 // no CSS of its own, so its path has no `style`, and a CSS tool doesn't get Sass it can't parse.
 for (const name of styledElementDirs) {
-  const specifier = subpath(name);
+  const specifier = subpath(elementName(name));
   const stylesheet = path.join(distDir, 'elements', name, 'index.scss');
 
   check(`node --conditions sass: ${specifier}`, () => {
@@ -178,7 +194,8 @@ for (const name of styledElementDirs) {
 // Element directories need an exact key: a pattern cannot append `/index`, so a new element
 // silently stops resolving without one.
 for (const name of elementDirs) {
-  for (const key of [`./${name}`, `./dist/elements/${name}`]) {
+  const keys = [`./${elementName(name)}`, ...(hasDistPath(name) ? [`./dist/elements/${name}`] : [])];
+  for (const key of keys) {
     check(`exports["${key}"]`, () => {
       assert.ok(pkg.exports[key], 'missing. Element directories need an exact key, patterns cannot append /index');
     });
@@ -285,16 +302,17 @@ check(`bundle: one hook from ${subpath('hooks')}`, () => {
 });
 
 for (const name of elementDirs) {
-  for (const specifier of [subpath(name), subpath('dist', 'elements', name)]) {
+  const specifiers = [subpath(elementName(name)), ...(hasDistPath(name) ? [subpath('dist', 'elements', name)] : [])];
+  for (const specifier of specifiers) {
     check(`bundle: import '${specifier}'`, () => {
-      assert.match(bundle(`import '${specifier}';`).text, new RegExp(`['"]awc-${name}['"]`), 'drops the registration');
+      assert.match(bundle(`import '${specifier}';`).text, new RegExp(`['"]awc-${elementName(name)}['"]`), 'drops the registration');
     });
   }
 }
 
 check(`bundle: import '${pkg.name}'`, () => {
   const { text } = bundle(`import '${pkg.name}';`);
-  for (const name of elementDirs) assert.match(text, new RegExp(`['"]awc-${name}['"]`), `drops <awc-${name}>`);
+  for (const name of elementDirs.map(elementName)) assert.match(text, new RegExp(`['"]awc-${name}['"]`), `drops <awc-${name}>`);
 });
 
 // 7. Stylesheets that follow the docs hold each element's rules, and define every custom property they read, other than
@@ -327,7 +345,7 @@ try {
     }).css;
 
   for (const name of styledElementDirs) {
-    const specifiers = [subpath('base'), subpath(name)];
+    const specifiers = [subpath('base'), subpath(elementName(name))];
     check(`sass: ${specifiers.join(' + ')}`, () => assertStyles(compile(specifiers), [name]));
   }
 

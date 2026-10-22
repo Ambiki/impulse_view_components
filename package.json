@@ -47,6 +47,10 @@
       "sass": "./dist/elements/autocomplete/index.scss",
       "default": "./dist/elements/autocomplete/index.js"
     },
+    "./clipboard-copy": {
+      "types": "./dist/elements/clipboard_copy/index.d.ts",
+      "default": "./dist/elements/clipboard_copy/index.js"
+    },
     "./dialog": {
       "types": "./dist/elements/dialog/index.d.ts",
       "sass": "./dist/elements/dialog/index.scss",
@@ -91,6 +95,8 @@
       "style": "./dist/elements/popover/index.scss",
       "default": "./dist/elements/popover/index.js"
     },
+    "./dist/elements/clipboard_copy": null,
+    "./dist/elements/clipboard_copy/*": null,
     "./dist/elements/*.scss": "./dist/elements/*.scss",
     "./dist/elements/*.js": {
       "types": "./dist/elements/*.d.ts",

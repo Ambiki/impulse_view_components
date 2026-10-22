@@ -1,0 +1,6 @@
+<div class="d-flex align-items-start">
+  <pre id="setup-command" class="mb-0 mr-2">bundle exec rails db:setup</pre>
+  <%= render(Impulse::ClipboardCopyComponent.new(for: "setup-command", class: "btn btn-sm btn-outline-secondary", aria: { label: "Copy command" })) do %>
+    <i class="bi bi-clipboard" aria-hidden="true"></i>
+  <% end %>
+</div>

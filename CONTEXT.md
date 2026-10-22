@@ -62,6 +62,20 @@ _Avoid_: Remote, async, server-side
 Options read from the page rather than fetched. The counterpart of ajax.
 _Avoid_: Static, inline, client-side
 
+### Clipboard
+
+**Copied text**:
+The text a clipboard copy writes to the clipboard: its own value when it has one, else the text of its copy source.
+_Avoid_: Content, payload, clipboard value
+
+**Copy source**:
+The element a clipboard copy reads its copied text from, named by id. A form control gives its value, any other element its text as rendered.
+_Avoid_: Target, source, reference
+
+**Feedback state**:
+The state a clipboard copy is in for a moment after a press: copied, or error when nothing was copied. What it looks like is up to the app.
+_Avoid_: Status, result, copied attribute
+
 ### Events
 
 **Open**:
@@ -77,7 +91,7 @@ The cancelable event a request emits before the element opens or closes (`show`,
 _Avoid_: Before event, intent event
 
 **State event**:
-The event emitted after an element has opened or closed, whatever caused it (`shown`, `hidden`).
+The event emitted after an element has opened or closed, or a clipboard copy has copied or failed to, whatever caused it (`shown`, `hidden`, `copied`, `error`).
 _Avoid_: After event, notification, lifecycle event
 
 **Value event**:

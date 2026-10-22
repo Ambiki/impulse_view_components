@@ -79,6 +79,10 @@ what you use.`,
             link: '/components/anchor',
           },
           {
+            text: 'Clipboard copy',
+            link: '/components/clipboard-copy',
+          },
+          {
             text: 'Dialog',
             link: '/components/dialog',
           },
@@ -111,6 +115,10 @@ what you use.`,
           {
             text: 'Autocomplete',
             link: '/js-api/autocomplete',
+          },
+          {
+            text: 'Clipboard copy',
+            link: '/js-api/clipboard-copy',
           },
           {
             text: 'Dialog',
