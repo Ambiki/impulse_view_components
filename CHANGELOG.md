@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- `Impulse::ClipboardCopyComponent` (`<awc-clipboard-copy>`), a button that copies a value or another element's text when pressed or on `copy()`, emits `copied` or `error`, and is in `:state(copied)` or `:state(error)` for a moment after ([#348](https://github.com/Ambiki/impulse_view_components/pull/348))
+- `Impulse::ClipboardCopyComponent` (`<awc-clipboard-copy>`), a button that copies text to the clipboard ([#348](https://github.com/Ambiki/impulse_view_components/pull/348))
 - `--rounded-xl` (12px) in the border radius scale ([#344](https://github.com/Ambiki/impulse_view_components/pull/344))
 - Style import paths: `/base`, then `/<element>` or the bare path for Sass, and `/styles.css` precompiled for apps without Sass ([#331](https://github.com/Ambiki/impulse_view_components/pull/331))
 - Shorter import paths: `/<element>` (such as `/popover`) and `/hooks`, which export by name and with the types their APIs use. Bundlers drop what an app doesn't import ([#330](https://github.com/Ambiki/impulse_view_components/pull/330))
