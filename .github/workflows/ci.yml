@@ -4,15 +4,21 @@ on:
   pull_request:
     branches:
       - main
+  # A pull request can only restore the gem and yarn caches saved by its own runs or by main's, so runs on main save
+  # them for every new pull request.
+  push:
+    branches:
+      - main
 
-# A new push to a pull request cancels the run still going for its previous push.
+# A new push to a pull request cancels the run still going for its previous push. Runs on main always finish.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   lint_js:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -30,6 +36,7 @@ jobs:
 
   check_exports:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -44,6 +51,7 @@ jobs:
 
   lint_ruby:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
@@ -55,9 +63,14 @@ jobs:
         run: ./bin/rubocop
 
   test_js:
-    needs:
-      - lint_js
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # The image comes with the browsers and the system packages they need, so the job doesn't install them from
+    # Ubuntu's mirrors. Keep its version in step with `playwright` in yarn.lock. On a mismatch, `playwright install`
+    # downloads the browsers that version needs.
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble
+      options: --user 1001
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -67,14 +80,12 @@ jobs:
       - name: Run test
         run: |
           yarn install --frozen-lockfile
-          yarn playwright install --with-deps
+          yarn playwright install
           yarn test
 
   test_system:
-    needs:
-      - lint_js
-      - lint_ruby
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
@@ -115,10 +126,8 @@ jobs:
           overwrite: true
 
   test_components:
-    needs:
-      - lint_js
-      - lint_ruby
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
