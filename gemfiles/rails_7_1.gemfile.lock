@@ -2,8 +2,8 @@ PATH
   remote: ..
   specs:
     impulse_view_components (0.8.0)
-      actionview (>= 7.0.9)
-      view_component (~> 3.27.0)
+      actionview (>= 7.1.0)
+      view_component (~> 4.17.0)
 
 GEM
   remote: https://rubygems.org/
@@ -167,7 +167,6 @@ GEM
       net-smtp
     marcel (1.2.1)
     matrix (0.4.3)
-    method_source (1.1.0)
     mini_mime (1.1.5)
     mini_portile2 (2.8.9)
     minitest (6.0.6)
@@ -330,10 +329,10 @@ GEM
     unicode-display_width (3.3.0)
       unicode-emoji (~> 4.3)
     unicode-emoji (4.3.0)
-    view_component (3.27.0)
-      activesupport (>= 5.2.0, < 8.2)
+    view_component (4.17.0)
+      actionview (>= 7.1.0)
+      activesupport (>= 7.1.0)
       concurrent-ruby (~> 1)
-      method_source (~> 1.0)
     webmock (3.34.0)
       addressable (>= 2.8.0)
       crack (>= 0.3.2)
@@ -352,9 +351,9 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
-  actionview (>= 7.0.9)
-  activerecord (>= 7.0.9)
-  activesupport (>= 7.0.9)
+  actionview (>= 7.1.0)
+  activerecord (>= 7.1.0)
+  activesupport (>= 7.1.0)
   appraisal (~> 2.5)
   bootsnap
   byebug (~> 13.0)
@@ -365,7 +364,7 @@ DEPENDENCIES
   ostruct (~> 0.6)
   puma (~> 8.0)
   rails (~> 7.1.0)
-  railties (>= 7.0.9)
+  railties (>= 7.1.0)
   rake (~> 13.0)
   rspec (~> 3.0)
   rubocop-minitest

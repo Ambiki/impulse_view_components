@@ -2,15 +2,15 @@
 
 source "https://rubygems.org"
 
-gem "actionview", ">= 7.0.9"
-gem "activesupport", ">= 7.0.9"
-gem "activerecord", ">= 7.0.9"
+gem "actionview", ">= 7.1.0"
+gem "activesupport", ">= 7.1.0"
+gem "activerecord", ">= 7.1.0"
 gem "appraisal", "~> 2.5"
 gem "bootsnap", require: false
 gem "lookbook", "~> 2.0", ">= 2.0.5"
 gem "puma", "~> 8.0"
 gem "rake", "~> 13.0"
-gem "railties", ">= 7.0.9"
+gem "railties", ">= 7.1.0"
 gem "sprockets"
 gem "sprockets-rails"
 gem "sqlite3", ">= 2.1"

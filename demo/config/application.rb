@@ -17,9 +17,9 @@ module Demo
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults Rails::VERSION::MAJOR + (Rails::VERSION::MINOR / 10.0)
 
-    config.view_component.default_preview_layout = "preview"
-    config.view_component.show_previews = true
-    config.view_component.preview_paths << Rails.root.join("../previews")
+    config.view_component.previews.default_layout = "preview"
+    config.view_component.previews.enabled = true
+    config.view_component.previews.paths << Rails.root.join("../previews")
 
     config.lookbook.project_name = "Impulse View Components"
     config.lookbook.debug_menu = true

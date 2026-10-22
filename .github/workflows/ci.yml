@@ -80,12 +80,10 @@ jobs:
       matrix:
         ruby: ["3.4", "4.0"]
         gemfile:
-          - rails_7
           - rails_7_1
           - rails_8
         exclude:
           # Keep Ruby 4.0 limited to the newest Rails only
-          - { ruby: "4.0", gemfile: rails_7 }
           - { ruby: "4.0", gemfile: rails_7_1 }
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile
@@ -126,12 +124,10 @@ jobs:
       matrix:
         ruby: ["3.4", "4.0"]
         gemfile:
-          - rails_7
           - rails_7_1
           - rails_8
         exclude:
           # Keep Ruby 4.0 limited to the newest Rails only
-          - { ruby: "4.0", gemfile: rails_7 }
           - { ruby: "4.0", gemfile: rails_7_1 }
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile

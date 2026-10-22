@@ -25,8 +25,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **Breaking:** Requires Rails 7.1 and `view_component` 4.17, which brings [ViewComponent 4's breaking changes](https://github.com/ViewComponent/view_component/releases/tag/v4.0.0). It raises `ViewComponent::ReusedInstanceError` when an app renders one component instance more than once ([#346](https://github.com/Ambiki/impulse_view_components/pull/346))
 - `<awc-dialog>`'s corners are 12px (`--rounded-xl`), up from 4px ([#344](https://github.com/Ambiki/impulse_view_components/pull/344))
-- Requires `view_component` 3.27, for its security fixes. It raises `ViewComponent::ReusedInstanceError` when an app renders one component instance more than once ([#341](https://github.com/Ambiki/impulse_view_components/pull/341))
 - **Breaking:** One click outside, or focus moving out, closes `<awc-popover>` and the popovers nested in it together. A request to hide a popover asks its nested popovers first, and one that refuses keeps it open ([#324](https://github.com/Ambiki/impulse_view_components/pull/324))
 - **Breaking:** Elements no longer write their defaults to attributes when they connect, so a selector like `awc-popover[placement="bottom"]` stops matching. Read the property, or render the attribute explicitly. To turn off a Boolean that defaults to on, such as `flip`, set it to `"false"`: removing the attribute now turns it back on ([#321](https://github.com/Ambiki/impulse_view_components/pull/321))
 - **Breaking:** `<awc-autocomplete>` auto sizes by default (`auto-size="false"` or `auto_size: false` turns it off), and its listbox is never taller than `--awc-autocomplete-listbox-max-height`. Compiling the SCSS now needs Dart Sass ([#318](https://github.com/Ambiki/impulse_view_components/pull/318))
