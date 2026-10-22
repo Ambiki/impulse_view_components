@@ -1,4 +1,4 @@
-import { ImpulseElement, property, registerElement } from '@ambiki/impulse';
+import { ImpulseElement, on, property, registerElement } from '@ambiki/impulse';
 
 /** The detail of `awc-clipboard-copy:copied`, emitted once the clipboard holds the copied text. */
 export interface AwcClipboardCopyCopiedEvent {
@@ -55,12 +55,14 @@ export default class AwcClipboardCopyElement extends ImpulseElement {
     this.internals.ariaDisabled = this.disabled ? 'true' : null;
 
     this.listeners = new AbortController();
-    const { signal } = this.listeners;
-    // In the capture phase, so that a disabled element can stop the click before anything else on the page hears it.
-    this.addEventListener('click', this.handleClick, { capture: true, signal });
-    this.addEventListener('keydown', this.handleKeydown, { signal });
-    this.addEventListener('keyup', this.handleKeyup, { signal });
-    this.addEventListener('blur', this.handleBlur, { signal });
+    // Delegated from the document in the capture phase, so the element hears an event before anything else on the
+    // page: a disabled element stops the click there, and a listener that stops a key's propagation can't keep it from
+    // pressing the element. `blur`, which doesn't bubble, only reaches the document in that phase.
+    const options = { capture: true, signal: this.listeners.signal };
+    on('click', this.localName, this.handleClick, options);
+    on('keydown', this.localName, this.handleKeydown, options);
+    on('keyup', this.localName, this.handleKeyup, options);
+    on('blur', this.localName, this.handleBlur, options);
   }
 
   disconnected() {
@@ -85,7 +87,10 @@ export default class AwcClipboardCopyElement extends ImpulseElement {
     this.tabIndexDisabled = this.disabled;
   }
 
+  // Every clipboard copy on the page is told of an event on any of them, so each one checks it is the one pressed.
   private handleClick = (event: MouseEvent) => {
+    if (event.currentTarget !== this) return;
+
     if (this.disabled) {
       // A native disabled button gets no click at all.
       event.preventDefault();
@@ -116,7 +121,9 @@ export default class AwcClipboardCopyElement extends ImpulseElement {
     this.click();
   };
 
-  private handleBlur = () => {
+  private handleBlur = (event: FocusEvent) => {
+    if (event.target !== this) return;
+
     this.spacePressed = false;
   };
 

@@ -194,7 +194,33 @@ describe('awc-clipboard-copy', () => {
     expect((events[0].detail as { error: DOMException }).error.name).to.equal('NotFoundError');
   });
 
+  it('copies only for the one pressed when the page has several', async () => {
+    const written = stubClipboard();
+    const container = await fixture<HTMLElement>(
+      `<div>${clipboardCopyHtml('value="First"')}${clipboardCopyHtml('value="Second"')}</div>`,
+    );
+    const [first, second] = container.querySelectorAll('awc-clipboard-copy');
+    await Promise.all([whenInitialized(first), whenInitialized(second)]);
+
+    first.click();
+    second.click();
+    await settle();
+
+    expect(written).to.eql(['First', 'Second']);
+  });
+
   describe('from the keyboard', () => {
+    it('copies even when the page stops the key from propagating', async () => {
+      const written = stubClipboard();
+      const el = await clipboardCopyFixture('value="Hello"');
+      el.parentElement!.addEventListener('keydown', (event) => event.stopPropagation());
+
+      dispatchKey(el, 'keydown', 'Enter');
+      await settle();
+
+      expect(written).to.eql(['Hello']);
+    });
+
     it('copies when Enter is pressed', async () => {
       const written = stubClipboard();
       const el = await clipboardCopyFixture('value="Hello"');
