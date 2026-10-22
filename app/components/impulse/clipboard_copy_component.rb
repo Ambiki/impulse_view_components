@@ -1,6 +1,7 @@
 module Impulse
   # A button that copies text to the clipboard: its `value`, or the text of the copy source its `for` names. It emits
-  # `awc-clipboard-copy:copied` or `awc-clipboard-copy:error`, and shows no feedback of its own.
+  # `awc-clipboard-copy:copied` or `awc-clipboard-copy:error`, and is in `:state(copied)` or `:state(error)` for
+  # `feedback_duration:` milliseconds after, for the app to style. It shows and announces nothing of its own.
   class ClipboardCopyComponent < ApplicationComponent
     def initialize(value: nil, disabled: false, **system_args)
       @system_args = system_args

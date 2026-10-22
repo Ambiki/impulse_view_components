@@ -1,8 +1,9 @@
 # Clipboard copy
 
 A button that copies text to the clipboard: a value rendered by the server, or the text of another element on the
-page. It emits an event once the text is copied, or when it couldn't be, and shows no feedback of its own: how the
-user is told, with a toast, an icon swap, or not at all, is up to your app.
+page. It emits an event once the text is copied, or when it couldn't be, and enters a short feedback state you can
+style. It shows and announces nothing of its own: how the user is told, with a toast, an icon swap, or not at all, is
+up to your app.
 
 ## Usage
 
@@ -25,6 +26,7 @@ an icon, or the value itself.
 | value    | N/A     | The text to copy. When given, even empty, it is copied instead of the copy source's text.                         |
 | for      | N/A     | The `id` of the copy source, the element whose text is copied when there is no `value`.                           |
 | disabled | `false` | Whether the button ignores presses. A disabled button takes no focus and is announced as disabled.                |
+| feedback_duration | `2000` | How long, in milliseconds, the button stays in its feedback state after a press. See [Showing the result](#showing-the-result). |
 
 Other arguments, such as `class` or `aria`, are rendered on the element. The component adds no classes of its own.
 
@@ -59,23 +61,58 @@ A button that shows only an icon needs an accessible name, given with `aria-labe
 When the button has a visible label, leave out `aria-label`, or start it with the visible label, so that speech input
 users can say what they see.
 
-### Telling the user
+### Showing the result
 
-Listen for `awc-clipboard-copy:copied` and `awc-clipboard-copy:error`, which bubble, and react as your app does
-elsewhere.
+For a short while after a press, the button is in a feedback state: `:state(copied)` once the text is copied, or
+`:state(error)` when nothing was. Style it to swap the icon, with no JavaScript. The state lasts 2 seconds; change it
+with `feedback_duration:`, in milliseconds. Another press starts it over.
 
-```js
-document.addEventListener('awc-clipboard-copy:copied', (event) => {
-  showToast('Copied to clipboard');
-});
-
-document.addEventListener('awc-clipboard-copy:error', (event) => {
-  showToast('Copying to the clipboard failed');
-});
+```erb
+<%= render(Impulse::ClipboardCopyComponent.new(value: meeting_link, class: "btn btn-sm copy-link", aria: { label: "Copy link" })) do %>
+  <i class="bi bi-clipboard" aria-hidden="true"></i>
+  <i class="bi bi-check2" aria-hidden="true"></i>
+<% end %>
 ```
 
-Whatever the user sees, screen reader users need to hear it too: an icon swap alone isn't announced. Put the message in
-a live region, such as an element with `role="status"`, as a toast usually does.
+```css
+.copy-link .bi-check2,
+.copy-link:state(copied) .bi-clipboard {
+  display: none;
+}
+
+.copy-link:state(copied) .bi-check2 {
+  display: inline;
+}
+```
+
+The state is a [custom state](https://developer.mozilla.org/en-US/docs/Web/CSS/:state), not an attribute, so a Turbo
+morph doesn't end it early. Browsers without `:state()` (before Chrome 125, Firefox 126 and Safari 17.4) still copy,
+without the feedback state.
+
+### Announcing the result
+
+An icon swap is only seen. Screen reader users need to hear the result too
+([WCAG 4.1.3](https://www.w3.org/WAI/WCAG22/Understanding/status-messages.html)), and the button doesn't announce it.
+Listen for `awc-clipboard-copy:copied` and `awc-clipboard-copy:error`, which bubble, and put a message in a live
+region, such as an element with `role="status"`. A toast that is one already does this.
+
+```html
+<div id="copy-status" role="status" class="sr-only"></div>
+```
+
+```js
+// Emptied first, so that copying twice announces twice.
+function announce(message) {
+  const status = document.getElementById('copy-status');
+  status.textContent = '';
+  setTimeout(() => {
+    status.textContent = message;
+  }, 100);
+}
+
+document.addEventListener('awc-clipboard-copy:copied', () => announce('Copied to clipboard'));
+document.addEventListener('awc-clipboard-copy:error', () => announce('Copying to the clipboard failed'));
+```
 
 The clipboard is only available on pages served over HTTPS or from `localhost`. Elsewhere, every press emits
 `awc-clipboard-copy:error`. See the [JS API](../js-api/clipboard-copy.md) for each event's detail.

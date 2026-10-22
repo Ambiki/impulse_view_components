@@ -13,5 +13,11 @@ module Impulse
     def with_copy_source
       render_with_template
     end
+
+    # @display center true
+    # @param feedback_duration number
+    def with_feedback(feedback_duration: 2000)
+      render_with_template(locals: { feedback_duration: feedback_duration })
+    end
   end
 end

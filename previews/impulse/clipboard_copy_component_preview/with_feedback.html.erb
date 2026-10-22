@@ -1,0 +1,34 @@
+<style>
+  .copy-feedback .bi-check2,
+  .copy-feedback .bi-x-lg,
+  .copy-feedback:state(copied) .bi-clipboard,
+  .copy-feedback:state(error) .bi-clipboard {
+    display: none;
+  }
+
+  .copy-feedback:state(copied) .bi-check2,
+  .copy-feedback:state(error) .bi-x-lg {
+    display: inline;
+  }
+</style>
+
+<%= render(Impulse::ClipboardCopyComponent.new(value: "https://example.com/meetings/123", feedback_duration: feedback_duration, class: "btn btn-outline-secondary copy-feedback", aria: { label: "Copy link" })) do %>
+  <i class="bi bi-clipboard" aria-hidden="true"></i>
+  <i class="bi bi-check2" aria-hidden="true"></i>
+  <i class="bi bi-x-lg" aria-hidden="true"></i>
+<% end %>
+
+<div id="copy-feedback-status" role="status" class="sr-only"></div>
+
+<script>
+  // The icons only show the result. Screen reader users hear it from the status region, which is emptied first so that
+  // copying twice announces twice.
+  function announce(message) {
+    const status = document.getElementById('copy-feedback-status');
+    status.textContent = '';
+    setTimeout(() => { status.textContent = message; }, 100);
+  }
+
+  document.addEventListener('awc-clipboard-copy:copied', () => announce('Link copied'));
+  document.addEventListener('awc-clipboard-copy:error', () => announce("Couldn't copy the link"));
+</script>

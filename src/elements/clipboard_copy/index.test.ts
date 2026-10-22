@@ -51,8 +51,15 @@ function dispatchKey(target: Element, type: 'keydown' | 'keyup', key: string) {
 }
 
 /** Resolves once the element has finished the copy a press started: the clipboard write is asynchronous. */
-function settle() {
-  return new Promise((resolve) => setTimeout(resolve));
+function settle(ms = 0) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** The feedback state the element is in, if any. */
+function feedback(el: Element) {
+  if (el.matches(':state(copied)')) return 'copied';
+  if (el.matches(':state(error)')) return 'error';
+  return null;
 }
 
 describe('awc-clipboard-copy', () => {
@@ -327,5 +334,87 @@ describe('awc-clipboard-copy', () => {
     await settle();
     expect(el.tabIndex).to.equal(0);
     expect(written).to.eql(['Changed']);
+  });
+
+  describe('feedback state', () => {
+    it('is copied for 2000ms by default after a copy', async () => {
+      stubClipboard();
+      const el = await clipboardCopyFixture('value="Hello"');
+      expect(el.feedbackDuration).to.equal(2000);
+      expect(feedback(el)).to.equal(null);
+
+      el.click();
+      await settle();
+
+      expect(feedback(el)).to.equal('copied');
+    });
+
+    it('ends once the feedback duration has passed', async () => {
+      stubClipboard();
+      const el = await clipboardCopyFixture('value="Hello" feedback-duration="50"');
+
+      el.click();
+      await settle();
+      expect(feedback(el)).to.equal('copied');
+
+      await settle(100);
+      expect(feedback(el)).to.equal(null);
+    });
+
+    it('is error when nothing was copied, in place of copied', async () => {
+      const written = stubClipboard();
+      const el = await clipboardCopyFixture('value="Hello"');
+
+      el.click();
+      await settle();
+      expect(feedback(el)).to.equal('copied');
+
+      el.removeAttribute('value');
+      el.click();
+      await settle();
+
+      expect(written).to.eql(['Hello']);
+      expect(feedback(el)).to.equal('error');
+    });
+
+    it('starts over on every press', async () => {
+      stubClipboard();
+      const el = await clipboardCopyFixture('value="Hello" feedback-duration="200"');
+
+      el.click();
+      await settle(120);
+      el.click();
+      await settle(120);
+      // 240ms after the first press, but 120ms after the second.
+      expect(feedback(el)).to.equal('copied');
+
+      await settle(150);
+      expect(feedback(el)).to.equal(null);
+    });
+
+    it('ends when the element is removed from the page', async () => {
+      stubClipboard();
+      const el = await clipboardCopyFixture('value="Hello"');
+      const parent = el.parentElement!;
+
+      el.click();
+      await settle();
+      el.remove();
+      parent.append(el);
+      await whenInitialized(el);
+
+      expect(feedback(el)).to.equal(null);
+    });
+
+    it('survives a morph, since no attribute holds it', async () => {
+      stubClipboard();
+      const el = await clipboardCopyFixture('value="Hello"');
+
+      el.click();
+      await settle();
+      Idiomorph.morph(el, clipboardCopyHtml('value="Hello"'));
+
+      expect(feedback(el)).to.equal('copied');
+    });
   });
 });

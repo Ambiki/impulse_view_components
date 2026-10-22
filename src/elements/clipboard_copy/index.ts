@@ -22,6 +22,12 @@ export default class AwcClipboardCopyElement extends ImpulseElement {
    */
   @property({ type: Boolean }) disabled = false;
 
+  /**
+   * How long, in milliseconds, the element stays in its feedback state after a press: `:state(copied)` once the text
+   * is copied, `:state(error)` when nothing was.
+   */
+  @property({ type: Number }) feedbackDuration = 2000;
+
   // The element is the button. Its role and disabled state are default semantics rather than attributes, so a page
   // morph, which syncs attributes to the server's HTML, can't strip them.
   private readonly internals = this.attachInternals();
@@ -33,6 +39,8 @@ export default class AwcClipboardCopyElement extends ImpulseElement {
   private tabIndexDisabled?: boolean;
 
   private listeners?: AbortController;
+
+  private feedbackTimeout?: ReturnType<typeof setTimeout>;
 
   constructor() {
     super();
@@ -58,6 +66,7 @@ export default class AwcClipboardCopyElement extends ImpulseElement {
   disconnected() {
     this.listeners?.abort();
     this.spacePressed = false;
+    this.showFeedback(null);
   }
 
   disabledChanged(disabled: boolean) {
@@ -119,10 +128,31 @@ export default class AwcClipboardCopyElement extends ImpulseElement {
       if (!navigator.clipboard) throw new DOMException('The Clipboard API is unavailable.', 'NotSupportedError');
       await navigator.clipboard.writeText(text);
     } catch (error) {
+      this.showFeedback('error');
       this.emit<AwcClipboardCopyErrorEvent>('error', { detail: { error } });
       return;
     }
+    this.showFeedback('copied');
     this.emit<AwcClipboardCopyCopiedEvent>('copied', { detail: { text } });
+  }
+
+  /**
+   * Puts the element in the feedback state `state`, out of the other one, for `feedbackDuration`, or out of both when
+   * `state` is `null`. It is a custom state rather than an attribute, so that a page morph doesn't end it early.
+   */
+  private showFeedback(state: 'copied' | 'error' | null) {
+    clearTimeout(this.feedbackTimeout);
+    try {
+      this.internals.states.delete('copied');
+      this.internals.states.delete('error');
+      if (!state) return;
+
+      this.internals.states.add(state);
+      this.feedbackTimeout = setTimeout(() => this.showFeedback(null), this.feedbackDuration);
+    } catch {
+      // Browsers without `:state()` (before Chrome 125, Firefox 126, Safari 17.4) only miss the feedback: the copy and
+      // its events still happen.
+    }
   }
 
   /** Its own `value` when it has one, even empty, else the text of the copy source its `for` names. */

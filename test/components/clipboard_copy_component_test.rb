@@ -31,6 +31,14 @@ module Impulse
       refute_selector "awc-clipboard-copy[tabindex]"
     end
 
+    test "renders the feedback duration only when given, leaving the default to the element" do
+      render_inline(Impulse::ClipboardCopyComponent.new(value: "Hello", feedback_duration: 500)) { "Copy" }
+      assert_selector "awc-clipboard-copy[feedback-duration='500']"
+
+      render_inline(Impulse::ClipboardCopyComponent.new(value: "Hello")) { "Copy" }
+      refute_selector "awc-clipboard-copy[feedback-duration]"
+    end
+
     test "passes other arguments on to the element, adding no classes of its own" do
       render_inline(Impulse::ClipboardCopyComponent.new(value: "Hello", class: "btn btn-sm", aria: { label: "Copy link" })) do
         "Copy"

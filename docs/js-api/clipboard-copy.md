@@ -35,6 +35,26 @@ announced with. A disabled element takes no focus and no click reaches the page,
 clipboardCopy.disabled = true;
 ```
 
+### `feedbackDuration`
+
+How long, in milliseconds, the element stays in its feedback state after a press. Defaults to `2000`. Set it with the
+`feedback-duration` attribute.
+
+## States
+
+For `feedbackDuration` after a press, the element is in one of two
+[custom states](https://developer.mozilla.org/en-US/docs/Web/CSS/:state), which CSS selects with `:state()`. Another
+press starts the duration over, and removing the element from the page ends it.
+
+| State     | Description                                                       |
+| ------    | ------------                                                      |
+| `copied`  | Entered just before `awc-clipboard-copy:copied` is emitted.       |
+| `error`   | Entered just before `awc-clipboard-copy:error` is emitted.        |
+
+```js
+clipboardCopy.matches(':state(copied)');
+```
+
 ## Events
 
 A press (a click, Enter, or Space) copies the text and then emits `copied`, or emits `error` when nothing was copied.

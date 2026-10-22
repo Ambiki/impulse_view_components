@@ -72,6 +72,10 @@ _Avoid_: Content, payload, clipboard value
 The element a clipboard copy reads its copied text from, named by id. A form control gives its value, any other element its text as rendered.
 _Avoid_: Target, source, reference
 
+**Feedback state**:
+The state a clipboard copy is in for a moment after a press: copied, or error when nothing was copied. What it looks like is up to the app.
+_Avoid_: Status, result, copied attribute
+
 ### Events
 
 **Open**:
