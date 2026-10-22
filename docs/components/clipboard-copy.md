@@ -23,7 +23,7 @@ an icon, or the value itself.
 
 | Name     | Default | Description                                                                                                       |
 | ------   | ------- | -------------                                                                                                     |
-| value    | N/A     | The text to copy. When given, even empty, it is copied instead of the copy source's text.                         |
+| value    | N/A     | The text to copy. When it isn't empty, it is copied instead of the copy source's text.                            |
 | for      | N/A     | The `id` of the copy source, the element whose text is copied when there is no `value`.                           |
 | disabled | `false` | Whether the button ignores presses. A disabled button takes no focus and is announced as disabled.                |
 | feedback_duration | `2000` | How long, in milliseconds, the button stays in its feedback state after a press. See [Styling the feedback state](#styling-the-feedback-state). |
@@ -68,7 +68,7 @@ For a short while after a press, the button is in a feedback state: `:state(copi
 with `feedback_duration:`, in milliseconds. Another press starts it over.
 
 ```erb
-<%= render(Impulse::ClipboardCopyComponent.new(value: meeting_link, class: "btn btn-sm copy-link", aria: { label: "Copy link" })) do %>
+<%= render(Impulse::ClipboardCopyComponent.new(value: meeting_link, feedback_duration: 1000, class: "btn btn-sm copy-link", aria: { label: "Copy link" })) do %>
   <i class="bi bi-clipboard" aria-hidden="true"></i>
   <i class="bi bi-check2" aria-hidden="true"></i>
 <% end %>

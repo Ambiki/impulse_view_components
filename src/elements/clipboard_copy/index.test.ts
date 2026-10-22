@@ -80,6 +80,19 @@ describe('awc-clipboard-copy', () => {
     expect(written).to.eql(['Hello']);
   });
 
+  it('copies the value property, which is its value attribute', async () => {
+    const written = stubClipboard();
+    const el = await clipboardCopyFixture('value="Hello"');
+    expect(el.value).to.equal('Hello');
+
+    el.value = 'Changed';
+    el.click();
+    await settle();
+
+    expect(el.getAttribute('value')).to.equal('Changed');
+    expect(written).to.eql(['Changed']);
+  });
+
   it('emits copied with the copied text once the clipboard has it', async () => {
     stubClipboard();
     const el = await clipboardCopyFixture('value="Hello"');
@@ -157,14 +170,37 @@ describe('awc-clipboard-copy', () => {
       expect(written).to.eql(['After']);
     });
 
-    it('copies its own value instead, even an empty one', async () => {
+    it('copies its own value instead, when it has one', async () => {
+      const written = stubClipboard();
+      const el = await clipboardCopyFixture('value="Own value" for="source"', '<input id="source" value="From input">');
+
+      el.click();
+      await settle();
+
+      expect(written).to.eql(['Own value']);
+    });
+
+    it('copies the copy source when its value is empty', async () => {
       const written = stubClipboard();
       const el = await clipboardCopyFixture('value="" for="source"', '<input id="source" value="From input">');
 
       el.click();
       await settle();
 
-      expect(written).to.eql(['']);
+      expect(written).to.eql(['From input']);
+    });
+
+    it('takes its copy source from the for property', async () => {
+      const written = stubClipboard();
+      const el = await clipboardCopyFixture('for="source"', '<input id="source" value="First"><input id="other" value="Second">');
+      expect(el.for).to.equal('source');
+
+      el.for = 'other';
+      el.click();
+      await settle();
+
+      expect(el.getAttribute('for')).to.equal('other');
+      expect(written).to.eql(['Second']);
     });
 
     it('emits error without writing when no element has the id it names', async () => {

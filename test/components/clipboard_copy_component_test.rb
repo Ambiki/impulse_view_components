@@ -11,7 +11,7 @@ module Impulse
       refute_selector "awc-clipboard-copy[role]"
     end
 
-    test "renders an empty value, which the element copies instead of its copy source" do
+    test "renders an empty value as given, which leaves the copy to the copy source" do
       render_inline(Impulse::ClipboardCopyComponent.new(value: "", for: "source")) { "Copy" }
 
       assert_selector "awc-clipboard-copy[value=''][for='source']"

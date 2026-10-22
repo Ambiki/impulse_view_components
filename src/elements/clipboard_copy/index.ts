@@ -23,6 +23,16 @@ export default class AwcClipboardCopyElement extends ImpulseElement {
   @property({ type: Boolean }) disabled = false;
 
   /**
+   * The text to copy. When empty, the text of the copy source that `for` names is copied instead.
+   */
+  @property() value = '';
+
+  /**
+   * The `id` of the copy source, whose text is copied when `value` is empty.
+   */
+  @property() for = '';
+
+  /**
    * How long, in milliseconds, the element stays in its feedback state after a press: `:state(copied)` once the text
    * is copied, `:state(error)` when nothing was.
    */
@@ -173,16 +183,15 @@ export default class AwcClipboardCopyElement extends ImpulseElement {
     }
   }
 
-  /** Its own `value` when it has one, even empty, else the text of the copy source its `for` names. */
+  /** Its own `value` when it has one, else the text of the copy source its `for` names. */
   private copiedText(): string {
-    const value = this.getAttribute('value');
-    if (value !== null) return value;
+    if (this.value) return this.value;
 
-    const id = this.getAttribute('for');
+    const id = this.for;
     // Looked up in the element's own tree, as a label's `for` is. A removed element is in neither.
     const root = this.getRootNode();
     const copySource = id && (root instanceof Document || root instanceof ShadowRoot) ? root.getElementById(id) : null;
-    if (!copySource) throw new DOMException(`No copy source has the id "${id ?? ''}".`, 'NotFoundError');
+    if (!copySource) throw new DOMException(`No copy source has the id "${id}".`, 'NotFoundError');
 
     if (
       copySource instanceof HTMLInputElement ||

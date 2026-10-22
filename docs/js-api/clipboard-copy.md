@@ -9,23 +9,26 @@ const clipboardCopy = document.querySelector('awc-clipboard-copy');
 Render the element with `Impulse::ClipboardCopyComponent`, which renders the `tabindex` the element needs to take
 focus. The element adds a missing one when it connects, but a DOM morph to markup without one takes it away again.
 
-## Attributes
+## Properties
 
 ### `value`
 
-The text to copy. When present, even empty, it is copied instead of the copy source's text. It is read when the
-element is pressed, so it can change after rendering.
+The text to copy, reflected to the `value` attribute. When it isn't empty, it is copied instead of the copy source's
+text. It is read when the element is pressed, so it can change after rendering.
 
 ```js
-clipboardCopy.setAttribute('value', 'https://example.com/meetings/456');
+clipboardCopy.value = 'https://example.com/meetings/456';
 ```
 
 ### `for`
 
-The `id` of the copy source, looked up in the element's own document or shadow root when the element is pressed. A
-form control gives its `value`, any other element its rendered text (`innerText`).
+The `id` of the copy source, reflected to the `for` attribute. Its text is copied when `value` is empty. It is looked
+up in the element's own document or shadow root when the element is pressed. A form control gives its `value`, any
+other element its rendered text (`innerText`).
 
-## Properties
+```js
+clipboardCopy.for = 'setup-command';
+```
 
 ### `disabled`
 
@@ -39,8 +42,12 @@ clipboardCopy.disabled = true;
 
 ### `feedbackDuration`
 
-How long, in milliseconds, the element stays in its feedback state after a press. Defaults to `2000`. Set it with the
-`feedback-duration` attribute.
+How long, in milliseconds, the element stays in its feedback state after a press or a `copy` call, reflected to the
+`feedback-duration` attribute. Defaults to `2000`. A change takes effect from the next copy.
+
+```js
+clipboardCopy.feedbackDuration = 1000;
+```
 
 ## Methods
 

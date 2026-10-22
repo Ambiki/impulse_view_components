@@ -136,6 +136,10 @@ export const notACommitValue: AwcAutocompleteCommitEvent['value'] = 1;
 export const notACommitSelected: AwcAutocompleteCommitEvent['selected'] = 'true';
 // @ts-expect-error: the copied text is a string
 export const notACopiedText: AwcClipboardCopyCopiedEvent['text'] = 1;
+// @ts-expect-error: the value to copy is a string
+export const notAClipboardValue: AwcClipboardCopyElement['value'] = 1;
+// @ts-expect-error: the copy source is named by its id, a string
+export const notAClipboardFor: AwcClipboardCopyElement['for'] = 1;
 // `copy()` is public and resolves to nothing.
 export const copied: Promise<void> = document.createElement('awc-clipboard-copy').copy();
 // Listeners get the clipboard copy's events typed, without a cast.
