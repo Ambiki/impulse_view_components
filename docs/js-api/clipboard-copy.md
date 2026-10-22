@@ -57,7 +57,7 @@ menuItem.addEventListener('click', async () => {
 ## States
 
 After a copy, the element is in a [custom state](https://developer.mozilla.org/en-US/docs/Web/CSS/:state) for
-`feedbackDuration`. Another copy restarts it.
+[`feedbackDuration`](#feedbackduration). Another copy restarts it.
 
 | State    | Description                         |
 | ------   | ------------                        |
