@@ -2,7 +2,7 @@ source "https://rubygems.org"
 
 gemspec
 
-rails_version = ">= 7.0.9"
+rails_version = ">= 7.1.0"
 
 gem "actionview", rails_version
 gem "activesupport", rails_version

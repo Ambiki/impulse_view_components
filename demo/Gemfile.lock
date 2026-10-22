@@ -2,7 +2,7 @@ PATH
   remote: ..
   specs:
     impulse_view_components (0.8.0)
-      actionview (>= 7.0.9)
+      actionview (>= 7.1.0)
       view_component (~> 3.27.0)
 
 GEM
