@@ -19,7 +19,9 @@ module Demo
 
     config.view_component.previews.default_layout = "preview"
     config.view_component.previews.enabled = true
-    config.view_component.previews.paths << Rails.root.join("../previews")
+    # A string: view_component watches its preview paths for template changes, and Rails' file watcher can't take a
+    # `Pathname`.
+    config.view_component.previews.paths << Rails.root.join("../previews").to_s
 
     config.lookbook.project_name = "Impulse View Components"
     config.lookbook.debug_menu = true
