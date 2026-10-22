@@ -91,6 +91,7 @@ const elementDirs = fs
 // The elements that had a `dist/` path when ADR 0008 deprecated them. Those paths are frozen; an element added since
 // has only its public path, and `package.json` closes the `dist/` wildcards to it.
 const distElementDirs = ['anchor', 'autocomplete', 'dialog', 'popover'];
+const hasDistPath = (name) => distElementDirs.includes(name);
 
 // An element's directory is named with underscores, its public path and its tag with dashes: `clipboard_copy` is
 // `…/clipboard-copy` and `<awc-clipboard-copy>`.
@@ -150,7 +151,7 @@ for (const specifier of [
   subpath('dist', 'hooks', 'index.js'),
   subpath('dist', 'styles', 'index.scss'),
   ...elementDirs
-    .filter((name) => !distElementDirs.includes(name))
+    .filter((name) => !hasDistPath(name))
     .flatMap((name) => [
       subpath('dist', 'elements', name),
       subpath('dist', 'elements', name, 'index'),
@@ -193,7 +194,7 @@ for (const name of styledElementDirs) {
 // Element directories need an exact key: a pattern cannot append `/index`, so a new element
 // silently stops resolving without one.
 for (const name of elementDirs) {
-  const keys = [`./${elementName(name)}`, ...(distElementDirs.includes(name) ? [`./dist/elements/${name}`] : [])];
+  const keys = [`./${elementName(name)}`, ...(hasDistPath(name) ? [`./dist/elements/${name}`] : [])];
   for (const key of keys) {
     check(`exports["${key}"]`, () => {
       assert.ok(pkg.exports[key], 'missing. Element directories need an exact key, patterns cannot append /index');
@@ -301,7 +302,7 @@ check(`bundle: one hook from ${subpath('hooks')}`, () => {
 });
 
 for (const name of elementDirs) {
-  const specifiers = [subpath(elementName(name)), ...(distElementDirs.includes(name) ? [subpath('dist', 'elements', name)] : [])];
+  const specifiers = [subpath(elementName(name)), ...(hasDistPath(name) ? [subpath('dist', 'elements', name)] : [])];
   for (const specifier of specifiers) {
     check(`bundle: import '${specifier}'`, () => {
       assert.match(bundle(`import '${specifier}';`).text, new RegExp(`['"]awc-${elementName(name)}['"]`), 'drops the registration');

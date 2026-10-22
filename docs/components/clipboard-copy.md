@@ -26,7 +26,7 @@ an icon, or the value itself.
 | value    | N/A     | The text to copy. When given, even empty, it is copied instead of the copy source's text.                         |
 | for      | N/A     | The `id` of the copy source, the element whose text is copied when there is no `value`.                           |
 | disabled | `false` | Whether the button ignores presses. A disabled button takes no focus and is announced as disabled.                |
-| feedback_duration | `2000` | How long, in milliseconds, the button stays in its feedback state after a press. See [Showing the result](#showing-the-result). |
+| feedback_duration | `2000` | How long, in milliseconds, the button stays in its feedback state after a press. See [Styling the feedback state](#styling-the-feedback-state). |
 
 Other arguments, such as `class` or `aria`, are rendered on the element. The component adds no classes of its own.
 
@@ -61,7 +61,7 @@ A button that shows only an icon needs an accessible name, given with `aria-labe
 When the button has a visible label, leave out `aria-label`, or start it with the visible label, so that speech input
 users can say what they see.
 
-### Showing the result
+### Styling the feedback state
 
 For a short while after a press, the button is in a feedback state: `:state(copied)` once the text is copied, or
 `:state(error)` when nothing was. Style it to swap the icon, with no JavaScript. The state lasts 2 seconds; change it
@@ -85,13 +85,13 @@ with `feedback_duration:`, in milliseconds. Another press starts it over.
 }
 ```
 
-The state is a [custom state](https://developer.mozilla.org/en-US/docs/Web/CSS/:state), not an attribute, so a Turbo
+The state is a [custom state](https://developer.mozilla.org/en-US/docs/Web/CSS/:state), not an attribute, so a DOM
 morph doesn't end it early. Browsers without `:state()` (before Chrome 125, Firefox 126 and Safari 17.4) still copy,
 without the feedback state.
 
-### Announcing the result
+### Announcing a copy
 
-An icon swap is only seen. Screen reader users need to hear the result too
+An icon swap is only seen. Screen reader users need to hear whether it copied too
 ([WCAG 4.1.3](https://www.w3.org/WAI/WCAG22/Understanding/status-messages.html)), and the button doesn't announce it.
 Listen for `awc-clipboard-copy:copied` and `awc-clipboard-copy:error`, which bubble, and put a message in a live
 region, such as an element with `role="status"`. A toast that is one already does this.
@@ -125,8 +125,8 @@ The clipboard is only available on pages served over HTTPS or from `localhost`. 
 <% end %>
 ```
 
-Like a native disabled button, it takes no focus, and no click reaches the page. Bootstrap's `.btn:disabled` styles
-only match native form controls. Style a disabled button with
+Like a native disabled button, it takes no focus, and listeners on it and its ancestors don't hear its clicks.
+Bootstrap's `.btn:disabled` styles only match native form controls. Style a disabled button with
 `awc-clipboard-copy[disabled]`, or add Bootstrap's `disabled` class.
 
 ## Imports

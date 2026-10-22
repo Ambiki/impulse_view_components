@@ -35,9 +35,6 @@ export default class AwcClipboardCopyElement extends ImpulseElement {
   /** Whether Space went down on the element since it last had focus, so that releasing it presses the element. */
   private spacePressed = false;
 
-  /** The `disabled` the element's `tabindex` was last in step with, from the time it first connects. */
-  private tabIndexDisabled?: boolean;
-
   private listeners?: AbortController;
 
   private feedbackTimeout?: ReturnType<typeof setTimeout>;
@@ -48,16 +45,16 @@ export default class AwcClipboardCopyElement extends ImpulseElement {
   }
 
   connected() {
-    // The component renders the `tabindex` that matches the `disabled` it renders with, and `disabledChanged` hears
-    // only the changes made while the element is connected. One made while it was removed is caught up with here.
-    if (this.tabIndexDisabled !== undefined && this.tabIndexDisabled !== this.disabled) this.syncTabIndex();
-    this.tabIndexDisabled = this.disabled;
+    // `disabledChanged` only hears changes made once the element has initialized, so one made before that, or while it
+    // was removed, is caught up with here. The component renders the `tabindex` that matches, which this leaves alone.
+    if (this.disabled === this.hasAttribute('tabindex')) this.syncTabIndex();
     this.internals.ariaDisabled = this.disabled ? 'true' : null;
 
     this.listeners = new AbortController();
-    // Delegated from the document in the capture phase, so the element hears an event before anything else on the
-    // page: a disabled element stops the click there, and a listener that stops a key's propagation can't keep it from
-    // pressing the element. `blur`, which doesn't bubble, only reaches the document in that phase.
+    // Delegated from the document in the capture phase, so the element hears an event before its own listeners and
+    // its ancestors' do: a disabled element stops the click before they hear it, and a listener that stops a key's
+    // propagation can't keep it from pressing the element. The cost is that `preventDefault()` on Enter or Space
+    // there comes too late to cancel the press. `blur`, which doesn't bubble, only reaches the document in that phase.
     const options = { capture: true, signal: this.listeners.signal };
     on('click', this.localName, this.handleClick, options);
     on('keydown', this.localName, this.handleKeydown, options);
@@ -84,10 +81,10 @@ export default class AwcClipboardCopyElement extends ImpulseElement {
     } else {
       this.tabIndex = 0;
     }
-    this.tabIndexDisabled = this.disabled;
   }
 
-  // Every clipboard copy on the page is told of an event on any of them, so each one checks it is the one pressed.
+  // Every clipboard copy on the page is told of an event on any of them, so each one checks it is the one pressed. A
+  // click counts on the element or its content, the other events only on the element itself.
   private handleClick = (event: MouseEvent) => {
     if (event.currentTarget !== this) return;
 
@@ -103,7 +100,7 @@ export default class AwcClipboardCopyElement extends ImpulseElement {
   // The keys press the element the way they press a native button: Enter as it goes down, Space as it comes up, so
   // that moving focus away first cancels it. Either one clicks the element, as a native button does.
   private handleKeydown = (event: KeyboardEvent) => {
-    if (event.target !== this || event.defaultPrevented || this.disabled) return;
+    if (!this.isTargetOf(event) || this.disabled) return;
 
     if (event.key === 'Enter') {
       this.click();
@@ -115,17 +112,25 @@ export default class AwcClipboardCopyElement extends ImpulseElement {
   };
 
   private handleKeyup = (event: KeyboardEvent) => {
-    if (event.target !== this || event.key !== ' ' || !this.spacePressed) return;
+    if (!this.isTargetOf(event) || event.key !== ' ' || !this.spacePressed) return;
 
     this.spacePressed = false;
     this.click();
   };
 
   private handleBlur = (event: FocusEvent) => {
-    if (event.target !== this) return;
+    if (!this.isTargetOf(event)) return;
 
     this.spacePressed = false;
   };
+
+  /**
+   * Whether the event was dispatched on the element itself. Not `event.target`, which the document sees as the shadow
+   * host when the element is in a shadow root.
+   */
+  private isTargetOf(event: Event) {
+    return event.composedPath()[0] === this;
+  }
 
   private async copy() {
     let text: string;
@@ -135,11 +140,12 @@ export default class AwcClipboardCopyElement extends ImpulseElement {
       if (!navigator.clipboard) throw new DOMException('The Clipboard API is unavailable.', 'NotSupportedError');
       await navigator.clipboard.writeText(text);
     } catch (error) {
-      this.showFeedback('error');
+      // An element removed before the write finished has ended its feedback for good.
+      if (this.isConnected) this.showFeedback('error');
       this.emit<AwcClipboardCopyErrorEvent>('error', { detail: { error } });
       return;
     }
-    this.showFeedback('copied');
+    if (this.isConnected) this.showFeedback('copied');
     this.emit<AwcClipboardCopyCopiedEvent>('copied', { detail: { text } });
   }
 

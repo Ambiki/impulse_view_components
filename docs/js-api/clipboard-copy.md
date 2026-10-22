@@ -6,7 +6,8 @@ import '@ambiki/impulse-view-components/clipboard-copy';
 const clipboardCopy = document.querySelector('awc-clipboard-copy');
 ```
 
-Render the element with `Impulse::ClipboardCopyComponent`. It renders the `tabindex` the element needs to take focus.
+Render the element with `Impulse::ClipboardCopyComponent`, which renders the `tabindex` the element needs to take
+focus. The element adds a missing one when it connects, but a DOM morph to markup without one takes it away again.
 
 ## Attributes
 
@@ -29,7 +30,8 @@ form control gives its `value`, any other element its rendered text (`innerText`
 ### `disabled`
 
 Whether the element ignores presses. Changing it also changes whether the element takes focus, and the state it is
-announced with. A disabled element takes no focus and no click reaches the page, as with a native disabled button.
+announced with. A disabled element takes no focus, and listeners on it and its ancestors don't hear its clicks, as with a native
+disabled button.
 
 ```js
 clipboardCopy.disabled = true;
@@ -60,6 +62,9 @@ clipboardCopy.matches(':state(copied)');
 A press (a click, Enter, or Space) copies the text and then emits `copied`, or emits `error` when nothing was copied.
 Pressing with a key clicks the element, as a native button does, so `click` listeners hear every press. A disabled
 element ignores presses and emits nothing.
+
+The element hears a click, Enter or Space before listeners on it and its ancestors do, so calling `preventDefault()`
+on one doesn't stop the copy. To keep the element from copying, disable it.
 
 The events are emitted from the element once the write has finished. If the press removed the element from the page,
 say by replacing the menu it was in, they don't reach listeners on `document`.

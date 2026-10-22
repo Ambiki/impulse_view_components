@@ -45,7 +45,7 @@ function recordEvents() {
 
 /** Dispatches a `type` event for `key` from `target`, as pressing or releasing it there would. */
 function dispatchKey(target: Element, type: 'keydown' | 'keyup', key: string) {
-  const event = new KeyboardEvent(type, { key, bubbles: true, cancelable: true });
+  const event = new KeyboardEvent(type, { key, bubbles: true, cancelable: true, composed: true });
   target.dispatchEvent(event);
   return event;
 }
@@ -213,7 +213,7 @@ describe('awc-clipboard-copy', () => {
     it('copies even when the page stops the key from propagating', async () => {
       const written = stubClipboard();
       const el = await clipboardCopyFixture('value="Hello"');
-      el.parentElement!.addEventListener('keydown', (event) => event.stopPropagation());
+      el.parentElement!.addEventListener('keydown', (event) => event.stopPropagation(), { capture: true });
 
       dispatchKey(el, 'keydown', 'Enter');
       await settle();
@@ -257,6 +257,22 @@ describe('awc-clipboard-copy', () => {
       await settle();
 
       expect(written).to.eql([]);
+    });
+
+    it('copies when Enter or Space is pressed inside a shadow root', async () => {
+      const written = stubClipboard();
+      const host = await fixture<HTMLElement>('<div></div>');
+      const root = host.attachShadow({ mode: 'open' });
+      root.innerHTML = clipboardCopyHtml('value="Hello"');
+      const el = root.querySelector('awc-clipboard-copy')!;
+      await whenInitialized(el);
+
+      dispatchKey(el, 'keydown', 'Enter');
+      dispatchKey(el, 'keydown', ' ');
+      dispatchKey(el, 'keyup', ' ');
+      await settle();
+
+      expect(written).to.eql(['Hello', 'Hello']);
     });
 
     it('ignores keys pressed on its content', async () => {
@@ -319,6 +335,19 @@ describe('awc-clipboard-copy', () => {
       parent.append(el);
       await whenInitialized(el);
       expect(el.tabIndex).to.equal(0);
+    });
+
+    it('catches up with a disabled changed before it initialized', async () => {
+      const container = await fixture<HTMLElement>('<div></div>');
+      container.insertAdjacentHTML('beforeend', clipboardCopyHtml('value="Hello"'));
+      container.insertAdjacentHTML('beforeend', '<awc-clipboard-copy value="Hello" disabled>Copy</awc-clipboard-copy>');
+      const [disabledEarly, enabledEarly] = container.querySelectorAll('awc-clipboard-copy');
+      disabledEarly.setAttribute('disabled', '');
+      enabledEarly.removeAttribute('disabled');
+      await Promise.all([whenInitialized(disabledEarly), whenInitialized(enabledEarly)]);
+
+      expect(disabledEarly.hasAttribute('tabindex')).to.equal(false);
+      expect(enabledEarly.tabIndex).to.equal(0);
     });
 
     it('keeps clicks from the page, as a native disabled button gets none', async () => {
@@ -426,6 +455,20 @@ describe('awc-clipboard-copy', () => {
       el.click();
       await settle();
       el.remove();
+      parent.append(el);
+      await whenInitialized(el);
+
+      expect(feedback(el)).to.equal(null);
+    });
+
+    it('is not entered when the element was removed before the copy finished', async () => {
+      stubClipboard();
+      const el = await clipboardCopyFixture('value="Hello"');
+      const parent = el.parentElement!;
+
+      el.click();
+      el.remove();
+      await settle();
       parent.append(el);
       await whenInitialized(el);
 
