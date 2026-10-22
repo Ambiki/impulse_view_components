@@ -62,6 +62,16 @@ _Avoid_: Remote, async, server-side
 Options read from the page rather than fetched. The counterpart of ajax.
 _Avoid_: Static, inline, client-side
 
+### Clipboard
+
+**Copied text**:
+The text a clipboard copy writes to the clipboard: its own value when it has one, else the text of its copy source.
+_Avoid_: Content, payload, clipboard value
+
+**Copy source**:
+The element a clipboard copy reads its copied text from, named by id. A form control gives its value, any other element its text as rendered.
+_Avoid_: Target, source, reference
+
 ### Events
 
 **Open**:

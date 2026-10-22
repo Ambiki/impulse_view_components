@@ -59,6 +59,9 @@ import type {
   FallbackStrategy,
 } from '@ambiki/impulse-view-components/anchor';
 import { AwcAutocompleteElement } from '@ambiki/impulse-view-components/autocomplete';
+import * as clipboardCopy from '@ambiki/impulse-view-components/clipboard-copy';
+import { AwcClipboardCopyElement } from '@ambiki/impulse-view-components/clipboard-copy';
+import type { AwcClipboardCopyCopiedEvent } from '@ambiki/impulse-view-components/clipboard-copy';
 import { AwcDialogElement } from '@ambiki/impulse-view-components/dialog';
 import { AwcPopoverElement } from '@ambiki/impulse-view-components/popover';
 import type {
@@ -94,6 +97,7 @@ export const used = {
   anchor,
   autocomplete,
   autocompleteIndex,
+  clipboardCopy,
   dialog,
   popover,
   ajaxSearch,
@@ -130,6 +134,17 @@ export const notAFallbackStrategy: AmbikiAnchorElement['fallbackStrategy'] = 'ne
 export const notACommitValue: AwcAutocompleteCommitEvent['value'] = 1;
 // @ts-expect-error: an event's `selected` is a boolean
 export const notACommitSelected: AwcAutocompleteCommitEvent['selected'] = 'true';
+// @ts-expect-error: the copied text is a string
+export const notACopiedText: AwcClipboardCopyCopiedEvent['text'] = 1;
+// Listeners get the clipboard copy's events typed, without a cast.
+document.addEventListener('awc-clipboard-copy:copied', (event) => {
+  const text: string = event.detail.text;
+  return text;
+});
+document.addEventListener('awc-clipboard-copy:error', (event) => {
+  const reason: unknown = event.detail.error;
+  return reason;
+});
 
 // The hook still takes everything Floating UI's `ReferenceElement` does: a Floating UI `VirtualElement`, and a virtual
 // element with `getClientRects` (which Floating UI's `inline()` middleware reads).
@@ -142,16 +157,19 @@ export const anchorWithClientRects: UseFloatingUIOptions['anchorElement'] = {
 };
 
 // Each element path exports its class by name, alongside the default export.
-export const namedClasses: [typeof anchor.default, typeof autocomplete.default, typeof dialog.default, typeof popover.default] = [
-  AwcAnchorElement,
-  AwcAutocompleteElement,
-  AwcDialogElement,
-  AwcPopoverElement,
-];
+export const namedClasses: [
+  typeof anchor.default,
+  typeof autocomplete.default,
+  typeof clipboardCopy.default,
+  typeof dialog.default,
+  typeof popover.default,
+] = [AwcAnchorElement, AwcAutocompleteElement, AwcClipboardCopyElement, AwcDialogElement, AwcPopoverElement];
 // @ts-expect-error: a plain element is not an anchor
 export const notAnAnchorElement: AwcAnchorElement = document.createElement('div');
 // @ts-expect-error: a plain element is not an autocomplete
 export const notAnAutocomplete: AwcAutocompleteElement = document.createElement('div');
+// @ts-expect-error: a plain element is not a clipboard copy
+export const notAClipboardCopy: AwcClipboardCopyElement = document.createElement('div');
 // @ts-expect-error: a plain element is not a dialog
 export const notADialog: AwcDialogElement = document.createElement('div');
 // @ts-expect-error: a plain element is not a popover
