@@ -3,7 +3,7 @@ PATH
   specs:
     impulse_view_components (0.8.0)
       actionview (>= 7.1.0)
-      view_component (~> 3.27.0)
+      view_component (~> 4.17.0)
 
 GEM
   remote: https://rubygems.org/
@@ -147,7 +147,6 @@ GEM
       net-pop
       net-smtp
     marcel (1.2.1)
-    method_source (1.1.0)
     mini_mime (1.1.5)
     minitest (5.27.0)
     msgpack (1.8.5)
@@ -286,10 +285,10 @@ GEM
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.6.0)
     useragent (0.16.11)
-    view_component (3.27.0)
-      activesupport (>= 5.2.0, < 8.2)
+    view_component (4.17.0)
+      actionview (>= 7.1.0)
+      activesupport (>= 7.1.0)
       concurrent-ruby (~> 1)
-      method_source (~> 1.0)
     web-console (4.2.1)
       actionview (>= 6.0.0)
       activemodel (>= 6.0.0)

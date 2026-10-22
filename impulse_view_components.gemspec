@@ -17,7 +17,7 @@ Gem::Specification.new do |spec|
   spec.files = Dir["CHANGELOG.md", "LICENSE.txt", "README.md", "lib/**/*", "app/**/*"]
   spec.require_paths = ["lib"]
 
-  spec.add_runtime_dependency "view_component", "~> 3.27.0"
+  spec.add_runtime_dependency "view_component", "~> 4.17.0"
   spec.add_runtime_dependency "actionview", ">= 7.1.0"
 
   spec.add_development_dependency "capybara", "~> 3.40"
