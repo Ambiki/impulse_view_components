@@ -43,7 +43,7 @@ clipboardCopy.feedbackDuration = 1000;
 
 ### `copy`
 
-Copies the text as a press does, even when disabled. Resolves once `copied` or `error` is emitted; never rejects.
+Copies the text, even when disabled. Resolves once `copied` or `error` is emitted; never rejects.
 
 Firefox and Safari only allow clipboard writes during a user gesture, so call it from one, such as a click handler.
 
