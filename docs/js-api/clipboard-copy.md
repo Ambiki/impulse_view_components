@@ -1,8 +1,6 @@
 # Clipboard copy API
 
 ```js
-import '@ambiki/impulse-view-components/clipboard-copy';
-
 const clipboardCopy = document.querySelector('awc-clipboard-copy');
 ```
 
