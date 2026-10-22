@@ -4,9 +4,6 @@
 const clipboardCopy = document.querySelector('awc-clipboard-copy');
 ```
 
-Render the element with `Impulse::ClipboardCopyComponent`, which renders the `tabindex` the element needs to take
-focus. The element adds a missing one when it connects, but a DOM morph to markup without one takes it away again.
-
 ## Properties
 
 ### `value`
