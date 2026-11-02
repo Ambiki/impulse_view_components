@@ -24,12 +24,12 @@ require "impulse/view_components/engine"
 
 ## Install the JavaScript package
 
-The interactive components ship as custom elements, so you also need the npm package. It depends on
-[`@ambiki/impulse`](https://github.com/Ambiki/impulse), which is installed automatically as a
-dependency.
+The interactive components ship as custom elements, so you also need the npm package. It's built on
+[`@ambiki/impulse`](https://github.com/Ambiki/impulse), which you install alongside it, so your own elements and the
+components share one copy:
 
 ```bash
-yarn add @ambiki/impulse-view-components
+yarn add @ambiki/impulse-view-components @ambiki/impulse
 ```
 
 ## Import the components
