@@ -152,13 +152,16 @@
     "test:watch": "yarn test --watch",
     "typecheck": "tsc --noEmit"
   },
+  "peerDependencies": {
+    "@ambiki/impulse": "^2.0.0"
+  },
   "dependencies": {
     "@ambiki/combobox": "^2.0.1",
-    "@ambiki/impulse": "^2.0.0-rc.3",
     "@floating-ui/dom": "^1.7.4",
     "tabbable": "^6.4.0"
   },
   "devDependencies": {
+    "@ambiki/impulse": "^2.0.0-rc.3",
     "@antfu/eslint-config": "^9.5.1",
     "@open-wc/testing": "^5.0.0",
     "@rollup/plugin-commonjs": "^29.0.3",
