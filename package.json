@@ -161,7 +161,7 @@
     "tabbable": "^6.4.0"
   },
   "devDependencies": {
-    "@ambiki/impulse": "^2.0.0-rc.3",
+    "@ambiki/impulse": "^2.0.0",
     "@antfu/eslint-config": "^9.5.1",
     "@open-wc/testing": "^5.0.0",
     "@rollup/plugin-commonjs": "^29.0.3",
