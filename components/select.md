@@ -1,0 +1,230 @@
+---
+url: https://ambiki.github.io/impulse_view_components/components/select.md
+---
+# Select
+
+Select allows a user to filter through a list of pre-defined sets of options and select one or multiple values.
+
+## Usage
+
+```erb
+<%= render(Impulse::SelectComponent.new(:post, :person_id, Person.all.collect { |p| [p.name, p.id] })) %>
+```
+
+## Arguments
+
+### Positional arguments
+
+| Name        | Default   | Description                                                                                                                                                                      |
+| ------      | --------- | -------------                                                                                                                                                                    |
+| object\_name | N/A       | The name of the object.                                                                                                                                                          |
+| method\_name | N/A       | The name of the method.                                                                                                                                                          |
+| choices     | `[]`      | An array of choices, similar to what you would pass to the native Rails [`select`](https://api.rubyonrails.org/classes/ActionView/Helpers/FormOptionsHelper.html#method-i-select) tag. |
+
+### Keyword arguments
+
+| Name              | Default   | Description                                                                                                                                       |
+| ------            | --------- | -------------                                                                                                                                     |
+| selected          | `nil`     | The `value` of the option that you want to force select.                                                                                          |
+| size              | `:md`     | The size of the select control. One of `:sm`, `:md`, or `:lg`.                                                                                    |
+| name              | `nil`     | The name of the field. By default, Rails automatically creates a `name` string based on the `object_name` and `method_name`.                      |
+| input\_id          | `nil`     | The id of the input field.                                                                                                                        |
+| placeholder       | `nil`     | The placeholder text that is displayed within the input field.                                                                                    |
+| include\_hidden    | `true`    | Only applies to a `multiple` select. See the "Gotcha" section of the Rails [`select`](https://api.rubyonrails.org/classes/ActionView/Helpers/FormOptionsHelper.html#method-i-select) tag. |
+| disabled          | `false`   | Disables the select control.                                                                                                                      |
+| required          | `false`   | Makes the select control a required field.                                                                                                        |
+| multiple          | `false`   | Whether multiple values can be selected or not.                                                                                                   |
+| clearable         | `true`    | Whether the clear button should be shown or not.                                                                                                  |
+| auto\_size         | `true`    | If `true`, caps the listbox's height to the space between it and the edge of the viewport, so a long list scrolls instead of running off screen.  |
+| auto\_size\_padding | `4`       | The space in pixels to keep between the listbox and the edge of the viewport when `auto_size` is enabled.                                         |
+
+Any other keyword arguments are passed to the `<awc-autocomplete>` element as HTML attributes, except `namespace`,
+`skip_default_ids` and `allow_method_names_outside_object`, which are passed to the Rails field helpers.
+
+## Examples
+
+### Rendering custom options
+
+Instead of passing an array of choices to the component, you can also render the options as a block. This provides
+more flexibility, and you can pass any HTML attributes to each option.
+
+```erb{2-4}
+<%= render(Impulse::SelectComponent.new(:post, :person_id)) do |c| %>
+  <% Person.all.each do |person| %>
+    <% c.with_option(value: person.id, text: person.display_name, disabled: person.on_vacation?) %>
+  <% end %>
+<% end %>
+```
+
+### Selecting an option
+
+You can pass the `value` of the option to the `selected` argument and it will be selected by default.
+
+```erb{6}
+<%= render(
+  Impulse::SelectComponent.new(
+    :user,
+    :fruit_id,
+    ["Apple", "Mango"],
+    selected: "Mango"
+  )
+) %>
+```
+
+::: tip
+In case of multiple select, pass an array of values to the `selected` argument, e.g. `["Apple", "Mango"]`.
+:::
+
+### Add inline attributes to options
+
+You can optionally provide HTML attributes as the last element of the array.
+
+```erb{5}
+<%= render(
+  Impulse::SelectComponent.new(
+    :user,
+    :country_id,
+    ["Denmark", ["USA", { class: "bold", disabled: true }], "Sweden"]
+  )
+) %>
+```
+
+::: warning
+Do not add "aria-selected" attribute to an option. If you want to select an option, pass the option's value to the
+[`selected`](#selecting-an-option) argument.
+:::
+
+### Add description to an option
+
+You can optionally add an inline description or pass the description attribute to the option slot.
+
+```erb{6,16}
+<%# Inline %>
+<%= render(
+  Impulse::SelectComponent.new(
+    :user,
+    :country_id,
+    [["USA", { description: "USA is a country." }]]
+  )
+) %>
+
+<%# Block %>
+<%= render(Impulse::SelectComponent.new(:user, :country_id)) do |c| %>
+  <% Country.all.each do |country| %>
+    <% c.with_option(
+      value: country.id,
+      text: country.display_name,
+      description: country.description
+    ) %>
+  <% end %>
+<% end %>
+```
+
+### Grouping options
+
+Like Rails' [`grouped_options_for_select`](https://api.rubyonrails.org/classes/ActionView/Helpers/FormOptionsHelper.html#method-i-grouped_options_for_select),
+the select component also supports grouping options. You can pass an array or a hash of grouped options.
+
+```erb
+<%
+  grouped_options = [
+    ["North America", [["United States", "US"], ["Canada", "CA", {disabled: true}]]],
+    ["Europe", ["Denmark", "Germany"]]
+  ]
+%>
+
+<%= render(Impulse::SelectComponent.new(:user, :country_id, grouped_options, selected: "US")) %>
+```
+
+```erb
+<%
+  grouped_options = {
+    "North America" => [["United States", "US"], "Canada"],
+    "Europe" => ["Denmark", "Germany"]
+  }
+%>
+
+<%= render(Impulse::SelectComponent.new(:user, :country_id, grouped_options, selected: "US")) %>
+```
+
+When rendering the options as a block, wrap them in `with_group`.
+
+```erb{3,5}
+<%= render(Impulse::SelectComponent.new(:user, :country_id, selected: "US")) do |c| %>
+  <% Continent.all.each do |continent| %>
+    <% c.with_group(title: continent.name) do |group| %>
+      <% continent.countries.each do |country| %>
+        <% group.with_option(value: country.code, text: country.name) %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>
+```
+
+### Custom blankslate
+
+A blankslate is displayed when the input's text does not match any of the options.
+
+```erb{2}
+<%= render(Impulse::SelectComponent.new(:post, :person_id, Person.all.collect { |p| [p.name, p.id] })) do |c| %>
+  <% c.with_blankslate { "We could not find that person in our directory!" } %>
+<% end %>
+```
+
+### Integrating with `form_with`
+
+Wrap your `select` tag with the `impulse_form_with` method. The `f.select` tag accepts the same
+[arguments](#arguments), and selects the attribute's value unless you pass `selected`.
+
+```erb
+<%= impulse_form_with model: @user do |f| %>
+  <%= f.select :person_id, Person.all.collect { |p| [p.name, p.id] } %>
+<% end %>
+```
+
+## Slots
+
+### `with_option`
+
+Customize the options by rendering a collection of the `with_option` block.
+
+| Name          | Default   | Description                                                               |
+| ------        | --------- | -------------                                                             |
+| `value`       | N/A       | The value of the option.                                                  |
+| `text`        | N/A       | The text of the option.                                                   |
+| `description` | `nil`     | An optional secondary description displayed below the option's text.      |
+| `system_args` | `{}`      | HTML attributes for the slot's element.                                   |
+
+### `with_group`
+
+Groups options under a title. Add the options with the group's `with_option`, which takes the same arguments as
+`with_option` above. A group with no options isn't rendered.
+
+| Name          | Default   | Description                                                               |
+| ------        | --------- | -------------                                                             |
+| `title`       | N/A       | The title displayed above the group's options.                            |
+| `system_args` | `{}`      | HTML attributes for the slot's element.                                   |
+
+### `with_blankslate`
+
+Overwrite the default blankslate message by passing a block. It takes no arguments.
+
+## Imports
+
+::: code-group
+
+```js
+import '@ambiki/impulse-view-components/autocomplete';
+```
+
+```scss
+@import '@ambiki/impulse-view-components/autocomplete';
+```
+
+:::
+
+The styles need Bootstrap's Sass and the base styles loaded first. See [Import the styles](/introduction/getting-started#import-the-styles).
+
+## JS API
+
+[Read here](../js-api/autocomplete.md).

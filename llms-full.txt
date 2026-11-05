@@ -1,0 +1,2308 @@
+---
+url: >-
+  https://ambiki.github.io/impulse_view_components/introduction/getting-started.md
+---
+# Getting started
+
+## Requirements
+
+* Ruby 3.4 or later, and Rails 7.1 or later.
+* [Bootstrap 4](https://getbootstrap.com/docs/4.6/)'s CSS. The components use its classes, such as `form-control`,
+  `dropdown-menu`, `btn` and `spinner-border`.
+* [Bootstrap Icons](https://icons.getbootstrap.com/)' CSS, for the icons the components render, such as `bi-x`.
+* [Dart Sass](https://sass-lang.com/dart-sass/), if you compile the components' Sass.
+
+## Install the gem
+
+Add the gem to your `Gemfile`:
+
+```rb
+gem "impulse_view_components"
+```
+
+Then install it:
+
+```bash
+bundle install
+```
+
+## Require the engine
+
+Require the engine in `config/application.rb`:
+
+```rb
+require "impulse/view_components/engine"
+```
+
+## Install the JavaScript package
+
+The interactive components ship as custom elements, so you also need the npm package. It's built on
+[`@ambiki/impulse`](https://github.com/Ambiki/impulse) 2, which you install alongside it, so your own elements and the
+components share one copy:
+
+```bash
+yarn add @ambiki/impulse-view-components @ambiki/impulse
+```
+
+## Import the components
+
+Each component is imported individually, so you only ship what you use.
+For example, to use the [Select](/components/select) component:
+
+```js
+import '@ambiki/impulse-view-components/autocomplete';
+```
+
+To register every component at once, import the package itself:
+
+```js
+import '@ambiki/impulse-view-components';
+```
+
+See the **Imports** section on each component's page for the exact paths.
+
+## Import the styles
+
+The styles are written in Sass on top of [Bootstrap 4](https://getbootstrap.com/docs/4.6/). Load Bootstrap's Sass
+functions, variables and mixins first (importing all of `bootstrap` does that), then the base styles once, then each
+component's styles:
+
+```scss
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins';
+
+@import '@ambiki/impulse-view-components/base';
+@import '@ambiki/impulse-view-components/autocomplete';
+```
+
+To include every component's styles, import the package itself instead of `base` and each component:
+
+```scss
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins';
+
+@import '@ambiki/impulse-view-components';
+```
+
+These paths work through webpack's `sass-loader` and Vite. When you run the `sass` command line directly, as
+`cssbundling-rails` does, prefix each path with `pkg:` and pass `--pkg-importer=node`, which needs Dart Sass 1.71 or
+later:
+
+```scss
+@import 'pkg:@ambiki/impulse-view-components/base';
+@import 'pkg:@ambiki/impulse-view-components/autocomplete';
+```
+
+A setup that only passes `--load-path=node_modules` can't read these paths, because it looks for files rather than
+reading the package's `exports`. It can keep importing the files directly:
+
+```scss
+@import '@ambiki/impulse-view-components/dist/styles/variables';
+@import '@ambiki/impulse-view-components/dist/styles/base';
+@import '@ambiki/impulse-view-components/dist/elements/autocomplete';
+```
+
+### Without Sass
+
+If your app doesn't compile Sass, import the precompiled CSS, which holds every component's styles:
+
+```js
+import '@ambiki/impulse-view-components/styles.css';
+```
+
+It's built with Bootstrap's default variables, and doesn't include Bootstrap's component CSS, which you still load. Change
+colors and sizes through the CSS custom properties it defines
+on `:root`, such as `--awc-autocomplete-control-min-height`.
+
+## Upgrading from `dist/` paths
+
+Paths that start with `@ambiki/impulse-view-components/dist/` are deprecated. They keep working, but the docs now
+use the shorter paths below.
+
+| Deprecated path                                                  | Use instead                                                                    |
+|------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| `…/dist/index.js`                                                | `@ambiki/impulse-view-components`                                              |
+| `…/dist/elements/<name>`, `…/dist/elements/<name>/index.js`      | `@ambiki/impulse-view-components/<name>`, such as `…/popover`                  |
+| `import useFloatingUI from '…/dist/hooks/use_floating_ui'`       | `import { useFloatingUI } from '@ambiki/impulse-view-components/hooks'`        |
+| `import useOutsideClick from '…/dist/hooks/use_outside_click'`   | `import { useOutsideClick } from '@ambiki/impulse-view-components/hooks'`      |
+| `@import '~…/dist/elements/<name>'`                              | `@import '@ambiki/impulse-view-components/<name>'`                             |
+| `@import '~…/dist/styles/variables'` and `'~…/dist/styles/base'` | `@import '@ambiki/impulse-view-components/base'`                               |
+| Any `…/dist/helpers/*`, or `…/dist/elements/autocomplete/<module>` such as `ajax_search` | None. These modules are internal, and stay reachable only through their `dist/` paths. |
+
+The Sass rows need a setup that reads the package's `exports`. See [Import the styles](#import-the-styles).
+
+Each element path exports its class by name, such as `AwcPopoverElement`, along with the types its properties use.
+`…/hooks` exports the types the hooks take and return.
+
+---
+
+---
+url: https://ambiki.github.io/impulse_view_components/components/ajax-select.md
+---
+# Ajax select
+
+Ajax select allows users to fetch a list of options from the server.
+
+## Usage
+
+```erb
+<%= render(Impulse::AjaxSelectComponent.new(:post, :person_id, :id, :name, src: "/users")) %>
+```
+
+## Arguments
+
+### Positional arguments
+
+| Name         | Default   | Description                                                      |
+| ------       | --------- | -------------                                                    |
+| object\_name  | N/A       | The name of the object.                                          |
+| method\_name  | N/A       | The name of the method.                                          |
+| value\_method | N/A       | The method called on the `selected` object to read each option's value (e.g. `:id`).        |
+| text\_method  | N/A       | The method called on the `selected` object to read each option's display text (e.g. `:name`). |
+
+### Keyword arguments
+
+| Name              | Default   | Description                                                                                                                                       |
+| ------            | --------- | -------------                                                                                                                                     |
+| selected          | `nil`     | An object that responds to `value_method` and `text_method`, or an array of them for a `multiple` select.                                         |
+| src               | N/A       | The endpoint to fetch the options from.                                                                                                           |
+| param             | `"q"`     | The param that is appended when making a network request. Example: `/fruits?q=Guava`.                                                             |
+| size              | `:md`     | The size of the select control. One of `:sm`, `:md`, or `:lg`.                                                                                    |
+| name              | `nil`     | The name of the field. By default, Rails automatically creates a `name` string based on the `object_name` and `method_name`.                      |
+| input\_id          | `nil`     | The id of the input field.                                                                                                                        |
+| placeholder       | `nil`     | The placeholder text that is displayed within the input field.                                                                                    |
+| include\_hidden    | `true`    | Only applies to a `multiple` select. See the "Gotcha" section of the Rails [`select`](https://api.rubyonrails.org/classes/ActionView/Helpers/FormOptionsHelper.html#method-i-select) tag. |
+| disabled          | `false`   | Disables the select control.                                                                                                                      |
+| required          | `false`   | Makes the select control a required field.                                                                                                        |
+| multiple          | `false`   | Whether multiple values can be selected or not.                                                                                                   |
+| clearable         | `true`    | Whether the clear button should be shown or not.                                                                                                  |
+| auto\_size         | `true`    | If `true`, caps the listbox's height to the space between it and the edge of the viewport, so a long list scrolls instead of running off screen.  |
+| auto\_size\_padding | `4`       | The space in pixels to keep between the listbox and the edge of the viewport when `auto_size` is enabled.                                         |
+
+Any other keyword arguments are passed to the `<awc-autocomplete>` element as HTML attributes, except `namespace`,
+`skip_default_ids` and `allow_method_names_outside_object`, which are passed to the Rails field helpers.
+
+::: tip Note
+The endpoint receives the search text in `param`, such as `/fruits?q=gu`, and `?q=` when the listbox first opens. It
+responds with the HTML of the matching options. The request sends `Accept: text/fragment+html`, and a response that
+isn't 2xx shows the [error](#custom-error).
+
+```erb
+<%= render(Impulse::Autocomplete::OptionComponent.new(value: "guava", text: "Guava")) %>
+<%= render(Impulse::Autocomplete::OptionComponent.new(value: "kiwi", text: "Kiwi")) %>
+```
+
+The `Impulse::Autocomplete::OptionComponent` also takes an optional `description` argument.
+
+```erb
+<%= render(Impulse::Autocomplete::OptionComponent.new(value: "kiwi", text: "Kiwi", description: "This is a fruit.")) %>
+```
+
+:::
+
+## Examples
+
+### Selecting an option
+
+Pass an object that responds to the `value_method` and the `text_method`.
+
+```erb{8}
+<%= render(
+  Impulse::AjaxSelectComponent.new(
+    :post,
+    :person_id,
+    :id,
+    :name,
+    src: "/persons",
+    selected: Person.find(1)
+  )
+) %>
+```
+
+::: tip
+In case of multiple select, pass an array of objects to the `selected` argument.
+:::
+
+### Custom blankslate
+
+A blankslate is displayed when the input's text does not match any of the options that are returned from the server.
+
+```erb
+<%= render(Impulse::AjaxSelectComponent.new(:post, :person_id, :id, :name, src: "/persons")) do |c| %>
+  <% c.with_blankslate { "We couldn't find what you're looking for!" } %>
+<% end %>
+```
+
+### Custom error
+
+An error is displayed when the network request fails.
+
+```erb
+<%= render(Impulse::AjaxSelectComponent.new(:post, :person_id, :id, :name, src: "/persons")) do |c| %>
+  <% c.with_error { "An error occurred. Please try again!" } %>
+<% end %>
+```
+
+### Integrating with `form_with`
+
+Wrap your `ajax_select` tag with the `impulse_form_with` method. The `f.ajax_select` tag accepts the same
+[arguments](#arguments). Unlike `f.select`, it doesn't read the selection from the object, so pass `selected`.
+
+```erb
+<%= impulse_form_with model: @user do |f| %>
+  <%= f.ajax_select :fruit_id, :id, :name, selected: f.object.fruit, src: "/fruits" %>
+<% end %>
+```
+
+## Slots
+
+### `with_blankslate`
+
+Overwrite the default blankslate message by passing a block. It takes no arguments.
+
+### `with_error`
+
+Overwrite the default error message by passing a block. It takes no arguments.
+
+## Imports
+
+::: code-group
+
+```js
+import '@ambiki/impulse-view-components/autocomplete';
+```
+
+```scss
+@import '@ambiki/impulse-view-components/autocomplete';
+```
+
+:::
+
+The styles need Bootstrap's Sass and the base styles loaded first. See [Import the styles](/introduction/getting-started#import-the-styles).
+
+## JS API
+
+[Read here](../js-api/autocomplete.md).
+
+---
+
+---
+url: https://ambiki.github.io/impulse_view_components/components/anchor.md
+---
+# Anchor
+
+`Impulse::AnchorComponent` renders an `<awc-anchor>` element: a **floating element**, such as a tooltip or a menu,
+that positions itself next to an **anchor** (another element on the page) and stays inside the viewport as the page
+scrolls or resizes. It is configured entirely with attributes, so it needs no JavaScript of your own.
+
+The anchor is often the **trigger** (the element that is clicked or hovered to show the floating element), but it
+doesn't have to be. For example, a menu opened by a chevron button can be anchored to the whole field.
+
+::: tip Anchor or `useFloatingUI`?
+Use `Impulse::AnchorComponent` when you are writing markup and want something positioned. If you are writing your own
+[`impulse`](https://github.com/Ambiki/impulse) element that opens and closes a floating element, use the
+[`useFloatingUI`](../hooks/use-floating-ui.md) hook instead. Both share the same positioning logic and defaults.
+:::
+
+## Usage
+
+```erb
+<button type="button" id="anchor-button" class="btn btn-primary">Anchor</button>
+
+<%= render(Impulse::AnchorComponent.new(anchor_id: "anchor-button", active: true, class: "popover bs-popover-auto")) do %>
+  <div class="popover-body">I am anchored to the button!</div>
+<% end %>
+```
+
+## Arguments
+
+### Keyword arguments
+
+| Name                | Default   | Description                                                                                                                                                                                                                                                    |
+| ------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| anchor\_id           | N/A       | The `id` of the element to position against.                                                                                                                                                                                                                   |
+| active              | `false`   | Whether the element is positioned when the page loads. Call [`start` and `stop`](../js-api/anchor.md) to change it from JavaScript. While `false`, the element stays where it was last placed, which before it first starts is the viewport's top-left corner. |
+| placement           | `"bottom"`  | The preferred placement. The actual placement may vary to keep the element inside the viewport. One of `"top"`, `"top-start"`, `"top-end"`, `"right"`, `"right-start"`, `"right-end"`, `"bottom"`, `"bottom-start"`, `"bottom-end"`, `"left"`, `"left-start"`, or `"left-end"`.        |
+| strategy            | `"fixed"`   | The value of the `position` CSS property. One of `"absolute"` or `"fixed"`.                                                                                                                                                                                        |
+| distance            | `0`       | The distance in pixels away from the anchor.                                                                                                                                                                                                                   |
+| skidding            | `0`       | The distance in pixels along the anchor.                                                                                                                                                                                                                       |
+| sync                | `nil`     | Matches the element's size to the anchor's. One of `"height"`, `"width"`, or `"both"`.                                                                                                                                                                               |
+| flip                | `true`    | Flips the element to another placement when the preferred one doesn't fit.                                                                                                                                                                                     |
+| flip\_padding        | `0`       | The padding in pixels to keep from the viewport edge before flipping. Raised past `auto_size_padding` on the auto sized axis while `auto_size` is set.                                                                                                         |
+| fallback\_placements | `[]`      | The placements to try, in order, when the preferred one doesn't fit. By default, the opposite side is tried.                                                                                                                                                   |
+| fallback\_strategy   | `"bestFit"` | What to do when no placement fits. `"bestFit"` uses the placement that fits best, and `"initialPlacement"` uses `placement`, or the side `keep_flipped` keeps.                                                                                                     |
+| keep\_flipped        | `false`   | Keeps the side the element flipped to until it's deactivated, instead of trying `placement` first on every reposition, so it doesn't jump back once its content shrinks. It still flips again when that side stops fitting.                                    |
+| shift               | `true`    | Shifts the element along the anchor to keep it inside the viewport.                                                                                                                                                                                            |
+| shift\_padding       | `0`       | The padding in pixels to keep from the viewport edge while shifting.                                                                                                                                                                                           |
+| auto\_size           | `nil`     | Exposes the space available to the element as the `--awc-auto-size-height` and `--awc-auto-size-width` CSS custom properties. One of `"height"`, `"width"`, or `"both"`.                                                                                             |
+| auto\_size\_padding   | `0`       | The padding in pixels to keep from the viewport edge when measuring the available space.                                                                                                                                                                       |
+| arrow\_padding       | `0`       | The padding in pixels between the arrow and the edges of the element.                                                                                                                                                                                          |
+
+Any other keyword arguments are passed to the `<awc-anchor>` element as HTML attributes.
+
+## Examples
+
+### Adding an arrow
+
+Mark a child element with `data-arrow` to have it point at the anchor. The element's chosen placement is set as its
+`x-placement` attribute, which you can use to style the arrow for each side.
+
+```erb{2}
+<%= render(Impulse::AnchorComponent.new(anchor_id: "anchor-button", active: true, distance: 8)) do %>
+  <div class="arrow" data-arrow></div>
+  <div class="popover-body">I am anchored to the button!</div>
+<% end %>
+```
+
+### Fitting the viewport
+
+Set `auto_size` and cap the element's size with the custom property it exposes, so a tall menu scrolls instead of
+overflowing the viewport. When the cap squashes the element and the other side of the anchor has more room, the element
+flips there.
+
+```erb
+<%= render(Impulse::AnchorComponent.new(anchor_id: "anchor-button", active: true, auto_size: "height", auto_size_padding: 8, class: "menu")) do %>
+  ...
+<% end %>
+```
+
+```css
+.menu {
+  max-height: var(--awc-auto-size-height);
+  overflow-y: auto;
+}
+```
+
+## Imports
+
+```js
+import '@ambiki/impulse-view-components/anchor';
+```
+
+The component has no styles of its own.
+
+## JS API
+
+[Read here](../js-api/anchor.md).
+
+---
+
+---
+url: https://ambiki.github.io/impulse_view_components/components/clipboard-copy.md
+---
+# Clipboard copy
+
+A button that copies text to the clipboard: a value rendered by the server, or the text of another element on the
+page. It emits an event once the text is copied, or when it couldn't be, and enters a short feedback state you can
+style. It shows and announces nothing of its own: how the user is told, with a toast, an icon swap, or not at all, is
+up to your app.
+
+## Usage
+
+```erb
+<%= render(Impulse::ClipboardCopyComponent.new(value: "https://example.com/meetings/123", class: "btn btn-primary")) do %>
+  Copy link
+<% end %>
+```
+
+The component renders `<awc-clipboard-copy>`, which is the button itself. It is announced as a button, takes focus,
+and is pressed with a click, Enter, or Space, like a native `<button>`. Its content is what the button shows: a label,
+an icon, or the value itself.
+
+## Arguments
+
+### Keyword arguments
+
+| Name     | Default | Description                                                                                                       |
+| ------   | ------- | -------------                                                                                                     |
+| value    | `nil`   | The text to copy. When it isn't empty, it is copied instead of the copy source's text.                            |
+| for      | `nil`   | The `id` of the copy source, the element whose text is copied when there is no `value`.                           |
+| disabled | `false` | Whether the button ignores presses. A disabled button takes no focus and is announced as disabled.                |
+| feedback\_duration | `2000` | How long, in milliseconds, the button stays in its feedback state after a press. See [Styling the feedback state](#styling-the-feedback-state). |
+
+Any other keyword arguments, such as `class` or `aria`, are passed to the `<awc-clipboard-copy>` element as HTML
+attributes. The component adds no classes of its own.
+
+## Examples
+
+### Copying another element's text
+
+Name the copy source by its `id` with `for`. A form control (`<input>`, `<textarea>` or `<select>`) gives its value;
+any other element gives its text as rendered, without its hidden content and with a line break between blocks. The
+text is read when the button is pressed, so changes made after rendering are copied.
+
+```erb
+<pre id="setup-command">bundle exec rails db:setup</pre>
+
+<%= render(Impulse::ClipboardCopyComponent.new(for: "setup-command", class: "btn btn-sm btn-outline-secondary")) do %>
+  Copy command
+<% end %>
+```
+
+To copy something other than what the page shows, such as the text with a prefix, render it as the `value`.
+
+### Icon-only button
+
+A button that shows only an icon needs an accessible name, given with `aria-label`.
+
+```erb
+<%= render(Impulse::ClipboardCopyComponent.new(value: reference_number, class: "btn btn-sm", aria: { label: "Copy reference number" })) do %>
+  <i class="bi bi-clipboard" aria-hidden="true"></i>
+<% end %>
+```
+
+When the button has a visible label, leave out `aria-label`, or start it with the visible label, so that speech input
+users can say what they see.
+
+### Styling the feedback state
+
+For a short while after a press, the button is in a feedback state: `:state(copied)` once the text is copied, or
+`:state(error)` when nothing was. Style it to swap the icon, with no JavaScript. The state lasts 2 seconds; change it
+with `feedback_duration:`, in milliseconds. Another press starts it over.
+
+```erb
+<%= render(Impulse::ClipboardCopyComponent.new(value: meeting_link, feedback_duration: 1000, class: "btn btn-sm copy-link", aria: { label: "Copy link" })) do %>
+  <i class="bi bi-clipboard" aria-hidden="true"></i>
+  <i class="bi bi-check2" aria-hidden="true"></i>
+<% end %>
+```
+
+```css
+.copy-link .bi-check2,
+.copy-link:state(copied) .bi-clipboard {
+  display: none;
+}
+
+.copy-link:state(copied) .bi-check2 {
+  display: inline;
+}
+```
+
+The state is a [custom state](https://developer.mozilla.org/en-US/docs/Web/CSS/:state), not an attribute, so a DOM
+morph doesn't end it early. Browsers without `:state()` (before Chrome 125, Firefox 126 and Safari 17.4) still copy,
+without the feedback state.
+
+### Announcing a copy
+
+An icon swap is only seen. Screen reader users need to hear whether it copied too
+([WCAG 4.1.3](https://www.w3.org/WAI/WCAG22/Understanding/status-messages.html)), and the button doesn't announce it.
+Listen for `awc-clipboard-copy:copied` and `awc-clipboard-copy:error`, which bubble, and put a message in a live
+region, such as an element with `role="status"`. A toast that is one already does this.
+
+```html
+<div id="copy-status" role="status" class="sr-only"></div>
+```
+
+```js
+// Emptied first, so that copying twice announces twice.
+function announce(message) {
+  const status = document.getElementById('copy-status');
+  status.textContent = '';
+  setTimeout(() => {
+    status.textContent = message;
+  }, 100);
+}
+
+document.addEventListener('awc-clipboard-copy:copied', () => announce('Copied to clipboard'));
+document.addEventListener('awc-clipboard-copy:error', () => announce('Copying to the clipboard failed'));
+```
+
+The clipboard is only available on pages served over HTTPS or from `localhost`. Elsewhere, every press emits
+`awc-clipboard-copy:error`. See the [JS API](../js-api/clipboard-copy.md) for each event's detail.
+
+### Disabling the button
+
+```erb
+<%= render(Impulse::ClipboardCopyComponent.new(value: "Hello", disabled: true, class: "btn btn-primary")) do %>
+  Copy
+<% end %>
+```
+
+Like a native disabled button, it takes no focus, and listeners on it and its ancestors don't hear its clicks.
+Bootstrap's `.btn:disabled` styles only match native form controls. Style a disabled button with
+`awc-clipboard-copy[disabled]`, or add Bootstrap's `disabled` class.
+
+## Imports
+
+```js
+import '@ambiki/impulse-view-components/clipboard-copy';
+```
+
+The component has no styles of its own.
+
+## JS API
+
+[Read here](../js-api/clipboard-copy.md).
+
+---
+
+---
+url: https://ambiki.github.io/impulse_view_components/components/dialog.md
+---
+# Dialog
+
+Dialog uses the native HTML `<dialog>` element under the hood which provides full accessibility out of the box and
+solves z-index issues by rendering the element in the [top layer](https://developer.mozilla.org/en-US/docs/Glossary/Top_layer).
+
+## Usage
+
+```erb
+<button type="button">Open dialog</button>
+
+<%= render(Impulse::DialogComponent.new(title: "My dialog")) do |c| %>
+  <% c.with_body { "Dialog body" } %>
+<% end %>
+```
+
+```js
+const button = document.querySelector('button');
+const dialog = document.querySelector('awc-dialog');
+button.addEventListener('click', () => {
+  dialog.requestShow();
+});
+```
+
+## Arguments
+
+### Keyword arguments
+
+| Name                  | Default                  | Description                                                                                                                    |
+| ------                | ---------                | -------------                                                                                                                  |
+| title                 | N/A                      | The title of the dialog element.                                                                                               |
+| id                    | `self.class.generate_id` | The `id` of the dialog element.                                                                                                |
+| size                  | `:md`                    | The `size` of the dialog element. One of `:sm`, `:md`, or `:lg`.                                                               |
+| center                | `true`                   | Whether or not to center the dialog vertically.                                                                                |
+| fullscreen            | `:never`                 | Whether or not to render the dialog fullscreen. One of `:never`, `:always`, `:sm_down`, `:md_down`, `:lg_down`, or `:xl_down`. |
+| hide\_on\_outside\_click | `true`                   | Whether or not to hide the dialog element when clicked outside.                                                                |
+
+Any other keyword arguments are passed to the `<awc-dialog>` element as HTML attributes.
+
+## Examples
+
+### Body
+
+You can add any arbitrary rich content inside the body by calling the `with_body` slot.
+
+```erb{2}
+<%= render(Impulse::DialogComponent.new(title: "My dialog")) do |c| %>
+  <% c.with_body do %>
+    <p>Dialog body</p>
+  <% end %>
+<% end %>
+```
+
+### Footer
+
+You can add a footer by calling the `with_footer` slot.
+
+```erb{2}
+<%= render(Impulse::DialogComponent.new(title: "My dialog")) do |c| %>
+  <% c.with_footer do %>
+    <button type="button">Submit</button>
+  <% end %>
+<% end %>
+```
+
+### Adding a form
+
+When the block renders content of its own, such as a form, the dialog renders that content instead of the `with_body`
+and `with_footer` slots. Render the slots inside it with `<%= %>`, and give the element that wraps them the
+`awc-dialog--scrollable` class, so that only the body scrolls.
+
+```erb{2-11}
+<%= render(Impulse::DialogComponent.new(title: "Edit profile")) do |c| %>
+  <%= form_with url: "#", class: "awc-dialog--scrollable" do |f| %>
+    <%= c.with_body do %>
+      <%= f.label :name %>
+      <%= f.text_field :name %>
+    <% end %>
+    <%= c.with_footer do %>
+      <button type="reset" data-action="click->awc-dialog#requestHide">Cancel</button>
+      <%= f.submit %>
+    <% end %>
+  <% end %>
+<% end %>
+```
+
+If your arbitrary content comes from a partial as is the case with many `form_with` partials, you can use the
+`Impulse::Dialog::BodyComponent` and `Impulse::Dialog::FooterComponent` to render the body and footer of the dialog
+component respectively.
+
+```erb{2}
+<%= render(Impulse::DialogComponent.new(title: "Edit profile")) do %>
+  <%= render "shared/form" %>
+<% end %>
+```
+
+```erb{4,8}
+<%# app/views/shared/_form.html.erb %>
+
+<%= form_with url: "#", class: "awc-dialog--scrollable" do |f| %>
+  <%= render(Impulse::Dialog::BodyComponent.new) do %>
+    <%= f.label :name %>
+    <%= f.text_field :name %>
+  <% end %>
+  <%= render(Impulse::Dialog::FooterComponent.new) do %>
+    <button type="reset" data-action="click->awc-dialog#requestHide">Cancel</button>
+    <%= f.submit %>
+  <% end %>
+<% end %>
+```
+
+### Closing the dialog
+
+Add the `data-action="click->awc-dialog#requestHide"` attribute on the `button` element to close the dialog when clicking it.
+
+`requestHide` emits the cancelable `awc-dialog:hide` event first, so a listener can keep the dialog open, for example
+while a form inside it has unsaved changes. `hide` closes it without asking.
+
+```erb{3}
+<%= render(Impulse::DialogComponent.new(title: "Edit your profile")) do |c| %>
+  <% c.with_body do %>
+    <button type="button" data-action="click->awc-dialog#requestHide">Close</button>
+  <% end %>
+<% end %>
+```
+
+### Nested dialogs
+
+You can nest as many dialogs as you want and it will be stacked on top of the parent dialog.
+
+```erb{7-9}
+<button type="button">Open dialog</button>
+
+<%= render(Impulse::DialogComponent.new(title: "Edit your profile")) do |c| %>
+  <% c.with_body do %>
+    <p>Body contents...</p>
+    <button type="button">Open nested dialog</button>
+    <%= render(Impulse::DialogComponent.new(title: "Nested dialog", size: :sm)) do |nested| %>
+      <% nested.with_body { "This is a nested dialog." } %>
+    <% end %>
+  <% end %>
+<% end %>
+```
+
+## Slots
+
+### `with_body`
+
+The body of the dialog.
+
+| Name          | Default   | Description                                                               |
+| ------        | --------- | -------------                                                             |
+| `system_args` | `{}`      | HTML attributes for the slot's element.                                   |
+
+### `with_footer`
+
+The footer of the dialog.
+
+| Name          | Default   | Description                                                               |
+| ------        | --------- | -------------                                                             |
+| `system_args` | `{}`      | HTML attributes for the slot's element.                                   |
+
+## Imports
+
+::: code-group
+
+```js
+import '@ambiki/impulse-view-components/dialog';
+```
+
+```scss
+@import '@ambiki/impulse-view-components/dialog';
+```
+
+:::
+
+The styles need Bootstrap's Sass and the base styles loaded first. See [Import the styles](/introduction/getting-started#import-the-styles).
+
+## JS API
+
+[Read here](../js-api/dialog.md).
+
+---
+
+---
+url: https://ambiki.github.io/impulse_view_components/components/popover.md
+---
+# Popover
+
+A popover is a floating panel that can display rich content like navigation menus and mobile menus.
+
+## Usage
+
+```erb
+<%= render(Impulse::PopoverComponent.new) do |c| %>
+  <% c.with_trigger(class: "btn btn-primary") { "Toggle popover" } %>
+  <% c.with_body do %>
+    <span>And here's some amazing content. It's very engaging. Right?</span>
+  <% end %>
+<% end %>
+```
+
+## Arguments
+
+### Keyword arguments
+
+| Name      | Default   | Description                                                                                                                                                                                                                                                            |
+| ------    | --------- | -------------                                                                                                                                                                                                                                                          |
+| title     | `nil`     | The title of the popover.                                                                                                                                                                                                                                              |
+| placement | `"bottom"`  | The preferred placement of the popover. The actual placement may vary to keep the element inside the viewport. One of `"top"`, `"top-start"`, `"top-end"`, `"right"`, `"right-start"`, `"right-end"`, `"bottom"`, `"bottom-start"`, `"bottom-end"`, `"left"`, `"left-start"`, or `"left-end"`. |
+| strategy  | `"fixed"`   | The value of the `position` CSS property. One of `"absolute"` or `"fixed"`.                                                                                                                                                                                                |
+
+Any other keyword arguments are passed to the `<awc-popover>` element as HTML attributes, such as `open: true` to render
+it open.
+
+## Examples
+
+### Adding a title
+
+You can add a title by setting the `title` argument on the component. It will also add a close button next to it.
+
+```erb{1}
+<%= render(Impulse::PopoverComponent.new(title: "Activity feed")) do |c| %>
+  <% c.with_trigger { "Open feed" } %>
+  <% c.with_body { "Body" } %>
+<% end %>
+```
+
+### Custom header
+
+You can customize the header to add rich content instead of a simple title by calling the `with_header` slot.
+
+```erb{3-6}
+<%= render(Impulse::PopoverComponent.new) do |c| %>
+  <% c.with_trigger { "Toggle popover" } %>
+  <% c.with_header do %>
+    <h2>Custom title</h2>
+    <button type="button">Action button</button>
+  <% end %>
+  <% c.with_body do %>
+    <span>And here's some amazing content. It's very engaging. Right?</span>
+  <% end %>
+<% end %>
+```
+
+::: tip Note
+You are encouraged to use the `title` argument if there aren't any rich content inside the header.
+:::
+
+### Closing the popover
+
+Add the `data-action="click->awc-popover#requestHide"` attribute on the `button` element to close the popover when clicking it.
+
+`requestHide` emits the cancelable `awc-popover:hide` event first, so a listener can keep the popover open, for example
+while a form inside it has unsaved changes. `hide` closes it without asking.
+
+```erb{4}
+<%= render(Impulse::PopoverComponent.new(title: "Activity feed")) do |c| %>
+  <% c.with_trigger { "Toggle popover" } %>
+  <% c.with_body do %>
+    <button type="button" data-action="click->awc-popover#requestHide">Close</button>
+  <% end %>
+<% end %>
+```
+
+### Nesting popovers
+
+You can nest as many popovers as you want and it will be stacked on top of the parent popover. A nested popover counts
+as part of its parent, so moving focus or clicking into it doesn't close the parent. A click outside both, or focus
+moving out of both, closes them together, the nested popover first. Escape closes the popover focus is in.
+
+```erb{4-7}
+<%= render(Impulse::PopoverComponent.new) do |c| %>
+  <% c.with_trigger { "Open" } %>
+  <% c.with_body do %>
+    <%= render(Impulse::PopoverComponent.new) do |nested| %>
+      <% nested.with_trigger { "Open nested popover" } %>
+      <% nested.with_body { "Nested contents" } %>
+    <% end %>
+  <% end %>
+<% end %>
+```
+
+## Accessibility
+
+The popover is a non-modal dialog, rendered in the browser's [top
+layer](https://developer.mozilla.org/en-US/docs/Glossary/Top_layer) so that no `z-index` or `overflow` can hide it.
+
+* The popover has `role="dialog"`, labelled by the `title`, or by the trigger when there is no title or a custom header
+  replaces it. The trigger has `aria-haspopup="dialog"`, `aria-expanded` and `aria-controls`.
+* Opening it moves focus into the popover: to the element with `autofocus`, else the first element you can Tab to,
+  else the popover itself. A popover rendered open doesn't take focus.
+* Escape, a click outside, and focus moving out of the popover, such as Tab past its last element, all ask it to close.
+* Closing it returns focus to the trigger when focus was inside the popover, or lost. When focus has moved on to
+  something else, such as a field clicked outside, it stays there.
+* Closing it closes the popovers nested in it first. A user action asks them first, and one that refuses keeps the
+  popover open.
+
+## Slots
+
+### `with_trigger`
+
+The trigger, a `<button>` that shows or hides the popover. Required: the popover renders nothing without it.
+
+| Name          | Default   | Description                                                               |
+| ------        | --------- | -------------                                                             |
+| `system_args` | `{}`      | HTML attributes for the slot's element.                                   |
+
+### `with_header`
+
+The header of the popover. If you just want to change the title of the popover, pass the `title` argument to
+the component.
+
+| Name          | Default   | Description                                                               |
+| ------        | --------- | -------------                                                             |
+| `system_args` | `{}`      | HTML attributes for the slot's element.                                   |
+
+### `with_body`
+
+The body of the popover.
+
+| Name          | Default   | Description                                                               |
+| ------        | --------- | -------------                                                             |
+| `tag`         | `:div`    | The name of the HTML tag.                                                 |
+| `system_args` | `{}`      | HTML attributes for the slot's element.                                   |
+
+## Imports
+
+::: code-group
+
+```js
+import '@ambiki/impulse-view-components/popover';
+```
+
+```scss
+@import '@ambiki/impulse-view-components/popover';
+```
+
+:::
+
+The styles need Bootstrap's Sass and the base styles loaded first. See [Import the styles](/introduction/getting-started#import-the-styles).
+
+## JS API
+
+[Read here](../js-api/popover.md).
+
+---
+
+---
+url: https://ambiki.github.io/impulse_view_components/components/select.md
+---
+# Select
+
+Select allows a user to filter through a list of pre-defined sets of options and select one or multiple values.
+
+## Usage
+
+```erb
+<%= render(Impulse::SelectComponent.new(:post, :person_id, Person.all.collect { |p| [p.name, p.id] })) %>
+```
+
+## Arguments
+
+### Positional arguments
+
+| Name        | Default   | Description                                                                                                                                                                      |
+| ------      | --------- | -------------                                                                                                                                                                    |
+| object\_name | N/A       | The name of the object.                                                                                                                                                          |
+| method\_name | N/A       | The name of the method.                                                                                                                                                          |
+| choices     | `[]`      | An array of choices, similar to what you would pass to the native Rails [`select`](https://api.rubyonrails.org/classes/ActionView/Helpers/FormOptionsHelper.html#method-i-select) tag. |
+
+### Keyword arguments
+
+| Name              | Default   | Description                                                                                                                                       |
+| ------            | --------- | -------------                                                                                                                                     |
+| selected          | `nil`     | The `value` of the option that you want to force select.                                                                                          |
+| size              | `:md`     | The size of the select control. One of `:sm`, `:md`, or `:lg`.                                                                                    |
+| name              | `nil`     | The name of the field. By default, Rails automatically creates a `name` string based on the `object_name` and `method_name`.                      |
+| input\_id          | `nil`     | The id of the input field.                                                                                                                        |
+| placeholder       | `nil`     | The placeholder text that is displayed within the input field.                                                                                    |
+| include\_hidden    | `true`    | Only applies to a `multiple` select. See the "Gotcha" section of the Rails [`select`](https://api.rubyonrails.org/classes/ActionView/Helpers/FormOptionsHelper.html#method-i-select) tag. |
+| disabled          | `false`   | Disables the select control.                                                                                                                      |
+| required          | `false`   | Makes the select control a required field.                                                                                                        |
+| multiple          | `false`   | Whether multiple values can be selected or not.                                                                                                   |
+| clearable         | `true`    | Whether the clear button should be shown or not.                                                                                                  |
+| auto\_size         | `true`    | If `true`, caps the listbox's height to the space between it and the edge of the viewport, so a long list scrolls instead of running off screen.  |
+| auto\_size\_padding | `4`       | The space in pixels to keep between the listbox and the edge of the viewport when `auto_size` is enabled.                                         |
+
+Any other keyword arguments are passed to the `<awc-autocomplete>` element as HTML attributes, except `namespace`,
+`skip_default_ids` and `allow_method_names_outside_object`, which are passed to the Rails field helpers.
+
+## Examples
+
+### Rendering custom options
+
+Instead of passing an array of choices to the component, you can also render the options as a block. This provides
+more flexibility, and you can pass any HTML attributes to each option.
+
+```erb{2-4}
+<%= render(Impulse::SelectComponent.new(:post, :person_id)) do |c| %>
+  <% Person.all.each do |person| %>
+    <% c.with_option(value: person.id, text: person.display_name, disabled: person.on_vacation?) %>
+  <% end %>
+<% end %>
+```
+
+### Selecting an option
+
+You can pass the `value` of the option to the `selected` argument and it will be selected by default.
+
+```erb{6}
+<%= render(
+  Impulse::SelectComponent.new(
+    :user,
+    :fruit_id,
+    ["Apple", "Mango"],
+    selected: "Mango"
+  )
+) %>
+```
+
+::: tip
+In case of multiple select, pass an array of values to the `selected` argument, e.g. `["Apple", "Mango"]`.
+:::
+
+### Add inline attributes to options
+
+You can optionally provide HTML attributes as the last element of the array.
+
+```erb{5}
+<%= render(
+  Impulse::SelectComponent.new(
+    :user,
+    :country_id,
+    ["Denmark", ["USA", { class: "bold", disabled: true }], "Sweden"]
+  )
+) %>
+```
+
+::: warning
+Do not add "aria-selected" attribute to an option. If you want to select an option, pass the option's value to the
+[`selected`](#selecting-an-option) argument.
+:::
+
+### Add description to an option
+
+You can optionally add an inline description or pass the description attribute to the option slot.
+
+```erb{6,16}
+<%# Inline %>
+<%= render(
+  Impulse::SelectComponent.new(
+    :user,
+    :country_id,
+    [["USA", { description: "USA is a country." }]]
+  )
+) %>
+
+<%# Block %>
+<%= render(Impulse::SelectComponent.new(:user, :country_id)) do |c| %>
+  <% Country.all.each do |country| %>
+    <% c.with_option(
+      value: country.id,
+      text: country.display_name,
+      description: country.description
+    ) %>
+  <% end %>
+<% end %>
+```
+
+### Grouping options
+
+Like Rails' [`grouped_options_for_select`](https://api.rubyonrails.org/classes/ActionView/Helpers/FormOptionsHelper.html#method-i-grouped_options_for_select),
+the select component also supports grouping options. You can pass an array or a hash of grouped options.
+
+```erb
+<%
+  grouped_options = [
+    ["North America", [["United States", "US"], ["Canada", "CA", {disabled: true}]]],
+    ["Europe", ["Denmark", "Germany"]]
+  ]
+%>
+
+<%= render(Impulse::SelectComponent.new(:user, :country_id, grouped_options, selected: "US")) %>
+```
+
+```erb
+<%
+  grouped_options = {
+    "North America" => [["United States", "US"], "Canada"],
+    "Europe" => ["Denmark", "Germany"]
+  }
+%>
+
+<%= render(Impulse::SelectComponent.new(:user, :country_id, grouped_options, selected: "US")) %>
+```
+
+When rendering the options as a block, wrap them in `with_group`.
+
+```erb{3,5}
+<%= render(Impulse::SelectComponent.new(:user, :country_id, selected: "US")) do |c| %>
+  <% Continent.all.each do |continent| %>
+    <% c.with_group(title: continent.name) do |group| %>
+      <% continent.countries.each do |country| %>
+        <% group.with_option(value: country.code, text: country.name) %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>
+```
+
+### Custom blankslate
+
+A blankslate is displayed when the input's text does not match any of the options.
+
+```erb{2}
+<%= render(Impulse::SelectComponent.new(:post, :person_id, Person.all.collect { |p| [p.name, p.id] })) do |c| %>
+  <% c.with_blankslate { "We could not find that person in our directory!" } %>
+<% end %>
+```
+
+### Integrating with `form_with`
+
+Wrap your `select` tag with the `impulse_form_with` method. The `f.select` tag accepts the same
+[arguments](#arguments), and selects the attribute's value unless you pass `selected`.
+
+```erb
+<%= impulse_form_with model: @user do |f| %>
+  <%= f.select :person_id, Person.all.collect { |p| [p.name, p.id] } %>
+<% end %>
+```
+
+## Slots
+
+### `with_option`
+
+Customize the options by rendering a collection of the `with_option` block.
+
+| Name          | Default   | Description                                                               |
+| ------        | --------- | -------------                                                             |
+| `value`       | N/A       | The value of the option.                                                  |
+| `text`        | N/A       | The text of the option.                                                   |
+| `description` | `nil`     | An optional secondary description displayed below the option's text.      |
+| `system_args` | `{}`      | HTML attributes for the slot's element.                                   |
+
+### `with_group`
+
+Groups options under a title. Add the options with the group's `with_option`, which takes the same arguments as
+`with_option` above. A group with no options isn't rendered.
+
+| Name          | Default   | Description                                                               |
+| ------        | --------- | -------------                                                             |
+| `title`       | N/A       | The title displayed above the group's options.                            |
+| `system_args` | `{}`      | HTML attributes for the slot's element.                                   |
+
+### `with_blankslate`
+
+Overwrite the default blankslate message by passing a block. It takes no arguments.
+
+## Imports
+
+::: code-group
+
+```js
+import '@ambiki/impulse-view-components/autocomplete';
+```
+
+```scss
+@import '@ambiki/impulse-view-components/autocomplete';
+```
+
+:::
+
+The styles need Bootstrap's Sass and the base styles loaded first. See [Import the styles](/introduction/getting-started#import-the-styles).
+
+## JS API
+
+[Read here](../js-api/autocomplete.md).
+
+---
+
+---
+url: https://ambiki.github.io/impulse_view_components/components/spinner.md
+---
+# Spinner
+
+Indicate the loading state of a component or a page.
+
+## Usage
+
+```erb
+<%= render(Impulse::SpinnerComponent.new) %>
+```
+
+## Arguments
+
+### Keyword arguments
+
+| Name    | Default     | Description                                                                                                          |
+| ------  | ---------   | -------------                                                                                                        |
+| variant | `:secondary` | The color of the spinner. One of `:primary`, `:secondary`, `:success`, `:danger`, `:warning`, `:info`, `:light`, or `:dark`. |
+| label   | `"Loading"`  | The accessible text that describes the current state of the component or a page.                                              |
+
+Any other keyword arguments are passed to the spinner's `<div>` element as HTML attributes.
+
+## Examples
+
+### Changing the color
+
+Set one of the accepted variants as the `variant` argument.
+
+```erb
+<%= render(Impulse::SpinnerComponent.new(variant: :primary)) %>
+<%= render(Impulse::SpinnerComponent.new(variant: :danger)) %>
+<%= render(Impulse::SpinnerComponent.new(variant: :info)) %>
+```
+
+---
+
+---
+url: >-
+  https://ambiki.github.io/impulse_view_components/components/time-zone-select.md
+---
+# Time zone select
+
+Time zone select allows a user to filter through a list of default time zones and select one or multiple values.
+
+## Usage
+
+```erb
+<%= render(Impulse::TimeZoneSelectComponent.new(:user, :time_zone)) %>
+```
+
+## Arguments
+
+### Positional arguments
+
+| Name           | Default   | Description                                                                  |
+| ------         | --------- | -------------                                                                |
+| object\_name    | N/A       | The name of the object.                                                      |
+| method\_name    | N/A       | The name of the method.                                                      |
+| priority\_zones | `nil`     | The time zones listed above the rest: an array of zones, or a `Regexp` that each zone is matched against. |
+
+### Keyword arguments
+
+| Name                 | Default                   | Description                                                                                                                                                                                                                                      |
+| ------               | ---------                 | -------------                                                                                                                                                                                                                                    |
+| selected             | `nil`                     | The `value` of the option that you want to force select.                                                                                                                                                                                         |
+| default              | `nil`                     | The `value` of the option that you want to select if the `selected` is `nil`.                                                                                                                                                                    |
+| model                | `ActiveSupport::TimeZone` | Where the zones come from: an object whose `all` returns them. Each zone must respond to `name` (the option's value) and `to_s` (its text), and to `match?` when `priority_zones` is a `Regexp`. |
+| priority\_zones\_title | `"Prioritized time zones"` | The title of the group of time zones that have been prioritized.                                                                                                                                                                                 |
+| size                 | `:md`                     | The size of the select control. One of `:sm`, `:md`, or `:lg`.                                                                                                                                                                                   |
+| name                 | `nil`                     | The name of the field. By default, Rails automatically creates a `name` string based on the `object_name` and `method_name`.                                                                                                                     |
+| input\_id             | `nil`                     | The id of the input field.                                                                                                                                                                                                                       |
+| placeholder          | `nil`                     | The placeholder text that is displayed within the input field.                                                                                                                                                                                   |
+| include\_hidden       | `true`                    | Only applies to a `multiple` select. See the "Gotcha" section of the Rails [`select`](https://api.rubyonrails.org/classes/ActionView/Helpers/FormOptionsHelper.html#method-i-select) tag.                                                                                             |
+| disabled             | `false`                   | Disables the select control.                                                                                                                                                                                                                     |
+| required             | `false`                   | Makes the select control a required field.                                                                                                                                                                                                       |
+| multiple             | `false`                   | Whether multiple values can be selected or not.                                                                                                                                                                                                  |
+| clearable            | `true`                    | Whether the clear button should be shown or not.                                                                                                                                                                                                 |
+| auto\_size            | `true`                    | If `true`, caps the listbox's height to the space between it and the edge of the viewport, so a long list scrolls instead of running off screen.                                                                                                 |
+| auto\_size\_padding    | `4`                       | The space in pixels to keep between the listbox and the edge of the viewport when `auto_size` is enabled.                                                                                                                                        |
+
+Any other keyword arguments are passed to the `<awc-autocomplete>` element as HTML attributes, except `namespace`,
+`skip_default_ids` and `allow_method_names_outside_object`, which are passed to the Rails field helpers.
+
+## Examples
+
+### Prioritizing zones
+
+Pass an array of [`ActiveSupport::TimeZone`](https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html),
+[`ActiveSupport::TimeZone.us_zones`](https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html#method-c-us_zones)
+for a list of US time zones, [`ActiveSupport::TimeZone.country_zones(country_code)`](https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html#method-c-country_zones)
+for another country’s time zones, or a [`Regexp`](https://docs.ruby-lang.org/en/master/Regexp.html) to select the zones
+of your choice. The rest are listed after them, under "Other".
+
+```erb
+<%= render(Impulse::TimeZoneSelectComponent.new(:user, :time_zone, ActiveSupport::TimeZone.us_zones)) %>
+<%= render(Impulse::TimeZoneSelectComponent.new(:user, :time_zone, [ActiveSupport::TimeZone["Alaska"], ActiveSupport::TimeZone["Hawaii"]])) %>
+<%= render(Impulse::TimeZoneSelectComponent.new(:user, :time_zone, /Australia/)) %>
+```
+
+### Custom blankslate
+
+A blankslate is displayed when the input's text does not match any of the options.
+
+```erb{2}
+<%= render(Impulse::TimeZoneSelectComponent.new(:user, :time_zone)) do |c| %>
+  <% c.with_blankslate { "We could not find that time zone in our directory!" } %>
+<% end %>
+```
+
+### Integrating with `form_with`
+
+Wrap your `time_zone_select` tag with the `impulse_form_with` method. The `f.time_zone_select` tag accepts the same
+[arguments](#arguments), and selects the attribute's value unless you pass `selected`. `default` applies when the
+attribute is `nil`.
+
+```erb
+<%= impulse_form_with model: @user do |f| %>
+  <%= f.time_zone_select :time_zone %>
+<% end %>
+
+<%= impulse_form_with model: @user do |f| %>
+  <%= f.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones %>
+<% end %>
+
+<%= impulse_form_with model: @user do |f| %>
+  <%= f.time_zone_select :time_zone, nil, default: "Hawaii" %>
+<% end %>
+
+<%= impulse_form_with model: @user do |f| %>
+  <%= f.time_zone_select :time_zone do |c| %>
+    <% c.with_blankslate { "Time zone not found!" } %>
+  <% end %>
+<% end %>
+```
+
+## Slots
+
+### `with_blankslate`
+
+Overwrite the default blankslate message by passing a block. It takes no arguments.
+
+## Imports
+
+::: code-group
+
+```js
+import '@ambiki/impulse-view-components/autocomplete';
+```
+
+```scss
+@import '@ambiki/impulse-view-components/autocomplete';
+```
+
+:::
+
+The styles need Bootstrap's Sass and the base styles loaded first. See [Import the styles](/introduction/getting-started#import-the-styles).
+
+## JS API
+
+[Read here](../js-api/autocomplete.md).
+
+---
+
+---
+url: https://ambiki.github.io/impulse_view_components/js-api/anchor.md
+---
+# Anchor API
+
+```js
+const anchor = document.querySelector('awc-anchor');
+```
+
+## Properties
+
+### `anchorId`
+
+The `id` of the element to position against. Changing it while the element is active moves the element to the new
+anchor.
+
+```js
+anchor.anchorId = 'other-button';
+```
+
+### `active`
+
+Whether the element is kept next to its anchor. Setting it starts or stops the element, as `start` and `stop` do.
+
+```js
+anchor.active;
+// => true
+```
+
+### Positioning options
+
+Every other argument of the [Anchor component](../components/anchor.md#keyword-arguments) is also a property, in
+camelCase, such as `placement`, `flipPadding` or `autoSize`.
+
+```js
+anchor.placement = 'top';
+```
+
+## Methods
+
+### `start`
+
+Positions the element and keeps it next to its anchor as the page scrolls or resizes, until `stop` is called. An
+element rendered with `active: true` starts on its own.
+
+```js
+// <awc-anchor> only positions the element; showing it is up to you.
+anchor.hidden = false;
+anchor.start();
+```
+
+### `stop`
+
+Stops keeping the element next to its anchor. It stays where it was last placed. Resolves once it has stopped, on the
+next frame if it was running, so you can wait for it before hiding the element.
+
+```js
+await anchor.stop();
+anchor.hidden = true; // or however your app hides it
+```
+
+### `reposition`
+
+Positions the element straight away. Changing an option such as `placement` otherwise takes effect from the next time
+the element is repositioned, e.g. when the page scrolls. Does nothing while the element is stopped.
+
+```js
+anchor.placement = 'top';
+await anchor.reposition();
+```
+
+## Events
+
+`<awc-anchor>` doesn't emit any events.
+
+---
+
+---
+url: https://ambiki.github.io/impulse_view_components/js-api/autocomplete.md
+---
+# Autocomplete API
+
+```js
+const autocomplete = document.querySelector('awc-autocomplete');
+```
+
+## TypeScript
+
+The selection mode (single vs. multiple) determines the type of `value` and the arguments
+`removeValue` accepts, and the source (local vs. ajax) determines whether `setValue` requires
+the `text` argument. TypeScript resolves these automatically when you narrow on the `multiple` and
+`ajax` properties:
+
+```ts
+const autocomplete = document.querySelector('awc-autocomplete')!;
+
+if (autocomplete.multiple) {
+  autocomplete.value; // string[]
+  autocomplete.removeValue('1'); // value argument is required
+} else {
+  autocomplete.value; // string
+  autocomplete.removeValue(); // no argument
+}
+
+if (autocomplete.ajax) {
+  autocomplete.setValue('1', 'One'); // text is required
+} else {
+  autocomplete.setValue('1'); // text is optional
+}
+```
+
+If you already know the mode at the call site, pass the exported type to `querySelector` instead
+of narrowing:
+
+```ts
+import type {
+  MultipleAutocompleteElement,
+  SingleAutocompleteElement,
+} from '@ambiki/impulse-view-components/autocomplete';
+
+const multi = document.querySelector<MultipleAutocompleteElement>('awc-autocomplete')!;
+multi.value; // string[]
+
+const single = document.querySelector<SingleAutocompleteElement>('awc-autocomplete')!;
+single.value; // string
+```
+
+If you already know the source at the call site, you can also pass the exported type to
+`querySelector` instead of narrowing on `ajax`:
+
+```ts
+import type {
+  AjaxAutocompleteElement,
+  LocalAutocompleteElement,
+} from '@ambiki/impulse-view-components/autocomplete';
+
+const ajax = document.querySelector<AjaxAutocompleteElement>('awc-autocomplete')!;
+ajax.setValue('1', 'One'); // text is required
+ajax.setValue('1'); // ✗ type error
+
+const local = document.querySelector<LocalAutocompleteElement>('awc-autocomplete')!;
+local.setValue('1'); // text is optional
+```
+
+Each alias leaves the other dimension open, but they are composable — pass the other dimension as a
+type argument to pin both at once:
+
+```ts
+const el = document.querySelector<MultipleAutocompleteElement<'ajax'>>('awc-autocomplete')!;
+el.value; // string[]
+el.setValue('1', 'One'); // text is required
+
+// `AjaxAutocompleteElement<'multiple'>` resolves to the same type.
+```
+
+## Properties
+
+### `open`
+
+Whether the listbox is open. Setting it, or adding or removing the `open` attribute, shows or hides the listbox as
+`show` and `hide` do. A removed autocomplete keeps `open`, and opens its listbox again when it's added back.
+
+```js
+autocomplete.open;
+// => false
+autocomplete.open = true;
+```
+
+### `value`
+
+The selected value(s). For a single select this is a `string`; for a multiple select it is a `string[]`.
+
+```js
+// Multiple select
+autocomplete.value;
+// => ['1', '2']
+
+// Single select
+autocomplete.value;
+// => '1'
+```
+
+### `multiple`
+
+Whether multiple values can be selected. Narrowing on this resolves mode-dependent types — see
+[TypeScript](#typescript).
+
+```js
+autocomplete.multiple;
+// => true
+```
+
+### `ajax`
+
+Whether the options are fetched from the server (i.e. the `src` attribute is set). Narrowing on this resolves
+source-dependent types — see [TypeScript](#typescript).
+
+```js
+autocomplete.ajax;
+// => true
+```
+
+### `activeOption`
+
+The option that has the `data-active` attribute.
+
+```js
+autocomplete.activeOption;
+```
+
+### `visibleOptions`
+
+All the visible options of the autocomplete element.
+
+```js
+autocomplete.visibleOptions;
+```
+
+### `options`
+
+All the options of the autocomplete element.
+
+```js
+autocomplete.options;
+```
+
+### `form`
+
+The parent form element.
+
+```js
+autocomplete.form;
+```
+
+## Methods
+
+### `show`
+
+Shows the listbox. Emits `awc-autocomplete:shown`, but not the cancelable `awc-autocomplete:show`.
+
+```js
+autocomplete.show();
+```
+
+### `hide`
+
+Hides the listbox. Emits `awc-autocomplete:hidden`, but not the cancelable `awc-autocomplete:hide`.
+
+```js
+await autocomplete.hide();
+```
+
+### `requestShow`
+
+Shows the listbox as if the user asked to. Emits a cancelable `awc-autocomplete:show`, and does nothing if it is
+prevented.
+
+```js
+autocomplete.requestShow();
+```
+
+### `requestHide`
+
+Hides the listbox as if the user asked to. Emits a cancelable `awc-autocomplete:hide`, and does nothing if it is
+prevented.
+
+```js
+await autocomplete.requestHide();
+```
+
+### `setValue`
+
+Sets the value of the element. When the options are fetched from the server, the `text` argument is required (the
+option is not in the DOM, so its text cannot be derived); for local options it is optional. See
+[TypeScript](#typescript) for how to enforce this at compile time.
+
+```js
+// Multiple select
+autocomplete.setValue('apple', 'Apple');
+autocomplete.value;
+// => ['apple']
+
+// When the options are not loaded from the server, you do not have to pass the text argument.
+autocomplete.setValue('apple');
+autocomplete.value;
+// => ['apple']
+```
+
+### `removeValue`
+
+Removes a value from the element.
+
+```js
+// Multiple select
+autocomplete.removeValue('apple');
+autocomplete.value;
+// => []
+```
+
+::: tip
+The `value` argument is required for a multiple select and is not used by a single select (which clears its value when
+`removeValue()` is called). TypeScript enforces this when the mode is known — see [TypeScript](#typescript).
+:::
+
+### `activate`
+
+Activates an option by setting the `data-active` attribute, and scrolls it into view. Pass `{ scroll: false }` to
+skip the scrolling.
+
+```js
+const option = autocomplete.options[0];
+autocomplete.activate(option, { scroll: false });
+```
+
+### `deactivate`
+
+Deactivates the active option by removing the `data-active` attribute.
+
+```js
+autocomplete.deactivate();
+```
+
+### `clear`
+
+Deselects all the selected options.
+
+```js
+autocomplete.clear();
+```
+
+### `reset`
+
+Resets the autocomplete value to its initial state.
+
+```js
+autocomplete.reset();
+```
+
+### `focus`
+
+Sets the focus on the input element. It also accepts the native focus
+[options](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/focus#parameters) object.
+
+```js
+autocomplete.focus({ preventScroll: true });
+```
+
+### `blur`
+
+Removes keyboard focus from the input element.
+
+```js
+autocomplete.blur();
+```
+
+### `reposition`
+
+Positions the listbox straight away. Does nothing while the listbox is closed.
+
+```js
+await autocomplete.reposition();
+```
+
+## Events
+
+Events work as they do on native elements. A user action (pressing the control or typing in the input, Escape,
+Alt+ArrowDown, Alt+ArrowUp, an outside click, the input losing focus, committing an option in a single select,
+clearing), or a `requestShow` or `requestHide` call, first emits a cancelable `show` or `hide`; calling
+`preventDefault()` on it keeps the listbox closed or open. `show()`, `hide()` and changing `open` act directly and emit
+no `show` or `hide`, and neither does closing because the form was reset. `shown` and `hidden` fire after every open
+and close. Connecting, moving and removing the element emit nothing.
+
+Like the other events, `show` and `hide` bubble. A listener on an element that contains other autocompletes receives
+their `show` and `hide` too, so check `event.target` before preventing one.
+
+Like `input` and `change`, `commit`, `clear`, `remove` and `reset` fire after the value has changed, and only when the
+user changed it or the form reset: `setValue`, `removeValue`, `clear` and `reset` called from code emit nothing.
+
+`commit` reports the option's state after the commit in `event.detail.selected`: `true` when the commit selected it,
+`false` when it deselected it in a multiple select.
+
+```js
+autocomplete.addEventListener('awc-autocomplete:commit', (event) => {
+  const { value, selected } = event.detail;
+  console.log(selected ? `Selected ${value}` : `Deselected ${value}`);
+});
+```
+
+::: warning
+In a single select, committing the option that is already selected emits `commit` with `selected: true`, although the
+value doesn't change. A future release will stop emitting it, as a native `<select>` emits no `change` when the user
+selects the option that is already selected ([#310](https://github.com/Ambiki/impulse_view_components/issues/310)).
+:::
+
+| Name                      | Bubbles | Cancelable | Description                                                                                                                                                                            |
+| ------------------------- | ------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `awc-autocomplete:show`   | `true`  | `true`     | Fires before the listbox opens for a user action or `requestShow`.                                                                                                                     |
+| `awc-autocomplete:shown`  | `true`  | `false`    | Fires after the listbox has opened.                                                                                                                                                    |
+| `awc-autocomplete:hide`   | `true`  | `true`     | Fires before the listbox closes for a user action or `requestHide`.                                                                                                                    |
+| `awc-autocomplete:hidden` | `true`  | `false`    | Fires after the listbox has closed.                                                                                                                                                    |
+| `awc-autocomplete:commit` | `true`  | `false`    | Fires when the user commits an option. `event.detail` carries the option as `target`, its `value`, its `text`, and `selected`: whether the option is selected after the commit. |
+| `awc-autocomplete:clear`  | `true`  | `false`    | Fires when the user deselects all the options with the clear button.                                                                                                                  |
+| `awc-autocomplete:remove` | `true`  | `false`    | Fires when the user removes a tag. `event.detail` carries the tag as `target`, its `value`, and its `text`.                                                                            |
+| `awc-autocomplete:reset`  | `true`  | `false`    | Fires when the parent form has been reset.                                                                                                                                             |
+| `loadstart`               | `false` | `false`    | Fires when the autocomplete starts the network request.                                                                                                                                |
+| `load`                    | `false` | `false`    | Fires when the autocomplete fetches the options successfully from the server.                                                                                                          |
+| `error`                   | `false` | `false`    | Fires when the autocomplete fails to fetch the options from the server.                                                                                                                |
+| `loadend`                 | `false` | `false`    | Fires when the autocomplete finishes the network request.                                                                                                                              |
+
+The `commit` and `remove` details are exported as `AwcAutocompleteCommitEvent` and `AwcAutocompleteRemoveEvent` from
+`@ambiki/impulse-view-components/autocomplete`.
+
+---
+
+---
+url: https://ambiki.github.io/impulse_view_components/js-api/clipboard-copy.md
+---
+# Clipboard copy API
+
+```js
+const clipboardCopy = document.querySelector('awc-clipboard-copy');
+```
+
+## Properties
+
+### `value`
+
+The text to copy. When empty, the copy source's text is copied instead.
+
+```js
+clipboardCopy.value = 'https://example.com/meetings/456';
+```
+
+### `for`
+
+The `id` of the copy source. A form control gives its value, any other element its rendered text.
+
+```js
+clipboardCopy.for = 'setup-command';
+```
+
+### `disabled`
+
+Whether the element ignores presses. Like a native disabled button, it takes no focus and its clicks don't reach
+listeners.
+
+```js
+clipboardCopy.disabled = true;
+```
+
+### `feedbackDuration`
+
+How long, in milliseconds, the feedback state lasts. Defaults to `2000`.
+
+```js
+clipboardCopy.feedbackDuration = 1000;
+```
+
+## Methods
+
+### `copy`
+
+Copies the text, even when disabled. Resolves once `copied` or `error` is emitted; never rejects.
+
+Firefox and Safari only allow clipboard writes during a user gesture, so call it from one, such as a click handler.
+
+```js
+menuItem.addEventListener('click', async () => {
+  await clipboardCopy.copy();
+  menu.hide();
+});
+```
+
+## States
+
+After a copy, the element is in a [custom state](https://developer.mozilla.org/en-US/docs/Web/CSS/:state) for
+[`feedbackDuration`](#feedbackduration). Another copy restarts it.
+
+| State    | Description                         |
+| ------   | ------------                        |
+| `copied` | The text was copied.                |
+| `error`  | Nothing was copied.                 |
+
+```js
+clipboardCopy.matches(':state(copied)');
+```
+
+## Events
+
+A press is a click, Enter, or Space. `preventDefault()` doesn't stop it; disable the element instead. If the press
+removes the element, its events don't reach `document`.
+
+| Name                        | Bubbles | Cancelable | Description                                                                                                                                                   |
+| ------                      | ------- | ---------- | ------------                                                                                                                                                  |
+| `awc-clipboard-copy:copied` | `true`  | `false`    | Fires once the text is copied. `event.detail.text` is the copied text.                                                                                        |
+| `awc-clipboard-copy:error`  | `true`  | `false`    | Fires when nothing was copied. `event.detail.error` is a `NotFoundError` (nothing to copy), a `NotSupportedError` (no Clipboard API), or the browser's rejection. |
+
+The details are exported as `AwcClipboardCopyCopiedEvent` and `AwcClipboardCopyErrorEvent` from
+`@ambiki/impulse-view-components/clipboard-copy`.
+
+```ts
+document.addEventListener('awc-clipboard-copy:copied', (event) => {
+  const { text } = event.detail;
+});
+```
+
+---
+
+---
+url: https://ambiki.github.io/impulse_view_components/js-api/dialog.md
+---
+# Dialog API
+
+```js
+const dialog = document.querySelector('awc-dialog');
+```
+
+## Properties
+
+### `open`
+
+Whether the dialog is open. Setting it, or adding or removing the `open` attribute, shows or hides the dialog as `show`
+and `hide` do, so `<awc-dialog open>` opens modally, unlike a native `<dialog open>`. A removed dialog keeps `open`, and
+opens again when it's added back.
+
+```js
+dialog.open;
+// => false
+dialog.open = true;
+```
+
+### `hideOnOutsideClick`
+
+Whether a click outside the dialog asks it to close. Defaults to `true`.
+
+```js
+dialog.hideOnOutsideClick = false;
+```
+
+## Methods
+
+### `show`
+
+Shows the dialog. Emits `awc-dialog:shown`, but not the cancelable `awc-dialog:show`.
+
+```js
+dialog.show();
+```
+
+### `hide`
+
+Hides the dialog, and any dialog nested in it first. Emits `awc-dialog:hidden`, but not the cancelable
+`awc-dialog:hide`.
+
+```js
+await dialog.hide();
+```
+
+### `requestShow`
+
+Shows the dialog as if the user asked to. Emits a cancelable `awc-dialog:show`, and does nothing if it is prevented.
+
+```js
+dialog.requestShow();
+```
+
+### `requestHide`
+
+Hides the dialog as if the user asked to. Emits a cancelable `awc-dialog:hide`, and does nothing if it is prevented.
+
+```js
+await dialog.requestHide();
+```
+
+### `hideWithoutEmitting`
+
+Hides the dialog, and any dialog nested in it, without emitting any `awc-dialog` events. Like `hide`, it removes
+`open`.
+
+```js
+dialog.hideWithoutEmitting();
+```
+
+## Events
+
+Events work as they do on native elements. A user action, or a `requestShow` or `requestHide` call, first emits a
+cancelable `show` or `hide`; calling `preventDefault()` on it stops the dialog from opening or closing. `show()`,
+`hide()` and changing `open` act directly, like a native `<dialog>`'s `close()`, and emit no `show` or `hide`. `shown`
+and `hidden` fire after every open and close, whatever caused it. Connecting, moving and removing the element emit
+nothing.
+
+Like the other events, `show` and `hide` bubble. A listener on an element that contains other dialogs receives their
+`show` and `hide` too, so check `event.target` before preventing one.
+
+| Name                | Bubbles | Cancelable | Description                                                                                                   |
+| ------              | ------- | ---------- | ------------                                                                                                  |
+| `awc-dialog:show`   | `true`  | `true`     | Fires before the dialog opens for `requestShow`.                                                              |
+| `awc-dialog:shown`  | `true`  | `false`    | Fires after the dialog has opened.                                                                            |
+| `awc-dialog:hide`   | `true`  | `true`     | Fires before the dialog closes for a user action or `requestHide`: a close button, Escape, or an outside click. |
+| `awc-dialog:hidden` | `true`  | `false`    | Fires after the dialog has closed, including when a `<form method="dialog">` closes it.                       |
+
+::: tip
+Browsers let a page keep a dialog open only on the first Escape after the user interacts with it. If the user presses
+Escape again, the dialog closes without an `awc-dialog:hide`, and only `awc-dialog:hidden` fires.
+:::
+
+---
+
+---
+url: https://ambiki.github.io/impulse_view_components/js-api/popover.md
+---
+# Popover API
+
+```js
+const popover = document.querySelector('awc-popover');
+```
+
+## Properties
+
+### `open`
+
+Whether the popover is open. Setting it, or adding or removing the `open` attribute, shows or hides the popover as
+`show` and `hide` do. A removed popover keeps `open`, and opens again when it's added back.
+
+```js
+popover.open;
+// => false
+popover.open = true;
+```
+
+### `placement` and `strategy`
+
+The same options as on the [Popover component](../components/popover.md#keyword-arguments). Changing `placement`
+repositions the popover straight away.
+
+```js
+popover.placement = 'top';
+```
+
+## Methods
+
+### `show`
+
+Shows the popover, hides any other open popover except the ones it is nested in, and moves focus into it. Emits
+`awc-popover:shown`, but not the cancelable `awc-popover:show`.
+
+```js
+popover.show();
+```
+
+### `hide`
+
+Hides the popover, and the popovers nested in it first. Focus returns to the trigger if it was inside the popover, or
+lost. Emits `awc-popover:hidden`, but not the cancelable `awc-popover:hide`.
+
+```js
+await popover.hide();
+```
+
+### `requestShow`
+
+Shows the popover as if the user asked to. Emits a cancelable `awc-popover:show`, then a cancelable `awc-popover:hide` on
+each other open popover except the ones it is nested in. Does nothing if any of them is prevented.
+
+```js
+popover.requestShow();
+```
+
+### `requestHide`
+
+Hides the popover as if the user asked to. Emits a cancelable `awc-popover:hide` on each popover nested in it,
+innermost first, then on the popover itself. Stops at the first one prevented: that popover and the ones it is nested
+in stay open, and the ones nested in it that allowed it close. Called again with the same event, it asks no popover a
+second time.
+
+```js
+await popover.requestHide();
+```
+
+### `toggle`
+
+Shows or hides the popover as if its trigger was clicked: calls `requestShow` or `requestHide`. Pass the event that
+toggled it, if any, so that a popover the same press already asked to hide isn't asked again.
+
+```js
+await popover.toggle();
+```
+
+### `reposition`
+
+Updates the position of the popover element. If you are rendering elements lazily within the popover element, you can
+call this function to update the popover's placement once the elements have been loaded. Does nothing while the popover
+is closed.
+
+```js
+await popover.reposition();
+```
+
+## Events
+
+Events work as they do on native elements. A user action, or a `requestShow`, `requestHide` or `toggle` call, first
+emits a cancelable `show` or `hide`; calling `preventDefault()` on it stops the popover from opening or closing.
+`show()`, `hide()` and changing `open` act directly and emit no `show` or `hide`. `shown` and
+`hidden` fire after every open and close, whatever caused it. Connecting, moving and removing the element emit nothing.
+
+Like the other events, `show` and `hide` bubble. A listener on an element that contains other popovers receives their
+`show` and `hide` too, so check `event.target` before preventing one.
+
+| Name                 | Bubbles | Cancelable | Description                                                                                                                                                                                                                   |
+| ------               | ------- | ---------- | ------------                                                                                                                                                                                                                  |
+| `awc-popover:show`   | `true`  | `true`     | Fires before the popover opens for a user action or `requestShow`. Opening the popover also asks the other open popovers to hide.                                                                                             |
+| `awc-popover:shown`  | `true`  | `false`    | Fires after the popover has opened.                                                                                                                                                                                           |
+| `awc-popover:hide`   | `true`  | `true`     | Fires before the popover closes for a user action or `requestHide`: its trigger, a close button, Escape, an outside click, focus moving out of it, another popover opening, or a request to hide the popover it is nested in. |
+| `awc-popover:hidden` | `true`  | `false`    | Fires after the popover has closed.                                                                                                                                                                                           |
+
+---
+
+---
+url: https://ambiki.github.io/impulse_view_components/hooks/introduction.md
+---
+# Introduction
+
+Hooks are functions that attach to an [`impulse`](https://github.com/Ambiki/impulse) element while it stays
+connected, and clean up after themselves when it disconnects.
+
+## Usage
+
+Call a hook from the element's `connected` lifecycle callback.
+
+In this example, the [`useOutsideClick`](./use-outside-click.md) hook listens for clicks outside the `pop-over` element
+and the `#button` element. When the user clicks outside both, the `callback` hides the `pop-over` element by adding the
+`hidden` attribute.
+
+```ts
+import { ImpulseElement, registerElement } from '@ambiki/impulse';
+import { useOutsideClick } from '@ambiki/impulse-view-components/hooks';
+
+@registerElement('pop-over')
+export default class PopoverElement extends ImpulseElement {
+  connected() {
+    useOutsideClick(this, {
+      boundaries: [this, document.querySelector('#button')],
+      callback: () => {
+        if (this.open) {
+          this.hidden = true;
+        }
+      },
+    });
+  }
+
+  get open() {
+    return !this.hasAttribute('hidden');
+  }
+}
+```
+
+---
+
+---
+url: https://ambiki.github.io/impulse_view_components/hooks/use-floating-ui.md
+---
+# useFloatingUI
+
+A thin wrapper around [Floating UI](https://floating-ui.com/) for positioning a floating element, such as a tooltip,
+dropdown, or popover, against its anchor.
+
+::: tip `useFloatingUI` or Anchor?
+Use this hook when you are writing your own [`impulse`](https://github.com/Ambiki/impulse) element that opens and
+closes a floating element. If you only need something positioned from markup, use the
+[Anchor](../components/anchor.md) component instead. Both share the same positioning logic and defaults.
+:::
+
+## Usage
+
+```ts
+import { ImpulseElement, registerElement, target } from '@ambiki/impulse';
+import { useFloatingUI } from '@ambiki/impulse-view-components/hooks';
+
+@registerElement('pop-over')
+export default class PopoverElement extends ImpulseElement {
+  // The anchor.
+  @target() button: HTMLButtonElement;
+
+  // The floating element, positioned against the anchor.
+  @target() panel: HTMLElement;
+
+  private floatingUI: ReturnType<typeof useFloatingUI>;
+
+  connected() {
+    this.floatingUI = useFloatingUI(this, {
+      anchorElement: this.button,
+      floatingElement: this.panel,
+      placement: 'bottom',
+    });
+  }
+
+  show() {
+    // Show the popover.
+    this.panel.hidden = false;
+    // Start positioning logic.
+    this.floatingUI.start();
+  }
+
+  async hide() {
+    // Hide the popover.
+    this.panel.hidden = true;
+    // Stop positioning logic.
+    await this.floatingUI.stop();
+  }
+
+  // Repositioning does nothing while this is `false`.
+  get open() {
+    return !this.panel.hasAttribute('hidden');
+  }
+}
+```
+
+## Arguments
+
+```ts
+useFloatingUI(element, options);
+```
+
+### `element`
+
+| Name    | Default | Description                           |
+| ------- | ------- | ------------------------------------- |
+| element | N/A     | The impulse element (usually `this`), with an `open` property. The hook stops when the element disconnects. |
+
+### `options`
+
+Either an object, or a function that returns one. An object is read once, when the hook is created. A function is
+called every time the `floatingElement` is repositioned, so options that change while it's open (such as a `placement`
+attribute) are picked up on the next reposition. Call the returned `update()` to reposition straight away.
+
+`start()` keeps following the `anchorElement` and `floatingElement` it found when it was called. If the function
+returns different elements later, call `stop()` and then `start()` to follow the new ones.
+
+```ts
+this.floatingUI = useFloatingUI(this, () => ({
+  anchorElement: this.button,
+  floatingElement: this.panel,
+  placement: this.placement,
+}));
+```
+
+| Name            | Default     | Description                                                                                                                                                                                                                                                                                                                                |
+| --------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| anchorElement   | N/A         | The element (or a virtual element, such as a pointer position) to position against.                                                                                                                                                                                                                                                        |
+| floatingElement | N/A         | The element to position against the `anchorElement`.                                                                                                                                                                                                                                                                                       |
+| arrowElement    | `undefined` | An element inside the `floatingElement` that points at the `anchorElement`.                                                                                                                                                                                                                                                                |
+| arrowPadding    | `0`         | The padding in pixels between the arrow and the edges of the `floatingElement`.                                                                                                                                                                                                                                                            |
+| middleware      | `[]`        | Array of Floating UI middleware for fine-grained positioning control. They run after the built-in middleware and before the arrow is aligned. Read the [docs](https://floating-ui.com/docs/middleware).                                                                                                                               |
+| offsetOptions   | `0`         | Adds distance between the `anchorElement` and the `floatingElement`. Read the [docs](https://floating-ui.com/docs/offset).                                                                                                                                                                                                                 |
+| placement       | `bottom`    | The preferred placement of the `floatingElement`. The actual placement may vary to keep it inside the viewport. One of `top`, `top-start`, `top-end`, `right`, `right-start`, `right-end`, `bottom`, `bottom-start`, `bottom-end`, `left`, `left-start`, or `left-end`. Read the [docs](https://floating-ui.com/docs/tutorial#placements). |
+| flipOptions     | `undefined` | Options for flipping the `floatingElement` to another placement when the preferred one doesn't fit. Flipping is always on. Read the [docs](https://floating-ui.com/docs/flip).                                                                                                                                                             |
+| keepFlipped     | `false`     | Keeps the side the `floatingElement` flipped to until `stop()` is called, instead of trying `placement` first on every reposition, so it doesn't jump back once its content shrinks. It still flips again when that side stops fitting.                                                                                                    |
+| shiftOptions    | `undefined` | Options for shifting the `floatingElement` along the `anchorElement` to keep it inside the viewport. Shifting is always on. Read the [docs](https://floating-ui.com/docs/shift).                                                                                                                                                           |
+| strategy        | `fixed`     | The value of the `position` CSS property. One of `absolute` or `fixed`.                                                                                                                                                                                                                                                                    |
+| sync            | `undefined` | Matches the `floatingElement`'s size to the `anchorElement`'s. One of `height`, `width`, or `both`.                                                                                                                                                                                                                                        |
+| autoSize        | `undefined` | Exposes the space available to the `floatingElement` as the `--awc-auto-size-height` and `--awc-auto-size-width` CSS custom properties. One of `height`, `width`, or `both`. A `floatingElement` capped to that space flips when it is squashed and the other side has more room.                                                          |
+| autoSizePadding | `0`         | The padding in pixels to keep from the viewport edge when measuring the available space.                                                                                                                                                                                                                                                   |
+
+## Returns
+
+The hook places the `floatingElement` once when it's created. After that, repositioning does nothing while `open` is
+`false`. It returns:
+
+| Name       | Description                                                                                                                      |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `start()`  | Starts positioning the `floatingElement`, and keeps it next to the `anchorElement` as the page scrolls or resizes.               |
+| `update()` | Repositions the `floatingElement` straight away. Returns a promise. Does nothing while `open` is `false`.                        |
+| `stop()`   | Stops positioning. The `floatingElement` stays where it was last placed. Returns a promise that resolves once it has stopped, on the next frame if it was running. |
+
+---
+
+---
+url: https://ambiki.github.io/impulse_view_components/hooks/use-focus-out.md
+---
+# useFocusOut
+
+Listen for focus moving to an element outside the defined `boundaries`, such as on Tab past the last element of a
+popover. Use it to close a floating element that keyboard users have left, so it doesn't stay open behind them.
+
+::: tip Pair it with `useOutsideClick`
+`useFocusOut` leaves most presses outside to [`useOutsideClick`](./use-outside-click.md). Use both hooks, with the same
+`boundaries`, to cover the keyboard and the pointer.
+:::
+
+## Usage
+
+```ts
+import { ImpulseElement, registerElement, target } from '@ambiki/impulse';
+import { useFocusOut, useOutsideClick } from '@ambiki/impulse-view-components/hooks';
+
+@registerElement('pop-over')
+export default class PopoverElement extends ImpulseElement {
+  // The trigger.
+  @target() button: HTMLButtonElement;
+
+  // The floating element.
+  @target() panel: HTMLElement;
+
+  connected() {
+    const boundaries = [this.button, this.panel];
+
+    // Focus moving outside, such as on Tab past the panel's last element.
+    useFocusOut(this, { boundaries, callback: () => this.hide() });
+
+    // A press outside, including one that moves focus to a field outside.
+    useOutsideClick(this, { boundaries, callback: () => this.hide() });
+  }
+
+  hide() {
+    // Both callbacks can run while the panel is hidden, or for the same press.
+    if (!this.open) return;
+    this.panel.hidden = true;
+  }
+
+  get open() {
+    return !this.panel.hidden;
+  }
+}
+```
+
+## Arguments
+
+```ts
+useFocusOut(element, options);
+```
+
+### `element`
+
+| Name    | Default | Description                                                                         |
+| ------- | ------- | ----------------------------------------------------------------------------------- |
+| element | N/A     | The impulse element (usually `this`). The hook stops listening when it disconnects. |
+
+### `options`
+
+| Name       | Default | Description                                                                                                                                                                                                                                                      |
+| ---------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| boundaries | N/A     | An array of HTML elements that focus can move into, or between, without invoking the `callback` function. `null` entries are skipped.                                                                                                                            |
+| callback   | N/A     | The function to call when focus moves outside. `event` is the `focusin` event and `target` is the element that received focus, or its shadow host when that element is in a shadow root. Signature: `callback: (event: FocusEvent, target: HTMLElement) => void` |
+
+## What counts as focus moving out
+
+* The `callback` runs on every move to an element outside the `boundaries`, even when focus wasn't inside them before.
+  Check your own state first, such as whether the popover is open.
+* Focus leaving the page, such as to another tab or window, doesn't count. Neither does focus falling back to `<body>`,
+  such as when the focused element is removed.
+* Focus moved by a press outside, to the element pressed or the focusable element around it, doesn't count. That press
+  is left to `useOutsideClick`.
+* A press outside that moves focus somewhere else, such as on a `<label>` that focuses its field, counts as well. Both
+  callbacks run for it, so make them safe to run twice.
+* Focus moved by a press inside does count, such as a button in the popover that opens a dialog elsewhere on the page.
+* Boundaries inside a shadow root aren't supported. Focus moving into a shadow root is seen as a move to its shadow
+  host.
+
+---
+
+---
+url: https://ambiki.github.io/impulse_view_components/hooks/use-outside-click.md
+---
+# useOutsideClick
+
+Listen for clicks that occur outside the defined `boundaries`.
+
+A click counts when the press that starts it, with the primary button, lands outside every boundary. A click without a
+press, such as from Enter or `click()`, doesn't count, and neither does one prevented before it reaches `document`, such
+as by a `window` capture listener.
+
+::: tip Pair it with `useFocusOut`
+Keyboard users leave a popover with Tab, not a click. Use [`useFocusOut`](./use-focus-out.md), with the same
+`boundaries`, to catch focus moving out.
+:::
+
+## Usage
+
+```ts
+import { ImpulseElement, registerElement } from '@ambiki/impulse';
+import { useOutsideClick } from '@ambiki/impulse-view-components/hooks';
+
+@registerElement('pop-over')
+export default class PopoverElement extends ImpulseElement {
+  connected() {
+    useOutsideClick(this, {
+      boundaries: [this, document.querySelector('#button')],
+      callback: () => {
+        // Only proceed if the popover element is open.
+        if (this.open) {
+          this.hidden = true;
+        }
+      },
+    });
+  }
+
+  get open() {
+    return !this.hasAttribute('hidden');
+  }
+}
+```
+
+## Arguments
+
+```ts
+useOutsideClick(element, options);
+```
+
+### `element`
+
+| Name    | Default   | Description                           |
+| ------  | --------- | -------------                         |
+| element | N/A       | The impulse element (usually `this`). The hook stops listening when it disconnects. |
+
+### `options`
+
+| Name       | Default   | Description                                                                                                                 |
+| ------     | --------- | -------------                                                                                                               |
+| boundaries | N/A       | An array of HTML elements that clicks can land in without invoking the `callback` function. `null` entries are skipped. |
+| callback   | N/A       | The function to call when an outside click is detected. `event` is the `click` event and `element` is the element the press landed on. Signature: `callback: (event: Event, element: HTMLElement) => void` |

@@ -1,0 +1,40 @@
+# Impulse ViewComponents
+
+> View components for Ruby on Rails.
+
+Impulse ViewComponents is a library of accessible, interactive UI components for Ruby on Rails, built with [ViewComponent](https://viewcomponent.org/). Each component renders server-side HTML, and the interactive ones ship with a matching custom element, built on [`@ambiki/impulse`](https://github.com/Ambiki/impulse), for behavior, so you get progressive enhancement without a heavy client framework.
+
+Components include Ajax select, Anchor, Clipboard copy, Dialog, Popover, Select, Spinner, and Time zone select. JavaScript behavior is exposed through a small JS API (Anchor, Autocomplete, Clipboard copy, Dialog, Popover) and reusable hooks (`useFloatingUI`, `useFocusOut`, `useOutsideClick`). Components are imported individually, so you only ship what you use.
+
+## Table of Contents
+
+### Introduction
+
+- [Getting started](https://ambiki.github.io/impulse_view_components/introduction/getting-started.md)
+
+### Components
+
+- [Ajax select](https://ambiki.github.io/impulse_view_components/components/ajax-select.md)
+- [Anchor](https://ambiki.github.io/impulse_view_components/components/anchor.md)
+- [Clipboard copy](https://ambiki.github.io/impulse_view_components/components/clipboard-copy.md)
+- [Dialog](https://ambiki.github.io/impulse_view_components/components/dialog.md)
+- [Popover](https://ambiki.github.io/impulse_view_components/components/popover.md)
+- [Select](https://ambiki.github.io/impulse_view_components/components/select.md)
+- [Spinner](https://ambiki.github.io/impulse_view_components/components/spinner.md)
+- [Time zone select](https://ambiki.github.io/impulse_view_components/components/time-zone-select.md)
+
+### JS API
+
+- [Anchor API](https://ambiki.github.io/impulse_view_components/js-api/anchor.md)
+- [Autocomplete API](https://ambiki.github.io/impulse_view_components/js-api/autocomplete.md)
+- [Clipboard copy API](https://ambiki.github.io/impulse_view_components/js-api/clipboard-copy.md)
+- [Dialog API](https://ambiki.github.io/impulse_view_components/js-api/dialog.md)
+- [Popover API](https://ambiki.github.io/impulse_view_components/js-api/popover.md)
+
+### Hooks
+
+- [Introduction](https://ambiki.github.io/impulse_view_components/hooks/introduction.md)
+- [useFloatingUI](https://ambiki.github.io/impulse_view_components/hooks/use-floating-ui.md)
+- [useFocusOut](https://ambiki.github.io/impulse_view_components/hooks/use-focus-out.md)
+- [useOutsideClick](https://ambiki.github.io/impulse_view_components/hooks/use-outside-click.md)
+
