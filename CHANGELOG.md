@@ -47,7 +47,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Removed
 
 - **Breaking:** `click_boundaries:` on `Impulse::PopoverComponent` and `click-boundaries` on `<awc-popover>` ([#323](https://github.com/Ambiki/impulse_view_components/pull/323))
-- Dropped support for Rails 6.1 and Ruby 3.3. The minimum supported versions are now Rails 7.0.9 and Ruby 3.4. Earlier Rails 7.0 releases fail to load on Ruby 3.4 because they don't declare `base64`, `bigdecimal`, `drb` and `mutex_m`, which Ruby 3.4 moved to bundled gems
+- Dropped support for Rails 6.1 and Ruby 3.3. The minimum supported versions are now Rails 7.0.9 and Ruby 3.4. Earlier Rails 7.0 releases fail to load on Ruby 3.4 because they don't declare `base64`, `bigdecimal`, `drb` and `mutex_m`, which Ruby 3.4 moved to bundled gems ([#256](https://github.com/Ambiki/impulse_view_components/pull/256))
 
 ### Fixed
 
@@ -75,8 +75,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed removing an open popover from the page throwing a `TypeError` ([#281](https://github.com/Ambiki/impulse_view_components/pull/281))
 - Fixed the popover ignoring changes to `placement` after it connected ([#273](https://github.com/Ambiki/impulse_view_components/pull/273))
 - Fixed `useFloatingUI` ignoring its `middleware` option. Custom middleware now runs before the arrow is aligned ([#269](https://github.com/Ambiki/impulse_view_components/pull/269))
-- Fixed the autocomplete issuing a request against a source it was no longer using: changing `src`, or removing the element, now cancels a request that is in flight and one that is still waiting out the debounce. Previously a response from the old source could overwrite the options of the new one
-- Fixed the `exports` subpath map pointing at directories instead of files, which broke `dist/elements/*`, `dist/hooks/*` and `dist/helpers/*` imports for Node and for TypeScript under `moduleResolution: bundler`/`node16`. Every subpath now maps to a real file and declares a `types` condition, and element stylesheets stay reachable through the `sass`/`style` conditions ([#224](https://github.com/Ambiki/impulse_view_components/issues/224))
+- Fixed the autocomplete issuing a request against a source it was no longer using: changing `src`, or removing the element, now cancels a request that is in flight and one that is still waiting out the debounce. Previously a response from the old source could overwrite the options of the new one ([#255](https://github.com/Ambiki/impulse_view_components/pull/255))
+- Fixed the `exports` subpath map pointing at directories instead of files, which broke `dist/elements/*`, `dist/hooks/*` and `dist/helpers/*` imports for Node and for TypeScript under `moduleResolution: bundler`/`node16`. Every subpath now maps to a real file and declares a `types` condition, and element stylesheets stay reachable through the `sass`/`style` conditions ([#241](https://github.com/Ambiki/impulse_view_components/pull/241))
 - Fixed `useOutsideClick` leaking its `click` listener by switching teardown to `AbortController` ([#215](https://github.com/Ambiki/impulse_view_components/pull/215))
 
 ## [0.8.0] - 2026-01-09
