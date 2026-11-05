@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-05
+
 ### Added
 
 - `Impulse::ClipboardCopyComponent` (`<awc-clipboard-copy>`), a button that copies text to the clipboard ([#348](https://github.com/Ambiki/impulse_view_components/pull/348))
@@ -20,9 +22,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Impulse::SelectComponent`'s block form can group options with `with_group` ([#299](https://github.com/Ambiki/impulse_view_components/pull/299))
 - Added `auto-size` and `auto-size-padding` to `<awc-anchor>` (`auto_size:` and `auto_size_padding:` on `Impulse::AnchorComponent`) ([#274](https://github.com/Ambiki/impulse_view_components/pull/274))
 - `useFloatingUI` accepts a function for its options, read on every reposition, and exports its options type as `UseFloatingUIOptions` ([#273](https://github.com/Ambiki/impulse_view_components/pull/273))
+- Every prefixed autocomplete event is now declared, so `show`, `shown`, `hide`, `hidden`, `clear` and `reset` listeners receive a typed `CustomEvent` alongside `commit` and `remove`. The four ajax events (`loadstart`, `load`, `error`, `loadend`) are unchanged — they stay unprefixed and non-bubbling ([#255](https://github.com/Ambiki/impulse_view_components/pull/255))
 - Autocomplete now infers its API types from the selection mode and source: `value`/`removeValue` resolve by narrowing on `multiple`, and `setValue`'s `text` requirement by narrowing on the new `ajax` getter. Exported `SingleAutocompleteElement` / `MultipleAutocompleteElement` / `LocalAutocompleteElement` / `AjaxAutocompleteElement` types allow pinning the shape explicitly ([#217](https://github.com/Ambiki/impulse_view_components/pull/217))
 - Added `GlobalEventHandlersEventMap` entries for the dialog and popover events so listeners receive a typed `CustomEvent` ([#216](https://github.com/Ambiki/impulse_view_components/pull/216))
-- Every prefixed autocomplete event is now declared, so `show`, `shown`, `hide`, `hidden`, `clear` and `reset` listeners receive a typed `CustomEvent` alongside `commit` and `remove`. The four ajax events (`loadstart`, `load`, `error`, `loadend`) are unchanged — they stay unprefixed and non-bubbling ([#255](https://github.com/Ambiki/impulse_view_components/pull/255))
 
 ### Changed
 
@@ -39,6 +41,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Breaking:** Renamed `useFloatingUI`'s `referenceElement` and `popupElement` options to `anchorElement` and `floatingElement` ([#278](https://github.com/Ambiki/impulse_view_components/pull/278))
 - **Breaking:** `<awc-anchor>`'s `start()` and `stop()` now turn `active` on and off ([#277](https://github.com/Ambiki/impulse_view_components/pull/277))
 - **Breaking:** `useFloatingUI` and `<awc-anchor>` now share their defaults: `bottom` placement, with flip and shift on. Hook callers that omit `placement` get `bottom` instead of `bottom-start`, and `<awc-anchor>` now shifts unless `shift` is `false` ([#276](https://github.com/Ambiki/impulse_view_components/pull/276))
+- **Breaking:** Requires Ruby 3.4 ([#256](https://github.com/Ambiki/impulse_view_components/pull/256), [#210](https://github.com/Ambiki/impulse_view_components/pull/210))
 
 ### Deprecated
 
@@ -47,7 +50,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Removed
 
 - **Breaking:** `click_boundaries:` on `Impulse::PopoverComponent` and `click-boundaries` on `<awc-popover>` ([#323](https://github.com/Ambiki/impulse_view_components/pull/323))
-- **Breaking:** Dropped support for Ruby 3.3. Ruby 3.4 is the minimum ([#256](https://github.com/Ambiki/impulse_view_components/pull/256))
 
 ### Fixed
 
@@ -75,6 +77,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed removing an open popover from the page throwing a `TypeError` ([#281](https://github.com/Ambiki/impulse_view_components/pull/281))
 - Fixed the popover ignoring changes to `placement` after it connected ([#273](https://github.com/Ambiki/impulse_view_components/pull/273))
 - Fixed `useFloatingUI` ignoring its `middleware` option. Custom middleware now runs before the arrow is aligned ([#269](https://github.com/Ambiki/impulse_view_components/pull/269))
+- Fixed `Impulse::AjaxSelectComponent` raising `NameError` for `OpenStruct` when given `selected:` in an app that doesn't load `ostruct` ([#266](https://github.com/Ambiki/impulse_view_components/pull/266))
 - Fixed the autocomplete issuing a request against a source it was no longer using: changing `src`, or removing the element, now cancels a request that is in flight and one that is still waiting out the debounce. Previously a response from the old source could overwrite the options of the new one ([#255](https://github.com/Ambiki/impulse_view_components/pull/255))
 - Fixed the `exports` subpath map pointing at directories instead of files, which broke `dist/elements/*`, `dist/hooks/*` and `dist/helpers/*` imports for Node and for TypeScript under `moduleResolution: bundler`/`node16`. Every subpath now maps to a real file and declares a `types` condition, and element stylesheets stay reachable through the `sass`/`style` conditions ([#241](https://github.com/Ambiki/impulse_view_components/pull/241))
 - Fixed `useOutsideClick` leaking its `click` listener by switching teardown to `AbortController` ([#215](https://github.com/Ambiki/impulse_view_components/pull/215))
@@ -256,7 +259,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Everything!
 
-[unreleased]: https://github.com/Ambiki/impulse_view_components/compare/v0.8.0...HEAD
+[unreleased]: https://github.com/Ambiki/impulse_view_components/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/Ambiki/impulse_view_components/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/Ambiki/impulse_view_components/compare/v0.7.2...v0.8.0
 [0.7.2]: https://github.com/Ambiki/impulse_view_components/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/Ambiki/impulse_view_components/compare/v0.7.0...v0.7.1
