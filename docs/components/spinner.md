@@ -17,7 +17,7 @@ Indicate the loading state of a component or a page.
 | variant | `:secondary` | The color of the spinner. One of `:primary`, `:secondary`, `:success`, `:danger`, `:warning`, `:info`, `:light`, or `:dark`. |
 | label   | `"Loading"`  | The accessible text that describes the current state of the component or a page.                                              |
 
-Any other keyword arguments are passed to the spinner element as HTML attributes.
+Any other keyword arguments are passed to the spinner's `<div>` element as HTML attributes.
 
 ## Examples
 

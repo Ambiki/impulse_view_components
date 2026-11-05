@@ -20,8 +20,8 @@ A popover is a floating panel that can display rich content like navigation menu
 | Name      | Default   | Description                                                                                                                                                                                                                                                            |
 | ------    | --------- | -------------                                                                                                                                                                                                                                                          |
 | title     | `nil`     | The title of the popover.                                                                                                                                                                                                                                              |
-| placement | `bottom`  | The preferred placement of the popover. The actual placement may vary to keep the element inside the viewport. One of `top`, `top-start`, `top-end`, `right`, `right-start`, `right-end`, `bottom`, `bottom-start`, `bottom-end`, `left`, `left-start`, or `left-end`. |
-| strategy  | `fixed`   | The value of the `position` CSS property. One of `absolute` or `fixed`.                                                                                                                                                                                                |
+| placement | `"bottom"`  | The preferred placement of the popover. The actual placement may vary to keep the element inside the viewport. One of `"top"`, `"top-start"`, `"top-end"`, `"right"`, `"right-start"`, `"right-end"`, `"bottom"`, `"bottom-start"`, `"bottom-end"`, `"left"`, `"left-start"`, or `"left-end"`. |
+| strategy  | `"fixed"`   | The value of the `position` CSS property. One of `"absolute"` or `"fixed"`.                                                                                                                                                                                                |
 
 Any other keyword arguments are passed to the `<awc-popover>` element as HTML attributes, such as `open: true` to render
 it open.
@@ -113,12 +113,11 @@ layer](https://developer.mozilla.org/en-US/docs/Glossary/Top_layer) so that no `
 
 ### `with_trigger`
 
-The button element that is responsible for showing or hiding the popover. Required: the popover renders nothing
-without it.
+The trigger, a `<button>` that shows or hides the popover. Required: the popover renders nothing without it.
 
 | Name          | Default   | Description                                                               |
 | ------        | --------- | -------------                                                             |
-| `system_args` | `{}`      | HTML attributes that should be passed to the Rails' `content_tag` method. |
+| `system_args` | `{}`      | HTML attributes for the slot's element.                                   |
 
 ### `with_header`
 
@@ -127,7 +126,7 @@ the component.
 
 | Name          | Default   | Description                                                               |
 | ------        | --------- | -------------                                                             |
-| `system_args` | `{}`      | HTML attributes that should be passed to the Rails' `content_tag` method. |
+| `system_args` | `{}`      | HTML attributes for the slot's element.                                   |
 
 ### `with_body`
 
@@ -135,8 +134,8 @@ The body of the popover.
 
 | Name          | Default   | Description                                                               |
 | ------        | --------- | -------------                                                             |
-| `tag`         | `div`     | The name of the HTML tag.                                                 |
-| `system_args` | `{}`      | HTML attributes that should be passed to the Rails' `content_tag` method. |
+| `tag`         | `:div`    | The name of the HTML tag.                                                 |
+| `system_args` | `{}`      | HTML attributes for the slot's element.                                   |
 
 ## Imports
 

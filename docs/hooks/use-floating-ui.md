@@ -47,7 +47,7 @@ export default class PopoverElement extends ImpulseElement {
     await this.floatingUI.stop();
   }
 
-  // The hook only repositions while this is `true`.
+  // Repositioning does nothing while this is `false`.
   get open() {
     return !this.panel.hasAttribute('hidden');
   }
@@ -64,7 +64,7 @@ useFloatingUI(element, options);
 
 | Name    | Default | Description                           |
 | ------- | ------- | ------------------------------------- |
-| element | N/A     | The impulse element (usually `this`), with an `open` property. The hook only repositions while `open` is `true`, and stops when the element disconnects. |
+| element | N/A     | The impulse element (usually `this`), with an `open` property. The hook stops when the element disconnects. |
 
 ### `options`
 
@@ -102,10 +102,11 @@ this.floatingUI = useFloatingUI(this, () => ({
 
 ## Returns
 
-The hook places the `floatingElement` once when it's created, and returns:
+The hook places the `floatingElement` once when it's created. After that, repositioning does nothing while `open` is
+`false`. It returns:
 
 | Name       | Description                                                                                                                      |
 | ---------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | `start()`  | Starts positioning the `floatingElement`, and keeps it next to the `anchorElement` as the page scrolls or resizes.               |
 | `update()` | Repositions the `floatingElement` straight away. Returns a promise. Does nothing while `open` is `false`.                        |
-| `stop()`   | Stops positioning. The `floatingElement` stays where it was last placed. Returns a promise that resolves on the next frame. |
+| `stop()`   | Stops positioning. The `floatingElement` stays where it was last placed. Returns a promise that resolves once it has stopped, on the next frame if it was running. |

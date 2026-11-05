@@ -35,7 +35,8 @@ Select allows a user to filter through a list of pre-defined sets of options and
 | auto_size         | `true`    | If `true`, caps the listbox's height to the space between it and the edge of the viewport, so a long list scrolls instead of running off screen.  |
 | auto_size_padding | `4`       | The space in pixels to keep between the listbox and the edge of the viewport when `auto_size` is enabled.                                         |
 
-Any other keyword arguments are passed to the `<awc-autocomplete>` element as HTML attributes.
+Any other keyword arguments are passed to the `<awc-autocomplete>` element as HTML attributes, except `namespace`,
+`skip_default_ids` and `allow_method_names_outside_object`, which are passed to the Rails field helpers.
 
 ## Examples
 
@@ -169,8 +170,8 @@ A blankslate is displayed when the input's text does not match any of the option
 
 ### Integrating with `form_with`
 
-Wrap your `select` tag with the `impulse_form_with` method. The `f.select` tag accepts the same [arguments](#arguments), and
-selects the attribute's value unless you pass `selected`.
+Wrap your `select` tag with the `impulse_form_with` method. The `f.select` tag accepts the same
+[arguments](#arguments), and selects the attribute's value unless you pass `selected`.
 
 ```erb
 <%= impulse_form_with model: @user do |f| %>
@@ -189,7 +190,7 @@ Customize the options by rendering a collection of the `with_option` block.
 | `value`       | N/A       | The value of the option.                                                  |
 | `text`        | N/A       | The text of the option.                                                   |
 | `description` | `nil`     | An optional secondary description displayed below the option's text.      |
-| `system_args` | `{}`      | HTML attributes that should be passed to the Rails' `content_tag` method. |
+| `system_args` | `{}`      | HTML attributes for the slot's element.                                   |
 
 ### `with_group`
 
@@ -199,7 +200,7 @@ Groups options under a title. Add the options with the group's `with_option`, wh
 | Name          | Default   | Description                                                               |
 | ------        | --------- | -------------                                                             |
 | `title`       | N/A       | The title displayed above the group's options.                            |
-| `system_args` | `{}`      | HTML attributes that should be passed to the Rails' `content_tag` method. |
+| `system_args` | `{}`      | HTML attributes for the slot's element.                                   |
 
 ### `with_blankslate`
 

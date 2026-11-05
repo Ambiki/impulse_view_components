@@ -26,8 +26,8 @@ export default defineConfig({
         details: `\
 Impulse ViewComponents is a library of accessible, interactive UI components for Ruby on Rails, built with \
 [ViewComponent](https://viewcomponent.org/). Each component renders server-side HTML, and the interactive ones ship \
-with a matching custom element, built on [\`@ambiki/impulse\`](https://github.com/Ambiki/impulse), for behavior, so you get \
-progressive enhancement without a heavy client framework.
+with a matching custom element, built on [\`@ambiki/impulse\`](https://github.com/Ambiki/impulse), for behavior, so \
+you get progressive enhancement without a heavy client framework.
 
 Components include Ajax select, Anchor, Clipboard copy, Dialog, Popover, Select, Spinner, and Time zone select. \
 JavaScript behavior is exposed through a small JS API (Anchor, Autocomplete, Clipboard copy, Dialog, Popover) and \

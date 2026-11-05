@@ -48,8 +48,8 @@ anchor.start();
 
 ### `stop`
 
-Stops keeping the element next to its anchor. It stays where it was last placed. Resolves on the next frame, so you can
-wait for it before hiding the element.
+Stops keeping the element next to its anchor. It stays where it was last placed. Resolves once it has stopped, on the
+next frame if it was running, so you can wait for it before hiding the element.
 
 ```js
 await anchor.stop();

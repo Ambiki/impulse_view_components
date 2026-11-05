@@ -24,8 +24,8 @@ Ajax select allows users to fetch a list of options from the server.
 | Name              | Default   | Description                                                                                                                                       |
 | ------            | --------- | -------------                                                                                                                                     |
 | selected          | `nil`     | An object that responds to `value_method` and `text_method`, or an array of them for a `multiple` select.                                         |
-| src               | N/A       | The endpoint to fetch the options from. Required.                                                                                                 |
-| param             | `q`       | The param that is appended when making a network request. Example: `/fruits?q=Guava`.                                                             |
+| src               | N/A       | The endpoint to fetch the options from.                                                                                                           |
+| param             | `"q"`     | The param that is appended when making a network request. Example: `/fruits?q=Guava`.                                                             |
 | size              | `:md`     | The size of the select control. One of `:sm`, `:md`, or `:lg`.                                                                                    |
 | name              | `nil`     | The name of the field. By default, Rails automatically creates a `name` string based on the `object_name` and `method_name`.                      |
 | input_id          | `nil`     | The id of the input field.                                                                                                                        |
@@ -38,10 +38,11 @@ Ajax select allows users to fetch a list of options from the server.
 | auto_size         | `true`    | If `true`, caps the listbox's height to the space between it and the edge of the viewport, so a long list scrolls instead of running off screen.  |
 | auto_size_padding | `4`       | The space in pixels to keep between the listbox and the edge of the viewport when `auto_size` is enabled.                                         |
 
-Any other keyword arguments are passed to the `<awc-autocomplete>` element as HTML attributes.
+Any other keyword arguments are passed to the `<awc-autocomplete>` element as HTML attributes, except `namespace`,
+`skip_default_ids` and `allow_method_names_outside_object`, which are passed to the Rails field helpers.
 
 ::: tip Note
-The endpoint receives the search text in `param`, such as `/fruits?q=gu`, and `?q=` when the listbox opens. It
+The endpoint receives the search text in `param`, such as `/fruits?q=gu`, and `?q=` when the listbox first opens. It
 responds with the HTML of the matching options. The request sends `Accept: text/fragment+html`, and a response that
 isn't 2xx shows the [error](#custom-error).
 

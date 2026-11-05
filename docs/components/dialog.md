@@ -149,7 +149,7 @@ The body of the dialog.
 
 | Name          | Default   | Description                                                               |
 | ------        | --------- | -------------                                                             |
-| `system_args` | `{}`      | HTML attributes that should be passed to the Rails' `content_tag` method. |
+| `system_args` | `{}`      | HTML attributes for the slot's element.                                   |
 
 ### `with_footer`
 
@@ -157,7 +157,7 @@ The footer of the dialog.
 
 | Name          | Default   | Description                                                               |
 | ------        | --------- | -------------                                                             |
-| `system_args` | `{}`      | HTML attributes that should be passed to the Rails' `content_tag` method. |
+| `system_args` | `{}`      | HTML attributes for the slot's element.                                   |
 
 ## Imports
 

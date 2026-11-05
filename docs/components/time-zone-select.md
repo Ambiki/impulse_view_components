@@ -38,7 +38,8 @@ Time zone select allows a user to filter through a list of default time zones an
 | auto_size            | `true`                    | If `true`, caps the listbox's height to the space between it and the edge of the viewport, so a long list scrolls instead of running off screen.                                                                                                 |
 | auto_size_padding    | `4`                       | The space in pixels to keep between the listbox and the edge of the viewport when `auto_size` is enabled.                                                                                                                                        |
 
-Any other keyword arguments are passed to the `<awc-autocomplete>` element as HTML attributes.
+Any other keyword arguments are passed to the `<awc-autocomplete>` element as HTML attributes, except `namespace`,
+`skip_default_ids` and `allow_method_names_outside_object`, which are passed to the Rails field helpers.
 
 ## Examples
 
@@ -68,8 +69,9 @@ A blankslate is displayed when the input's text does not match any of the option
 
 ### Integrating with `form_with`
 
-Wrap your `time_zone_select` tag with the `impulse_form_with` method. The `f.time_zone_select` tag accepts the same [arguments](#arguments),
-and selects the attribute's value unless you pass `selected`. `default` applies when the attribute is `nil`.
+Wrap your `time_zone_select` tag with the `impulse_form_with` method. The `f.time_zone_select` tag accepts the same
+[arguments](#arguments), and selects the attribute's value unless you pass `selected`. `default` applies when the
+attribute is `nil`.
 
 ```erb
 <%= impulse_form_with model: @user do |f| %>

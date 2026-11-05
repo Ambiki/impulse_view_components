@@ -108,7 +108,7 @@ If your app doesn't compile Sass, import the precompiled CSS, which holds every 
 import '@ambiki/impulse-view-components/styles.css';
 ```
 
-It's built with Bootstrap's default variables, and doesn't include Bootstrap's own CSS, which you still load. Change
+It's built with Bootstrap's default variables, and doesn't include Bootstrap's component CSS, which you still load. Change
 colors and sizes through the CSS custom properties it defines
 on `:root`, such as `--awc-autocomplete-control-min-height`.
 

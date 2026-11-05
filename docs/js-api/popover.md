@@ -30,8 +30,8 @@ popover.placement = 'top';
 
 ### `show`
 
-Shows the popover, hides any other open popover except the ones it is nested in, and moves focus into it. Emits `awc-popover:shown`, but not the
-cancelable `awc-popover:show`.
+Shows the popover, hides any other open popover except the ones it is nested in, and moves focus into it. Emits
+`awc-popover:shown`, but not the cancelable `awc-popover:show`.
 
 ```js
 popover.show();
