@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed `<awc-popover>` showing open, and throwing when it opens or closes, in browsers without the Popover API (before Chrome 114, Firefox 125 and Safari 17). There the panel stays in the page, stacked with `$zindex-popover` and hidden while the popover is closed
+
 ## [0.9.0] - 2026-11-05
 
 ### Added

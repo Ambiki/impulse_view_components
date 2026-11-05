@@ -42,6 +42,16 @@
   }
 }
 
+@supports not selector(:popover-open) {
+  awc-popover:not([open]) > .awc-popover-container {
+    display: none;
+  }
+
+  .awc-popover-container {
+    z-index: $zindex-popover;
+  }
+}
+
 // FloatingUI changes
 .bs-popover-auto {
   &[x-placement^='top'] {
