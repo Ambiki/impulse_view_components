@@ -50,9 +50,8 @@ export default [
     input: 'src/index.ts',
     output: [
       {
-        name: 'ImpulseViewComponents',
         file: 'demo/app/assets/builds/impulse_view_components.js',
-        format: 'umd',
+        format: 'iife',
       },
     ],
     plugins: [
