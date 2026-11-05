@@ -38,8 +38,8 @@ Time zone select allows a user to filter through a list of default time zones an
 | auto_size            | `true`                    | If `true`, caps the listbox's height to the space between it and the edge of the viewport, so a long list scrolls instead of running off screen.                                                                                                 |
 | auto_size_padding    | `4`                       | The space in pixels to keep between the listbox and the edge of the viewport when `auto_size` is enabled.                                                                                                                                        |
 
-Any other keyword arguments are passed to the `<awc-autocomplete>` element as HTML attributes, except `namespace`,
-`skip_default_ids` and `allow_method_names_outside_object`, which are passed to the Rails field helpers.
+Any other keyword arguments are passed to the `<awc-autocomplete>` element as HTML attributes, except `index`,
+`namespace`, `skip_default_ids` and `allow_method_names_outside_object`, which are passed to the Rails field helpers.
 
 ## Examples
 

@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Fixed `select`, `ajax_select` and `time_zone_select` leaving `index`, such as from `fields_for`, out of their field names and ids ([#363](https://github.com/Ambiki/impulse_view_components/pull/363))
 - Fixed a stopped `<awc-anchor>` jumping to the viewport's top-left corner when its `anchor-id` changed or it reconnected ([#362](https://github.com/Ambiki/impulse_view_components/pull/362))
 
 ## [0.9.0] - 2026-11-05

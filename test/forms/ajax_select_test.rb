@@ -72,5 +72,19 @@ module Impulse
 
       assert_selector "input[type='text'][id='foo_user_fruit_id']"
     end
+
+    test "includes the index from fields_for in the field name and id" do
+      render_in_view_context do
+        impulse_form_with(model: User.new, url: "/users") do |f|
+          f.fields_for :items, index: 0 do |item|
+            item.ajax_select :fruit_id, :id, :name, src: "/users"
+          end
+        end
+      end
+
+      assert_selector "input[type='hidden'][name='user[items][0][fruit_id]']", visible: false
+      assert_selector "input[type='text'][id='user_items_0_fruit_id']"
+      assert_no_selector "awc-autocomplete[index]"
+    end
   end
 end

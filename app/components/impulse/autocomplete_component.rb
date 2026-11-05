@@ -14,6 +14,10 @@ module Impulse
       :lg => "awc-autocomplete--lg"
     }.freeze
 
+    # Tells no `index` apart from `index: nil`, which Rails' field helpers render as an empty `[]` in the field name.
+    NO_INDEX = Object.new.freeze
+    private_constant :NO_INDEX
+
     def initialize(
       object_name,
       method_name,
@@ -25,6 +29,7 @@ module Impulse
       include_hidden: true,
       disabled: false,
       clearable: true,
+      index: NO_INDEX,
       namespace: nil,
       skip_default_ids: false,
       allow_method_names_outside_object: true,
@@ -40,6 +45,7 @@ module Impulse
       @include_hidden = include_hidden
       @disabled = disabled
       @clearable = clearable
+      @index = index
       @namespace = namespace
       @skip_default_ids = skip_default_ids
       @allow_method_names_outside_object = allow_method_names_outside_object
@@ -85,6 +91,7 @@ module Impulse
       {}.tap do |args|
         args[:id] = @input_id if @input_id
         args[:placeholder] = @placeholder
+        args[:index] = @index unless @index.equal?(NO_INDEX)
         args[:namespace] = @namespace
         args[:skip_default_ids] = @skip_default_ids
         args[:allow_method_names_outside_object] = @allow_method_names_outside_object
@@ -94,6 +101,7 @@ module Impulse
     def hidden_field_args
       {}.tap do |args|
         args[:name] = @name if @name
+        args[:index] = @index unless @index.equal?(NO_INDEX)
         args[:allow_method_names_outside_object] = @allow_method_names_outside_object
       end
     end
