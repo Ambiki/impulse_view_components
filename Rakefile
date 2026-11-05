@@ -12,6 +12,7 @@ namespace :test do
     t.libs << "test"
     t.libs << "lib"
     t.test_files = FileList[
+      "test/engine_test.rb",
       "test/components/**/*_test.rb",
       "test/forms/**/*_test.rb"
     ]

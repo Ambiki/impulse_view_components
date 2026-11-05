@@ -46,13 +46,14 @@ export default [
         []),
     ],
   },
+  // The demo app's bundle, which Lookbook loads through Sprockets. The gem doesn't ship it.
   {
     input: 'src/index.ts',
     external: ['@floating-ui/dom'],
     output: [
       {
         name: 'ImpulseViewComponents',
-        file: 'app/assets/dist/impulse_view_components.js',
+        file: 'demo/app/assets/builds/impulse_view_components.js',
         format: 'umd',
         globals: {
           '@floating-ui/dom': 'FloatingUIDOM',
@@ -65,7 +66,7 @@ export default [
         compilerOptions: {
           declaration: false, // iife bundles don't need types
           declarationMap: false,
-          outDir: 'app/assets/dist', // @rollup/plugin-typescript requires outDir to contain the output file
+          outDir: 'demo/app/assets/builds', // @rollup/plugin-typescript requires outDir to contain the output file
         },
       }),
       ...(isProd ? [uglify()] : []),
