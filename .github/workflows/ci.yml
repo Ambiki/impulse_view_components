@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - main
+      - 0.9.x
   # A pull request can only restore the gem and yarn caches saved by its own runs or by main's, so runs on main save
   # them for every new pull request.
   push:
