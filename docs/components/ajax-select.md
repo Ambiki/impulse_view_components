@@ -23,14 +23,14 @@ Ajax select allows users to fetch a list of options from the server.
 
 | Name              | Default   | Description                                                                                                                                       |
 | ------            | --------- | -------------                                                                                                                                     |
-| selected          | `nil`     | The `class` instance that should respond to the `value_method` and `text_method` as defined in the positional arguments.                          |
-| src               | `nil`     | The endpoint to fetch the options from.                                                                                                           |
-| param             | `q`       | The param that is appended when making a network request. Example: `/fruits?q=Guava`.                                                             |
-| size              | `md`      | The size of the select control. One of `sm`, `md`, or `lg`.                                                                                       |
+| selected          | `nil`     | An object that responds to `value_method` and `text_method`, or an array of them for a `multiple` select.                                         |
+| src               | N/A       | The endpoint to fetch the options from.                                                                                                           |
+| param             | `"q"`     | The param that is appended when making a network request. Example: `/fruits?q=Guava`.                                                             |
+| size              | `:md`     | The size of the select control. One of `:sm`, `:md`, or `:lg`.                                                                                    |
 | name              | `nil`     | The name of the field. By default, Rails automatically creates a `name` string based on the `object_name` and `method_name`.                      |
 | input_id          | `nil`     | The id of the input field.                                                                                                                        |
 | placeholder       | `nil`     | The placeholder text that is displayed within the input field.                                                                                    |
-| include_hidden    | `true`    | See the "Gotcha" section of the Rails [`select`](https://api.rubyonrails.org/classes/ActionView/Helpers/FormOptionsHelper.html#method-i-select) tag.  |
+| include_hidden    | `true`    | Only applies to a `multiple` select. See the "Gotcha" section of the Rails [`select`](https://api.rubyonrails.org/classes/ActionView/Helpers/FormOptionsHelper.html#method-i-select) tag. |
 | disabled          | `false`   | Disables the select control.                                                                                                                      |
 | required          | `false`   | Makes the select control a required field.                                                                                                        |
 | multiple          | `false`   | Whether multiple values can be selected or not.                                                                                                   |
@@ -38,8 +38,13 @@ Ajax select allows users to fetch a list of options from the server.
 | auto_size         | `true`    | If `true`, caps the listbox's height to the space between it and the edge of the viewport, so a long list scrolls instead of running off screen.  |
 | auto_size_padding | `4`       | The space in pixels to keep between the listbox and the edge of the viewport when `auto_size` is enabled.                                         |
 
+Any other keyword arguments are passed to the `<awc-autocomplete>` element as HTML attributes, except `namespace`,
+`skip_default_ids` and `allow_method_names_outside_object`, which are passed to the Rails field helpers.
+
 ::: tip Note
-The server response should include the options that matched the search query.
+The endpoint receives the search text in `param`, such as `/fruits?q=gu`, and `?q=` when the listbox first opens. It
+responds with the HTML of the matching options. The request sends `Accept: text/fragment+html`, and a response that
+isn't 2xx shows the [error](#custom-error).
 
 ```erb
 <%= render(Impulse::Autocomplete::OptionComponent.new(value: "guava", text: "Guava")) %>
@@ -98,7 +103,7 @@ An error is displayed when the network request fails.
 ### Integrating with `form_with`
 
 Wrap your `ajax_select` tag with the `impulse_form_with` method. The `f.ajax_select` tag accepts the same
-[arguments](#arguments).
+[arguments](#arguments). Unlike `f.select`, it doesn't read the selection from the object, so pass `selected`.
 
 ```erb
 <%= impulse_form_with model: @user do |f| %>
@@ -110,19 +115,11 @@ Wrap your `ajax_select` tag with the `impulse_form_with` method. The `f.ajax_sel
 
 ### `with_blankslate`
 
-Overwrite the default blankslate message by passing a custom block.
-
-| Name          | Default   | Description                                                               |
-| ------        | --------- | -------------                                                             |
-| `system_args` | `{}`      | HTML attributes that should be passed to the Rails' `content_tag` method. |
+Overwrite the default blankslate message by passing a block. It takes no arguments.
 
 ### `with_error`
 
-Overwrite the default error message by passing a custom block.
-
-| Name          | Default   | Description                                                               |
-| ------        | --------- | -------------                                                             |
-| `system_args` | `{}`      | HTML attributes that should be passed to the Rails' `content_tag` method. |
+Overwrite the default error message by passing a block. It takes no arguments.
 
 ## Imports
 

@@ -23,12 +23,13 @@ an icon, or the value itself.
 
 | Name     | Default | Description                                                                                                       |
 | ------   | ------- | -------------                                                                                                     |
-| value    | N/A     | The text to copy. When it isn't empty, it is copied instead of the copy source's text.                            |
-| for      | N/A     | The `id` of the copy source, the element whose text is copied when there is no `value`.                           |
+| value    | `nil`   | The text to copy. When it isn't empty, it is copied instead of the copy source's text.                            |
+| for      | `nil`   | The `id` of the copy source, the element whose text is copied when there is no `value`.                           |
 | disabled | `false` | Whether the button ignores presses. A disabled button takes no focus and is announced as disabled.                |
 | feedback_duration | `2000` | How long, in milliseconds, the button stays in its feedback state after a press. See [Styling the feedback state](#styling-the-feedback-state). |
 
-Other arguments, such as `class` or `aria`, are rendered on the element. The component adds no classes of its own.
+Any other keyword arguments, such as `class` or `aria`, are passed to the `<awc-clipboard-copy>` element as HTML
+attributes. The component adds no classes of its own.
 
 ## Examples
 
