@@ -78,7 +78,8 @@ removes the element, its events don't reach `document`.
 | `awc-clipboard-copy:copied` | `true`  | `false`    | Fires once the text is copied. `event.detail.text` is the copied text.                                                                                        |
 | `awc-clipboard-copy:error`  | `true`  | `false`    | Fires when nothing was copied. `event.detail.error` is a `NotFoundError` (nothing to copy), a `NotSupportedError` (no Clipboard API), or the browser's rejection. |
 
-The details are exported as `AwcClipboardCopyCopiedEvent` and `AwcClipboardCopyErrorEvent`.
+The details are exported as `AwcClipboardCopyCopiedEvent` and `AwcClipboardCopyErrorEvent` from
+`@ambiki/impulse-view-components/clipboard-copy`.
 
 ```ts
 document.addEventListener('awc-clipboard-copy:copied', (event) => {

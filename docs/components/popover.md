@@ -23,6 +23,9 @@ A popover is a floating panel that can display rich content like navigation menu
 | placement | `bottom`  | The preferred placement of the popover. The actual placement may vary to keep the element inside the viewport. One of `top`, `top-start`, `top-end`, `right`, `right-start`, `right-end`, `bottom`, `bottom-start`, `bottom-end`, `left`, `left-start`, or `left-end`. |
 | strategy  | `fixed`   | The value of the `position` CSS property. One of `absolute` or `fixed`.                                                                                                                                                                                                |
 
+Any other keyword arguments are passed to the `<awc-popover>` element as HTML attributes, such as `open: true` to render
+it open.
+
 ## Examples
 
 ### Adding a title
@@ -83,9 +86,9 @@ moving out of both, closes them together, the nested popover first. Escape close
 <%= render(Impulse::PopoverComponent.new) do |c| %>
   <% c.with_trigger { "Open" } %>
   <% c.with_body do %>
-    <%= render(Impulse::PopoverComponent.new) do |c| %>
-      <% c.with_trigger { "Open nested popover" } %>
-      <% c.with_body { "Nested contents" } %>
+    <%= render(Impulse::PopoverComponent.new) do |nested| %>
+      <% nested.with_trigger { "Open nested popover" } %>
+      <% nested.with_body { "Nested contents" } %>
     <% end %>
   <% end %>
 <% end %>
@@ -110,7 +113,8 @@ layer](https://developer.mozilla.org/en-US/docs/Glossary/Top_layer) so that no `
 
 ### `with_trigger`
 
-The button element that is responsible for showing or hiding the popover.
+The button element that is responsible for showing or hiding the popover. Required: the popover renders nothing
+without it.
 
 | Name          | Default   | Description                                                               |
 | ------        | --------- | -------------                                                             |
@@ -149,4 +153,5 @@ import '@ambiki/impulse-view-components/popover';
 The styles need Bootstrap's Sass and the base styles loaded first. See [Import the styles](/introduction/getting-started#import-the-styles).
 
 ## JS API
+
 [Read here](../js-api/popover.md).

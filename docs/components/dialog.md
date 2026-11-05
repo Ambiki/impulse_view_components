@@ -34,7 +34,11 @@ button.addEventListener('click', () => {
 | fullscreen            | `:never`                 | Whether or not to render the dialog fullscreen. One of `:never`, `:always`, `:sm_down`, `:md_down`, `:lg_down`, or `:xl_down`. |
 | hide_on_outside_click | `true`                   | Whether or not to hide the dialog element when clicked outside.                                                                |
 
-## Body
+Any other keyword arguments are passed to the `<awc-dialog>` element as HTML attributes.
+
+## Examples
+
+### Body
 
 You can add any arbitrary rich content inside the body by calling the `with_body` slot.
 
@@ -46,7 +50,7 @@ You can add any arbitrary rich content inside the body by calling the `with_body
 <% end %>
 ```
 
-## Footer
+### Footer
 
 You can add a footer by calling the `with_footer` slot.
 
@@ -58,12 +62,13 @@ You can add a footer by calling the `with_footer` slot.
 <% end %>
 ```
 
-## Adding a form
+### Adding a form
 
-There should only be one arbitrary content inside the dialog component and it should have the `awc-dialog--scrollable`
-class so that only the body element can be scrolled.
+When the block renders content of its own, such as a form, the dialog renders that content instead of the `with_body`
+and `with_footer` slots. Render the slots inside it with `<%= %>`, and give the element that wraps them the
+`awc-dialog--scrollable` class, so that only the body scrolls.
 
-```erb{2-13}
+```erb{2-11}
 <%= render(Impulse::DialogComponent.new(title: "Edit profile")) do |c| %>
   <%= form_with url: "#", class: "awc-dialog--scrollable" do |f| %>
     <%= c.with_body do %>
@@ -89,7 +94,7 @@ component respectively.
 ```
 
 ```erb{4,8}
-<%# app/views/shared/form %>
+<%# app/views/shared/_form.html.erb %>
 
 <%= form_with url: "#", class: "awc-dialog--scrollable" do |f| %>
   <%= render(Impulse::Dialog::BodyComponent.new) do %>
@@ -103,7 +108,7 @@ component respectively.
 <% end %>
 ```
 
-## Closing the dialog
+### Closing the dialog
 
 Add the `data-action="click->awc-dialog#requestHide"` attribute on the `button` element to close the dialog when clicking it.
 
@@ -118,7 +123,7 @@ while a form inside it has unsaved changes. `hide` closes it without asking.
 <% end %>
 ```
 
-## Nested dialogs
+### Nested dialogs
 
 You can nest as many dialogs as you want and it will be stacked on top of the parent dialog.
 
@@ -129,8 +134,8 @@ You can nest as many dialogs as you want and it will be stacked on top of the pa
   <% c.with_body do %>
     <p>Body contents...</p>
     <button type="button">Open nested dialog</button>
-    <%= render(Impulse::DialogComponent.new(title: "Nested dialog", size: :sm)) do |s| %>
-      <% s.with_body { "This is a nested dialog." } %>
+    <%= render(Impulse::DialogComponent.new(title: "Nested dialog", size: :sm)) do |nested| %>
+      <% nested.with_body { "This is a nested dialog." } %>
     <% end %>
   <% end %>
 <% end %>
@@ -169,4 +174,5 @@ import '@ambiki/impulse-view-components/dialog';
 The styles need Bootstrap's Sass and the base styles loaded first. See [Import the styles](/introduction/getting-started#import-the-styles).
 
 ## JS API
+
 [Read here](../js-api/dialog.md).

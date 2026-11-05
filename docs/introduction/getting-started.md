@@ -1,5 +1,13 @@
 # Getting started
 
+## Requirements
+
+- Ruby 3.4 or later, and Rails 7.1 or later.
+- [Bootstrap 4](https://getbootstrap.com/docs/4.6/)'s CSS. The components use its classes, such as `form-control`,
+  `dropdown-menu`, `btn` and `spinner-border`.
+- [Bootstrap Icons](https://icons.getbootstrap.com/)' CSS, for the icons the components render, such as `bi-x`.
+- [Dart Sass](https://sass-lang.com/dart-sass/), if you compile the components' Sass.
+
 ## Install the gem
 
 Add the gem to your `Gemfile`:
@@ -14,7 +22,7 @@ Then install it:
 bundle install
 ```
 
-## Mount the engine
+## Require the engine
 
 Require the engine in `config/application.rb`:
 
@@ -25,7 +33,7 @@ require "impulse/view_components/engine"
 ## Install the JavaScript package
 
 The interactive components ship as custom elements, so you also need the npm package. It's built on
-[`@ambiki/impulse`](https://github.com/Ambiki/impulse), which you install alongside it, so your own elements and the
+[`@ambiki/impulse`](https://github.com/Ambiki/impulse) 2, which you install alongside it, so your own elements and the
 components share one copy:
 
 ```bash
@@ -34,7 +42,7 @@ yarn add @ambiki/impulse-view-components @ambiki/impulse
 
 ## Import the components
 
-Each component is imported individually for both JavaScript and styles, so you only ship what you use.
+Each component is imported individually, so you only ship what you use.
 For example, to use the [Select](/components/select) component:
 
 ```js
@@ -94,13 +102,14 @@ reading the package's `exports`. It can keep importing the files directly:
 
 ### Without Sass
 
-If your app doesn't use Sass or Bootstrap, import the precompiled CSS, which holds every component's styles:
+If your app doesn't compile Sass, import the precompiled CSS, which holds every component's styles:
 
 ```js
 import '@ambiki/impulse-view-components/styles.css';
 ```
 
-It's built with Bootstrap's default variables. Change colors and sizes through the CSS custom properties it defines
+It's built with Bootstrap's default variables, and doesn't include Bootstrap's own CSS, which you still load. Change
+colors and sizes through the CSS custom properties it defines
 on `:root`, such as `--awc-autocomplete-control-min-height`.
 
 ## Upgrading from `dist/` paths
@@ -113,7 +122,6 @@ use the shorter paths below.
 | `…/dist/index.js`                                                | `@ambiki/impulse-view-components`                                              |
 | `…/dist/elements/<name>`, `…/dist/elements/<name>/index.js`      | `@ambiki/impulse-view-components/<name>`, such as `…/popover`                  |
 | `import useFloatingUI from '…/dist/hooks/use_floating_ui'`       | `import { useFloatingUI } from '@ambiki/impulse-view-components/hooks'`        |
-| `import useFocusOut from '…/dist/hooks/use_focus_out'`           | `import { useFocusOut } from '@ambiki/impulse-view-components/hooks'`          |
 | `import useOutsideClick from '…/dist/hooks/use_outside_click'`   | `import { useOutsideClick } from '@ambiki/impulse-view-components/hooks'`      |
 | `@import '~…/dist/elements/<name>'`                              | `@import '@ambiki/impulse-view-components/<name>'`                             |
 | `@import '~…/dist/styles/variables'` and `'~…/dist/styles/base'` | `@import '@ambiki/impulse-view-components/base'`                               |

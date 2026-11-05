@@ -4,6 +4,35 @@
 const anchor = document.querySelector('awc-anchor');
 ```
 
+## Properties
+
+### `anchorId`
+
+The `id` of the element to position against. Changing it while the element is active moves the element to the new
+anchor.
+
+```js
+anchor.anchorId = 'other-button';
+```
+
+### `active`
+
+Whether the element is kept next to its anchor. Setting it starts or stops the element, as `start` and `stop` do.
+
+```js
+anchor.active;
+// => true
+```
+
+### Positioning options
+
+Every other argument of the [Anchor component](../components/anchor.md#keyword-arguments) is also a property, in
+camelCase, such as `placement`, `flipPadding` or `autoSize`.
+
+```js
+anchor.placement = 'top';
+```
+
 ## Methods
 
 ### `start`
@@ -25,14 +54,6 @@ wait for it before hiding the element.
 ```js
 await anchor.stop();
 anchor.hidden = true; // or however your app hides it
-```
-
-### `anchorId`
-
-The `id` of the element to position against. Changing it moves the element to the new anchor.
-
-```js
-anchor.anchorId = 'other-button';
 ```
 
 ### `reposition`

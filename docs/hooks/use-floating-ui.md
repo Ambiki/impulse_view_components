@@ -47,7 +47,7 @@ export default class PopoverElement extends ImpulseElement {
     await this.floatingUI.stop();
   }
 
-  // Required for Floating UI to calculate positioning.
+  // The hook only repositions while this is `true`.
   get open() {
     return !this.panel.hasAttribute('hidden');
   }
@@ -64,7 +64,7 @@ useFloatingUI(element, options);
 
 | Name    | Default | Description                           |
 | ------- | ------- | ------------------------------------- |
-| element | N/A     | The impulse element (usually `this`). |
+| element | N/A     | The impulse element (usually `this`), with an `open` property. The hook only repositions while `open` is `true`, and stops when the element disconnects. |
 
 ### `options`
 
@@ -89,7 +89,7 @@ this.floatingUI = useFloatingUI(this, () => ({
 | floatingElement | N/A         | The element to position against the `anchorElement`.                                                                                                                                                                                                                                                                                       |
 | arrowElement    | `undefined` | An element inside the `floatingElement` that points at the `anchorElement`.                                                                                                                                                                                                                                                                |
 | arrowPadding    | `0`         | The padding in pixels between the arrow and the edges of the `floatingElement`.                                                                                                                                                                                                                                                            |
-| middleware      | `[]`        | Array of custom middleware functions for fine-grained positioning control. They run after the built-in middleware and before the arrow is aligned. Read the [docs](https://floating-ui.com/docs/middleware).                                                                                                                               |
+| middleware      | `[]`        | Array of Floating UI middleware for fine-grained positioning control. They run after the built-in middleware and before the arrow is aligned. Read the [docs](https://floating-ui.com/docs/middleware).                                                                                                                               |
 | offsetOptions   | `0`         | Adds distance between the `anchorElement` and the `floatingElement`. Read the [docs](https://floating-ui.com/docs/offset).                                                                                                                                                                                                                 |
 | placement       | `bottom`    | The preferred placement of the `floatingElement`. The actual placement may vary to keep it inside the viewport. One of `top`, `top-start`, `top-end`, `right`, `right-start`, `right-end`, `bottom`, `bottom-start`, `bottom-end`, `left`, `left-start`, or `left-end`. Read the [docs](https://floating-ui.com/docs/tutorial#placements). |
 | flipOptions     | `undefined` | Options for flipping the `floatingElement` to another placement when the preferred one doesn't fit. Flipping is always on. Read the [docs](https://floating-ui.com/docs/flip).                                                                                                                                                             |
@@ -99,3 +99,13 @@ this.floatingUI = useFloatingUI(this, () => ({
 | sync            | `undefined` | Matches the `floatingElement`'s size to the `anchorElement`'s. One of `height`, `width`, or `both`.                                                                                                                                                                                                                                        |
 | autoSize        | `undefined` | Exposes the space available to the `floatingElement` as the `--awc-auto-size-height` and `--awc-auto-size-width` CSS custom properties. One of `height`, `width`, or `both`. A `floatingElement` capped to that space flips when it is squashed and the other side has more room.                                                          |
 | autoSizePadding | `0`         | The padding in pixels to keep from the viewport edge when measuring the available space.                                                                                                                                                                                                                                                   |
+
+## Returns
+
+The hook places the `floatingElement` once when it's created, and returns:
+
+| Name       | Description                                                                                                                      |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `start()`  | Starts positioning the `floatingElement`, and keeps it next to the `anchorElement` as the page scrolls or resizes.               |
+| `update()` | Repositions the `floatingElement` straight away. Returns a promise. Does nothing while `open` is `false`.                        |
+| `stop()`   | Stops positioning. The `floatingElement` stays where it was last placed. Returns a promise that resolves on the next frame. |

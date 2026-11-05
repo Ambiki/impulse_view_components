@@ -1,6 +1,7 @@
 # ImpulseViewComponents
 
-View components for Ruby on Rails.
+View components for Ruby on Rails. Read the [documentation](https://ambiki.github.io/impulse_view_components/) to get
+started.
 
 ## Development
 

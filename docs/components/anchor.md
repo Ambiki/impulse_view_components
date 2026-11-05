@@ -88,6 +88,8 @@ flips there.
 import '@ambiki/impulse-view-components/anchor';
 ```
 
+The component has no styles of its own.
+
 ## JS API
 
 [Read here](../js-api/anchor.md).

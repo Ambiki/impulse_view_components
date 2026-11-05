@@ -16,7 +16,7 @@ Time zone select allows a user to filter through a list of default time zones an
 | ------         | --------- | -------------                                                                |
 | object_name    | N/A       | The name of the object.                                                      |
 | method_name    | N/A       | The name of the method.                                                      |
-| priority_zones | `nil`     | A list of time zones that will be listed above the rest of the (long) list. |
+| priority_zones | `nil`     | The time zones listed above the rest: an array of zones, or a `Regexp` that each zone is matched against. |
 
 ### Keyword arguments
 
@@ -24,13 +24,13 @@ Time zone select allows a user to filter through a list of default time zones an
 | ------               | ---------                 | -------------                                                                                                                                                                                                                                    |
 | selected             | `nil`                     | The `value` of the option that you want to force select.                                                                                                                                                                                         |
 | default              | `nil`                     | The `value` of the option that you want to select if the `selected` is `nil`.                                                                                                                                                                    |
-| model                | `ActiveSupport::TimeZone` | A list of time zones that should respond to `all` and return an array of objects that represent time zones; each object must respond to `name` and `to_s`. If a `Regexp` is given, it will attempt to match the zones using the `match?` method. |
-| priority_zones_title | "Prioritized time zones"  | The title of the group of time zones that have been prioritized.                                                                                                                                                                                 |
-| size                 | `md`                      | The size of the select control. One of `sm`, `md`, or `lg`.                                                                                                                                                                                      |
+| model                | `ActiveSupport::TimeZone` | Where the zones come from: an object whose `all` returns them. Each zone must respond to `name` (the option's value) and `to_s` (its text), and to `match?` when `priority_zones` is a `Regexp`. |
+| priority_zones_title | `"Prioritized time zones"` | The title of the group of time zones that have been prioritized.                                                                                                                                                                                 |
+| size                 | `:md`                     | The size of the select control. One of `:sm`, `:md`, or `:lg`.                                                                                                                                                                                   |
 | name                 | `nil`                     | The name of the field. By default, Rails automatically creates a `name` string based on the `object_name` and `method_name`.                                                                                                                     |
 | input_id             | `nil`                     | The id of the input field.                                                                                                                                                                                                                       |
 | placeholder          | `nil`                     | The placeholder text that is displayed within the input field.                                                                                                                                                                                   |
-| include_hidden       | `true`                    | See the "Gotcha" section of the Rails [`select`](https://api.rubyonrails.org/classes/ActionView/Helpers/FormOptionsHelper.html#method-i-select) tag.                                                                                             |
+| include_hidden       | `true`                    | Only applies to a `multiple` select. See the "Gotcha" section of the Rails [`select`](https://api.rubyonrails.org/classes/ActionView/Helpers/FormOptionsHelper.html#method-i-select) tag.                                                                                             |
 | disabled             | `false`                   | Disables the select control.                                                                                                                                                                                                                     |
 | required             | `false`                   | Makes the select control a required field.                                                                                                                                                                                                       |
 | multiple             | `false`                   | Whether multiple values can be selected or not.                                                                                                                                                                                                  |
@@ -38,21 +38,22 @@ Time zone select allows a user to filter through a list of default time zones an
 | auto_size            | `true`                    | If `true`, caps the listbox's height to the space between it and the edge of the viewport, so a long list scrolls instead of running off screen.                                                                                                 |
 | auto_size_padding    | `4`                       | The space in pixels to keep between the listbox and the edge of the viewport when `auto_size` is enabled.                                                                                                                                        |
 
+Any other keyword arguments are passed to the `<awc-autocomplete>` element as HTML attributes.
+
 ## Examples
 
 ### Prioritizing zones
 
-You can also supply an array of [`ActiveSupport::TimeZone`](https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html),
+Pass an array of [`ActiveSupport::TimeZone`](https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html),
 [`ActiveSupport::TimeZone.us_zones`](https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html#method-c-us_zones)
 for a list of US time zones, [`ActiveSupport::TimeZone.country_zones(country_code)`](https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html#method-c-country_zones)
-for another country’s time zones or a [`Regexp`](https://api.rubyonrails.org/classes/Regexp.html) to select the zones
-of your choice.
+for another country’s time zones, or a [`Regexp`](https://docs.ruby-lang.org/en/master/Regexp.html) to select the zones
+of your choice. The rest are listed after them, under "Other".
 
 ```erb
 <%= render(Impulse::TimeZoneSelectComponent.new(:user, :time_zone, ActiveSupport::TimeZone.us_zones)) %>
 <%= render(Impulse::TimeZoneSelectComponent.new(:user, :time_zone, [ActiveSupport::TimeZone["Alaska"], ActiveSupport::TimeZone["Hawaii"]])) %>
 <%= render(Impulse::TimeZoneSelectComponent.new(:user, :time_zone, /Australia/)) %>
-<%= render(Impulse::TimeZoneSelectComponent.new(:user, :time_zone, ActiveSupport::TimeZone.all.sort)) %>
 ```
 
 ### Custom blankslate
@@ -67,7 +68,8 @@ A blankslate is displayed when the input's text does not match any of the option
 
 ### Integrating with `form_with`
 
-Wrap your `time_zone_select` tag with the `impulse_form_with` method. The `f.time_zone_select` tag accepts the same [arguments](#arguments).
+Wrap your `time_zone_select` tag with the `impulse_form_with` method. The `f.time_zone_select` tag accepts the same [arguments](#arguments),
+and selects the attribute's value unless you pass `selected`. `default` applies when the attribute is `nil`.
 
 ```erb
 <%= impulse_form_with model: @user do |f| %>
@@ -93,11 +95,7 @@ Wrap your `time_zone_select` tag with the `impulse_form_with` method. The `f.tim
 
 ### `with_blankslate`
 
-Overwrite the default blankslate message by passing a custom block.
-
-| Name          | Default   | Description                                                               |
-| ------        | --------- | -------------                                                             |
-| `system_args` | `{}`      | HTML attributes that should be passed to the Rails' `content_tag` method. |
+Overwrite the default blankslate message by passing a block. It takes no arguments.
 
 ## Imports
 
