@@ -40,6 +40,34 @@ function moveAnchor(anchor: HTMLElement, position: { left?: string; top?: string
   window.dispatchEvent(new Event('resize'));
 }
 
+/** Adds another anchor to `container`, placed `left` from the viewport's left edge. */
+function addAnchor(container: HTMLElement, id: string, left: string) {
+  const anchor = document.createElement('button');
+  anchor.id = id;
+  anchor.className = 'anchor';
+  anchor.style.left = left;
+  container.append(anchor);
+}
+
+/** Removes `floating` and puts it back, then waits for it to reconnect. */
+async function reconnect(floating: AwcAnchorElement) {
+  const parent = floating.parentElement!;
+  floating.remove();
+  parent.append(floating);
+  await whenInitialized(floating);
+}
+
+/** Counts the calls to `floating.reposition`, such as the ones `autoUpdate` makes while it watches the page. */
+function countRepositions(floating: AwcAnchorElement) {
+  const calls = { count: 0 };
+  const reposition = floating.reposition.bind(floating);
+  floating.reposition = () => {
+    calls.count += 1;
+    return reposition();
+  };
+  return calls;
+}
+
 /** Waits long enough for any pending `autoUpdate` reposition to have landed. */
 async function settle() {
   await nextFrame();
@@ -107,15 +135,39 @@ describe('awc-anchor', () => {
   });
 
   it('stays active when disconnected, so it resumes once reconnected', async () => {
-    const { container, anchor, floating } = await anchorFixture();
+    const { anchor, floating } = await anchorFixture();
     await floating.reposition();
 
-    floating.remove();
-    container.append(floating);
+    await reconnect(floating);
     moveAnchor(anchor, { left: '200px' });
 
     expect(floating.active).to.equal(true);
     await waitUntil(() => floating.style.left === '185px', 'did not resume following the anchor');
+  });
+
+  it('stays where it was last placed when reconnected while stopped', async () => {
+    const { floating } = await anchorFixture();
+    await floating.reposition();
+    await floating.stop();
+
+    await reconnect(floating);
+    await settle();
+
+    expect(floating.style.left).to.equal('85px');
+    expect(floating.style.top).to.equal('120px');
+  });
+
+  it('doesn\'t watch the page when reconnected while stopped', async () => {
+    const { floating } = await anchorFixture();
+    await floating.reposition();
+    await floating.stop();
+    await reconnect(floating);
+    const repositions = countRepositions(floating);
+
+    window.dispatchEvent(new Event('resize'));
+    await settle();
+
+    expect(repositions.count).to.equal(0);
   });
 
   it('offsets itself by `distance` and `skidding`', async () => {
@@ -393,15 +445,53 @@ describe('awc-anchor', () => {
 
   it('follows a different anchor when `anchor-id` changes', async () => {
     const { container, floating } = await anchorFixture();
-    const other = document.createElement('button');
-    other.id = 'other-anchor';
-    other.className = 'anchor';
-    other.style.left = '300px';
-    container.append(other);
+    addAnchor(container, 'other-anchor', '300px');
 
     floating.anchorId = 'other-anchor';
 
     await waitUntil(() => floating.style.left === '285px', 'did not follow the new anchor');
+  });
+
+  it('stays where it was last placed when `anchor-id` changes while stopped', async () => {
+    const { container, floating } = await anchorFixture();
+    await floating.reposition();
+    await floating.stop();
+    addAnchor(container, 'other-anchor', '300px');
+
+    floating.anchorId = 'other-anchor';
+    await settle();
+
+    expect(floating.style.left).to.equal('85px');
+    expect(floating.style.top).to.equal('120px');
+  });
+
+  it('stays where it was last placed when stopped straight after `anchor-id` changes', async () => {
+    const { container, floating } = await anchorFixture();
+    await floating.reposition();
+    addAnchor(container, 'other-anchor', '300px');
+
+    floating.anchorId = 'other-anchor';
+    await floating.stop();
+    await settle();
+
+    expect(floating.active).to.equal(false);
+    expect(floating.style.left).to.equal('85px');
+    expect(floating.style.top).to.equal('120px');
+  });
+
+  it('doesn\'t watch the page when `anchor-id` changes while stopped', async () => {
+    const { container, floating } = await anchorFixture();
+    await floating.reposition();
+    await floating.stop();
+    addAnchor(container, 'other-anchor', '300px');
+    floating.anchorId = 'other-anchor';
+    await settle();
+    const repositions = countRepositions(floating);
+
+    window.dispatchEvent(new Event('resize'));
+    await settle();
+
+    expect(repositions.count).to.equal(0);
   });
 
   it('stops following the anchor when disconnected', async () => {

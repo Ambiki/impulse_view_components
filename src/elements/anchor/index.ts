@@ -94,10 +94,15 @@ export default class AwcAnchorElement extends ImpulseElement {
   @property({ type: Number }) arrowPadding: number;
 
   private positioner = createPositioner(() => this.positioningOptions);
+  private placed = false;
 
   connected() {
-    // Lay the element out straight away; it is only positioned once `active`.
-    this.follow();
+    if (this.active) {
+      this.follow();
+    } else if (!this.placed && this.anchorElement) {
+      // A stopped element stays where it was last placed, so it's only laid out until it's first placed.
+      this.positioner.prime();
+    }
   }
 
   disconnected() {
@@ -107,7 +112,8 @@ export default class AwcAnchorElement extends ImpulseElement {
 
   async anchorIdChanged(newValue: string) {
     await this.unfollow();
-    if (newValue && this.anchorElement) {
+    // Read after the wait, as `stop` may have been called meanwhile.
+    if (newValue && this.active) {
       this.follow();
     }
   }
@@ -145,6 +151,7 @@ export default class AwcAnchorElement extends ImpulseElement {
   async reposition() {
     if (!this.active || !this.anchorElement) return;
     await this.positioner.reposition();
+    this.placed = true;
   }
 
   private follow() {

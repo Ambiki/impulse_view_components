@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - **Breaking:** The gem's Sprockets bundle, `impulse_view_components.js` and `impulse_view_components.css`, which the engine added to every app's precompile list. Load the components from the npm package ([#361](https://github.com/Ambiki/impulse_view_components/pull/361))
 
+### Fixed
+
+- Fixed a stopped `<awc-anchor>` jumping to the viewport's top-left corner when its `anchor-id` changed or it reconnected ([#362](https://github.com/Ambiki/impulse_view_components/pull/362))
+
 ## [0.9.0] - 2026-11-05
 
 ### Added
