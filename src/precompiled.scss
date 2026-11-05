@@ -1,5 +1,5 @@
-// Builds the precompiled CSS: the gem's `impulse_view_components.css` and the package's `styles.css`. Unlike the Sass
-// that apps import, it loads Bootstrap 4's Sass itself, with its default variables.
+// Builds the precompiled CSS: the package's `styles.css` and the demo app's `impulse_view_components.css`. Unlike
+// the Sass that apps import, it loads Bootstrap 4's Sass itself, with its default variables.
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins';

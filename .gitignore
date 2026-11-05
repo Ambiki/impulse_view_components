@@ -15,7 +15,6 @@
 /pkg/
 /build/*
 /dist/*
-/app/assets/dist/*
 /docs/.vitepress/dist
 /docs/.vitepress/cache
 

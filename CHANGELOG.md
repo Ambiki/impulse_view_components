@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Removed
+
+- **Breaking:** The gem's Sprockets bundle, `impulse_view_components.js` and `impulse_view_components.css`, which the engine added to every app's precompile list. Load the components from the npm package ([#361](https://github.com/Ambiki/impulse_view_components/pull/361))
+
 ## [0.9.0] - 2026-11-05
 
 ### Added

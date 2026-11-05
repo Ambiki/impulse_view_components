@@ -2,7 +2,6 @@ import resolve from '@rollup/plugin-node-resolve';
 import typescript from '@rollup/plugin-typescript';
 import { copy } from '@web/rollup-plugin-copy';
 import { globby } from 'globby';
-import { uglify } from 'rollup-plugin-uglify';
 import rewriteDeclarationImports from './scripts/rewrite-declaration-imports.mjs';
 
 const isProd = process.env.NODE_ENV === 'production';
@@ -46,17 +45,13 @@ export default [
         []),
     ],
   },
+  // The demo app's bundle, which Lookbook loads through Sprockets. The gem doesn't ship it.
   {
     input: 'src/index.ts',
-    external: ['@floating-ui/dom'],
     output: [
       {
-        name: 'ImpulseViewComponents',
-        file: 'app/assets/dist/impulse_view_components.js',
-        format: 'umd',
-        globals: {
-          '@floating-ui/dom': 'FloatingUIDOM',
-        },
+        file: 'demo/app/assets/builds/impulse_view_components.js',
+        format: 'iife',
       },
     ],
     plugins: [
@@ -65,10 +60,9 @@ export default [
         compilerOptions: {
           declaration: false, // iife bundles don't need types
           declarationMap: false,
-          outDir: 'app/assets/dist', // @rollup/plugin-typescript requires outDir to contain the output file
+          outDir: 'demo/app/assets/builds', // @rollup/plugin-typescript requires outDir to contain the output file
         },
       }),
-      ...(isProd ? [uglify()] : []),
     ],
   },
 ];
