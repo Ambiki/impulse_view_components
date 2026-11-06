@@ -107,7 +107,7 @@ document.addEventListener('awc-clipboard-copy:error', (event) => {
 export const notACommittedDay: AwcDateCalendarCommitEvent['value'] = new Date();
 // @ts-expect-error: the disabled days of the week are numbers
 export const notDisabledDays: AwcDateCalendarElement['disabledDaysOfWeek'] = ['sunday'];
-// `resetView()`, `previousPage()`, `nextPage()`, `goToDate()` and `focus()` are public and return nothing.
+// The calendar's methods are public, and only `isDateDisabled()` returns something.
 const calendar = document.createElement('awc-date-calendar');
 export const reset: void = calendar.resetView();
 export const paged: [void, void] = [calendar.previousPage(), calendar.nextPage()];
@@ -115,6 +115,9 @@ export const wentToDate: void = calendar.goToDate('2026-12-24');
 // @ts-expect-error: a day to go to is a `YYYY-MM-DD` string
 export const notADayToGoTo: void = calendar.goToDate(new Date());
 export const focused: void = calendar.focus();
+export const wentToToday: void = calendar.goToToday();
+export const cleared: void = calendar.clear();
+export const disabled: boolean = calendar.isDateDisabled('2026-11-22');
 // Listeners get the date calendar's event typed, without a cast.
 document.addEventListener('awc-date-calendar:commit', (event) => {
   const value: string = event.detail.value;

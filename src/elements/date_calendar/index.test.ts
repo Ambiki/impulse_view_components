@@ -599,4 +599,69 @@ describe('awc-date-calendar', () => {
       expect(focusedDay()).to.equal('2027-01-18');
     });
   });
+
+  describe('clear()', () => {
+    it('selects no day and shows today\'s month, without emitting, as setting an empty value does', async () => {
+      const el = await dateCalendarFixture({ value: '2020-01-15', timeZone: 'Asia/Dubai' });
+      const todayThere = today('Asia/Dubai').toString();
+      const events: string[] = [];
+      for (const type of ['awc-date-calendar:commit', 'awc-date-calendar:clear']) {
+        el.addEventListener(type, () => events.push(type));
+      }
+
+      el.clear();
+
+      expect(el.value).to.equal('');
+      expect(el.hasAttribute('value')).to.equal(false);
+      expect(selectedDay(el)).to.equal(null);
+      expect(el.grid.dataset.month).to.equal(todayThere.slice(0, 7));
+      expect(events).to.eql([]);
+    });
+
+    it('can be called from a data-action', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18' });
+      el.insertAdjacentHTML('beforeend', '<button type="button" data-action="click->awc-date-calendar#clear">Clear</button>');
+      const button = el.querySelector<HTMLButtonElement>('[data-action$="#clear"]')!;
+      await new Promise((resolve) => setTimeout(resolve));
+
+      button.click();
+
+      expect(el.value).to.equal('');
+      expect(selectedDay(el)).to.equal(null);
+    });
+  });
+
+  describe('goToToday()', () => {
+    it('shows today\'s month in the calendar\'s zone and makes today the active day, without selecting it', async () => {
+      const el = await dateCalendarFixture({ value: '2020-01-15', timeZone: 'Pacific/Kiritimati' });
+      const todayThere = today('Pacific/Kiritimati').toString();
+      const commits = recordCommits();
+
+      el.goToToday();
+
+      expect(el.grid.dataset.month).to.equal(todayThere.slice(0, 7));
+      expect(day(el, todayThere).tabIndex).to.equal(0);
+      expect(el.value).to.equal('2020-01-15');
+      expect(commits).to.eql([]);
+    });
+  });
+
+  describe('isDateDisabled()', () => {
+    it('tells whether the user couldn\'t commit a day', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18', min: '2026-11-10', max: '2026-11-25', disabledDaysOfWeek: [0] });
+
+      expect(el.isDateDisabled('2026-11-18')).to.equal(false);
+      expect(el.isDateDisabled('2026-11-09')).to.equal(true);
+      expect(el.isDateDisabled('2026-11-26')).to.equal(true);
+      expect(el.isDateDisabled('2026-11-22')).to.equal(true);
+      // Any day, not only the displayed month's.
+      expect(el.isDateDisabled('2027-06-01')).to.equal(true);
+    });
+
+    it('is false for anything that isn\'t a calendar date', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18' });
+
+      expect(el.isDateDisabled('2026-02-30')).to.equal(false);
+    });
+  });
 });

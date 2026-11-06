@@ -109,6 +109,29 @@ export default class AwcDateCalendarElement extends ImpulseElement {
     if (day) this.showDay(this.view(), day);
   }
 
+  /** Shows today's month, in the calendar's time zone, and makes today the active day, without selecting it. */
+  goToToday() {
+    const view = this.view();
+    this.showDay(view, view.today);
+  }
+
+  /**
+   * Selects no day, as setting an empty `value` does: the calendar shows today's month. Like any value method called
+   * from code, including from a `data-action`, it emits nothing (ADR 0002).
+   */
+  clear() {
+    this.removeAttribute('value');
+  }
+
+  /**
+   * Whether the user couldn't commit `date`, a `YYYY-MM-DD` day: it is before `min`, after `max`, or on a disabled day of
+   * the week. Anything that isn't a calendar date isn't disabled.
+   */
+  isDateDisabled(date: string): boolean {
+    const day = CalendarDate.parse(date);
+    return !!day && isDisabledDay(day, this.view());
+  }
+
   /** Focuses the active day, the grid's one tab stop. Call it when a popover holding the calendar opens. */
   focus(options?: FocusOptions) {
     this.button(this.view().active)?.focus(options);

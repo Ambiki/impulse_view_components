@@ -47,7 +47,7 @@ from the app's translations. Its type is exported as `DateCalendarI18n`.
 
 ## Methods
 
-None of them change the value or emit an event.
+None of them emit an event, and only `clear` changes the value.
 
 ### `previousPage` and `nextPage`
 
@@ -65,6 +65,30 @@ Shows the month of a `YYYY-MM-DD` day and gives that day the tab stop, without s
 
 ```js
 calendar.goToDate('2027-03-09');
+```
+
+### `goToToday`
+
+Shows today's month, in the calendar's time zone, and gives today the tab stop, without selecting it.
+
+```js
+todayButton.addEventListener('click', () => calendar.goToToday());
+```
+
+### `clear`
+
+Selects no day and shows today's month, as setting an empty `value` does. It can be called from a `data-action`.
+
+```html
+<button type="button" data-action="click->awc-date-calendar#clear">Clear</button>
+```
+
+### `isDateDisabled`
+
+Whether the user can't commit a `YYYY-MM-DD` day: it's before `min`, after `max`, or on a disabled day of the week.
+
+```js
+calendar.isDateDisabled('2026-11-22'); // true when Sundays are disabled
 ```
 
 ### `focus`
