@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 // Consumer-shaped smoke check for the `exports` map in package.json.
 //
-// Subpath patterns are substituted literally: there is no extension probing and no
+// Subpaths map to their targets literally: there is no extension probing and no
 // directory-index lookup. Bundlers hide that (webpack applies `resolve.extensions` and
 // `mainFiles` *after* the exports mapping), so a broken map only surfaces in Node and in
 // TypeScript once a consumer moves to `moduleResolution: bundler`/`node16`.
 //
 // This script therefore checks resolution the way those resolvers do:
 //   1. every public subpath resolves through Node's ESM resolver to a file that exists,
-//   2. element stylesheets resolve under the `sass`/`style` conditions, which is how
-//      sass-loader asks for them,
+//   2. element paths resolve to their stylesheet under the `sass` condition, which is how
+//      sass-loader asks for them, and not under `style`,
 //   3. a declaration file sits next to every runtime file,
 //   4. every import in a declaration file resolves for consumers: none goes through the
 //      repo-only `src/` path alias, and every relative one names an emitted declaration with
@@ -88,11 +88,6 @@ const elementDirs = fs
   .filter((entry) => entry.isDirectory())
   .map((entry) => entry.name);
 
-// The elements that had a `dist/` path when ADR 0008 deprecated them. Those paths are frozen; an element added since
-// has only its public path, and `package.json` closes the `dist/` wildcards to it.
-const distElementDirs = ['anchor', 'autocomplete', 'dialog', 'popover'];
-const hasDistPath = (name) => distElementDirs.includes(name);
-
 // An element's directory is named with underscores, its public path and its tag with dashes: `clipboard_copy` is
 // `…/clipboard-copy` and `<awc-clipboard-copy>`.
 const elementName = (dir) => dir.replaceAll('_', '-');
@@ -101,84 +96,21 @@ const styledElementDirs = elementDirs.filter((name) =>
   fs.existsSync(path.join(distDir, 'elements', name, 'index.scss')),
 );
 
-const flatModules = ['hooks', 'helpers'].flatMap((group) =>
-  fs
-    .readdirSync(path.join(distDir, group))
-    .filter((file) => file.endsWith('.js') && file !== 'index.js')
-    .map((file) => [group, path.basename(file, '.js')]),
-);
-
-// The import paths the docs teach (ADR 0008).
-const publicSpecifiers = [
+// 1. Runtime resolution through Node's ESM resolver, for the import paths the docs teach (ADR 0008).
+const scriptSpecifiers = [
+  pkg.name,
   ...elementDirs.map((name) => subpath(elementName(name))),
   subpath('hooks'),
 ];
 
-// 1. Runtime resolution through Node's ESM resolver. The `dist/` paths are deprecated, but apps
-// still import them.
-const scriptSpecifiers = [
-  ...publicSpecifiers,
-  pkg.name,
-  subpath('dist', 'index.js'),
-  ...distElementDirs.map((name) => subpath('dist', 'elements', name)),
-  ...distElementDirs.map((name) => subpath('dist', 'elements', name, 'index.js')),
-  ...flatModules.map(([group, name]) => subpath('dist', group, name)),
-  ...flatModules.map(([group, name]) => subpath('dist', group, `${name}.js`)),
-  // Non-index modules inside an element directory.
-  ...fs
-    .readdirSync(path.join(distDir, 'elements', 'autocomplete'))
-    .filter((file) => file.endsWith('.js') && file !== 'index.js')
-    .map((file) => subpath('dist', 'elements', 'autocomplete', path.basename(file, '.js'))),
-];
-
-// Stylesheets addressed with their extension, which needs no condition.
-const styleSpecifiers = [
-  ...styledElementDirs.map((name) => subpath('dist', 'elements', name, 'index.scss')),
-  ...fs
-    .readdirSync(path.join(distDir, 'styles'))
-    .filter((file) => file !== 'index.scss')
-    .map((file) => subpath('dist', 'styles', file)),
-];
-
-for (const specifier of [...scriptSpecifiers, ...styleSpecifiers]) {
+for (const specifier of scriptSpecifiers) {
   check(`node: ${specifier}`, () => resolvesToFile(specifier));
 }
 
-// The entry files behind the new paths stay off the `dist/` wildcards, which are frozen: anything they reach can never
-// change again.
-for (const specifier of [
-  subpath('dist', 'hooks', 'index'),
-  subpath('dist', 'hooks', 'index.js'),
-  subpath('dist', 'styles', 'index.scss'),
-  ...elementDirs
-    .filter((name) => !hasDistPath(name))
-    .flatMap((name) => [
-      subpath('dist', 'elements', name),
-      subpath('dist', 'elements', name, 'index'),
-      subpath('dist', 'elements', name, 'index.js'),
-    ]),
-]) {
-  check(`node: ${specifier} is not exported`, () => {
-    assert.throws(() => import.meta.resolve(specifier), { code: 'ERR_PACKAGE_PATH_NOT_EXPORTED' });
-  });
-}
-
-// 2. Element stylesheets under the conditions sass-loader resolves with. Without them the
-// bare specifier lands on the element's JavaScript, and sass-loader reports the subpath as
-// missing rather than falling back.
-for (const name of styledElementDirs) {
-  const specifier = subpath('dist', 'elements', name);
-  const stylesheet = path.join(distDir, 'elements', name, 'index.scss');
-
-  for (const condition of ['sass', 'style']) {
-    check(`node --conditions ${condition}: ${specifier}`, () => {
-      assert.equal(resolvesToFileUnder([condition], specifier), stylesheet);
-    });
-  }
-}
-
-// The paths the docs teach follow the conditions' convention: `sass` names Sass and `style` names CSS. An element has
-// no CSS of its own, so its path has no `style`, and a CSS tool doesn't get Sass it can't parse.
+// 2. Element stylesheets under the condition sass-loader resolves with. Without it the bare specifier lands on the
+// element's JavaScript, and sass-loader reports the subpath as missing rather than falling back. The paths follow the
+// conditions' convention: `sass` names Sass and `style` names CSS. An element has no CSS of its own, so its path has no
+// `style`, and a CSS tool doesn't get Sass it can't parse.
 for (const name of styledElementDirs) {
   const specifier = subpath(elementName(name));
   const stylesheet = path.join(distDir, 'elements', name, 'index.scss');
@@ -191,15 +123,12 @@ for (const name of styledElementDirs) {
   });
 }
 
-// Element directories need an exact key: a pattern cannot append `/index`, so a new element
-// silently stops resolving without one.
+// Each element needs its own key. Without one the checks above fail too, but this names the missing key.
 for (const name of elementDirs) {
-  const keys = [`./${elementName(name)}`, ...(hasDistPath(name) ? [`./dist/elements/${name}`] : [])];
-  for (const key of keys) {
-    check(`exports["${key}"]`, () => {
-      assert.ok(pkg.exports[key], 'missing. Element directories need an exact key, patterns cannot append /index');
-    });
-  }
+  const key = `./${elementName(name)}`;
+  check(`exports["${key}"]`, () => {
+    assert.ok(pkg.exports[key], 'missing. Each element needs its own key');
+  });
 }
 
 // 3. Types must resolve alongside every runtime file, otherwise `tsc` reports TS2307 even
@@ -302,12 +231,10 @@ check(`bundle: one hook from ${subpath('hooks')}`, () => {
 });
 
 for (const name of elementDirs) {
-  const specifiers = [subpath(elementName(name)), ...(hasDistPath(name) ? [subpath('dist', 'elements', name)] : [])];
-  for (const specifier of specifiers) {
-    check(`bundle: import '${specifier}'`, () => {
-      assert.match(bundle(`import '${specifier}';`).text, new RegExp(`['"]awc-${elementName(name)}['"]`), 'drops the registration');
-    });
-  }
+  const specifier = subpath(elementName(name));
+  check(`bundle: import '${specifier}'`, () => {
+    assert.match(bundle(`import '${specifier}';`).text, new RegExp(`['"]awc-${elementName(name)}['"]`), 'drops the registration');
+  });
 }
 
 check(`bundle: import '${pkg.name}'`, () => {
@@ -377,5 +304,4 @@ if (failures.length > 0) {
   process.exit(1);
 }
 
-const total = scriptSpecifiers.length + styleSpecifiers.length;
-console.log(`✓ ${total} subpaths resolve in Node, type-check under moduleResolution bundler/node16, bundle what they import, and compile their styles`);
+console.log(`✓ ${scriptSpecifiers.length} subpaths resolve in Node, type-check under moduleResolution bundler/node16, bundle what they import, and compile their styles`);

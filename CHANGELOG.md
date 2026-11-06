@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Removed
 
+- **Breaking:** Import paths under `@ambiki/impulse-view-components/dist/`, deprecated in 0.9.0. Getting Started lists the paths that replace them ([#372](https://github.com/Ambiki/impulse_view_components/pull/372))
 - **Breaking:** The gem's Sprockets bundle, `impulse_view_components.js` and `impulse_view_components.css`, which the engine added to every app's precompile list. Load the components from the npm package ([#361](https://github.com/Ambiki/impulse_view_components/pull/361))
 
 ### Fixed

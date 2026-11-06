@@ -13,7 +13,6 @@ export default [
   {
     input: [
       './src/index.ts',
-      // Need to export these in package.json
       ...(await globby('./src/elements/**/!(*.test).ts')),
       ...(await globby('./src/hooks/**/!(*.test).ts')),
       ...(await globby('./src/helpers/**/!(*.test).ts')),
