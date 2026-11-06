@@ -8,6 +8,10 @@ import { focusInto, focusIsInsideOrLost, keepFocusOn } from 'src/internal/focus'
 import OpenableElement from 'src/internal/openable_element';
 import { stripCSSUnit } from '../../helpers/string';
 
+function supportsPopover() {
+  return typeof HTMLElement.prototype.showPopover === 'function';
+}
+
 @registerElement('awc-popover')
 export default class AwcPopoverElement extends OpenableElement {
   /**
@@ -174,7 +178,7 @@ export default class AwcPopoverElement extends OpenableElement {
     try {
       this.closeOtherPopovers();
       const previouslyFocused = document.activeElement;
-      this.panel.showPopover();
+      if (supportsPopover()) this.panel.showPopover();
       if (!initial) {
         focusInto(this.panel);
       } else if (this.panel.contains(document.activeElement)) {
@@ -199,7 +203,7 @@ export default class AwcPopoverElement extends OpenableElement {
     if (panel.isConnected) {
       // Read before hiding, which moves focus out of the panel.
       const returnsFocus = focusIsInsideOrLost(panel);
-      panel.hidePopover();
+      if (supportsPopover()) panel.hidePopover();
       if (returnsFocus) {
         button.focus();
       }
