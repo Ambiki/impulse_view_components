@@ -128,16 +128,24 @@ jobs:
   test_components:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # Rails main isn't a release we support, so its failures don't fail the run.
+    continue-on-error: ${{ matrix.gemfile == 'rails_main' }}
     strategy:
       fail-fast: false
       matrix:
         ruby: ["3.4", "4.0"]
         gemfile:
           - rails_7_1
+          - rails_7_2
           - rails_8
         exclude:
           # Keep Ruby 4.0 limited to the newest Rails only
           - { ruby: "4.0", gemfile: rails_7_1 }
+          - { ruby: "4.0", gemfile: rails_7_2 }
+        include:
+          # The form tags build on Rails' private form tag API (ADR 0011), so Rails main warns of a change to it before
+          # a release.
+          - { ruby: "3.4", gemfile: rails_main }
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile
       BUNDLE_PATH_RELATIVE_TO_CWD: true

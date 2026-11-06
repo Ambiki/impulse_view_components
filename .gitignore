@@ -11,6 +11,9 @@
 # rspec failure tracking
 .rspec_status
 
+# Rails main is resolved afresh on every CI run, so its lockfile isn't kept
+/gemfiles/rails_main.gemfile.lock
+
 # build files
 /pkg/
 /build/*
