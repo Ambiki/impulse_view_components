@@ -1,11 +1,11 @@
 <%= render(Impulse::BaseRenderer.new(**@system_args)) do %>
   <div class="awc-date-calendar-header">
     <button type="button" class="btn btn-sm btn-light awc-date-calendar-nav" aria-label="<%= t("impulse.date_calendar.previous_month") %>" aria-disabled="<%= previous_month_disabled? %>" data-target="awc-date-calendar.previousButton" data-action="click->awc-date-calendar#handlePreviousClick">
-      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/></svg>
+      <i class="bi bi-chevron-left" aria-hidden="true"></i>
     </button>
     <div id="<%= @heading_id %>" class="awc-date-calendar-heading" aria-live="polite" data-target="awc-date-calendar.heading"><%= heading %></div>
     <button type="button" class="btn btn-sm btn-light awc-date-calendar-nav" aria-label="<%= t("impulse.date_calendar.next_month") %>" aria-disabled="<%= next_month_disabled? %>" data-target="awc-date-calendar.nextButton" data-action="click->awc-date-calendar#handleNextClick">
-      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
+      <i class="bi bi-chevron-right" aria-hidden="true"></i>
     </button>
   </div>
   <table class="awc-date-calendar-grid" role="grid" aria-labelledby="<%= @heading_id %>" data-month="<%= @displayed_month.strftime("%Y-%m") %>" data-target="awc-date-calendar.grid" data-action="click->awc-date-calendar#handleClick keydown->awc-date-calendar#handleKeydown focusin->awc-date-calendar#handleFocusin">
