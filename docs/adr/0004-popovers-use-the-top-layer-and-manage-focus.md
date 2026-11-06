@@ -20,7 +20,8 @@ The popover API was used before (#73) and removed (#187) after random Chromium c
 
 ## Consequences
 
-- The popover renders above everything stacked with `z-index`, including inside a modal `<awc-dialog>`. `$zindex-popover` no longer applies.
+- The popover renders above everything stacked with `z-index`, including inside a modal `<awc-dialog>`. `$zindex-popover` no longer applies, except as below.
+- Browsers without the Popover API (before Chrome 114, Firefox 125 and Safari 17) keep the panel in the page, as 0.8.0 did: floating-ui positions it, `$zindex-popover` stacks it, and the stylesheet hides it while the popover is closed. Focus and events behave the same.
 - Escape, outside clicks and focus moving out are all handled by the element, so each still emits a cancelable `hide`.
 - On open, focus moves to the element with `autofocus`, else the first element in the popover's tab order, else the floating element itself. A popover that connects already open doesn't take focus. The header's close button comes first in the tab order, so it has no `autofocus`, which would take focus from a page's own `autofocus` field after a Turbo visit.
 - On close, focus returns to the trigger if it was inside the popover, or lost to `<body>`. If it moved to something else, such as a field clicked outside, it stays there. `<awc-dialog>` gets the same from the native modal dialog, and `<awc-autocomplete>` never moves focus out of its input.

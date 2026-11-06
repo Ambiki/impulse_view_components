@@ -905,6 +905,71 @@ describe('awc-popover', () => {
     });
   });
 
+  describe('without the Popover API', () => {
+    const methods = ['showPopover', 'hidePopover', 'togglePopover'] as const;
+    const removed = new Map<string, PropertyDescriptor>();
+
+    beforeEach(() => {
+      for (const name of methods) {
+        const descriptor = Object.getOwnPropertyDescriptor(HTMLElement.prototype, name);
+        if (!descriptor) continue;
+        removed.set(name, descriptor);
+        delete (HTMLElement.prototype as Partial<HTMLElement>)[name];
+      }
+    });
+
+    afterEach(() => {
+      for (const [name, descriptor] of removed) {
+        Object.defineProperty(HTMLElement.prototype, name, descriptor);
+      }
+      removed.clear();
+    });
+
+    async function fixtureWithoutPopoverSupport(options: Parameters<typeof popoverHtml>[0] = {}) {
+      const el = await popoverFixture(options);
+      el.panel.removeAttribute('popover');
+      return el;
+    }
+
+    it('opens and closes through its trigger, moving focus and emitting the same events', async () => {
+      const el = await fixtureWithoutPopoverSupport({ content: '<button type="button" class="inside">Inside</button>' });
+      const events = recordEvents(el);
+
+      el.button.click();
+      await settle();
+      expect(el.open).to.equal(true);
+      expect(el.button.getAttribute('aria-expanded')).to.equal('true');
+      expect(isFocused(el.querySelector('.inside'))).to.equal(true);
+
+      el.button.click();
+      await settle();
+      expect(el.open).to.equal(false);
+      expect(el.button.getAttribute('aria-expanded')).to.equal('false');
+      expect(isFocused(el.button)).to.equal(true);
+      expect(events).to.eql(['show', 'shown', 'hide', 'hidden']);
+    });
+
+    it('opens when it connects with `open` set', async () => {
+      const el = await fixtureWithoutPopoverSupport({ attributes: 'open' });
+
+      expect(el.open).to.equal(true);
+      expect(el.button.getAttribute('aria-expanded')).to.equal('true');
+    });
+
+    it('hides the other open popovers when it opens', async () => {
+      const first = await fixtureWithoutPopoverSupport();
+      const second = await fixtureWithoutPopoverSupport();
+      first.show();
+
+      second.show();
+      await settle();
+
+      expect(first.open).to.equal(false);
+      expect(first.button.getAttribute('aria-expanded')).to.equal('false');
+      expect(second.open).to.equal(true);
+    });
+  });
+
   it('stays open, and keeps working, after an open popover is moved', async () => {
     const el = await popoverFixture();
     const destination = document.createElement('section');
