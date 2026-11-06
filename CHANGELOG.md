@@ -12,9 +12,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
-- Fixed `<awc-popover>` showing open, and throwing when it opens or closes, in browsers without the Popover API (before Chrome 114, Firefox 125 and Safari 17). There the panel stays in the page, stacked with `$zindex-popover` and hidden while the popover is closed ([#366](https://github.com/Ambiki/impulse_view_components/pull/366))
 - Fixed `select`, `ajax_select` and `time_zone_select` leaving `index`, such as from `fields_for`, out of their field names and ids ([#363](https://github.com/Ambiki/impulse_view_components/pull/363))
 - Fixed a stopped `<awc-anchor>` jumping to the viewport's top-left corner when its `anchor-id` changed or it reconnected ([#362](https://github.com/Ambiki/impulse_view_components/pull/362))
+
+## [0.9.1] - 2026-11-06
+
+### Fixed
+
+- Fixed `<awc-popover>` showing open, and throwing when it opens or closes, in browsers without the Popover API (before Chrome 114, Firefox 125 and Safari 17). There the panel stays in the page, stacked with `$zindex-popover` and hidden while the popover is closed ([#365](https://github.com/Ambiki/impulse_view_components/pull/365))
 
 ## [0.9.0] - 2026-11-05
 
@@ -269,7 +274,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Everything!
 
-[unreleased]: https://github.com/Ambiki/impulse_view_components/compare/v0.9.0...HEAD
+[unreleased]: https://github.com/Ambiki/impulse_view_components/compare/v0.9.1...HEAD
+[0.9.1]: https://github.com/Ambiki/impulse_view_components/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/Ambiki/impulse_view_components/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/Ambiki/impulse_view_components/compare/v0.7.2...v0.8.0
 [0.7.2]: https://github.com/Ambiki/impulse_view_components/compare/v0.7.1...v0.7.2
