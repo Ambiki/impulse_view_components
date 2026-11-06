@@ -86,5 +86,27 @@ module Impulse
       assert_selector "input[type='text'][id='user_items_0_fruit_id']"
       assert_no_selector "awc-autocomplete[index]"
     end
+
+    test "takes the index from the object when the scope ends in []" do
+      render_in_view_context do
+        impulse_form_with(scope: "item[]", model: Item.new(id: 42), url: "/items") do |f|
+          f.ajax_select :fruit_id, :id, :name, src: "/fruits"
+        end
+      end
+
+      assert_selector "input[type='hidden'][name='item[42][fruit_id]']", visible: false
+      assert_selector "input[type='text'][id='item_42_fruit_id']"
+    end
+
+    test "takes the index from the object when a nested scope ends in []" do
+      render_in_view_context do
+        impulse_form_with(scope: "project[item][]", model: Item.new(id: 42), url: "/items") do |f|
+          f.ajax_select :fruit_id, :id, :name, src: "/fruits"
+        end
+      end
+
+      assert_selector "input[type='hidden'][name='project[item][42][fruit_id]']", visible: false
+      assert_selector "input[type='text'][id='project_item_42_fruit_id']"
+    end
   end
 end

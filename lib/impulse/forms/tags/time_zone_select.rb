@@ -2,24 +2,18 @@ module Impulse
   module Forms
     module Tags
       class TimeZoneSelect < Base
-        def initialize(object:, object_name:, method_name:, template:, priority_zones:, **system_args)
-          super(object:, object_name:, method_name:, template:, **system_args)
+        def initialize(object_name, method_name, template_object, priority_zones, options)
           @priority_zones = priority_zones
-          @value = @system_args.fetch(:selected, value)
+          super(object_name, method_name, template_object, options)
         end
 
-        def render_tag(&block)
-          if block
-            render(component) { |c| yield c }
-          else
-            render(component)
-          end
-        end
-
-        private
-
-        def component
-          Impulse::TimeZoneSelectComponent.new(@object_name, @method_name, @priority_zones, selected: @value, **@system_args)
+        def render(&block)
+          @template_object.render(
+            Impulse::TimeZoneSelectComponent.new(
+              @object_name, @method_name, @priority_zones, selected: selected_value, **component_options
+            ),
+            &block
+          )
         end
       end
     end
