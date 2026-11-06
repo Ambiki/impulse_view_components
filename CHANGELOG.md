@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- `Impulse::DateCalendarComponent` and `<awc-date-calendar>`, a grid of a month's days for choosing one, to show inline or in a popover ([#377](https://github.com/Ambiki/impulse_view_components/pull/377))
+
 ### Changed
 
 - **Breaking:** `select` and `time_zone_select` in a form without a model take the selected option from the view's instance variable named after the form, such as `@user` for `scope: :user`, as Rails' own fields do ([#368](https://github.com/Ambiki/impulse_view_components/pull/368))

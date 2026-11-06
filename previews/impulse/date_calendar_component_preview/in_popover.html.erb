@@ -1,0 +1,20 @@
+<%= render(Impulse::PopoverComponent.new(placement: "bottom-start", data: { action: "awc-date-calendar:commit->awc-popover#requestHide" })) do |c| %>
+  <% c.with_trigger(class: "btn btn-outline-secondary", data: { test_id: "date-trigger" }) { "November 18, 2026" } %>
+  <% c.with_body do %>
+    <%= render(Impulse::DateCalendarComponent.new(value: Date.new(2026, 11, 18))) %>
+  <% end %>
+<% end %>
+
+<script type="module">
+  // Opening the popover focuses the selected day, where the keys move through the grid. Committing a day closes it, and
+  // closing it takes the calendar back to the selected day, dropping any page turns. The trigger names the selected day.
+  const popover = document.querySelector('awc-popover');
+  const calendar = popover.querySelector('awc-date-calendar');
+  const trigger = popover.querySelector('[data-test-id="date-trigger"]');
+  popover.addEventListener('awc-popover:shown', () => calendar.focus());
+  popover.addEventListener('awc-popover:hidden', () => calendar.resetView());
+  calendar.addEventListener('awc-date-calendar:commit', (event) => {
+    const [year, month, day] = event.detail.value.split('-').map(Number);
+    trigger.textContent = new Date(year, month - 1, day).toLocaleDateString('en-US', { dateStyle: 'long' });
+  });
+</script>

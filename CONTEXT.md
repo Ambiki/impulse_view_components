@@ -43,7 +43,7 @@ The option the user has moved to, by keyboard or pointer, that a commit would ch
 _Avoid_: Highlighted option, focused option, current option
 
 **Commit**:
-The user choosing the active option, by Enter, Tab or a click. What it does to the selection is decided by the element built on the combobox.
+The user choosing the active option, by Enter, Tab or a click. What it does to the selection is decided by the element built on the combobox. In a date calendar, the user choosing a day, by Enter, Space or a click.
 _Avoid_: Pick, choose, submit
 
 **Selected option**:
@@ -97,6 +97,49 @@ _Avoid_: After event, notification, lifecycle event
 **Value event**:
 The event emitted after the user changes an element's value, or its form resets (`commit`, `remove`, `clear`, `reset`).
 _Avoid_: Change event
+
+### Date calendar
+
+**Date calendar**:
+A static grid of a month's days for choosing one. It has no input or popover of its own: the app shows it inline or in a popover.
+_Avoid_: Inline date picker, datepicker, calendar
+
+**Date picker**:
+An input that opens a date calendar in a popover.
+_Avoid_: Date field, date input
+
+**Calendar date**:
+A day with no time or offset, so it names the same day in every time zone. A date calendar's value is one.
+_Avoid_: Date, datetime, timestamp
+
+**Selected day**:
+The day that is a date calendar's value. Distinct from today.
+_Avoid_: Chosen day, picked day, current day
+
+**Active day**:
+The day the user has moved to in a date calendar, holding its one tab stop, that a commit by keyboard would choose. Distinct from the selected day.
+_Avoid_: Focused day, highlighted day, cursor
+
+**Page**:
+What a calendar's grid shows at once: for a date calendar, its displayed month. Turning the page shows the one before
+or after.
+_Avoid_: Screen, sheet
+
+**Displayed month**:
+The month a date calendar's grid shows. Turning a page changes it, not the value.
+_Avoid_: View date, visible month, current month
+
+**Outside day**:
+A day of the month before or after the displayed month, shown to fill the grid's six rows. Never the active day.
+_Avoid_: Adjacent day, overflow day, other-month day
+
+**Disabled day**:
+A day in a date calendar that the user can move to but can't commit, because it falls before the earliest or after the latest day allowed, or on a disabled day of the week.
+_Avoid_: Blocked day, unavailable day
+
+**Today**:
+The calendar date it is now in a date calendar's time zone, which may differ from the browser's.
+_Avoid_: Current date, now
 
 ### Building blocks
 
