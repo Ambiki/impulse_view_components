@@ -22,10 +22,15 @@
   font-weight: var(--fw-semibold);
 }
 
+// Square, and as large as a day, so the buttons line up with the grid's first and last columns.
 .awc-date-calendar-nav {
   display: inline-flex;
+  flex: none;
   align-items: center;
   justify-content: center;
+  width: var(--awc-date-calendar-day-size);
+  height: var(--awc-date-calendar-day-size);
+  padding: 0;
 
   // It stays focusable, so pressing it at a limit doesn't drop focus to the page.
   &[aria-disabled='true'] {
