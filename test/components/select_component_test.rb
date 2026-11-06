@@ -181,5 +181,14 @@ module Impulse
         assert_selector "span", text: "Country", visible: false
       end
     end
+
+    test "includes the index and namespace keywords in the field names and id" do
+      render_inline(Impulse::SelectComponent.new(:user, :fruit_id, ["Apple", "Guava"], index: 3, namespace: "ns"))
+
+      assert_selector "input[type='hidden'][name='user[3][fruit_id]']", visible: false
+      assert_selector "input[type='text'][id='ns_user_3_fruit_id']"
+      assert_no_selector "awc-autocomplete[index]"
+      assert_no_selector "awc-autocomplete[namespace]"
+    end
   end
 end

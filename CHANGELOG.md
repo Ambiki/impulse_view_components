@@ -6,12 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Breaking:** `select` and `time_zone_select` in a form without a model take the selected option from the view's instance variable named after the form, such as `@user` for `scope: :user`, as Rails' own fields do ([#368](https://github.com/Ambiki/impulse_view_components/pull/368))
+
 ### Removed
 
 - **Breaking:** The gem's Sprockets bundle, `impulse_view_components.js` and `impulse_view_components.css`, which the engine added to every app's precompile list. Load the components from the npm package ([#361](https://github.com/Ambiki/impulse_view_components/pull/361))
 
 ### Fixed
 
+- Fixed `select`, `ajax_select` and `time_zone_select` raising when the object name ends in `[]`, such as `scope: "item[]"` ([#368](https://github.com/Ambiki/impulse_view_components/pull/368))
+- Fixed the search field of `select`, `ajax_select` and `time_zone_select` rendering a `namespace` attribute when `skip_default_ids` is set ([#368](https://github.com/Ambiki/impulse_view_components/pull/368))
 - Fixed `select`, `ajax_select` and `time_zone_select` leaving `index`, such as from `fields_for`, out of their field names and ids ([#363](https://github.com/Ambiki/impulse_view_components/pull/363))
 - Fixed a stopped `<awc-anchor>` jumping to the viewport's top-left corner when its `anchor-id` changed or it reconnected ([#362](https://github.com/Ambiki/impulse_view_components/pull/362))
 

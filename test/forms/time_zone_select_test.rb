@@ -159,5 +159,27 @@ module Impulse
       assert_selector "input[type='text'][id='user_items_0_time_zone']"
       assert_no_selector "awc-autocomplete[index]"
     end
+
+    test "takes the index from the object when the scope ends in []" do
+      render_in_view_context do
+        impulse_form_with(scope: "item[]", model: Item.new(id: 42), url: "/items") do |f|
+          f.time_zone_select :time_zone
+        end
+      end
+
+      assert_selector "input[type='hidden'][name='item[42][time_zone]']", visible: false
+      assert_selector "input[type='text'][id='item_42_time_zone']"
+    end
+
+    test "takes the index from the object when a nested scope ends in []" do
+      render_in_view_context do
+        impulse_form_with(scope: "project[item][]", model: Item.new(id: 42), url: "/items") do |f|
+          f.time_zone_select :time_zone
+        end
+      end
+
+      assert_selector "input[type='hidden'][name='project[item][42][time_zone]']", visible: false
+      assert_selector "input[type='text'][id='project_item_42_time_zone']"
+    end
   end
 end

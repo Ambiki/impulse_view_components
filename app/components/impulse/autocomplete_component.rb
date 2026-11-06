@@ -14,7 +14,8 @@ module Impulse
       :lg => "awc-autocomplete--lg"
     }.freeze
 
-    # Tells no `index` apart from `index: nil`, which Rails' field helpers render as an empty `[]` in the field name.
+    # For rendering the component directly, as Rails' own `select` takes `index`: tells no `index` apart from `index: nil`,
+    # which renders as an empty `[]` in the field name. The form builder works out the names itself and passes no `index`.
     NO_INDEX = Object.new.freeze
     private_constant :NO_INDEX
 
