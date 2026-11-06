@@ -47,10 +47,38 @@ from the app's translations. Its type is exported as `DateCalendarI18n`.
 
 ## Methods
 
+None of them change the value or emit an event.
+
+### `previousPage` and `nextPage`
+
+Turn the page, as the previous and next buttons do: the day with the tab stop moves by a month. They stop at the
+months holding `min` and `max`.
+
+```js
+calendar.nextPage();
+```
+
+### `goToDate`
+
+Shows the month of a `YYYY-MM-DD` day and gives that day the tab stop, without selecting it. It can go past `min` and
+`max`.
+
+```js
+calendar.goToDate('2027-03-09');
+```
+
+### `focus`
+
+Focuses the day with the tab stop. Call it when a popover holding the calendar opens, so the keys work at once.
+
+```js
+popover.addEventListener('awc-popover:shown', () => calendar.focus());
+```
+
 ### `resetView`
 
 Moves the calendar back to the selected day's month, or today's without one, and makes that day the one tab stop.
-Changes no value and emits nothing. Call it when a popover holding the calendar closes.
+Call it when a popover holding the calendar closes.
 
 ```js
 popover.addEventListener('awc-popover:hidden', () => calendar.resetView());

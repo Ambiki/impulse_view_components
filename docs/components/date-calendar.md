@@ -54,8 +54,9 @@ A value outside them is still shown selected.
 
 ### In a popover
 
-Close the popover when the user commits a day, and take the calendar back to the selected day when the popover closes,
-so that it reopens there rather than on a month the user paged to.
+Focus the selected day when the popover opens, so that the keys move through the grid straight away, as they do in a
+date picker dialog. Close the popover when the user commits a day, and take the calendar back to the selected day when
+the popover closes, so that it reopens there rather than on a month the user paged to.
 
 ```erb
 <%= render(Impulse::PopoverComponent.new(data: { action: "awc-date-calendar:commit->awc-popover#requestHide" })) do |c| %>
@@ -67,9 +68,9 @@ so that it reopens there rather than on a month the user paged to.
 ```
 
 ```js
-popover.addEventListener('awc-popover:hidden', () => {
-  popover.querySelector('awc-date-calendar').resetView();
-});
+const calendar = popover.querySelector('awc-date-calendar');
+popover.addEventListener('awc-popover:shown', () => calendar.focus());
+popover.addEventListener('awc-popover:hidden', () => calendar.resetView());
 ```
 
 ### Translations
@@ -107,4 +108,4 @@ announces the new month.
 | Enter, Space                     | Commits the day                      |
 
 Moving past the edge of the month turns the page. See the [JS API](../js-api/date-calendar.md) for the element's
-properties, `resetView()`, and the event's detail.
+properties, its methods to turn the page, go to a date and focus, and the event's detail.

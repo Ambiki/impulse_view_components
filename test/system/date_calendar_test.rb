@@ -53,6 +53,18 @@ module Impulse
       assert_selector "td[aria-selected='true'] button[data-date='2026-11-20'][tabindex='0']"
     end
 
+    test "opens a popover on the selected day, where the keys move through the grid" do
+      visit_preview(:in_popover)
+
+      find("[data-test-id='date-trigger']").click
+      assert_equal "2026-11-18", page.evaluate_script("document.activeElement.dataset.date")
+
+      page.send_keys(:page_down)
+
+      assert_selector "[aria-live='polite']", text: "December 2026"
+      assert_equal "2026-12-18", page.evaluate_script("document.activeElement.dataset.date")
+    end
+
     test "moves through the days and commits one by keyboard" do
       visit_preview(:default, value: "2026-11-18")
 

@@ -6,11 +6,12 @@
 <% end %>
 
 <script type="module">
-  // Picking a day closes the popover. Closing it takes the calendar back to the selected day, dropping any page turns,
-  // and the trigger names the selected day.
+  // Opening the popover focuses the selected day, where the keys move through the grid. Committing a day closes it, and
+  // closing it takes the calendar back to the selected day, dropping any page turns. The trigger names the selected day.
   const popover = document.querySelector('awc-popover');
   const calendar = popover.querySelector('awc-date-calendar');
   const trigger = popover.querySelector('[data-test-id="date-trigger"]');
+  popover.addEventListener('awc-popover:shown', () => calendar.focus());
   popover.addEventListener('awc-popover:hidden', () => calendar.resetView());
   calendar.addEventListener('awc-date-calendar:commit', (event) => {
     const [year, month, day] = event.detail.value.split('-').map(Number);

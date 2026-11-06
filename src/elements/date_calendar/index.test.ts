@@ -516,4 +516,87 @@ describe('awc-date-calendar', () => {
       expect(day(el, '2027-02-03').tabIndex).to.equal(0);
     });
   });
+
+  describe('previousPage() and nextPage()', () => {
+    it('turn the page as the buttons do, without selecting a day or emitting', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18' });
+      const commits = recordCommits();
+
+      el.nextPage();
+      expect(el.grid.dataset.month).to.equal('2026-12');
+      expect(day(el, '2026-12-18').tabIndex).to.equal(0);
+
+      el.previousPage();
+      el.previousPage();
+      expect(el.grid.dataset.month).to.equal('2026-10');
+      expect(el.value).to.equal('2026-11-18');
+      expect(commits).to.eql([]);
+    });
+
+    it('stop at the months holding min and max', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18', min: '2026-11-01', max: '2026-12-31' });
+
+      el.previousPage();
+      expect(el.grid.dataset.month).to.equal('2026-11');
+
+      el.nextPage();
+      el.nextPage();
+      expect(el.grid.dataset.month).to.equal('2026-12');
+    });
+  });
+
+  describe('goToDate()', () => {
+    it('shows the day\'s month and makes it the active day, without selecting it or emitting', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18' });
+      const commits = recordCommits();
+
+      el.goToDate('2027-03-09');
+
+      expect(el.grid.dataset.month).to.equal('2027-03');
+      expect(el.heading.textContent).to.equal('March 2027');
+      expect(day(el, '2027-03-09').tabIndex).to.equal(0);
+      expect(el.value).to.equal('2026-11-18');
+      expect(selectedDay(el)).to.equal(null);
+      expect(commits).to.eql([]);
+    });
+
+    it('goes past min and max, as code decides', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18', max: '2026-11-30' });
+
+      el.goToDate('2027-06-01');
+
+      expect(el.grid.dataset.month).to.equal('2027-06');
+      expect(nextButton(el).getAttribute('aria-disabled')).to.equal('true');
+    });
+
+    it('ignores something that isn\'t a calendar date', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18' });
+
+      el.goToDate('2026-02-30');
+
+      expect(el.grid.dataset.month).to.equal('2026-11');
+      expect(day(el, '2026-11-18').tabIndex).to.equal(0);
+    });
+  });
+
+  describe('focus()', () => {
+    it('focuses the active day', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18' });
+
+      el.focus();
+
+      expect(focusedDay()).to.equal('2026-11-18');
+    });
+
+    it('focuses the day a page turn made active, and the keys then move from it', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18' });
+
+      el.nextPage();
+      el.focus();
+      expect(focusedDay()).to.equal('2026-12-18');
+
+      await press(el, 'PageDown');
+      expect(focusedDay()).to.equal('2027-01-18');
+    });
+  });
 });

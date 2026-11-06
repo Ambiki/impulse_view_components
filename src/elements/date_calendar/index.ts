@@ -87,12 +87,39 @@ export default class AwcDateCalendarElement extends ImpulseElement {
     this.showDay(view, view.selected ?? view.today);
   }
 
-  handlePreviousClick() {
+  /**
+   * Turns to the page before, the month before, as the previous button does: the active day moves back a month, kept
+   * within the month's length. Does nothing at the month holding `min`. Changes no value and emits nothing.
+   */
+  previousPage() {
     this.turnPage(-1);
   }
 
-  handleNextClick() {
+  /** Turns to the page after, as the next button does. Does nothing at the month holding `max`. */
+  nextPage() {
     this.turnPage(1);
+  }
+
+  /**
+   * Shows the month `date` is in and makes `date` the active day, without selecting it. Unlike the user, code can go
+   * past `min` and `max`. Ignores anything that isn't a `YYYY-MM-DD` calendar date, and emits nothing.
+   */
+  goToDate(date: string) {
+    const day = CalendarDate.parse(date);
+    if (day) this.showDay(this.view(), day);
+  }
+
+  /** Focuses the active day, the grid's one tab stop. Call it when a popover holding the calendar opens. */
+  focus(options?: FocusOptions) {
+    this.button(this.view().active)?.focus(options);
+  }
+
+  handlePreviousClick() {
+    this.previousPage();
+  }
+
+  handleNextClick() {
+    this.nextPage();
   }
 
   /**
