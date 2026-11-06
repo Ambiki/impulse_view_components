@@ -246,8 +246,9 @@ check(`bundle: import '${pkg.name}'`, () => {
 // those the elements set at runtime.
 const RUNTIME_PROPERTY = /^--awc-auto-size-/;
 
-function assertStyles(css, names) {
-  for (const name of names) assert.match(css, new RegExp(`\\.awc-${name}`), `has no .awc-${name} rules`);
+// `dirs` are element directories, whose classes are dashed as their tags are: `date_calendar` styles `.awc-date-calendar`.
+function assertStyles(css, dirs) {
+  for (const name of dirs.map(elementName)) assert.match(css, new RegExp(`\\.awc-${name}`), `has no .awc-${name} rules`);
 
   const defined = new Set(css.match(/--[\w-]+(?=\s*:)/g));
   const read = new Set([...css.matchAll(/var\((--[\w-]+)/g)].map(([, property]) => property));

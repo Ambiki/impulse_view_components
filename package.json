@@ -51,6 +51,11 @@
       "types": "./dist/elements/clipboard_copy/index.d.ts",
       "default": "./dist/elements/clipboard_copy/index.js"
     },
+    "./date-calendar": {
+      "types": "./dist/elements/date_calendar/index.d.ts",
+      "sass": "./dist/elements/date_calendar/index.scss",
+      "default": "./dist/elements/date_calendar/index.js"
+    },
     "./dialog": {
       "types": "./dist/elements/dialog/index.d.ts",
       "sass": "./dist/elements/dialog/index.scss",

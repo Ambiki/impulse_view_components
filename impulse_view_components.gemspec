@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
   spec.metadata["source_code_uri"] = spec.homepage
   spec.metadata["changelog_uri"] = "https://github.com/Ambiki/impulse_view_components/blob/main/CHANGELOG.md"
 
-  spec.files = Dir["CHANGELOG.md", "LICENSE.txt", "README.md", "lib/**/*", "app/components/**/*"]
+  spec.files = Dir["CHANGELOG.md", "LICENSE.txt", "README.md", "lib/**/*", "app/components/**/*", "config/**/*"]
   spec.require_paths = ["lib"]
 
   spec.add_runtime_dependency "view_component", "~> 4.17.0"

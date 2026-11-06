@@ -28,6 +28,9 @@ import type { AwcAutocompleteCommitEvent } from '@ambiki/impulse-view-components
 import * as clipboardCopy from '@ambiki/impulse-view-components/clipboard-copy';
 import { AwcClipboardCopyElement } from '@ambiki/impulse-view-components/clipboard-copy';
 import type { AwcClipboardCopyCopiedEvent } from '@ambiki/impulse-view-components/clipboard-copy';
+import * as dateCalendar from '@ambiki/impulse-view-components/date-calendar';
+import { AwcDateCalendarElement } from '@ambiki/impulse-view-components/date-calendar';
+import type { AwcDateCalendarCommitEvent } from '@ambiki/impulse-view-components/date-calendar';
 import * as dialog from '@ambiki/impulse-view-components/dialog';
 import { AwcDialogElement } from '@ambiki/impulse-view-components/dialog';
 import * as popover from '@ambiki/impulse-view-components/popover';
@@ -62,6 +65,7 @@ export const used = {
   anchor,
   autocomplete,
   clipboardCopy,
+  dateCalendar,
   dialog,
   popover,
   useFloatingUI,
@@ -99,6 +103,17 @@ document.addEventListener('awc-clipboard-copy:error', (event) => {
   const reason: unknown = event.detail.error;
   return reason;
 });
+// @ts-expect-error: a committed day is a `YYYY-MM-DD` string
+export const notACommittedDay: AwcDateCalendarCommitEvent['value'] = new Date();
+// @ts-expect-error: the disabled days of the week are numbers
+export const notDisabledDays: AwcDateCalendarElement['disabledDaysOfWeek'] = ['sunday'];
+// `resetView()` is public and returns nothing.
+export const reset: void = document.createElement('awc-date-calendar').resetView();
+// Listeners get the date calendar's event typed, without a cast.
+document.addEventListener('awc-date-calendar:commit', (event) => {
+  const value: string = event.detail.value;
+  return value;
+});
 
 // The hook still takes everything Floating UI's `ReferenceElement` does: a Floating UI `VirtualElement`, and a virtual
 // element with `getClientRects` (which Floating UI's `inline()` middleware reads).
@@ -115,15 +130,25 @@ export const namedClasses: [
   typeof anchor.default,
   typeof autocomplete.default,
   typeof clipboardCopy.default,
+  typeof dateCalendar.default,
   typeof dialog.default,
   typeof popover.default,
-] = [AwcAnchorElement, AwcAutocompleteElement, AwcClipboardCopyElement, AwcDialogElement, AwcPopoverElement];
+] = [
+  AwcAnchorElement,
+  AwcAutocompleteElement,
+  AwcClipboardCopyElement,
+  AwcDateCalendarElement,
+  AwcDialogElement,
+  AwcPopoverElement,
+];
 // @ts-expect-error: a plain element is not an anchor
 export const notAnAnchorElement: AwcAnchorElement = document.createElement('div');
 // @ts-expect-error: a plain element is not an autocomplete
 export const notAnAutocomplete: AwcAutocompleteElement = document.createElement('div');
 // @ts-expect-error: a plain element is not a clipboard copy
 export const notAClipboardCopy: AwcClipboardCopyElement = document.createElement('div');
+// @ts-expect-error: a plain element is not a date calendar
+export const notADateCalendar: AwcDateCalendarElement = document.createElement('div');
 // @ts-expect-error: a plain element is not a dialog
 export const notADialog: AwcDialogElement = document.createElement('div');
 // @ts-expect-error: a plain element is not a popover
