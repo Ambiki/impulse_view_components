@@ -21,28 +21,31 @@ Rails compute the field names, ids and values, so that we stop re-implementing t
 - One call to its private `add_default_name_and_field` (`add_default_name_and_id` before Rails 8.0.3) computes the
   hidden fields' name and the search field's id.
 - The tag passes them to the component as the `name:` and `input_id:` it already accepts. The component doesn't
-  change, and the markup doesn't change.
+  change. The markup changes only where Rails' own fields already differ from ours (see "Selected value" under Risks).
+- The decision is recorded in [ADR 0011](../adr/0011-form-tags-build-on-rails-form-tags.md).
 - The cost is a dependency on a `# :nodoc:` class, the same one Action Text and several well-known gems depend on.
 
 ## How it works today
 
+As of [`9d5c46d`](https://github.com/Ambiki/impulse_view_components/blob/9d5c46ddb592a220c29591b4524cfb5a2598d4af/), before #368 changed the tags.
+
 1. `Impulse::Forms::Builder#select` builds `Tags::Select` with `object:` and `**objectify_options(system_args)`
-   ([builder.rb:7-16](../../lib/impulse/forms/builder.rb)). `objectify_options` is private in Rails. It returns the
+   ([builder.rb:7-16](https://github.com/Ambiki/impulse_view_components/blob/9d5c46ddb592a220c29591b4524cfb5a2598d4af/lib/impulse/forms/builder.rb#L7-L16)). `objectify_options` is private in Rails. It returns the
    builder's `index`, `namespace`, `skip_default_ids` and `allow_method_names_outside_object`, plus `object`
    ([actionview-8.1.4 form_helper.rb:1723][fb-init-814], [:2674-2679][objectify-814]).
 2. Our `Tags::Base` keeps `object:` for itself and passes everything else on as `**system_args`
-   ([tags/base.rb:8-14](../../lib/impulse/forms/tags/base.rb)). `Tags::Select` and `TimeZoneSelect` read the selected
-   value from the object ([tags/base.rb:21-23](../../lib/impulse/forms/tags/base.rb)).
+   ([tags/base.rb:8-14](https://github.com/Ambiki/impulse_view_components/blob/9d5c46ddb592a220c29591b4524cfb5a2598d4af/lib/impulse/forms/tags/base.rb#L8-L14)). `Tags::Select` and `TimeZoneSelect` read the selected
+   value from the object ([tags/base.rb:21-23](https://github.com/Ambiki/impulse_view_components/blob/9d5c46ddb592a220c29591b4524cfb5a2598d4af/lib/impulse/forms/tags/base.rb#L21-L23)).
 3. `AutocompleteComponent` passes its `index`, `namespace`, `skip_default_ids` and `allow_method_names_outside_object`
    keywords to Rails' `hidden_field` and `text_field`. The hidden fields get `name`, `index` and
    `allow_method_names_outside_object`. The search field gets `id`, `index`, `namespace`, `skip_default_ids` and
    `allow_method_names_outside_object`
-   ([autocomplete_component.rb:90-106](../../app/components/impulse/autocomplete_component.rb)). The template calls
+   ([autocomplete_component.rb:90-106](https://github.com/Ambiki/impulse_view_components/blob/9d5c46ddb592a220c29591b4524cfb5a2598d4af/app/components/impulse/autocomplete_component.rb#L90-L106)). The template calls
    `hidden_field` four times (the include_hidden field, one per selected option, one in `<template>`) and `text_field`
-   once ([autocomplete_component.html.erb:4-46](../../app/components/impulse/autocomplete_component.html.erb)).
+   once ([autocomplete_component.html.erb:4-46](https://github.com/Ambiki/impulse_view_components/blob/9d5c46ddb592a220c29591b4524cfb5a2598d4af/app/components/impulse/autocomplete_component.html.erb#L4-L46)).
 4. `AjaxSelectComponent` is not a subclass of `AutocompleteComponent`. It renders one and hands it its keywords
-   ([ajax_select_component.rb:2](../../app/components/impulse/ajax_select_component.rb),
-   [ajax_select_component.html.erb:1](../../app/components/impulse/ajax_select_component.html.erb)).
+   ([ajax_select_component.rb:2](https://github.com/Ambiki/impulse_view_components/blob/9d5c46ddb592a220c29591b4524cfb5a2598d4af/app/components/impulse/ajax_select_component.rb#L2),
+   [ajax_select_component.html.erb:1](https://github.com/Ambiki/impulse_view_components/blob/9d5c46ddb592a220c29591b4524cfb5a2598d4af/app/components/impulse/ajax_select_component.html.erb#L1)).
 
 Rails' helpers run with the component as their template, so they look for `@item` on the component and find nothing.
 For `item[]` they then raise in `retrieve_autoindex` ([actionview-8.1.4 tags/base.rb:74-81][base-814-autoindex]).
@@ -117,7 +120,7 @@ auto-index whatever `index` is ([:11-28][base-814-init]).
 - **Today:** every `[]` case raises.
 - **Design 2:** with an error on the attribute, Rails wraps the search field in `<div class="field_with_errors">`.
   The wrapper becomes the flex item in `.awc-autocomplete-control`, in place of the `flex: 1 1 0%` input
-  ([index.scss:6-14, 43-50](../../src/elements/autocomplete/index.scss)).
+  ([index.scss:6-14, 43-50](https://github.com/Ambiki/impulse_view_components/blob/9d5c46ddb592a220c29591b4524cfb5a2598d4af/src/elements/autocomplete/index.scss#L6-L50)).
 - **Design 3:** wrong for `index: nil` and `skip_default_ids`, double prefix `ns_ns_user_fruit_id`, and still raises
   for `[]`.
 - **Design 4:** the 14 wrong cases are hidden fields with `id="ns"`, which passing `namespace: nil` would fix. Design 4
@@ -193,7 +196,7 @@ identical in 7.1.6 and 7.2.3.1, and in 8.0.5.1 and 8.1.4.
 | … with `index` / `index: nil` | ✓ / `[]` and `__` | ✓ / ✓ | ✓ / **no `[]`** | ✓ / ✓ |
 | … with `item[]`, `project[item][]` | ✓, from `Tags::Base#initialize`; the component gets `item` / `project[item]` | ✓ | **raises** (`field_name` gives `item[][fruit_id]`) | ✓ |
 | … with `skip_default_ids` | no `"id"` set → `input_id: nil` plus `skip_default_ids:` | ✓ (keeps the stray `namespace` attribute) | **id still rendered** | ✓ |
-| Selected value | `@options.fetch(:selected) { object.public_send(method) if object.respond_to?(method) }`, as today | as today | as today | as today |
+| Selected value | `@options.fetch(:selected) { object.public_send(method) if object&.respond_to?(method) }`. With no object on the form, Rails falls back to the view's `@<name>`, as its own fields do. That's a change | as today | as today | as today |
 | Error wrapping | none | **search field wrapped** | none | **search field wrapped** |
 | User `name:` | kept as the explicit `"name"` (Rails doesn't add `[]` to it, as today) | as today | as today | as today |
 | User `input_id:` | kept as the explicit `"id"`, then namespaced (`ns_my_id`, as today) | as today | as today | as today |
@@ -286,18 +289,22 @@ Why:
 - It follows Rails' own shape: a builder method builds a `Tags` object and calls `render`.
 - It's what Action Text, form_props and country_select do.
 
-`lib/impulse/forms/tags/base.rb`:
+The code as shipped in #368. `lib/impulse/forms/tags/base.rb`:
 
 ```ruby
 module Impulse
   module Forms
     module Tags
-      # Rails' form tags work out field names and ids. This builds on their base class, as Action Text does.
+      # Builds on Rails' own form tags, so that Rails works out the field names and ids as it does for its own fields.
       class Base < ActionView::Helpers::Tags::Base
         private
 
-        # The hidden fields' name and the search field's id, worked out by Rails as for any of its own fields.
-        def naming_options
+        # The component's options, with the hidden fields' name and the search field's id worked out by Rails.
+        def component_options
+          @options.except(:index, :namespace, :name, :input_id, :selected).merge(field_options)
+        end
+
+        def field_options
           field = { "multiple" => @options[:multiple], "namespace" => @options[:namespace] }
           field["name"] = @options[:name] if @options[:name]
           field["id"] = @options[:input_id] if @options[:input_id]
@@ -306,17 +313,12 @@ module Impulse
           { name: field["name"], input_id: field["id"], skip_default_ids: @skip_default_ids }
         end
 
-        def component_options
-          @options.except(:index, :namespace, :name, :input_id, :selected).merge(naming_options)
-        end
-
         # Rails' own `value` raises when `allow_method_names_outside_object` is false and the object lacks the method.
         def selected_value
-          @options.fetch(:selected) { object.public_send(@method_name) if object.respond_to?(@method_name) }
+          @options.fetch(:selected) { object.public_send(@method_name) if object&.respond_to?(@method_name) }
         end
 
-        # Rails 8.0.3 has only `add_default_name_and_field`, Rails before 8.0.3 only `add_default_name_and_id`.
-        # Takes Rails' `field` argument too, in case Rails calls it with one.
+        # Rails before 8.0.3 has only `add_default_name_and_id`.
         def add_default_name_and_field(options, *)
           defined?(super) ? super : add_default_name_and_id(options)
         end
@@ -339,9 +341,10 @@ module Impulse
           super(object_name, method_name, template_object, options)
         end
 
-        def render(&)
+        def render(&block)
           @template_object.render(
-            Impulse::SelectComponent.new(@object_name, @method_name, @choices, selected: selected_value, **component_options), &
+            Impulse::SelectComponent.new(@object_name, @method_name, @choices, selected: selected_value, **component_options),
+            &block
           )
         end
       end
@@ -353,18 +356,26 @@ end
 `lib/impulse/forms/tags/ajax_select.rb`. It doesn't read the selection from the object, as today:
 
 ```ruby
-class AjaxSelect < Base
-  def initialize(object_name, method_name, template_object, value_method, text_method, options)
-    @value_method, @text_method = value_method, text_method
-    super(object_name, method_name, template_object, options)
-  end
+module Impulse
+  module Forms
+    module Tags
+      class AjaxSelect < Base
+        def initialize(object_name, method_name, template_object, value_method, text_method, options)
+          @value_method = value_method
+          @text_method = text_method
+          super(object_name, method_name, template_object, options)
+        end
 
-  def render(&)
-    @template_object.render(
-      Impulse::AjaxSelectComponent.new(
-        @object_name, @method_name, @value_method, @text_method, selected: @options[:selected], **component_options
-      ), &
-    )
+        def render(&block)
+          @template_object.render(
+            Impulse::AjaxSelectComponent.new(
+              @object_name, @method_name, @value_method, @text_method, selected: @options[:selected], **component_options
+            ),
+            &block
+          )
+        end
+      end
+    end
   end
 end
 ```
@@ -372,16 +383,29 @@ end
 `lib/impulse/forms/builder.rb`. Same public methods, with Rails-shaped constructors:
 
 ```ruby
-def select(method_name, choices = [], **options, &)
-  Tags::Select.new(object_name, method_name, template, choices, objectify_options(options)).render(&)
-end
+module Impulse
+  module Forms
+    class Builder < ActionView::Helpers::FormBuilder
+      attr_reader :template
+      delegate :render, to: :template
 
-def ajax_select(method_name, value_method, text_method, **options, &)
-  Tags::AjaxSelect.new(object_name, method_name, template, value_method, text_method, objectify_options(options)).render(&)
-end
+      def select(method_name, choices = [], **system_args, &block)
+        Tags::Select.new(object_name, method_name, template, choices, objectify_options(system_args)).render(&block)
+      end
 
-def time_zone_select(method_name, priority_zones = nil, **options, &)
-  Tags::TimeZoneSelect.new(object_name, method_name, template, priority_zones, objectify_options(options)).render(&)
+      def ajax_select(method_name, value_method, text_method, **system_args, &block)
+        Tags::AjaxSelect.new(
+          object_name, method_name, template, value_method, text_method, objectify_options(system_args)
+        ).render(&block)
+      end
+
+      def time_zone_select(method_name, priority_zones = nil, **system_args, &block)
+        Tags::TimeZoneSelect.new(
+          object_name, method_name, template, priority_zones, objectify_options(system_args)
+        ).render(&block)
+      end
+    end
+  end
 end
 ```
 
@@ -396,9 +420,10 @@ The components stay as they are.
   its public `attributes`.
 - **Stripped object name.** The component receives `item`, not `item[]`. Nothing else in the components reads
   `@object_name` (checked with grep).
-- **Hand-picked keys.** `naming_options` lists the keys Rails reads today ([tags/base.rb:97-107][base-814-adfn]). A new
+- **Hand-picked keys.** `field_options` lists the keys Rails reads today ([tags/base.rb:97-107][base-814-adfn]). A new
   Rails naming option needs one line there.
-- **Selected value.** `selected_value` keeps today's lenient lookup on purpose. Switching to Rails' `value` would raise
+- **Selected value.** `selected_value` keeps today's lenient lookup on purpose. The object it reads now falls back to the
+  view's instance variable when the form has none, as Rails' own fields do. #368 accepted that as a breaking change. Switching to Rails' `value` would raise
   in `fields_for` and `form_for` where it returns `nil` today. That's a breaking change and needs the maintainer's
   call.
 - **Not covered here.** HTML options such as `form` and `disabled` don't reach the hidden fields today. Design 1

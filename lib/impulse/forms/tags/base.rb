@@ -21,7 +21,7 @@ module Impulse
 
         # Rails' own `value` raises when `allow_method_names_outside_object` is false and the object lacks the method.
         def selected_value
-          @options.fetch(:selected) { object.public_send(@method_name) if object.respond_to?(@method_name) }
+          @options.fetch(:selected) { object.public_send(@method_name) if object&.respond_to?(@method_name) }
         end
 
         # Rails before 8.0.3 has only `add_default_name_and_id`.

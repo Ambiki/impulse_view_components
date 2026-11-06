@@ -2,6 +2,11 @@ require "test_helper"
 
 module Impulse
   class SelectTest < ApplicationTest
+    # The multiple select's tag template, whose fields Capybara can't query.
+    def tag_template
+      rendered_content[%r{<template data-behavior="tag-template">.*?</template>}m].to_s
+    end
+
     test "renders the component" do
       render_in_view_context do
         impulse_form_with(model: User.new, url: "/users") do |f|
@@ -154,6 +159,7 @@ module Impulse
 
       assert_selector "input[type='hidden'][name='custom']", count: 2, visible: false
       assert_no_selector "input[type='hidden'][name*='fruit_ids']", visible: false
+      assert_includes tag_template, 'name="custom"'
     end
 
     test "prefixes a given input id with the namespace" do
@@ -188,6 +194,30 @@ module Impulse
       end
 
       assert_selector "input[type='hidden'][name='user[color]']", visible: false
+      assert_no_selector ".awc-autocomplete--selected"
+    end
+
+    test "takes the selected option from the view's instance variable when the form has no object" do
+      render_in_view_context do
+        @user = User.new(fruit_id: "Mango")
+        impulse_form_with(scope: :user, url: "/users") do |f|
+          f.text_field(:fruit_id) + f.select(:fruit_id, ["Apple", "Mango", "Guava"])
+        end
+      end
+
+      assert_selector "input[type='text'][name='user[fruit_id]'][value='Mango']"
+      assert_selector "input[type='hidden'][name='user[fruit_id]'][value='Mango']", visible: false
+      assert_selector ".awc-autocomplete--selected"
+    end
+
+    test "renders without a selected option when the form has no object" do
+      render_in_view_context do
+        fields_for(:payment, nil, builder: Impulse::Forms::Builder) do |f|
+          f.select :method, ["Card", "Cash"]
+        end
+      end
+
+      assert_selector "input[type='hidden'][name='payment[method]']", visible: false
       assert_no_selector ".awc-autocomplete--selected"
     end
 
@@ -245,6 +275,7 @@ module Impulse
 
       assert_selector "input[type='hidden'][name='item[42][fruit_ids][]']", count: 2, visible: false
       assert_no_selector "input[type='hidden'][name='item[fruit_ids][]']", visible: false
+      assert_includes tag_template, 'name="item[42][fruit_ids][]"'
     end
 
     test "renders no namespace attribute on the input when ids are skipped" do

@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Breaking:** `select` and `time_zone_select` in a form without a model take the selected option from the view's instance variable named after the form, such as `@user` for `scope: :user`, as Rails' own fields do ([#368](https://github.com/Ambiki/impulse_view_components/pull/368))
+
 ### Removed
 
 - **Breaking:** The gem's Sprockets bundle, `impulse_view_components.js` and `impulse_view_components.css`, which the engine added to every app's precompile list. Load the components from the npm package ([#361](https://github.com/Ambiki/impulse_view_components/pull/361))
