@@ -131,9 +131,18 @@ $calendar-grid-cell-padding: 1px;
 
 // The box the day grid fills, six weeks under a row of weekday headings, which every level's grid fills too, so drilling
 // up never changes a calendar's size (ADR 0015).
-@mixin calendar-grid-box($block) {
-  $cell: calc(var(--#{$block}-day-size) + #{2 * $calendar-grid-cell-padding});
+@function calendar-grid-box-width($block) {
+  @return calc(7 * (var(--#{$block}-day-size) + #{2 * $calendar-grid-cell-padding}));
+}
 
-  width: calc(7 * #{$cell});
-  height: calc(var(--fs-sm) * #{$line-height-base} + #{$calendar-grid-heading-gap} + 6 * #{$cell});
+@function calendar-grid-box-height($block) {
+  @return calc(
+    var(--fs-sm) * #{$line-height-base} + #{$calendar-grid-heading-gap} + 6 *
+      (var(--#{$block}-day-size) + #{2 * $calendar-grid-cell-padding})
+  );
+}
+
+@mixin calendar-grid-box($block) {
+  width: calendar-grid-box-width($block);
+  height: calendar-grid-box-height($block);
 }

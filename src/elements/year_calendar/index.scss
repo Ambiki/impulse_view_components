@@ -3,19 +3,38 @@
 @include calendar-grid('awc-year-calendar', 'year');
 
 // The years fill the box the day grid fills, so a calendar keeps its size whichever level it shows. Each year is a
-// compact button, as tall as a day, three to a row, spaced evenly through the box.
+// compact button, as tall as a day. The outer years reach the box's edges, as the outer days do, and the rest are spaced
+// evenly between them.
 .awc-year-calendar-grid {
   @include calendar-grid-box('awc-year-calendar');
 
   table-layout: fixed;
 
+  // Each row but the last takes a third of the height the last row leaves, which is as tall as a year: with the years
+  // at the top of their rows, the gaps between rows come out even.
+  tr {
+    height: calc((#{calendar-grid-box-height('awc-year-calendar')} - var(--awc-year-calendar-day-size)) / 3);
+  }
+
+  tr:last-child {
+    height: var(--awc-year-calendar-day-size);
+  }
+
   td {
     padding: 0;
-    vertical-align: middle;
+    vertical-align: top;
   }
 }
 
 .awc-year-calendar-year {
   width: 4.5rem;
   margin: 0 auto;
+
+  td:first-child > & {
+    margin-left: 0;
+  }
+
+  td:last-child > & {
+    margin-right: 0;
+  }
 }
