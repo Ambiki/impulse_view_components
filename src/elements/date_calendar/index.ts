@@ -1,7 +1,7 @@
 import type { CalendarView, DateCalendarI18n } from './render';
 import { ImpulseElement, property, registerElement, target } from '@ambiki/impulse';
 import { CalendarDate, today } from 'src/internal/calendar_date';
-import { canShowMonth, canTurnPage, ENGLISH, headingText, isDisabledDay, weekdayRow, weekRows } from './render';
+import { canMoveView, canShowMonth, ENGLISH, headingText, isDisabledDay, weekdayRow, weekRows } from './render';
 
 /** The detail of `awc-date-calendar:commit`, emitted when the user commits a day other than the selected one. */
 export interface AwcDateCalendarCommitEvent {
@@ -88,16 +88,16 @@ export default class AwcDateCalendarElement extends ImpulseElement {
   }
 
   /**
-   * Turns to the page before, the month before, as the previous button does: the active day moves back a month, kept
+   * Shows the view before, the month before, as the previous button does: the active day moves back a month, kept
    * within the month's length. Does nothing at the month holding `min`. Changes no value and emits nothing.
    */
-  previousPage() {
-    this.turnPage(-1);
+  previousView() {
+    this.moveView(-1);
   }
 
-  /** Turns to the page after, as the next button does. Does nothing at the month holding `max`. */
-  nextPage() {
-    this.turnPage(1);
+  /** Shows the view after, as the next button does. Does nothing at the month holding `max`. */
+  nextView() {
+    this.moveView(1);
   }
 
   /**
@@ -138,20 +138,20 @@ export default class AwcDateCalendarElement extends ImpulseElement {
   }
 
   handlePreviousClick() {
-    this.previousPage();
+    this.previousView();
   }
 
   handleNextClick() {
-    this.nextPage();
+    this.nextView();
   }
 
   /**
-   * Turns the page by `months`, moving the active day by as many months, kept within the month's length. Does nothing
+   * Moves the view by `months`, moving the active day by as many months, kept within the month's length. Does nothing
    * past the months holding `min` and `max`.
    */
-  private turnPage(months: number) {
+  private moveView(months: number) {
     const view = this.view();
-    if (!canTurnPage(view, months)) return;
+    if (!canMoveView(view, months)) return;
 
     this.showDay(view, view.active.add({ months }));
   }
@@ -282,8 +282,8 @@ export default class AwcDateCalendarElement extends ImpulseElement {
     this.weekdays.replaceChildren(weekdayRow(view));
     this.days.replaceChildren(...weekRows(view));
     if (hadFocus) this.button(view.active)?.focus();
-    this.previousButton.setAttribute('aria-disabled', String(!canTurnPage(view, -1)));
-    this.nextButton.setAttribute('aria-disabled', String(!canTurnPage(view, 1)));
+    this.previousButton.setAttribute('aria-disabled', String(!canMoveView(view, -1)));
+    this.nextButton.setAttribute('aria-disabled', String(!canMoveView(view, 1)));
   }
 
   /** The day a day button in the grid names, or `null` for anything else. */

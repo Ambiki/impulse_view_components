@@ -67,8 +67,8 @@ export function canShowMonth(date: CalendarDate, view: CalendarView): boolean {
   return !beforeMin && !afterMax;
 }
 
-/** Whether the user can turn the page by `months`, `-1` being back a month. */
-export function canTurnPage(view: CalendarView, months: number): boolean {
+/** Whether the user can move the view by `months`, `-1` being back a month. */
+export function canMoveView(view: CalendarView, months: number): boolean {
   return canShowMonth(view.displayed.add({ months }), view);
 }
 

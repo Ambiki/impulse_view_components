@@ -120,9 +120,9 @@ _Avoid_: Chosen day, picked day, current day
 The day the user has moved to in a date calendar, holding its one tab stop, that a commit by keyboard would choose. Distinct from the selected day.
 _Avoid_: Focused day, highlighted day, cursor
 
-**Page**:
-What a calendar's grid shows at once: for a date calendar, its displayed month. Turning the page shows the one before
-or after.
+**View**:
+What a calendar shows at once: for a date calendar, its displayed month. The previous and next views are the ones
+before and after it.
 _Avoid_: Screen, sheet
 
 **Displayed month**:

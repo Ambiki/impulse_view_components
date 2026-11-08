@@ -4,7 +4,7 @@ import { expect, fixture } from '@open-wc/testing';
 import { sendKeys } from '@web/test-runner-commands';
 import { Idiomorph } from 'idiomorph';
 import { CalendarDate, today } from '../../internal/calendar_date';
-import { canTurnPage, ENGLISH, headingText, weekdayRow, weekRows } from './render';
+import { canMoveView, ENGLISH, headingText, weekdayRow, weekRows } from './render';
 // Registers `awc-date-calendar`. Kept separate from the type import above, which the bundler elides.
 import './index';
 
@@ -52,9 +52,9 @@ function dateCalendarHtml(options: CalendarOptions = {}) {
 
   return `<awc-date-calendar class="awc-date-calendar" ${attributes.join(' ')}>
     <div class="awc-date-calendar-header">
-      <button type="button" class="awc-date-calendar-nav" aria-label="Previous month" aria-disabled="${!canTurnPage(view, -1)}" data-target="awc-date-calendar.previousButton" data-action="click->awc-date-calendar#handlePreviousClick"></button>
+      <button type="button" class="awc-date-calendar-nav" aria-label="Previous month" aria-disabled="${!canMoveView(view, -1)}" data-target="awc-date-calendar.previousButton" data-action="click->awc-date-calendar#handlePreviousClick"></button>
       <div id="heading" class="awc-date-calendar-heading" aria-live="polite" data-target="awc-date-calendar.heading">${headingText(view)}</div>
-      <button type="button" class="awc-date-calendar-nav" aria-label="Next month" aria-disabled="${!canTurnPage(view, 1)}" data-target="awc-date-calendar.nextButton" data-action="click->awc-date-calendar#handleNextClick"></button>
+      <button type="button" class="awc-date-calendar-nav" aria-label="Next month" aria-disabled="${!canMoveView(view, 1)}" data-target="awc-date-calendar.nextButton" data-action="click->awc-date-calendar#handleNextClick"></button>
     </div>
     <table class="awc-date-calendar-grid" role="grid" aria-labelledby="heading" data-month="${month}" data-target="awc-date-calendar.grid" data-action="click->awc-date-calendar#handleClick keydown->awc-date-calendar#handleKeydown focusin->awc-date-calendar#handleFocusin">
       <thead data-target="awc-date-calendar.weekdays">${html([weekdayRow(view)])}</thead>
@@ -517,17 +517,17 @@ describe('awc-date-calendar', () => {
     });
   });
 
-  describe('previousPage() and nextPage()', () => {
-    it('turn the page as the buttons do, without selecting a day or emitting', async () => {
+  describe('previousView() and nextView()', () => {
+    it('show the view before and after, as the buttons do, without selecting a day or emitting', async () => {
       const el = await dateCalendarFixture({ value: '2026-11-18' });
       const commits = recordCommits();
 
-      el.nextPage();
+      el.nextView();
       expect(el.grid.dataset.month).to.equal('2026-12');
       expect(day(el, '2026-12-18').tabIndex).to.equal(0);
 
-      el.previousPage();
-      el.previousPage();
+      el.previousView();
+      el.previousView();
       expect(el.grid.dataset.month).to.equal('2026-10');
       expect(el.value).to.equal('2026-11-18');
       expect(commits).to.eql([]);
@@ -536,11 +536,11 @@ describe('awc-date-calendar', () => {
     it('stop at the months holding min and max', async () => {
       const el = await dateCalendarFixture({ value: '2026-11-18', min: '2026-11-01', max: '2026-12-31' });
 
-      el.previousPage();
+      el.previousView();
       expect(el.grid.dataset.month).to.equal('2026-11');
 
-      el.nextPage();
-      el.nextPage();
+      el.nextView();
+      el.nextView();
       expect(el.grid.dataset.month).to.equal('2026-12');
     });
   });
@@ -588,10 +588,10 @@ describe('awc-date-calendar', () => {
       expect(focusedDay()).to.equal('2026-11-18');
     });
 
-    it('focuses the day a page turn made active, and the keys then move from it', async () => {
+    it('focuses the day a view change made active, and the keys then move from it', async () => {
       const el = await dateCalendarFixture({ value: '2026-11-18' });
 
-      el.nextPage();
+      el.nextView();
       el.focus();
       expect(focusedDay()).to.equal('2026-12-18');
 

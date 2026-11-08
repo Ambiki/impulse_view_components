@@ -55,22 +55,22 @@ from the app's translations. Its type is exported as `DateCalendarI18n`.
 
 ## Methods
 
-### `previousPage`
+### `previousView`
 
-Turns to the month before, as the previous button does: the day with the tab stop moves back a month. It stops at the
+Shows the month before, as the previous button does: the day with the tab stop moves back a month. It stops at the
 month holding `min`.
 
 ```js
-calendar.previousPage();
+calendar.previousView();
 ```
 
-### `nextPage`
+### `nextView`
 
-Turns to the month after, as the next button does: the day with the tab stop moves on a month. It stops at the month
+Shows the month after, as the next button does: the day with the tab stop moves on a month. It stops at the month
 holding `max`.
 
 ```js
-calendar.nextPage();
+calendar.nextView();
 ```
 
 ### `goToDate`
