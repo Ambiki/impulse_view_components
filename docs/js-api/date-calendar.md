@@ -94,10 +94,10 @@ calendar.goToToday();
 
 ### `clear`
 
-Selects no day and shows today's month, as setting an empty `value` does. It can be called from a `data-action`.
+Selects no day and shows today's month, as setting an empty `value` does.
 
-```html
-<button type="button" data-action="click->awc-date-calendar#clear">Clear</button>
+```js
+calendar.clear();
 ```
 
 ### `isDateDisabled`
