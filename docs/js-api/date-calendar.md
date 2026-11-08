@@ -119,10 +119,9 @@ calendar.focus();
 ### `resetView`
 
 Moves the calendar back to the selected day's month, or today's without one, and makes that day the one tab stop.
-Call it when a popover holding the calendar closes.
 
 ```js
-popover.addEventListener('awc-popover:hidden', () => calendar.resetView());
+calendar.resetView();
 ```
 
 ## Events
