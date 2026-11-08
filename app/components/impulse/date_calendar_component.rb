@@ -125,30 +125,5 @@ module Impulse
       first = @displayed_month.beginning_of_week(Date::DAYS_INTO_WEEK.key(@first_day_of_week))
       (first...(first + 42)).each_slice(7)
     end
-
-    # The grid's rows, rendered without whitespace between the tags, as the element renders the months it turns to.
-    def week_rows
-      safe_join(weeks.map do |week|
-        content_tag(:tr, safe_join(week.map { |date| day_cell(date) }))
-      end)
-    end
-
-    def day_cell(date)
-      button = content_tag(
-        :button,
-        date.day,
-        type: "button",
-        class: class_names(
-          "awc-date-calendar-day",
-          "awc-date-calendar-day--outside": date.beginning_of_month != @displayed_month
-        ),
-        tabindex: (date == @active_day) ? 0 : -1,
-        "data-date": date.iso8601,
-        "aria-label": I18n.l(date, format: day_format),
-        "aria-current": ("date" if date == @today),
-        "aria-disabled": ("true" if disabled?(date))
-      )
-      content_tag(:td, button, "aria-selected": ("true" if date == @selected))
-    end
   end
 end
