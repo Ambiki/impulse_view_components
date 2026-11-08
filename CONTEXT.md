@@ -104,6 +104,11 @@ _Avoid_: Change event
 A static grid of a month's days for choosing one. It has no input or popover of its own: the app shows it inline or in a popover.
 _Avoid_: Inline date picker, datepicker, calendar
 
+**Week calendar**:
+A date calendar's grid for choosing a week: committing any day commits its week. Like a date calendar, it has no input
+or popover of its own.
+_Avoid_: Week picker, inline week picker
+
 **Date picker**:
 An input that opens a date calendar in a popover.
 _Avoid_: Date field, date input
@@ -112,21 +117,34 @@ _Avoid_: Date field, date input
 A day with no time or offset, so it names the same day in every time zone. A date calendar's value is one.
 _Avoid_: Date, datetime, timestamp
 
+**Date range**:
+Two calendar dates, a start and an end, and every day from one to the other, both included. A week is one: from the
+first day of the week to the last.
+_Avoid_: Interval, period, span
+
+**Week**:
+The seven days from a first day of the week, which is a setting of the calendar rather than of the locale.
+_Avoid_: ISO week, calendar week
+
 **Selected day**:
 The day that is a date calendar's value. Distinct from today.
 _Avoid_: Chosen day, picked day, current day
 
+**Selected week**:
+The week a week calendar's value falls in. Any day of it names it; a commit names it by its first day.
+_Avoid_: Highlighted week, current week
+
 **Active day**:
-The day the user has moved to in a date calendar, holding its one tab stop, that a commit by keyboard would choose. Distinct from the selected day.
+The day the user has moved to in a calendar, holding its one tab stop, that a commit by keyboard would choose. Distinct from the selected day.
 _Avoid_: Focused day, highlighted day, cursor
 
 **View**:
-What a calendar shows at once: for a date calendar, its displayed month. The previous and next views are the ones
-before and after it.
+What a calendar shows at once: for a date or week calendar, its displayed month. The previous and next views are the
+ones before and after it.
 _Avoid_: Screen, sheet
 
 **Displayed month**:
-The month a date calendar's grid shows. Turning a page changes it, not the value.
+The month a calendar's grid shows. Turning a page changes it, not the value.
 _Avoid_: View date, visible month, current month
 
 **Outside day**:
@@ -134,11 +152,16 @@ A day of the month before or after the displayed month, shown to fill the grid's
 _Avoid_: Adjacent day, overflow day, other-month day
 
 **Disabled day**:
-A day in a date calendar that the user can move to but can't commit, because it falls before the earliest or after the latest day allowed, or on a disabled day of the week.
+A day in a calendar that the user can move to but can't commit. In a date calendar, it falls before the earliest or after the latest day allowed, or on a disabled day of the week. In a week calendar, its week is a disabled week.
 _Avoid_: Blocked day, unavailable day
 
+**Disabled week**:
+A week in a week calendar that the user can move through but can't commit, because none of its days falls between the
+earliest and the latest day allowed. Its days are the week calendar's only disabled days.
+_Avoid_: Blocked week, unavailable week
+
 **Today**:
-The calendar date it is now in a date calendar's time zone, which may differ from the browser's.
+The calendar date it is now in a calendar's time zone, which may differ from the browser's.
 _Avoid_: Current date, now
 
 ### Building blocks

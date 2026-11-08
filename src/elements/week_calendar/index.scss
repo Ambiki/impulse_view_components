@@ -1,0 +1,48 @@
+@import '../../internal/day_grid';
+
+@include day-grid('awc-week-calendar');
+
+.awc-week-calendar-grid tbody tr {
+  // The week under the pointer, and the active day's week as the user moves through the grid. The selected week keeps
+  // its band, and a disabled week stays plain, as it can't be committed.
+  &:hover,
+  &:has(.awc-week-calendar-day:focus-visible) {
+    td:not([aria-selected='true']) > .awc-week-calendar-day:not([aria-disabled='true']) {
+      background-color: $gray-100;
+    }
+  }
+
+  // The selected week is a whole row, drawn as one band. The days' shadows close the gaps between their cells, and only
+  // its ends are rounded.
+  td[aria-selected='true'] > .awc-week-calendar-day {
+    border-radius: 0;
+    box-shadow: -2px 0 0 var(--awc-week-calendar-accent);
+
+    &[aria-current='date'] {
+      box-shadow:
+        -2px 0 0 var(--awc-week-calendar-accent),
+        inset 0 0 0 1px $white;
+    }
+
+    // Outside the band, the outline would sit on the neighbouring days' accent, which it barely contrasts with.
+    &:focus-visible {
+      outline: 2px solid $white;
+      outline-offset: -4px;
+    }
+  }
+
+  td[aria-selected='true']:first-child > .awc-week-calendar-day {
+    border-top-left-radius: $btn-border-radius-sm;
+    border-bottom-left-radius: $btn-border-radius-sm;
+    box-shadow: none;
+
+    &[aria-current='date'] {
+      box-shadow: inset 0 0 0 1px $white;
+    }
+  }
+
+  td[aria-selected='true']:last-child > .awc-week-calendar-day {
+    border-top-right-radius: $btn-border-radius-sm;
+    border-bottom-right-radius: $btn-border-radius-sm;
+  }
+}

@@ -31,7 +31,7 @@ function dateCalendarHtml(options: CalendarOptions = {}) {
   const minDay = CalendarDate.parse(min);
   const maxDay = CalendarDate.parse(max);
   const view = {
-    block: 'awc-date-calendar',
+    tagName: 'awc-date-calendar',
     displayed: active,
     active,
     selected: selected && { start: selected, end: selected },

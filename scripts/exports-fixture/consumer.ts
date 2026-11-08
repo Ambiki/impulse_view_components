@@ -40,6 +40,9 @@ import type {
   Side as PopoverSide,
   Strategy as PopoverStrategy,
 } from '@ambiki/impulse-view-components/popover';
+import * as weekCalendar from '@ambiki/impulse-view-components/week-calendar';
+import { AwcWeekCalendarElement } from '@ambiki/impulse-view-components/week-calendar';
+import type { AwcWeekCalendarCommitEvent } from '@ambiki/impulse-view-components/week-calendar';
 
 import { useFloatingUI, useFocusOut, useOutsideClick } from '@ambiki/impulse-view-components/hooks';
 import type {
@@ -68,6 +71,7 @@ export const used = {
   dateCalendar,
   dialog,
   popover,
+  weekCalendar,
   useFloatingUI,
   useFocusOut,
   useOutsideClick,
@@ -123,6 +127,23 @@ document.addEventListener('awc-date-calendar:commit', (event) => {
   const value: string = event.detail.value;
   return value;
 });
+// @ts-expect-error: a committed week's end is a `YYYY-MM-DD` string
+export const notACommittedWeekEnd: AwcWeekCalendarCommitEvent['end'] = new Date();
+// @ts-expect-error: a week calendar has no disabled days of the week
+export const noWeekDisabledDays = document.createElement('awc-week-calendar').disabledDaysOfWeek;
+// The week calendar shares the date calendar's methods.
+const weekCalendarElement = document.createElement('awc-week-calendar');
+export const weekMethods: [void, void, void, boolean] = [
+  weekCalendarElement.resetView(),
+  weekCalendarElement.nextView(),
+  weekCalendarElement.goToDate('2026-12-24'),
+  weekCalendarElement.isDateDisabled('2026-11-22'),
+];
+// Listeners get the week calendar's event typed, without a cast.
+document.addEventListener('awc-week-calendar:commit', (event) => {
+  const { value, start, end }: { value: string; start: string; end: string } = event.detail;
+  return [value, start, end];
+});
 
 // The hook still takes everything Floating UI's `ReferenceElement` does: a Floating UI `VirtualElement`, and a virtual
 // element with `getClientRects` (which Floating UI's `inline()` middleware reads).
@@ -142,6 +163,7 @@ export const namedClasses: [
   typeof dateCalendar.default,
   typeof dialog.default,
   typeof popover.default,
+  typeof weekCalendar.default,
 ] = [
   AwcAnchorElement,
   AwcAutocompleteElement,
@@ -149,6 +171,7 @@ export const namedClasses: [
   AwcDateCalendarElement,
   AwcDialogElement,
   AwcPopoverElement,
+  AwcWeekCalendarElement,
 ];
 // @ts-expect-error: a plain element is not an anchor
 export const notAnAnchorElement: AwcAnchorElement = document.createElement('div');
@@ -162,6 +185,8 @@ export const notADateCalendar: AwcDateCalendarElement = document.createElement('
 export const notADialog: AwcDialogElement = document.createElement('div');
 // @ts-expect-error: a plain element is not a popover
 export const notAPopover: AwcPopoverElement = document.createElement('div');
+// @ts-expect-error: a plain element is not a week calendar
+export const notAWeekCalendar: AwcWeekCalendarElement = document.createElement('div');
 
 // ...and the positioning types its properties use, as their real unions.
 // @ts-expect-error: not a placement

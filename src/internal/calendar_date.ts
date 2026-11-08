@@ -53,12 +53,27 @@ export class CalendarDate {
     return this.add({ days: -((this.dayOfWeek - firstDayOfWeek + 7) % 7) });
   }
 
+  /** The last day of the week the date is in, a week starting on `firstDayOfWeek`. */
+  endOfWeek(firstDayOfWeek: number): CalendarDate {
+    return this.startOfWeek(firstDayOfWeek).add({ days: 6 });
+  }
+
+  /** The first day of the date's month. */
+  startOfMonth(): CalendarDate {
+    return new CalendarDate(this.year, this.month, 1);
+  }
+
+  /** The last day of the date's month. */
+  endOfMonth(): CalendarDate {
+    return new CalendarDate(this.year, this.month, daysInMonth(this.year, this.month));
+  }
+
   /**
    * The date's month as six weeks starting on `firstDayOfWeek`, filled with days of the months before and after, so a
    * grid of it has the same height for every month.
    */
   monthGrid(firstDayOfWeek: number): CalendarDate[][] {
-    const first = new CalendarDate(this.year, this.month, 1).startOfWeek(firstDayOfWeek);
+    const first = this.startOfMonth().startOfWeek(firstDayOfWeek);
     return Array.from({ length: 6 }, (_, week) =>
       Array.from({ length: 7 }, (_, day) => first.add({ days: week * 7 + day })));
   }

@@ -41,7 +41,7 @@ export const ENGLISH: CalendarI18n = {
 /** What a calendar shows: everything its grid is rendered from. */
 export interface CalendarView {
   /** The element's tag, which prefixes the grid's class names, such as `awc-date-calendar-day`. */
-  block: string;
+  tagName: string;
   /** A day of the displayed month. */
   displayed: CalendarDate;
   /** The day holding the grid's one tab stop. */
@@ -103,8 +103,8 @@ function dayCell(date: CalendarDate, view: CalendarView) {
   const button = document.createElement('button');
   button.setAttribute('type', 'button');
   button.className = date.isSameMonth(view.displayed) ?
-    `${view.block}-day` :
-    `${view.block}-day ${view.block}-day--outside`;
+    `${view.tagName}-day` :
+    `${view.tagName}-day ${view.tagName}-day--outside`;
   button.setAttribute('tabindex', date.equals(view.active) ? '0' : '-1');
   button.dataset.date = date.toString();
   button.setAttribute('aria-label', formatDate(date, view.i18n.formats.day, view.i18n));

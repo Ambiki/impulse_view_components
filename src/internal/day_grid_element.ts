@@ -54,7 +54,7 @@ export default abstract class DayGridElement extends ImpulseElement {
    * The month shown, and the day holding the tab stop, after the user commits `date`, which selected `range`. By
    * default, `date`'s month: committing an outside day turns the page to it.
    */
-  protected afterCommit(_view: CalendarView, date: CalendarDate, _range: DateRange): { displayed: CalendarDate; active: CalendarDate } {
+  protected viewAfterCommit(_view: CalendarView, date: CalendarDate, _range: DateRange): { displayed: CalendarDate; active: CalendarDate } {
     return { displayed: date, active: date };
   }
 
@@ -213,7 +213,7 @@ export default abstract class DayGridElement extends ImpulseElement {
       case 'Home':
         return from.startOfWeek(this.firstDayOfWeek);
       case 'End':
-        return from.startOfWeek(this.firstDayOfWeek).add({ days: 6 });
+        return from.endOfWeek(this.firstDayOfWeek);
       case 'PageUp':
         return event.shiftKey ? from.add({ years: -1 }) : from.add({ months: -1 });
       case 'PageDown':
@@ -260,7 +260,7 @@ export default abstract class DayGridElement extends ImpulseElement {
     if (view.isDisabled(date)) return;
 
     const range = this.rangeOf(date);
-    this.render({ ...view, ...this.afterCommit(view, date, range), selected: range });
+    this.render({ ...view, ...this.viewAfterCommit(view, date, range), selected: range });
     if (rangeEquals(range, view.selected)) return;
 
     // The event reports the range committed, not whatever `value` holds by the time it is read.
@@ -281,7 +281,7 @@ export default abstract class DayGridElement extends ImpulseElement {
     const min = CalendarDate.parse(this.min);
     const max = CalendarDate.parse(this.max);
     return {
-      block: this.localName,
+      tagName: this.localName,
       displayed,
       active: active ?? day ?? displayed,
       selected: day ? this.rangeOf(day) : null,
