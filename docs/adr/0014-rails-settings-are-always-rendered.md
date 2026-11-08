@@ -18,3 +18,4 @@ The date calendar depends on three settings an app already has in Rails and a br
 - Month and weekday names come from Rails' `date.*` keys, and the heading and day-name patterns from `impulse.calendar.*`, which the calendars share. IVC ships English in `config/locales/en.yml`; other locales are the app's.
 - Ruby marks today in the calendar's zone, and JavaScript checks it against `time-zone` when the element connects and on each page turn, so a cached page, or one left open past midnight, still marks the right day.
 - `Intl` is used only to tell what day it is in a zone, never for text.
+- Each calendar renders the settings it uses. A year calendar has no weeks, so it renders no `first-day-of-week`, and its `i18n` holds only the pattern that names a decade (#373).

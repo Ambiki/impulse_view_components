@@ -57,7 +57,7 @@ module Impulse
       end
 
       def heading(page)
-        I18n.l(page, format: I18n.t("impulse.calendar.formats.heading"))
+        I18n.l(page, format: heading_format)
       end
 
       def text(cell)
@@ -65,7 +65,7 @@ module Impulse
       end
 
       def label(cell)
-        I18n.l(cell, format: I18n.t("impulse.calendar.formats.day"))
+        I18n.l(cell, format: day_format)
       end
 
       def previous_label
@@ -83,11 +83,18 @@ module Impulse
           abbrMonthNames: I18n.t("date.abbr_month_names").compact,
           dayNames: I18n.t("date.day_names"),
           abbrDayNames: I18n.t("date.abbr_day_names"),
-          formats: {
-            heading: I18n.t("impulse.calendar.formats.heading"),
-            day: I18n.t("impulse.calendar.formats.day")
-          }
+          formats: { heading: heading_format, day: day_format }
         }
+      end
+
+      private
+
+      def heading_format
+        I18n.t("impulse.calendar.formats.heading")
+      end
+
+      def day_format
+        I18n.t("impulse.calendar.formats.day")
       end
     end
   end

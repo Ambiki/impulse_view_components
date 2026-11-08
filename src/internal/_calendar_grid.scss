@@ -1,6 +1,11 @@
-// The grid the calendars share, with each calendar's own class prefix, `$block`: `awc-date-calendar` styles
-// `.awc-date-calendar-day`. It expects Bootstrap 4's Sass functions, variables and mixins to be loaded already.
-@mixin calendar-grid($block) {
+// The space below a weekday heading, and around a cell's button, which the grid's box is worked out from.
+$calendar-grid-heading-gap: 0.25rem;
+$calendar-grid-cell-padding: 1px;
+
+// The grid the calendars share, with each calendar's own class prefix, `$block`, and its level's cells, `$cell`:
+// `awc-date-calendar` and `day` style `.awc-date-calendar-day`. It expects Bootstrap 4's Sass functions, variables and
+// mixins to be loaded already.
+@mixin calendar-grid($block, $cell: 'day') {
   .#{$block} {
     // At least 24px square, so each day is a large enough target (WCAG 2.5.8).
     --#{$block}-day-size: 2.25rem;
@@ -47,16 +52,19 @@
     border-collapse: collapse;
 
     th {
-      padding: 0 0 0.25rem;
+      padding: 0 0 $calendar-grid-heading-gap;
       text-align: center;
       font-size: var(--fs-sm);
+      // Set rather than inherited, so the day grid's height can be worked out: a level without weekdays fills the same
+      // box (see `calendar-grid-box`). It's what the page's text inherits anyway.
+      line-height: $line-height-base;
       font-weight: var(--fw-medium);
       color: var(--color-fg-secondary);
     }
 
-    // A click on the padding around a day's button commits the day, so it shows the day's cursor.
+    // A click on the padding around a cell's button commits the cell, so it shows the cell's cursor.
     td {
-      padding: 1px;
+      padding: $calendar-grid-cell-padding;
       cursor: pointer;
 
       &:has(> [aria-disabled='true']) {
@@ -65,7 +73,7 @@
     }
   }
 
-  .#{$block}-day {
+  .#{$block}-#{$cell} {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -119,4 +127,13 @@
       font-weight: var(--fw-medium);
     }
   }
+}
+
+// The box the day grid fills, six weeks under a row of weekday headings, which every level's grid fills too, so drilling
+// up never changes a calendar's size (ADR 0015).
+@mixin calendar-grid-box($block) {
+  $cell: calc(var(--#{$block}-day-size) + #{2 * $calendar-grid-cell-padding});
+
+  width: calc(7 * #{$cell});
+  height: calc(var(--fs-sm) * #{$line-height-base} + #{$calendar-grid-heading-gap} + 6 * #{$cell});
 }

@@ -1,24 +1,70 @@
 /**
  * The day level: a month's days, in six weeks, under a row of weekday headings. The date and week calendars show it.
- * It is internal: the package's `exports` map doesn't list it.
+ * A cell is a day, and a view a month. It is internal: the package's `exports` map doesn't list it.
  */
-import type { CalendarI18n, Level } from 'src/internal/calendar_grid';
+import type { DateNames } from 'src/internal/calendar_date';
+import type { Level } from 'src/internal/calendar_grid';
 import { CalendarDate, formatDate } from 'src/internal/calendar_date';
-import { weekdayRow } from 'src/internal/calendar_grid';
 
-export const DAY_LEVEL: Level<CalendarI18n> = {
+/** The names and patterns a day-level calendar formats its text with, as its component renders them. */
+export interface DayLevelI18n extends DateNames {
+  formats: {
+    /** Names the displayed month, above the grid. */
+    heading: string;
+    /** Each day's accessible name. */
+    day: string;
+  };
+}
+
+/** Rails' English, used only when the component's `i18n` attribute is missing (ADR 0014). */
+export const DAY_ENGLISH: DayLevelI18n = {
+  monthNames: [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ],
+  abbrMonthNames: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+  dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+  abbrDayNames: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+  formats: { heading: '%B %Y', day: '%A, %B %-d, %Y' },
+};
+
+/** The row of weekday headings, from the first day of the week. */
+export function weekdayRow(firstDayOfWeek: number, i18n: DateNames): HTMLTableRowElement {
+  const row = document.createElement('tr');
+  for (let offset = 0; offset < 7; offset++) {
+    const dayOfWeek = (firstDayOfWeek + offset) % 7;
+    const heading = document.createElement('th');
+    heading.setAttribute('scope', 'col');
+    heading.setAttribute('abbr', i18n.dayNames[dayOfWeek] ?? '');
+    heading.textContent = i18n.abbrDayNames[dayOfWeek] ?? '';
+    row.append(heading);
+  }
+  return row;
+}
+
+export const DAY_LEVEL: Level<DayLevelI18n> = {
   cell: 'day',
-  pageAttribute: 'month',
+  viewAttribute: 'month',
   weekdayRow,
-  formatPage: (page) => page.toString().slice(0, 7),
-  parsePage: (value) => CalendarDate.parse(`${value}-01`),
+  formatView: (view) => view.toString().slice(0, 7),
+  parseView: (value) => CalendarDate.parse(`${value}-01`),
   cellOf: (date) => date,
-  pageOf: (date) => date.startOfMonth(),
-  comparePages: (a, b) => a.compareMonth(b),
-  addPages: (cell, pages) => cell.add({ months: pages }),
-  rows: (page, firstDayOfWeek) => page.monthGrid(firstDayOfWeek),
+  viewOf: (date) => date.startOfMonth(),
+  compareViews: (a, b) => a.compareMonth(b),
+  addViews: (cell, views) => cell.add({ months: views }),
+  rows: (view, firstDayOfWeek) => view.monthGrid(firstDayOfWeek),
   // Per the APG date picker: a day, a week, the week's ends, a month, and with Shift a year.
-  move: (cell, event, firstDayOfWeek) => {
+  move: (cell, event, { firstDayOfWeek }) => {
     switch (event.key) {
       case 'ArrowLeft':
         return cell.add({ days: -1 });
@@ -40,7 +86,7 @@ export const DAY_LEVEL: Level<CalendarI18n> = {
         return null;
     }
   },
-  heading: (page, i18n) => formatDate(page, i18n.formats.heading, i18n),
+  heading: (view, i18n) => formatDate(view, i18n.formats.heading, i18n),
   text: (cell) => String(cell.day),
   label: (cell, i18n) => formatDate(cell, i18n.formats.day, i18n),
 };

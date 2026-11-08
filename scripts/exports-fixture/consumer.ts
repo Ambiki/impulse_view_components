@@ -43,6 +43,9 @@ import type {
 import * as weekCalendar from '@ambiki/impulse-view-components/week-calendar';
 import { AwcWeekCalendarElement } from '@ambiki/impulse-view-components/week-calendar';
 import type { AwcWeekCalendarCommitEvent } from '@ambiki/impulse-view-components/week-calendar';
+import * as yearCalendar from '@ambiki/impulse-view-components/year-calendar';
+import { AwcYearCalendarElement } from '@ambiki/impulse-view-components/year-calendar';
+import type { AwcYearCalendarCommitEvent, YearCalendarI18n } from '@ambiki/impulse-view-components/year-calendar';
 
 import { useFloatingUI, useFocusOut, useOutsideClick } from '@ambiki/impulse-view-components/hooks';
 import type {
@@ -72,6 +75,7 @@ export const used = {
   dialog,
   popover,
   weekCalendar,
+  yearCalendar,
   useFloatingUI,
   useFocusOut,
   useOutsideClick,
@@ -139,6 +143,17 @@ export const weekMethods: [void, void, void, boolean] = [
   weekCalendarElement.goToDate('2026-12-24'),
   weekCalendarElement.isDateDisabled('2026-11-22'),
 ];
+// The year calendar's methods take years, and its event carries one.
+const yearCalendarElement = document.createElement('awc-year-calendar');
+export const yearMethods: [void, boolean] = [yearCalendarElement.goToDate('2031'), yearCalendarElement.isDateDisabled('2019')];
+// @ts-expect-error: a committed year is a `YYYY` string
+export const notACommittedYear: AwcYearCalendarCommitEvent['value'] = 2026;
+// @ts-expect-error: a year calendar's names are only its decade pattern
+export const notYearNames: YearCalendarI18n['monthNames'] = [];
+document.addEventListener('awc-year-calendar:commit', (event) => {
+  const value: string = event.detail.value;
+  return value;
+});
 // Listeners get the week calendar's event typed, without a cast.
 document.addEventListener('awc-week-calendar:commit', (event) => {
   const { value, start, end }: { value: string; start: string; end: string } = event.detail;
@@ -164,6 +179,7 @@ export const namedClasses: [
   typeof dialog.default,
   typeof popover.default,
   typeof weekCalendar.default,
+  typeof yearCalendar.default,
 ] = [
   AwcAnchorElement,
   AwcAutocompleteElement,
@@ -172,6 +188,7 @@ export const namedClasses: [
   AwcDialogElement,
   AwcPopoverElement,
   AwcWeekCalendarElement,
+  AwcYearCalendarElement,
 ];
 // @ts-expect-error: a plain element is not an anchor
 export const notAnAnchorElement: AwcAnchorElement = document.createElement('div');
@@ -187,6 +204,8 @@ export const notADialog: AwcDialogElement = document.createElement('div');
 export const notAPopover: AwcPopoverElement = document.createElement('div');
 // @ts-expect-error: a plain element is not a week calendar
 export const notAWeekCalendar: AwcWeekCalendarElement = document.createElement('div');
+// @ts-expect-error: a plain element is not a year calendar
+export const notAYearCalendar: AwcYearCalendarElement = document.createElement('div');
 
 // ...and the positioning types its properties use, as their real unions.
 // @ts-expect-error: not a placement

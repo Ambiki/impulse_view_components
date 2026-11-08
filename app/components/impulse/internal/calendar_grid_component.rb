@@ -33,9 +33,9 @@ module Impulse
         @system_args = system_args
         @system_args[:tag] = tag_name.to_sym
         @system_args[:class] = class_names(system_args[:class], tag_name)
-        @system_args[:value] = (@selected && format_value(@selected)) || value.presence
-        @system_args[:min] = (@min && format_value(@min..@min)) || min.presence
-        @system_args[:max] = (@max && format_value(@max..@max)) || max.presence
+        @system_args[:value] = (@value_cell && format_value(@value_cell)) || value.presence
+        @system_args[:min] = (@min && format_value(@min)) || min.presence
+        @system_args[:max] = (@max && format_value(@max)) || max.presence
         # Rails names zones its own way, such as "Eastern Time (US & Canada)". The browser needs the IANA name.
         @system_args[:"time-zone"] = @time_zone.tzinfo.identifier
         @system_args[:"first-day-of-week"] = @first_day_of_week if level.weekdays
@@ -69,9 +69,9 @@ module Impulse
         nil
       end
 
-      # The value naming `range`. By default, its first day as `YYYY-MM-DD`.
-      def format_value(range)
-        range.begin.iso8601
+      # The value naming the selection, or a limit, that starts with `cell`. By default, the day as `YYYY-MM-DD`.
+      def format_value(cell)
+        cell.iso8601
       end
 
       # The earliest day `min` allows, or the latest `max` does. By default, the day itself.

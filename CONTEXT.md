@@ -109,6 +109,10 @@ A date calendar's grid for choosing a week: committing any day commits its week.
 or popover of its own.
 _Avoid_: Week picker, inline week picker
 
+**Year calendar**:
+A static grid of years for choosing one. Like a date calendar, it has no input or popover of its own.
+_Avoid_: Year picker, decade picker
+
 **Date picker**:
 An input that opens a date calendar in a popover.
 _Avoid_: Date field, date input
@@ -138,9 +142,14 @@ _Avoid_: Highlighted week, current week
 The day the user has moved to in a calendar, holding its one tab stop, that a commit by keyboard would choose. Distinct from the selected day.
 _Avoid_: Focused day, highlighted day, cursor
 
+**Level**:
+The kind of cell a calendar's grid shows: days, months or years. A date or week calendar shows days, and a year
+calendar years.
+_Avoid_: View, mode, zoom, scale
+
 **View**:
-What a calendar shows at once: for a date or week calendar, its displayed month. The previous and next views are the
-ones before and after it.
+What a calendar shows at once: for a date or week calendar, its displayed month; for a year calendar, its displayed
+decade. The previous and next views are the ones before and after it.
 _Avoid_: Screen, sheet
 
 **Displayed month**:
@@ -151,6 +160,14 @@ _Avoid_: View date, visible month, current month
 A day of the month before or after the displayed month, shown to fill the grid's six rows. Never the active day.
 _Avoid_: Adjacent day, overflow day, other-month day
 
+**Displayed decade**:
+The ten years a year calendar's grid shows, from a year ending in 0. Moving to another view changes it, not the value.
+_Avoid_: Year page, year range, period
+
+**Outside year**:
+The year before or after the displayed decade, shown to fill the grid's twelve cells. Never the active year.
+_Avoid_: Adjacent year, overflow year
+
 **Disabled day**:
 A day in a calendar that the user can move to but can't commit. In a date calendar, it falls before the earliest or after the latest day allowed, or on a disabled day of the week. In a week calendar, its week is a disabled week.
 _Avoid_: Blocked day, unavailable day
@@ -159,6 +176,11 @@ _Avoid_: Blocked day, unavailable day
 A week in a week calendar that the user can move through but can't commit, because none of its days falls between the
 earliest and the latest day allowed. Its days are the week calendar's only disabled days.
 _Avoid_: Blocked week, unavailable week
+
+**Disabled year**:
+A year in a year calendar that the user can move to but can't commit, because it falls before the earliest or after
+the latest year allowed.
+_Avoid_: Blocked year, unavailable year
 
 **Today**:
 The calendar date it is now in a calendar's time zone, which may differ from the browser's.

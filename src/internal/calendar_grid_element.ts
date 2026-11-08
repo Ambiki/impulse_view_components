@@ -15,7 +15,7 @@ import type { DateRange } from 'src/internal/calendar_date';
 import type { CalendarView, Level } from 'src/internal/calendar_grid';
 import { ImpulseElement } from '@ambiki/impulse';
 import { CalendarDate, rangeEquals, today } from 'src/internal/calendar_date';
-import { canMoveView, canShowPage, gridRows, headingText } from 'src/internal/calendar_grid';
+import { canMoveView, canShowView, gridRows, headingText } from 'src/internal/calendar_grid';
 
 export default abstract class CalendarGridElement<I> extends ImpulseElement {
   /** The selection, written as the calendar writes values. Anything else selects nothing. */
@@ -27,13 +27,10 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
   /** The latest the user can commit, written as the value is. */
   abstract max: string;
 
-  /** The day each week starts on, `0` being Sunday. */
-  abstract firstDayOfWeek: number;
-
   /** The IANA time zone that decides what today is. Defaults to the browser's. */
   abstract timeZone: string;
 
-  /** The names and patterns the pages are rendered with. Defaults to English. */
+  /** The names and patterns the views are rendered with. Defaults to English. */
   abstract i18n: I;
 
   abstract heading: HTMLElement;
@@ -61,6 +58,11 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
   /** The detail of `commit`, for the range the user committed. */
   protected abstract commitDetail(range: DateRange): object;
 
+  /** The day each week starts on, `0` being Sunday, for a calendar with weeks. By default, Sunday. */
+  protected weekStart(): number {
+    return 0;
+  }
+
   /** The cell a value names, or `null` when it names none. By default, a `YYYY-MM-DD` day. */
   protected parseValue(value: string): CalendarDate | null {
     return CalendarDate.parse(value);
@@ -77,8 +79,8 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
   }
 
   /**
-   * The page shown, and the cell holding the tab stop, after the user commits `cell`, which selected `range`. By
-   * default, `cell`'s page: committing an outside cell turns the page to it.
+   * The view shown, and the cell holding the tab stop, after the user commits `cell`, which selected `range`. By
+   * default, `cell`'s view: committing an outside cell moves the view to it.
    */
   protected viewAfterCommit(_view: CalendarView<I>, cell: CalendarDate, _range: DateRange): { displayed: CalendarDate; active: CalendarDate } {
     return { displayed: cell, active: cell };
@@ -115,12 +117,8 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
     this.refresh();
   }
 
-  firstDayOfWeekChanged() {
-    this.refresh();
-  }
-
   /**
-   * Takes the view back to the value: its page becomes the displayed page, and its cell the active one. Without a
+   * Takes the view back to the value: its view becomes the displayed one, and its cell the active one. Without a
    * value, today's. Changes nothing else, and emits nothing.
    */
   resetView() {
@@ -130,20 +128,20 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
   }
 
   /**
-   * Shows the view before, as the previous button does: the active cell moves back a page, keeping its place in it.
-   * Does nothing at the page holding `min`. Changes no value and emits nothing.
+   * Shows the view before, as the previous button does: the active cell moves back a view, keeping its place in it.
+   * Does nothing at the view holding `min`. Changes no value and emits nothing.
    */
   previousView() {
     this.moveView(-1);
   }
 
-  /** Shows the view after, as the next button does. Does nothing at the page holding `max`. */
+  /** Shows the view after, as the next button does. Does nothing at the view holding `max`. */
   nextView() {
     this.moveView(1);
   }
 
   /**
-   * Shows the page `value` is on and makes its cell the active one, without selecting it. `value` is written as the
+   * Shows the view `value` is in and makes its cell the active one, without selecting it. `value` is written as the
    * calendar writes values. Unlike the user, code can go past `min` and `max`. Ignores anything else, and emits nothing.
    */
   goToDate(value: string) {
@@ -151,14 +149,14 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
     if (day) this.showCell(this.view(), this.level.cellOf(day));
   }
 
-  /** Shows today's page, in the calendar's time zone, and makes today's cell the active one, without selecting it. */
+  /** Shows today's view, in the calendar's time zone, and makes today's cell the active one, without selecting it. */
   goToToday() {
     const view = this.view();
     this.showCell(view, view.today);
   }
 
   /**
-   * Selects nothing, as setting an empty `value` does: the calendar shows today's page. Like any value method called
+   * Selects nothing, as setting an empty `value` does: the calendar shows today's view. Like any value method called
    * from code, including from a `data-action`, it emits nothing (ADR 0002).
    */
   clear() {
@@ -191,7 +189,7 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
     const from = this.cellOf(event.target);
     if (!from || event.altKey || event.ctrlKey || event.metaKey) return;
 
-    const to = this.level.move(from, event, this.firstDayOfWeek);
+    const to = this.level.move(from, event, { firstDayOfWeek: this.weekStart(), displayed: this.view().displayed });
     if (!to) return;
 
     // The keys move through the grid, so they don't scroll the page, even where the grid stops them.
@@ -199,10 +197,10 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
     this.moveTo(to);
   }
 
-  /** A cell of the displayed page that gets focus, by pointer for one, takes the tab stop. Outside cells never do. */
+  /** A cell of the displayed view that gets focus, by pointer for one, takes the tab stop. Outside cells never do. */
   handleFocusin(event: FocusEvent) {
     const cell = this.cellOf(event.target);
-    if (cell && this.level.comparePages(cell, this.view().displayed) === 0) this.moveTabStop(cell);
+    if (cell && this.level.compareViews(cell, this.view().displayed) === 0) this.moveTabStop(cell);
   }
 
   handleClick(event: MouseEvent) {
@@ -222,25 +220,25 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
   }
 
   /**
-   * Moves the view by `pages`, moving the active cell by as many pages, keeping its place in its page. Does nothing past
-   * the pages holding `min` and `max`.
+   * Moves by `views` views, moving the active cell as far, keeping its place in its view. Does nothing past the views
+   * holding `min` and `max`.
    */
-  private moveView(pages: number) {
+  private moveView(views: number) {
     const view = this.view();
-    if (!canMoveView(view, pages)) return;
+    if (!canMoveView(view, views)) return;
 
-    this.showCell(view, this.level.addPages(view.active, pages));
+    this.showCell(view, this.level.addViews(view.active, views));
   }
 
   /**
-   * Makes `cell` the active one and focuses it, turning the page when it is on another. Does nothing past the pages
+   * Makes `cell` the active one and focuses it, moving the view when it is in another. Does nothing past the views
    * holding `min` and `max`.
    */
   private moveTo(cell: CalendarDate) {
     const view = this.view();
-    if (!canShowPage(cell, view)) return;
+    if (!canShowView(cell, view)) return;
 
-    if (this.level.comparePages(cell, view.displayed) === 0) {
+    if (this.level.compareViews(cell, view.displayed) === 0) {
       this.moveTabStop(cell);
     } else {
       this.showCell(view, cell);
@@ -248,7 +246,7 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
     this.button(cell)?.focus();
   }
 
-  /** Gives the grid's one tab stop to `cell`, a cell of the displayed page. */
+  /** Gives the grid's one tab stop to `cell`, a cell of the displayed view. */
   private moveTabStop(cell: CalendarDate) {
     for (const button of this.cells.querySelectorAll<HTMLElement>('button[tabindex="0"]')) {
       button.setAttribute('tabindex', '-1');
@@ -282,10 +280,10 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
     this.emit('commit', { detail: this.commitDetail(range) });
   }
 
-  /** What the grid shows now. The displayed page and the active cell are read from the DOM, which a morph restores. */
+  /** What the grid shows now. The displayed view and the active cell are read from the DOM, which a morph restores. */
   protected view(): CalendarView<I> {
     const { level } = this;
-    const displayed = level.parsePage(this.grid.dataset[level.pageAttribute])!;
+    const displayed = level.parseView(this.grid.dataset[level.viewAttribute])!;
     const cell = this.valueCell();
     const active = CalendarDate.parse(this.cells.querySelector<HTMLElement>('button[tabindex="0"]')?.dataset.date);
     const min = this.parseLimit(this.min, 'min');
@@ -300,12 +298,12 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
       min,
       max,
       isDisabled: (date) => this.isDisabledCell(date, min, max),
-      firstDayOfWeek: this.firstDayOfWeek,
+      firstDayOfWeek: this.weekStart(),
       i18n: this.i18n,
     };
   }
 
-  /** Shows the page `cell` is on, with `cell` as the active one. */
+  /** Shows the view `cell` is in, with `cell` as the active one. */
   private showCell(view: CalendarView<I>, cell: CalendarDate) {
     this.render({ ...view, displayed: cell, active: cell });
   }
@@ -314,8 +312,8 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
     const { level } = this;
     // The cells' buttons are replaced, so focus on one moves to the active cell rather than to the page.
     const hadFocus = this.cells.contains(document.activeElement);
-    this.grid.dataset[level.pageAttribute] = level.formatPage(level.pageOf(view.displayed));
-    // The heading is a live region, so it is only written when the page changes, which announces it.
+    this.grid.dataset[level.viewAttribute] = level.formatView(level.viewOf(view.displayed));
+    // The heading is a live region, so it is only written when the view changes, which announces it.
     const heading = headingText(view);
     if (this.heading.textContent !== heading) this.heading.textContent = heading;
     const weekdays = level.weekdayRow?.(view.firstDayOfWeek, view.i18n);

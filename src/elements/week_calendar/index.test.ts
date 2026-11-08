@@ -5,8 +5,8 @@ import { expect, fixture } from '@open-wc/testing';
 import { sendKeys } from '@web/test-runner-commands';
 import { Idiomorph } from 'idiomorph';
 import { CalendarDate, today } from '../../internal/calendar_date';
-import { canMoveView, ENGLISH, gridRows, headingText, weekdayRow } from '../../internal/calendar_grid';
-import { DAY_LEVEL } from '../../internal/day_level';
+import { canMoveView, gridRows, headingText } from '../../internal/calendar_grid';
+import { DAY_LEVEL, DAY_ENGLISH as ENGLISH, weekdayRow } from '../../internal/day_level';
 // Registers `awc-week-calendar`. Kept separate from the type imports above, which the bundler elides.
 import './index';
 
