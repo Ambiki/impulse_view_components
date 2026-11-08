@@ -54,8 +54,14 @@
       color: var(--color-fg-secondary);
     }
 
+    // A click on the padding around a day's button commits the day, so it shows the day's cursor.
     td {
       padding: 1px;
+      cursor: pointer;
+
+      &:has(> [aria-disabled='true']) {
+        cursor: not-allowed;
+      }
     }
   }
 
