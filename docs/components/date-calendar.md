@@ -107,5 +107,22 @@ announces the new month.
 | Shift + Page Up, Shift + Page Down | The same day of the year before or after |
 | Enter, Space                     | Commits the day                      |
 
-Moving past the edge of the month turns the page. See the [JS API](../js-api/date-calendar.md) for the element's
-properties, its methods to turn the page, go to a date and focus, and the event's detail.
+Moving past the edge of the month turns the page.
+
+## Imports
+
+::: code-group
+```js
+import '@ambiki/impulse-view-components/date-calendar';
+```
+
+```scss
+@import '@ambiki/impulse-view-components/date-calendar';
+```
+:::
+
+The styles need Bootstrap's Sass and the base styles loaded first. See [Import the styles](/introduction/getting-started#import-the-styles).
+
+## JS API
+
+[Read here](../js-api/date-calendar.md).
