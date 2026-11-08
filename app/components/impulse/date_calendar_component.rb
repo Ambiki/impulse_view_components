@@ -89,11 +89,11 @@ module Impulse
     end
 
     def heading_format
-      I18n.t("impulse.date_calendar.formats.heading")
+      I18n.t("impulse.calendar.formats.heading")
     end
 
     def day_format
-      I18n.t("impulse.date_calendar.formats.day")
+      I18n.t("impulse.calendar.formats.day")
     end
 
     # A day the user can move to but not commit.

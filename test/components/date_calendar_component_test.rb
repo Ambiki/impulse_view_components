@@ -150,7 +150,7 @@ module Impulse
     test "uses the app's translations" do
       # Loads the translation files first, which would otherwise be loaded on the first lookup, over these.
       I18n.backend.eager_load!
-      I18n.backend.store_translations(:en, impulse: { date_calendar: {
+      I18n.backend.store_translations(:en, impulse: { calendar: {
         previous_month: "Earlier",
         formats: { heading: "%b %Y", day: "%-d %B %Y" }
       } })

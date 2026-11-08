@@ -15,6 +15,6 @@ The date calendar depends on three settings an app already has in Rails and a br
 
 - The time zone comes from the `time_zone:` argument, then the zone of an `ActiveSupport::TimeWithZone` value, then `Time.zone`, and times are read in that zone. Rails zone names aren't IANA names, so the component sends `tzinfo.identifier`. A name the browser rejects falls back to the browser's zone.
 - An app that never sets `config.beginning_of_week` gets Rails' default, Monday. `first_day_of_week:` overrides it per calendar.
-- Month and weekday names come from Rails' `date.*` keys, and the heading and day-name patterns from `impulse.date_calendar.*`. IVC ships English in `config/locales/en.yml`; other locales are the app's.
+- Month and weekday names come from Rails' `date.*` keys, and the heading and day-name patterns from `impulse.calendar.*`, which the calendars share. IVC ships English in `config/locales/en.yml`; other locales are the app's.
 - Ruby marks today in the calendar's zone, and JavaScript checks it against `time-zone` when the element connects and on each page turn, so a cached page, or one left open past midnight, still marks the right day.
 - `Intl` is used only to tell what day it is in a zone, never for text.

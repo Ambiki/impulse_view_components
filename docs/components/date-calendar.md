@@ -76,12 +76,12 @@ popover.addEventListener('awc-popover:hidden', () => calendar.resetView());
 ### Translations
 
 Month and weekday names come from Rails' `date.month_names`, `date.abbr_month_names`, `date.day_names` and
-`date.abbr_day_names`. The button labels and the two `strftime` patterns are the calendar's own:
+`date.abbr_day_names`. The button labels and the two `strftime` patterns are shared by the calendars:
 
 ```yaml
 en:
   impulse:
-    date_calendar:
+    calendar:
       previous_month: Previous month
       next_month: Next month
       formats:
