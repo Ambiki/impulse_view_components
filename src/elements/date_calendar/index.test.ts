@@ -4,7 +4,7 @@ import { expect, fixture } from '@open-wc/testing';
 import { sendKeys } from '@web/test-runner-commands';
 import { Idiomorph } from 'idiomorph';
 import { CalendarDate, today } from '../../internal/calendar_date';
-import { canMoveView, ENGLISH, headingText, weekdayRow, weekRows } from './render';
+import { canMoveView, ENGLISH, headingText, weekdayRow, weekRows } from '../../internal/day_grid';
 // Registers `awc-date-calendar`. Kept separate from the type import above, which the bundler elides.
 import './index';
 
@@ -28,14 +28,20 @@ function dateCalendarHtml(options: CalendarOptions = {}) {
   const selected = CalendarDate.parse(value);
   const marked = CalendarDate.parse(options.markedToday) ?? today(timeZone);
   const active = selected ?? marked;
+  const minDay = CalendarDate.parse(min);
+  const maxDay = CalendarDate.parse(max);
   const view = {
+    block: 'awc-date-calendar',
     displayed: active,
     active,
-    selected,
+    selected: selected && { start: selected, end: selected },
     today: marked,
-    min: CalendarDate.parse(min),
-    max: CalendarDate.parse(max),
-    disabledDaysOfWeek,
+    min: minDay,
+    max: maxDay,
+    isDisabled: (date: CalendarDate) =>
+      (!!minDay && date.compare(minDay) < 0) ||
+      (!!maxDay && date.compare(maxDay) > 0) ||
+      disabledDaysOfWeek.includes(date.dayOfWeek),
     firstDayOfWeek,
     i18n: ENGLISH,
   };

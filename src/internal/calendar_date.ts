@@ -93,6 +93,22 @@ function pad(value: number) {
   return String(value).padStart(2, '0');
 }
 
+/** Two calendar dates and every day from one to the other, both included. A week is one, and a single day is too. */
+export interface DateRange {
+  start: CalendarDate;
+  end: CalendarDate;
+}
+
+/** Whether `date` falls in `range`, its start and end included. */
+export function rangeIncludes(range: DateRange | null, date: CalendarDate): boolean {
+  return !!range && date.compare(range.start) >= 0 && date.compare(range.end) <= 0;
+}
+
+/** Whether `a` and `b` are the same range of days. */
+export function rangeEquals(a: DateRange | null, b: DateRange | null): boolean {
+  return !!a && !!b && a.start.equals(b.start) && a.end.equals(b.end);
+}
+
 const DATE_PARTS = { year: 'numeric', month: 'numeric', day: 'numeric' } as const;
 
 /**
