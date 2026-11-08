@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- `Impulse::YearCalendarComponent` and `<awc-year-calendar>`, a grid of years for choosing one, a decade at a time ([#380](https://github.com/Ambiki/impulse_view_components/pull/380))
 - `Impulse::WeekCalendarComponent` and `<awc-week-calendar>`, the date calendar's grid for choosing a week, committed as its first and last days ([#378](https://github.com/Ambiki/impulse_view_components/pull/378))
 - `Impulse::DateCalendarComponent` and `<awc-date-calendar>`, a grid of a month's days for choosing one, to show inline or in a popover ([#377](https://github.com/Ambiki/impulse_view_components/pull/377))
 
