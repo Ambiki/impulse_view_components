@@ -49,10 +49,19 @@ from the app's translations. Its type is exported as `DateCalendarI18n`.
 
 None of them emit an event, and only `clear` changes the value.
 
-### `previousPage` and `nextPage`
+### `previousPage`
 
-Turn the page, as the previous and next buttons do: the day with the tab stop moves by a month. They stop at the
-months holding `min` and `max`.
+Turns to the month before, as the previous button does: the day with the tab stop moves back a month. It stops at the
+month holding `min`.
+
+```js
+calendar.previousPage();
+```
+
+### `nextPage`
+
+Turns to the month after, as the next button does: the day with the tab stop moves on a month. It stops at the month
+holding `max`.
 
 ```js
 calendar.nextPage();
