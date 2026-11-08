@@ -55,8 +55,6 @@ from the app's translations. Its type is exported as `DateCalendarI18n`.
 
 ## Methods
 
-None of them emit an event, and only `clear` changes the value.
-
 ### `previousPage`
 
 Turns to the month before, as the previous button does: the day with the tab stop moves back a month. It stops at the
