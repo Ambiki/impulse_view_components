@@ -89,7 +89,7 @@ calendar.goToDate('2027-03-09');
 Shows today's month, in the calendar's time zone, and gives today the tab stop, without selecting it.
 
 ```js
-todayButton.addEventListener('click', () => calendar.goToToday());
+calendar.goToToday();
 ```
 
 ### `clear`
