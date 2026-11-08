@@ -1,6 +1,6 @@
-// The day grid the calendars share, with each calendar's own class prefix, `$block`: `awc-date-calendar` styles
+// The grid the calendars share, with each calendar's own class prefix, `$block`: `awc-date-calendar` styles
 // `.awc-date-calendar-day`. It expects Bootstrap 4's Sass functions, variables and mixins to be loaded already.
-@mixin day-grid($block) {
+@mixin calendar-grid($block) {
   .#{$block} {
     // At least 24px square, so each day is a large enough target (WCAG 2.5.8).
     --#{$block}-day-size: 2.25rem;

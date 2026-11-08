@@ -1,6 +1,6 @@
-@import '../../internal/day_grid';
+@import '../../internal/calendar_grid';
 
-@include day-grid('awc-week-calendar');
+@include calendar-grid('awc-week-calendar');
 
 // A week as one band of `$color` across its row: the days' shadows close the gaps between their cells, and only the
 // row's ends are rounded. `$cell` and `$day` pick which cells and days the band covers. Today keeps its ring in
