@@ -16,12 +16,20 @@ The selected day. Anything else selects no day. Setting it moves the calendar to
 calendar.value = '2026-12-24';
 ```
 
-### `min` and `max`
+### `min`
 
-The earliest and latest days the user can commit. The calendar doesn't page past their months.
+The earliest day the user can commit. The calendar doesn't page back past its month.
 
 ```js
 calendar.min = '2026-11-10';
+```
+
+### `max`
+
+The latest day the user can commit. The calendar doesn't page on past its month.
+
+```js
+calendar.max = '2027-02-28';
 ```
 
 ### `disabledDaysOfWeek`
