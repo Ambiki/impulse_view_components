@@ -3,18 +3,24 @@
 @include day-grid('awc-week-calendar');
 
 // A week as one band of `$color` across its row: the days' shadows close the gaps between their cells, and only the
-// row's ends are rounded. `$cell` and `$day` pick which cells and days the band covers. Today's ring would box one day
-// off from the rest of the band, so inside it today is underlined instead.
-@mixin week-band($cell, $day, $color) {
+// row's ends are rounded. `$cell` and `$day` pick which cells and days the band covers. Today keeps its ring in
+// `$today-ring`, or, without one, is underlined, where a ring would box one day off from the rest of the band.
+@mixin week-band($cell, $day, $color, $today-ring: null) {
   #{$cell} > #{$day} {
     border-radius: 0;
     background-color: $color;
     box-shadow: -2px 0 0 $color;
 
     &[aria-current='date'] {
-      text-decoration: underline;
-      text-decoration-thickness: 2px;
-      text-underline-offset: 3px;
+      @if $today-ring {
+        box-shadow:
+          -2px 0 0 $color,
+          inset 0 0 0 1px $today-ring;
+      } @else {
+        text-decoration: underline;
+        text-decoration-thickness: 2px;
+        text-underline-offset: 3px;
+      }
     }
   }
 
@@ -22,6 +28,12 @@
     border-top-left-radius: $btn-border-radius-sm;
     border-bottom-left-radius: $btn-border-radius-sm;
     box-shadow: none;
+
+    @if $today-ring {
+      &[aria-current='date'] {
+        box-shadow: inset 0 0 0 1px $today-ring;
+      }
+    }
   }
 
   #{$cell}:last-child > #{$day} {
@@ -38,11 +50,12 @@
     @include week-band(
       "td:not([aria-selected='true'])",
       ".awc-week-calendar-day:not([aria-disabled='true'])",
-      $gray-100
+      $gray-100,
+      $today-ring: var(--awc-week-calendar-accent)
     );
   }
 
-  // The selected week is a whole row.
+  // The selected week is a whole row. Today is underlined in it.
   @include week-band("td[aria-selected='true']", '.awc-week-calendar-day', var(--awc-week-calendar-accent));
 
   // Outside the band, the outline would sit on the neighbouring days' accent, which it barely contrasts with.
