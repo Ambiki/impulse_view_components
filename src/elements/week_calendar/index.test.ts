@@ -125,6 +125,15 @@ describe('awc-week-calendar', () => {
       expect(commits).to.eql([{ value: '2026-11-15', start: '2026-11-15', end: '2026-11-21' }]);
     });
 
+    it('happens on a click in the gap around the day, its cell', async () => {
+      const el = await weekCalendarFixture({ value: '2026-11-01' });
+      const commits = recordCommits();
+
+      day(el, '2026-11-18').closest('td')!.click();
+
+      expect(commits).to.eql([{ value: '2026-11-15', start: '2026-11-15', end: '2026-11-21' }]);
+    });
+
     it('emits nothing for another day of the selected week', async () => {
       const el = await weekCalendarFixture({ value: '2026-11-15' });
       const commits = recordCommits();

@@ -313,9 +313,13 @@ export default abstract class DayGridElement extends ImpulseElement {
     this.nextButton.setAttribute('aria-disabled', String(!canMoveView(view, 1)));
   }
 
-  /** The day a day button in the grid names, or `null` for anything else. */
+  /**
+   * The day a day's cell in the grid names, or `null` for anything else. A cell's padding, the gap around its button,
+   * counts as the day: the band a week calendar draws spans it, so a click there is meant for the day.
+   */
   private dayOf(node: EventTarget | null): CalendarDate | null {
-    const button = node instanceof Element ? node.closest<HTMLElement>('button[data-date]') : null;
+    const cell = node instanceof Element ? node.closest('td') : null;
+    const button = cell?.querySelector<HTMLElement>('button[data-date]');
     return button && this.days.contains(button) ? CalendarDate.parse(button.dataset.date) : null;
   }
 }

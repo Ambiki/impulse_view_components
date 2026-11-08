@@ -134,6 +134,15 @@ describe('awc-date-calendar', () => {
       expect(commits).to.eql(['2026-11-18']);
     });
 
+    it('happens on a click in the gap around the day, its cell', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-06' });
+      const commits = recordCommits();
+
+      day(el, '2026-11-18').closest('td')!.click();
+
+      expect(commits).to.eql(['2026-11-18']);
+    });
+
     it('emits nothing for the day already selected', async () => {
       const el = await dateCalendarFixture({ value: '2026-11-06' });
       const commits = recordCommits();
