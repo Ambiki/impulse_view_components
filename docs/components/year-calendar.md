@@ -89,8 +89,8 @@ year is a button named by its text. Turning the page announces the new decade.
 | Page Up, Page Down, with or without Shift | The same year of the decade before or after |
 | Enter, Space                       | Commits the year                            |
 
-Moving past the edge of the decade, or onto the year before or after it, turns the page. The calendar is the same size
-as the date calendar, so the two can share a popover without it changing size.
+Moving past the edge of the decade, or onto the year before or after it, turns the page. The calendar is as wide as the
+date calendar.
 
 ## Imports
 

@@ -29,13 +29,15 @@ module Impulse
       assert_equal "2023", find("button[data-date='2023-01-01']").native.accessible_name
     end
 
-    test "fills the date calendar's box, so a calendar keeps its size whichever level it shows" do
+    test "is as wide as the date calendar, with its outer years at the grid's sides" do
       visit "/components/preview/impulse/date_calendar/default?value=2026-11-18"
-      date_box = grid_box
+      date_width = grid_box["grid"].first
 
       visit_preview(:default, value: "2026")
 
-      assert_equal date_box, grid_box
+      box = grid_box
+      assert_equal date_width, box["grid"].first
+      assert_equal [0, 0], box["edges"]
     end
 
     test "opens a popover on the selected year, and commits the year clicked" do
@@ -68,13 +70,17 @@ module Impulse
       JS
     end
 
-    # The size of the calendar and of its grid.
+    # The size of the grid, and how far its first row's outer cells sit from its sides.
     def grid_box
       page.evaluate_script(<<~JS)
         (() => {
           const calendar = document.querySelector('[class$="-calendar"]');
-          const size = (el) => [el.getBoundingClientRect().width, el.getBoundingClientRect().height];
-          return { calendar: size(calendar), grid: size(calendar.querySelector('table')) };
+          const grid = calendar.querySelector('table').getBoundingClientRect();
+          const cells = [...calendar.querySelectorAll('tbody tr:first-child button')].map((button) => button.getBoundingClientRect());
+          return {
+            grid: [grid.width, grid.height],
+            edges: [cells[0].left - grid.left, grid.right - cells[cells.length - 1].right],
+          };
         })()
       JS
     end
