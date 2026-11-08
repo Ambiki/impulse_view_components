@@ -238,15 +238,17 @@ export default class AwcDateCalendarElement extends ImpulseElement {
 
     // Committing an outside day turns the page to its month, so the selected day is in the displayed month.
     this.render({ ...view, displayed: date, active: date, selected: date });
-    if (this.value === date.toString()) return;
+    // The event reports the day committed, not whatever `value` holds by the time it is read.
+    const value = date.toString();
+    if (this.value === value) return;
 
     this.committing = true;
     try {
-      this.value = date.toString();
+      this.value = value;
     } finally {
       this.committing = false;
     }
-    this.emit<AwcDateCalendarCommitEvent>('commit', { detail: { value: this.value } });
+    this.emit<AwcDateCalendarCommitEvent>('commit', { detail: { value } });
   }
 
   /** What the grid shows now. The displayed month and the active day are read from the DOM, which a morph restores. */

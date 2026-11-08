@@ -210,6 +210,19 @@ describe('awc-date-calendar', () => {
       expect(day(el, '2026-02-28').tabIndex).to.equal(0);
     });
 
+    it('emit nothing, as moving through the calendar changes no value', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18' });
+      const commits = recordCommits();
+
+      nextButton(el).click();
+      previousButton(el).click();
+      await press(el, 'ArrowRight', '2026-11-18');
+      await press(el, 'PageDown');
+
+      expect(commits).to.eql([]);
+      expect(el.value).to.equal('2026-11-18');
+    });
+
     it('keep focus on the button pressed', async () => {
       const el = await dateCalendarFixture({ value: '2026-11-18' });
       nextButton(el).focus();
@@ -505,10 +518,13 @@ describe('awc-date-calendar', () => {
       expect(el.value).to.equal('2026-11-19');
     });
 
-    it('shows the server\'s new value', async () => {
+    it('shows the server\'s new value, without emitting commit', async () => {
       const el = await dateCalendarFixture({ value: '2026-11-18' });
+      const commits = recordCommits();
 
       Idiomorph.morph(el, dateCalendarHtml({ value: '2027-02-03' }));
+
+      expect(commits).to.eql([]);
 
       expect(el.value).to.equal('2027-02-03');
       expect(el.grid.dataset.month).to.equal('2027-02');
