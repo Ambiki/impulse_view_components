@@ -110,10 +110,10 @@ calendar.isDateDisabled('2026-11-22'); // true when Sundays are disabled
 
 ### `focus`
 
-Focuses the day with the tab stop. Call it when a popover holding the calendar opens, so the keys work at once.
+Focuses the day with the tab stop.
 
 ```js
-popover.addEventListener('awc-popover:shown', () => calendar.focus());
+calendar.focus();
 ```
 
 ### `resetView`
