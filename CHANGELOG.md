@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **Breaking:** `Impulse::PopoverComponent` nests its header and body in a `with_panel` slot, whose arguments reach the panel. `title:` is removed: set the title with the header's `with_title` ([#381](https://github.com/Ambiki/impulse_view_components/pull/381))
 - **Breaking:** `select` and `time_zone_select` in a form without a model take the selected option from the view's instance variable named after the form, such as `@user` for `scope: :user`, as Rails' own fields do ([#368](https://github.com/Ambiki/impulse_view_components/pull/368))
 
 ### Removed
