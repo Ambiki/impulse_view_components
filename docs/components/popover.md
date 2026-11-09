@@ -7,8 +7,10 @@ A popover is a floating panel that can display rich content like navigation menu
 ```erb
 <%= render(Impulse::PopoverComponent.new) do |c| %>
   <% c.with_trigger(class: "btn btn-primary") { "Toggle popover" } %>
-  <% c.with_body do %>
-    <span>And here's some amazing content. It's very engaging. Right?</span>
+  <% c.with_panel do |panel| %>
+    <% panel.with_body do %>
+      <span>And here's some amazing content. It's very engaging. Right?</span>
+    <% end %>
   <% end %>
 <% end %>
 ```
@@ -19,7 +21,6 @@ A popover is a floating panel that can display rich content like navigation menu
 
 | Name      | Default   | Description                                                                                                                                                                                                                                                            |
 | ------    | --------- | -------------                                                                                                                                                                                                                                                          |
-| title     | `nil`     | The title of the popover.                                                                                                                                                                                                                                              |
 | placement | `"bottom"`  | The preferred placement of the popover. The actual placement may vary to keep the element inside the viewport. One of `"top"`, `"top-start"`, `"top-end"`, `"right"`, `"right-start"`, `"right-end"`, `"bottom"`, `"bottom-start"`, `"bottom-end"`, `"left"`, `"left-start"`, or `"left-end"`. |
 | strategy  | `"fixed"`   | The value of the `position` CSS property. One of `"absolute"` or `"fixed"`.                                                                                                                                                                                                |
 
@@ -30,35 +31,70 @@ it open.
 
 ### Adding a title
 
-You can add a title by setting the `title` argument on the component. It will also add a close button next to it.
+Add a title with the header's `with_title` slot. It names the popover, and a close button follows it.
 
-```erb{1}
-<%= render(Impulse::PopoverComponent.new(title: "Activity feed")) do |c| %>
+```erb{4-6}
+<%= render(Impulse::PopoverComponent.new) do |c| %>
   <% c.with_trigger { "Open feed" } %>
-  <% c.with_body { "Body" } %>
+  <% c.with_panel do |panel| %>
+    <% panel.with_header do |header| %>
+      <% header.with_title { "Activity feed" } %>
+    <% end %>
+    <% panel.with_body { "Body" } %>
+  <% end %>
 <% end %>
 ```
 
 ### Custom header
 
-You can customize the header to add rich content instead of a simple title by calling the `with_header` slot.
+The header renders its block between the title and the close button.
 
-```erb{3-6}
+```erb{4-7}
 <%= render(Impulse::PopoverComponent.new) do |c| %>
-  <% c.with_trigger { "Toggle popover" } %>
-  <% c.with_header do %>
-    <h2>Custom title</h2>
-    <button type="button">Action button</button>
-  <% end %>
-  <% c.with_body do %>
-    <span>And here's some amazing content. It's very engaging. Right?</span>
+  <% c.with_trigger { "Open feed" } %>
+  <% c.with_panel do |panel| %>
+    <% panel.with_header(class: "d-flex align-items-center") do |header| %>
+      <% header.with_title { "Activity feed" } %>
+      <button type="button" class="btn btn-link btn-sm ml-auto">Mark all as read</button>
+    <% end %>
+    <% panel.with_body { "Body" } %>
   <% end %>
 <% end %>
 ```
 
-::: tip Note
-You are encouraged to use the `title` argument if there aren't any rich content inside the header.
-:::
+Without a title, the header renders only its block, and the trigger names the popover.
+
+### Sizing the panel
+
+`with_panel` passes its arguments to the panel. The panel is at most Bootstrap's `$popover-max-width` wide. Set a
+fixed width with a class: the popover clears an inline `width` when it positions the panel.
+
+```erb{3}
+<%= render(Impulse::PopoverComponent.new) do |c| %>
+  <% c.with_trigger { "Open feed" } %>
+  <% c.with_panel(style: "max-width: 20rem") do |panel| %>
+    <% panel.with_body { "Body" } %>
+  <% end %>
+<% end %>
+```
+
+### Adding a form
+
+When the panel's block renders content of its own, such as a form, the panel renders that content instead of the
+`with_body` slot. Render the body inside it with `<%= %>`.
+
+```erb{4-8}
+<%= render(Impulse::PopoverComponent.new) do |c| %>
+  <% c.with_trigger { "Rename" } %>
+  <% c.with_panel do |panel| %>
+    <%= form_with url: "#" do |f| %>
+      <%= panel.with_body do %>
+        <%= f.text_field :name %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>
+```
 
 ### Closing the popover
 
@@ -67,11 +103,13 @@ Add the `data-action="click->awc-popover#requestHide"` attribute on the `button`
 `requestHide` emits the cancelable `awc-popover:hide` event first, so a listener can keep the popover open, for example
 while a form inside it has unsaved changes. `hide` closes it without asking.
 
-```erb{4}
-<%= render(Impulse::PopoverComponent.new(title: "Activity feed")) do |c| %>
+```erb{5}
+<%= render(Impulse::PopoverComponent.new) do |c| %>
   <% c.with_trigger { "Toggle popover" } %>
-  <% c.with_body do %>
-    <button type="button" data-action="click->awc-popover#requestHide">Close</button>
+  <% c.with_panel do |panel| %>
+    <% panel.with_body do %>
+      <button type="button" data-action="click->awc-popover#requestHide">Close</button>
+    <% end %>
   <% end %>
 <% end %>
 ```
@@ -82,13 +120,17 @@ You can nest as many popovers as you want and it will be stacked on top of the p
 as part of its parent, so moving focus or clicking into it doesn't close the parent. A click outside both, or focus
 moving out of both, closes them together, the nested popover first. Escape closes the popover focus is in.
 
-```erb{4-7}
+```erb{5-10}
 <%= render(Impulse::PopoverComponent.new) do |c| %>
   <% c.with_trigger { "Open" } %>
-  <% c.with_body do %>
-    <%= render(Impulse::PopoverComponent.new) do |nested| %>
-      <% nested.with_trigger { "Open nested popover" } %>
-      <% nested.with_body { "Nested contents" } %>
+  <% c.with_panel do |panel| %>
+    <% panel.with_body do %>
+      <%= render(Impulse::PopoverComponent.new) do |nested| %>
+        <% nested.with_trigger { "Open nested popover" } %>
+        <% nested.with_panel do |nested_panel| %>
+          <% nested_panel.with_body { "Nested contents" } %>
+        <% end %>
+      <% end %>
     <% end %>
   <% end %>
 <% end %>
@@ -99,8 +141,8 @@ moving out of both, closes them together, the nested popover first. Escape close
 The popover is a non-modal dialog, rendered in the browser's [top
 layer](https://developer.mozilla.org/en-US/docs/Glossary/Top_layer) so that no `z-index` or `overflow` can hide it.
 
-- The popover has `role="dialog"`, labelled by the `title`, or by the trigger when there is no title or a custom header
-  replaces it. The trigger has `aria-haspopup="dialog"`, `aria-expanded` and `aria-controls`.
+- The panel has `role="dialog"`, labelled by the header's title, or by the trigger when there is no title. The
+  trigger has `aria-haspopup="dialog"`, `aria-expanded` and `aria-controls`.
 - Opening it moves focus into the popover: to the element with `autofocus`, else the first element you can Tab to,
   else the popover itself. A popover rendered open doesn't take focus.
 - Escape, a click outside, and focus moving out of the popover, such as Tab past its last element, all ask it to close.
@@ -119,18 +161,34 @@ The trigger, a `<button>` that shows or hides the popover. Required: the popover
 | ------        | --------- | -------------                                                             |
 | `system_args` | `{}`      | HTML attributes for the slot's element.                                   |
 
-### `with_header`
+### `with_panel`
 
-The header of the popover. If you just want to change the title of the popover, pass the `title` argument to
-the component.
+The panel, the dialog the trigger shows. Add its parts with `with_header` and `with_body`.
 
 | Name          | Default   | Description                                                               |
 | ------        | --------- | -------------                                                             |
 | `system_args` | `{}`      | HTML attributes for the slot's element.                                   |
 
-### `with_body`
+### `panel.with_header`
 
-The body of the popover.
+The header of the panel. Add its title with `with_title`.
+
+| Name          | Default   | Description                                                               |
+| ------        | --------- | -------------                                                             |
+| `system_args` | `{}`      | HTML attributes for the slot's element.                                   |
+
+### `header.with_title`
+
+The title of the panel, which names it.
+
+| Name          | Default   | Description                                                               |
+| ------        | --------- | -------------                                                             |
+| `tag`         | `:span`   | The name of the HTML tag.                                                 |
+| `system_args` | `{}`      | HTML attributes for the slot's element.                                   |
+
+### `panel.with_body`
+
+The body of the panel.
 
 | Name          | Default   | Description                                                               |
 | ------        | --------- | -------------                                                             |
