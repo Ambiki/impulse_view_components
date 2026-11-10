@@ -3,7 +3,7 @@ module Impulse
     renders_one :trigger, lambda { |**system_args|
       system_args[:tag] = :button
       system_args[:type] = system_args.fetch(:type, "button")
-      # Labels the panel when the popover has no title, so it needs an id even when the caller didn't give one.
+      # Labels the panel when it has no title, so it needs an id even when the caller didn't give one.
       @trigger_id = system_args[:id] ||= "#{@panel_id}-trigger"
       system_args[:"aria-haspopup"] = :dialog
       system_args[:"aria-expanded"] = false
@@ -19,23 +19,14 @@ module Impulse
       Impulse::BaseRenderer.new(**system_args)
     }
 
-    renders_one :header, lambda { |**system_args|
-      Impulse::Popover::HeaderComponent.new(title: @title, title_id: @title_id, **system_args)
+    renders_one :panel, lambda { |**system_args|
+      Impulse::Popover::PanelComponent.new(**system_args, id: @panel_id, trigger_id_reader: -> { @trigger_id })
     }
 
-    renders_one :body, lambda { |**system_args|
-      system_args[:tag] ||= :div
-      system_args[:class] = class_names(system_args[:class], "popover-body")
-
-      Impulse::BaseRenderer.new(**system_args)
-    }
-
-    def initialize(title: nil, **system_args)
-      @title = title
+    def initialize(**system_args)
       @system_args = system_args
       @system_args[:tag] = :"awc-popover"
       @panel_id = self.class.generate_id
-      @title_id = "#{@panel_id}-title"
 
       @system_args[:class] = class_names(
         system_args[:class],
@@ -53,15 +44,7 @@ module Impulse
     end
 
     def before_render
-      with_header unless header?
-    end
-
-    private
-
-    # The id of what names the popover, which is a dialog and needs an accessible name: its title, or its trigger when a
-    # custom header replaces the title or there is none.
-    def label_id
-      (header.content? || @title.blank?) ? @trigger_id : @title_id
+      with_panel unless panel?
     end
   end
 end

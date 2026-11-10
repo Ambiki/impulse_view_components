@@ -1,17 +1,19 @@
-.awc-dialog-dialog {
-  --margin-y: #{$modal-dialog-margin};
-  --margin-y-sm-up: #{$modal-dialog-margin-y-sm-up};
+:where(:root) {
+  --awc-dialog-margin-y: 0.5rem;
+  --awc-dialog-margin-y-sm-up: 1.75rem;
+}
 
+.awc-dialog-dialog {
   border: 0;
-  border-radius: var(--rounded-xl);
+  border-radius: var(--awc-radius-5);
   max-width: 92vw;
   width: 100%;
   color: inherit;
-  background-color: var(--white);
-  box-shadow: var(--shadow-lg);
+  background-color: var(--awc-panel);
+  box-shadow: var(--awc-shadow-4);
   padding: 0;
-  margin: var(--margin-y) auto;
-  max-height: calc(100vh - calc(#{var(--margin-y)} * 2));
+  margin: var(--awc-dialog-margin-y) auto;
+  max-height: calc(100vh - var(--awc-dialog-margin-y) * 2);
   overflow: hidden;
   animation: dialog-show 150ms cubic-bezier(0.16, 1, 0.3, 1);
 
@@ -25,15 +27,16 @@
   }
 
   &::backdrop {
-    background-color: rgba(#001742, 0.5);
+    // Browsers before Chrome 122, Firefox 120 and Safari 17.4 don't pass custom properties to `::backdrop`.
+    background-color: var(--awc-overlay, rgb(0 23 66 / 0.5));
     animation: dialog-overlay 150ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   @include media-breakpoint-up(sm) {
     max-width: 498px;
-    max-height: calc(100vh - calc(#{var(--margin-y-sm-up)} * 2));
-    margin-top: var(--margin-y-sm-up);
-    margin-bottom: var(--margin-y-sm-up);
+    max-height: calc(100vh - var(--awc-dialog-margin-y-sm-up) * 2);
+    margin-top: var(--awc-dialog-margin-y-sm-up);
+    margin-bottom: var(--awc-dialog-margin-y-sm-up);
   }
 }
 
@@ -53,20 +56,20 @@
   flex-shrink: 0;
   display: flex;
   align-items: flex-start;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-1) var(--space-2) var(--space-3);
-  border-bottom: 1px solid var(--color-border-default);
+  gap: var(--awc-space-2);
+  padding: var(--awc-space-2) var(--awc-space-1) var(--awc-space-2) var(--awc-space-3);
+  border-bottom: 1px solid var(--awc-neutral-line);
 }
 
 .awc-dialog-title-container {
   flex: 1 1 0%;
-  padding: var(--space-2) 0;
+  padding: var(--awc-space-2) 0;
 }
 
 .awc-dialog-title {
   margin: 0 !important;
-  font-size: var(--fs-lg);
-  font-weight: var(--fw-medium);
+  font-size: var(--awc-font-size-4);
+  font-weight: var(--awc-font-weight-medium);
   line-height: 20px;
 }
 
@@ -84,8 +87,8 @@
   justify-content: center;
 
   &:not(:hover) {
-    background-color: var(--white);
-    border-color: var(--white);
+    background-color: var(--awc-panel);
+    border-color: var(--awc-panel);
   }
 
   &:focus {
@@ -93,7 +96,7 @@
   }
 
   &:focus-visible {
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    box-shadow: 0 0 0 var(--awc-focus-ring-width) var(--awc-focus-ring);
   }
 
   i {
@@ -112,8 +115,8 @@
   // Cannot flex-shrink: 0 on iOS.
   flex-grow: 1;
   overflow-y: auto;
-  padding: var(--space-3);
-  font-size: var(--fs-default);
+  padding: var(--awc-space-3);
+  font-size: var(--awc-font-size-3);
 }
 
 .awc-dialog-footer {
@@ -121,10 +124,10 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  padding: var(--space-3);
+  padding: var(--awc-space-3);
   flex-wrap: wrap;
-  gap: var(--space-2);
-  border-top: 1px solid var(--color-border-default);
+  gap: var(--awc-space-2);
+  border-top: 1px solid var(--awc-neutral-line);
 }
 
 .awc-dialog--sm .awc-dialog-dialog {

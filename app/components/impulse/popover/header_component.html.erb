@@ -1,8 +1,7 @@
 <%= render(Impulse::BaseRenderer.new(**@system_args)) do %>
-  <% if content.present? %>
-    <%= content %>
-  <% else %>
-    <%= content_tag(:span, @title, id: @title_id) %>
+  <%= title if titled? %>
+  <%= content %>
+  <% if titled? %>
     <button type="button" class="close" aria-label="Close" data-action="click->awc-popover#requestHide">
       &times;
     </button>

@@ -16,10 +16,14 @@ _Avoid_: Reference, reference element, target
 
 **Floating element**:
 The element positioned relative to an anchor and kept inside the viewport.
-_Avoid_: Popup, panel, content
+_Avoid_: Popup, content
+
+**Panel**:
+A popover's floating element: the dialog its trigger shows, holding the header and body. Only popovers have a panel; elsewhere, say floating element.
+_Avoid_: Content, popup, container
 
 **Nested popover**:
-A popover inside another popover's floating element, its parent popover. It counts as part of the parent, so pressing or focusing it isn't outside the parent.
+A popover inside another popover's panel, its parent popover. It counts as part of the parent, so pressing or focusing it isn't outside the parent.
 _Avoid_: Child popover, sub-popover, inner popover
 
 **Available space**:
