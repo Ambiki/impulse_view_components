@@ -183,7 +183,6 @@ $calendar-grid-cell-padding: 1px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--awc-space-1);
     width: 100%;
     height: var(--#{$block}-day-size);
     padding-top: 0;
@@ -191,9 +190,5 @@ $calendar-grid-cell-padding: 1px;
     font-size: inherit;
     font-weight: inherit;
     line-height: 20px;
-
-    .bi {
-      font-size: 0.75em;
-    }
   }
 }

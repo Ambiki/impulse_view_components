@@ -34,7 +34,7 @@ module Impulse
       assert_equal heading[:id], page.find("table[role='grid']")["aria-labelledby"]
       button = heading.find("button.btn.btn-sm.btn-light.awc-month-calendar-heading-button[type='button']", text: "2026")
       assert_selector "##{button["aria-describedby"]}.sr-only", text: "Choose a year", visible: :all
-      assert_selector "button i.bi.bi-chevron-down[aria-hidden='true']"
+      assert_equal "2026", button.native.inner_html
       assert_selector ".awc-month-calendar-header[data-action='click->awc-month-calendar#handleHeadingClick']"
       assert_selector "button[aria-label='Previous year']"
       assert_selector "button[aria-label='Next year']"

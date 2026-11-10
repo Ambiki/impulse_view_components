@@ -106,8 +106,8 @@ export function headingText<I>(view: CalendarView<I>): string {
 
 /**
  * The heading's content, as the calendar's component renders it. Below the top level it's a button that drills up,
- * described by the hint `hintId` names, with its text in a span; on the top level, its text. The header listens for
- * the button's clicks, as the button is replaced on every drill.
+ * named by its text and described by the hint `hintId` names; on the top level, its text. The header listens for the
+ * button's clicks, as the button is replaced on every drill.
  */
 export function headingContent<I>(view: CalendarView<I>, hintId: string | null): Node {
   const text = headingText(view);
@@ -117,12 +117,7 @@ export function headingContent<I>(view: CalendarView<I>, hintId: string | null):
   button.setAttribute('type', 'button');
   button.className = `btn btn-sm btn-light ${view.tagName}-heading-button`;
   button.setAttribute('aria-describedby', hintId);
-  const label = document.createElement('span');
-  label.textContent = text;
-  const icon = document.createElement('i');
-  icon.className = 'bi bi-chevron-down';
-  icon.setAttribute('aria-hidden', 'true');
-  button.append(label, icon);
+  button.textContent = text;
   return button;
 }
 

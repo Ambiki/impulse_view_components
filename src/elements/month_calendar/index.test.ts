@@ -59,7 +59,7 @@ function monthCalendarHtml(options: CalendarOptions = {}) {
   return `<awc-month-calendar class="awc-month-calendar" ${attributes.join(' ')}>
     <div class="awc-month-calendar-header" data-action="click->awc-month-calendar#handleHeadingClick">
       <button type="button" class="awc-month-calendar-nav" aria-label="Previous year" aria-disabled="${!canMoveView(view, -1)}" data-target="awc-month-calendar.previousButton" data-action="click->awc-month-calendar#handlePreviousClick"></button>
-      <div id="heading" class="awc-month-calendar-heading" aria-live="polite" data-target="awc-month-calendar.heading"><button type="button" class="btn btn-sm btn-light awc-month-calendar-heading-button" aria-describedby="heading-year"><span>${headingText(view)}</span><i class="bi bi-chevron-down" aria-hidden="true"></i></button></div>
+      <div id="heading" class="awc-month-calendar-heading" aria-live="polite" data-target="awc-month-calendar.heading"><button type="button" class="btn btn-sm btn-light awc-month-calendar-heading-button" aria-describedby="heading-year">${headingText(view)}</button></div>
       <button type="button" class="awc-month-calendar-nav" aria-label="Next year" aria-disabled="${!canMoveView(view, 1)}" data-target="awc-month-calendar.nextButton" data-action="click->awc-month-calendar#handleNextClick"></button>
     </div>
     <span id="heading-year" class="sr-only">Choose a year</span>

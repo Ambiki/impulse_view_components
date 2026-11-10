@@ -463,7 +463,7 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
 
     const text = headingText(view);
     if (this.heading.textContent !== text) {
-      (this.heading.querySelector('button > span') ?? this.heading).textContent = text;
+      (this.heading.querySelector('button') ?? this.heading).textContent = text;
     }
   }
 

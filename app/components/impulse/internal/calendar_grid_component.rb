@@ -89,15 +89,13 @@ module Impulse
         nil
       end
 
-      # The heading's content: below the top level, a button that drills up, with its text in a span. The header
-      # listens for its clicks, as the element replaces it on every drill.
+      # The heading's content: below the top level, a button that drills up, named by its text. The header listens
+      # for its clicks, as the element replaces it on every drill.
       def heading_content
         heading = level.heading(@displayed_page)
         return heading unless level_above
 
-        tag.button(type: "button", class: "btn btn-sm btn-light #{tag_name}-heading-button", "aria-describedby": @drill_hint_id) do
-          safe_join([tag.span(heading), tag.i(class: "bi bi-chevron-down", "aria-hidden": "true")])
-        end
+        tag.button(heading, type: "button", class: "btn btn-sm btn-light #{tag_name}-heading-button", "aria-describedby": @drill_hint_id)
       end
 
       # The value naming the selection, or a limit, that starts with `cell`. By default, the day as `YYYY-MM-DD`.
