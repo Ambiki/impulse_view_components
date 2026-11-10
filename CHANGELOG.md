@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-11-10
+
 ### Added
 
 - `--awc-` design tokens on `:where(:root)`, which an app overrides from any selector: scales such as `--awc-gray-6`, aliases such as `--awc-neutral-line`, and component tokens such as `--awc-popover-max-width` ([#382](https://github.com/Ambiki/impulse_view_components/pull/382))
@@ -292,7 +294,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Everything!
 
-[unreleased]: https://github.com/Ambiki/impulse_view_components/compare/v0.9.1...HEAD
+[unreleased]: https://github.com/Ambiki/impulse_view_components/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/Ambiki/impulse_view_components/compare/v0.9.1...v0.10.0
 [0.9.1]: https://github.com/Ambiki/impulse_view_components/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/Ambiki/impulse_view_components/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/Ambiki/impulse_view_components/compare/v0.7.2...v0.8.0
