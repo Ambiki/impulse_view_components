@@ -2,8 +2,8 @@ module Impulse
   module Internal
     # The day grid the calendars share: `DateCalendarComponent`, `WeekCalendarComponent`, and a range calendar later.
     # It is internal, and not part of the public API. It renders the first month, and the element renders the months
-    # the user moves to (ADR 0013). The time zone, the first day of the week and the translations are always rendered,
-    # so the element never falls back to the browser's (ADR 0014).
+    # the user moves to (ADR 0014). The time zone, the first day of the week and the translations are always rendered,
+    # so the element never falls back to the browser's (ADR 0015).
     #
     # The selection is a date range: one day for a date calendar, a week for a week calendar. The value is always its
     # first day. A subclass names its element and decides what a day selects, which days are disabled, and any hint.

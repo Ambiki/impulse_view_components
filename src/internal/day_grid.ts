@@ -1,6 +1,6 @@
 /**
  * The day grid the calendars share: what they show, and the markup their components render, which the elements
- * render again for the months the user moves to (ADR 0013). It is internal: the package's `exports` map doesn't list
+ * render again for the months the user moves to (ADR 0014). It is internal: the package's `exports` map doesn't list
  * it.
  */
 import type { CalendarDate, DateNames, DateRange } from 'src/internal/calendar_date';
