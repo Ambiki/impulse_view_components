@@ -1,7 +1,9 @@
 <%= render(Impulse::PopoverComponent.new(placement: "bottom-start", data: { action: "awc-week-calendar:commit->awc-popover#requestHide" })) do |c| %>
   <% c.with_trigger(class: "btn btn-outline-secondary", data: { test_id: "week-trigger" }) { "Nov 15 - 21, 2026" } %>
-  <% c.with_body do %>
-    <%= render(Impulse::WeekCalendarComponent.new(value: Date.new(2026, 11, 15), first_day_of_week: :sunday)) %>
+  <% c.with_panel do |panel| %>
+    <% panel.with_body do %>
+      <%= render(Impulse::WeekCalendarComponent.new(value: Date.new(2026, 11, 15), first_day_of_week: :sunday)) %>
+    <% end %>
   <% end %>
 <% end %>
 

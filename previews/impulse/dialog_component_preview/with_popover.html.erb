@@ -2,10 +2,15 @@
 
 <%= render(Impulse::DialogComponent.new(id: "dialog-1", title: "Edit your profile", **local_assigns)) do |c| %>
   <% c.with_body do %>
-    <%= render(Impulse::PopoverComponent.new(title: "Hello world")) do |c| %>
+    <%= render(Impulse::PopoverComponent.new) do |c| %>
       <% c.with_trigger(class: "btn btn-primary btn-sm") { "Toggle popover" } %>
-      <% c.with_body do %>
-        <span>Are you sure you want to delete this record? It cannot be undone.</span>
+      <% c.with_panel do |panel| %>
+        <% panel.with_header do |header| %>
+          <% header.with_title { "Hello world" } %>
+        <% end %>
+        <% panel.with_body do %>
+          <span>Are you sure you want to delete this record? It cannot be undone.</span>
+        <% end %>
       <% end %>
     <% end %>
   <% end %>

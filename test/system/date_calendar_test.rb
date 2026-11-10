@@ -2,7 +2,7 @@ require "system/test_helper"
 
 module Impulse
   class DateCalendarSystemTest < ApplicationSystemTest
-    # The element renders the months the user turns to, and the component the first one (ADR 0013). They must agree,
+    # The element renders the months the user turns to, and the component the first one (ADR 0014). They must agree,
     # or the calendar would change the first time the user turns back to it.
     [
       ["a month starting on Sunday", { value: "2026-11-18" }],
