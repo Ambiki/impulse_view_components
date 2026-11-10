@@ -61,6 +61,11 @@
       "sass": "./dist/elements/dialog/index.scss",
       "default": "./dist/elements/dialog/index.js"
     },
+    "./month-calendar": {
+      "types": "./dist/elements/month_calendar/index.d.ts",
+      "sass": "./dist/elements/month_calendar/index.scss",
+      "default": "./dist/elements/month_calendar/index.js"
+    },
     "./popover": {
       "types": "./dist/elements/popover/index.d.ts",
       "sass": "./dist/elements/popover/index.scss",

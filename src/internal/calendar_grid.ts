@@ -35,6 +35,13 @@ export interface Level<I> {
   compareViews: (a: CalendarDate, b: CalendarDate) => number;
   /** `cell` moved by `views` views, keeping its place in its view. */
   addViews: (cell: CalendarDate, views: number) => CalendarDate;
+  /** The days `cell` covers: a day, a month or a year. */
+  range: (cell: CalendarDate) => DateRange;
+  /**
+   * `cell` placed in `view`, a cell of the level above, keeping its place in its own view: November 2026 placed in 2024
+   * is November 2024. For a level a calendar drills down to.
+   */
+  placeIn?: (cell: CalendarDate, view: CalendarDate) => CalendarDate;
   /** The view's cells in rows, the cells of the views before and after it included. `view` may be any of its cells. */
   rows: (view: CalendarDate, firstDayOfWeek: number) => CalendarDate[][];
   /** The cell `event`'s key moves to from `cell`, or `null` when it isn't one that moves. */
@@ -42,9 +49,17 @@ export interface Level<I> {
   /** Names the view, above the grid. `view` may be any of its cells. */
   heading: (view: CalendarDate, i18n: I) => string;
   /** A cell's text. */
-  text: (cell: CalendarDate) => string;
+  text: (cell: CalendarDate, i18n: I) => string;
   /** A cell's accessible name, or `null` when its text names it. */
   label: (cell: CalendarDate, i18n: I) => string | null;
+}
+
+/**
+ * The names of a drilling calendar's page buttons on each of its levels, keyed by the level's `cell`, as its component
+ * renders them: on a month calendar, "Previous year" under `month` and "Previous decade" under `year`.
+ */
+export interface PagingI18n {
+  paging: Record<string, { previous: string; next: string }>;
 }
 
 /** What a calendar shows: everything its grid is rendered from. */
@@ -56,7 +71,7 @@ export interface CalendarView<I> {
   displayed: CalendarDate;
   /** The cell holding the grid's one tab stop. */
   active: CalendarDate;
-  /** The selected range: a day, a week or a year. */
+  /** The selected range: a day, a week, a month or a year. */
   selected: DateRange | null;
   /** The cell today falls in. */
   today: CalendarDate;
@@ -89,6 +104,33 @@ export function headingText<I>(view: CalendarView<I>): string {
   return view.level.heading(view.displayed, view.i18n);
 }
 
+/**
+ * The heading's content, as the calendar's component renders it. Below the top level it's a button that drills up,
+ * described by the hint `hintId` names, with its text in a span; on the top level, its text. The header listens for
+ * the button's clicks, as the button is replaced on every drill.
+ */
+export function headingContent<I>(view: CalendarView<I>, hintId: string | null): Node {
+  const text = headingText(view);
+  if (!hintId) return document.createTextNode(text);
+
+  const button = document.createElement('button');
+  button.setAttribute('type', 'button');
+  button.className = `btn btn-sm btn-light ${view.tagName}-heading-button`;
+  button.setAttribute('aria-describedby', hintId);
+  const label = document.createElement('span');
+  label.textContent = text;
+  const icon = document.createElement('i');
+  icon.className = 'bi bi-chevron-down';
+  icon.setAttribute('aria-hidden', 'true');
+  button.append(label, icon);
+  return button;
+}
+
+/** Whether none of `range`'s days falls between `min` and `max`. */
+export function isOutsideLimits(range: DateRange, min: CalendarDate | null, max: CalendarDate | null): boolean {
+  return (!!min && range.end.compare(min) < 0) || (!!max && range.start.compare(max) > 0);
+}
+
 /** The displayed view's rows of cells, marked up as the calendar's component renders them. */
 export function gridRows<I>(view: CalendarView<I>): HTMLTableRowElement[] {
   return view.level.rows(view.displayed, view.firstDayOfWeek).map((cells) => {
@@ -110,7 +152,7 @@ function gridCell<I>(cell: CalendarDate, view: CalendarView<I>) {
   if (label) button.setAttribute('aria-label', label);
   if (cell.equals(view.today)) button.setAttribute('aria-current', 'date');
   if (view.isDisabled(cell)) button.setAttribute('aria-disabled', 'true');
-  button.textContent = level.text(cell);
+  button.textContent = level.text(cell, view.i18n);
 
   const td = document.createElement('td');
   if (rangeIncludes(view.selected, cell)) td.setAttribute('aria-selected', 'true');

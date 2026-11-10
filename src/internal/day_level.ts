@@ -62,6 +62,7 @@ export const DAY_LEVEL: Level<DayLevelI18n> = {
   viewOf: (date) => date.startOfMonth(),
   compareViews: (a, b) => a.compareMonth(b),
   addViews: (cell, views) => cell.add({ months: views }),
+  range: (cell) => ({ start: cell, end: cell }),
   rows: (view, firstDayOfWeek) => view.monthGrid(firstDayOfWeek),
   // Per the APG date picker: a day, a week, the week's ends, a month, and with Shift a year.
   move: (cell, event, { firstDayOfWeek }) => {

@@ -64,18 +64,12 @@ export default class AwcWeekCalendarElement extends CalendarGridElement<DayLevel
     this.refresh();
   }
 
-  /** A day selects its week. */
+  /**
+   * A day selects its week, so it's disabled when none of its week's days falls between `min` and `max`: a week can be
+   * committed when any of them does, and commits whole.
+   */
   protected rangeOf(date: CalendarDate): DateRange {
     return { start: date.startOfWeek(this.firstDayOfWeek), end: date.endOfWeek(this.firstDayOfWeek) };
-  }
-
-  /**
-   * A day is disabled when none of its week's days falls between `min` and `max`: a week can be committed when any of
-   * them does, and commits whole.
-   */
-  protected isDisabledCell(date: CalendarDate, min: CalendarDate | null, max: CalendarDate | null): boolean {
-    const week = this.rangeOf(date);
-    return (!!min && week.end.compare(min) < 0) || (!!max && week.start.compare(max) > 0);
   }
 
   /**

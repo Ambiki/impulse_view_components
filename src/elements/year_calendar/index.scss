@@ -1,32 +1,4 @@
 @import '../../internal/calendar_grid';
 
 @include calendar-grid('awc-year-calendar', 'year');
-
-// As wide as the day grid, so a year calendar lines up with the other calendars. Each year is a compact button, as tall
-// as a day, three to a row: the outer years reach the grid's sides, as the outer days do, and the middle ones sit
-// evenly between them.
-.awc-year-calendar-grid {
-  width: calendar-grid-width('awc-year-calendar');
-  table-layout: fixed;
-
-  td {
-    padding: 0;
-  }
-
-  tr:not(:last-child) td {
-    padding-bottom: 0.75rem;
-  }
-}
-
-.awc-year-calendar-year {
-  width: 4.5rem;
-  margin: 0 auto;
-
-  td:first-child > & {
-    margin-left: 0;
-  }
-
-  td:last-child > & {
-    margin-right: 0;
-  }
-}
+@include calendar-compact-grid('awc-year-calendar', 'year');

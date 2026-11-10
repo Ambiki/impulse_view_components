@@ -42,14 +42,9 @@ export default class AwcYearCalendarElement extends CalendarGridElement<YearCale
     return this.years;
   }
 
-  /** A year selects its days, from January 1 to December 31. */
+  /** A year selects its days, from January 1 to December 31, so it's disabled before `min`'s year or after `max`'s. */
   protected rangeOf(cell: CalendarDate): DateRange {
     return yearRange(cell);
-  }
-
-  /** A year is disabled before `min`'s year or after `max`'s. */
-  protected isDisabledCell(cell: CalendarDate, min: CalendarDate | null, max: CalendarDate | null): boolean {
-    return (!!min && cell.year < min.year) || (!!max && cell.year > max.year);
   }
 
   protected commitDetail(range: DateRange): AwcYearCalendarCommitEvent {

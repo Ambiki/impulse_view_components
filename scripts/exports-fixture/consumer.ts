@@ -40,6 +40,9 @@ import type {
   Side as PopoverSide,
   Strategy as PopoverStrategy,
 } from '@ambiki/impulse-view-components/popover';
+import * as monthCalendar from '@ambiki/impulse-view-components/month-calendar';
+import { AwcMonthCalendarElement } from '@ambiki/impulse-view-components/month-calendar';
+import type { AwcMonthCalendarCommitEvent, MonthCalendarI18n } from '@ambiki/impulse-view-components/month-calendar';
 import * as weekCalendar from '@ambiki/impulse-view-components/week-calendar';
 import { AwcWeekCalendarElement } from '@ambiki/impulse-view-components/week-calendar';
 import type { AwcWeekCalendarCommitEvent } from '@ambiki/impulse-view-components/week-calendar';
@@ -73,6 +76,7 @@ export const used = {
   clipboardCopy,
   dateCalendar,
   dialog,
+  monthCalendar,
   popover,
   weekCalendar,
   yearCalendar,
@@ -154,6 +158,18 @@ document.addEventListener('awc-year-calendar:commit', (event) => {
   const value: string = event.detail.value;
   return value;
 });
+// The month calendar's methods take months, and its event carries one.
+const monthCalendarElement = document.createElement('awc-month-calendar');
+export const monthMethods: [void, boolean] = [monthCalendarElement.goToDate('2031-04'), monthCalendarElement.isDateDisabled('2026-11')];
+// @ts-expect-error: a committed month is a `YYYY-MM` string
+export const notACommittedMonth: AwcMonthCalendarCommitEvent['value'] = 202611;
+// @ts-expect-error: a month calendar's names are its months', with no weekdays
+export const notMonthNames: MonthCalendarI18n['dayNames'] = [];
+export const monthCalendarNames: MonthCalendarI18n['formats'] = { month: '%B %Y', decade: '%{start} – %{end}' };
+document.addEventListener('awc-month-calendar:commit', (event) => {
+  const value: string = event.detail.value;
+  return value;
+});
 // Listeners get the week calendar's event typed, without a cast.
 document.addEventListener('awc-week-calendar:commit', (event) => {
   const { value, start, end }: { value: string; start: string; end: string } = event.detail;
@@ -177,6 +193,7 @@ export const namedClasses: [
   typeof clipboardCopy.default,
   typeof dateCalendar.default,
   typeof dialog.default,
+  typeof monthCalendar.default,
   typeof popover.default,
   typeof weekCalendar.default,
   typeof yearCalendar.default,
@@ -186,6 +203,7 @@ export const namedClasses: [
   AwcClipboardCopyElement,
   AwcDateCalendarElement,
   AwcDialogElement,
+  AwcMonthCalendarElement,
   AwcPopoverElement,
   AwcWeekCalendarElement,
   AwcYearCalendarElement,
@@ -200,6 +218,8 @@ export const notAClipboardCopy: AwcClipboardCopyElement = document.createElement
 export const notADateCalendar: AwcDateCalendarElement = document.createElement('div');
 // @ts-expect-error: a plain element is not a dialog
 export const notADialog: AwcDialogElement = document.createElement('div');
+// @ts-expect-error: a plain element is not a month calendar
+export const notAMonthCalendar: AwcMonthCalendarElement = document.createElement('div');
 // @ts-expect-error: a plain element is not a popover
 export const notAPopover: AwcPopoverElement = document.createElement('div');
 // @ts-expect-error: a plain element is not a week calendar

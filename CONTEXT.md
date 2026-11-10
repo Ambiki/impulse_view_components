@@ -117,6 +117,11 @@ _Avoid_: Week picker, inline week picker
 A static grid of years for choosing one. Like a date calendar, it has no input or popover of its own.
 _Avoid_: Year picker, decade picker
 
+**Month calendar**:
+A static grid of a year's months for choosing one. Its heading drills up to years. Like a date calendar, it has no
+input or popover of its own.
+_Avoid_: Month picker
+
 **Date picker**:
 An input that opens a date calendar in a popover.
 _Avoid_: Date field, date input
@@ -147,13 +152,19 @@ The day the user has moved to in a calendar, holding its one tab stop, that a co
 _Avoid_: Focused day, highlighted day, cursor
 
 **Level**:
-The kind of cell a calendar's grid shows: days, months or years. A date or week calendar shows days, and a year
-calendar years.
+The kind of cell a calendar's grid shows: days, months or years. A date or week calendar shows days, a month calendar
+months, and a year calendar years. A calendar's base level is the one its value is a cell of.
 _Avoid_: View, mode, zoom, scale
 
+**Drill up**:
+Pressing a calendar's heading to show the level above, in the same grid: a month calendar's months drill up to years.
+The top level's heading can't be pressed. Choosing a cell there drills back down, to the view holding it; choosing the
+cell the user drilled up from leaves the view as it was.
+_Avoid_: Zoom out, switch view, toggle view
+
 **View**:
-What a calendar shows at once: for a date or week calendar, its displayed month; for a year calendar, its displayed
-decade. The previous and next views are the ones before and after it.
+What a calendar shows at once: for a date or week calendar, its displayed month; for a month calendar, its displayed
+year; for a year calendar, its displayed decade. The previous and next views are the ones before and after it.
 _Avoid_: Screen, sheet
 
 **Displayed month**:
@@ -168,6 +179,10 @@ _Avoid_: Adjacent day, overflow day, other-month day
 The ten years a year calendar's grid shows, from a year ending in 0. Moving to another view changes it, not the value.
 _Avoid_: Year page, year range, period
 
+**Displayed year**:
+The year a month calendar's grid shows. Moving to another view changes it, not the value.
+_Avoid_: Year page, current year
+
 **Outside year**:
 The year before or after the displayed decade, shown to fill the grid's twelve cells. Never the active year.
 _Avoid_: Adjacent year, overflow year
@@ -181,9 +196,15 @@ A week in a week calendar that the user can move through but can't commit, becau
 earliest and the latest day allowed. Its days are the week calendar's only disabled days.
 _Avoid_: Blocked week, unavailable week
 
+**Disabled month**:
+A month in a month calendar that the user can move to but can't commit, because it falls before the earliest or after
+the latest month allowed.
+_Avoid_: Blocked month, unavailable month
+
 **Disabled year**:
-A year in a year calendar that the user can move to but can't commit, because it falls before the earliest or after
-the latest year allowed.
+A year that the user can move to but can't choose. In a year calendar, it falls before the earliest or after the latest
+year allowed. In a month calendar drilled up, none of its months falls between the earliest and the latest month
+allowed, unless it's the year the user drilled up from, which always takes them back.
 _Avoid_: Blocked year, unavailable year
 
 **Today**:

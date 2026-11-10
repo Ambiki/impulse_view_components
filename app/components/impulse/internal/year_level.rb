@@ -62,6 +62,11 @@ module Impulse
         I18n.t("impulse.calendar.next_decade")
       end
 
+      # Describes the heading's button on the level below, which drills up to years.
+      def drill_hint
+        I18n.t("impulse.calendar.choose_year")
+      end
+
       # The pattern the element names the decades the user moves to with.
       def i18n
         { formats: { decade: I18n.t("impulse.calendar.formats.decade") } }

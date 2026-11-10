@@ -6,13 +6,19 @@ en:
     calendar:
       previous_month: Previous month
       next_month: Next month
+      previous_year: Previous year
+      next_year: Next year
       previous_decade: Previous decade
       next_decade: Next decade
+      # Describes the heading's button, which drills up from a month calendar's months to years.
+      choose_year: Choose a year
       formats:
         # Names the displayed month, above the grid.
         heading: "%B %Y"
         # Each day's accessible name.
         day: "%A, %B %-d, %Y"
+        # Each month's accessible name, in a month calendar.
+        month: "%B %Y"
         # Names the displayed decade, above a year calendar's grid. Rails interpolation, not strftime.
         decade: "%{start} – %{end}"
     week_calendar:

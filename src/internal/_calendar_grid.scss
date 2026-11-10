@@ -1,10 +1,21 @@
 // The space around a day's button, which the day grid's width is worked out from.
 $calendar-grid-cell-padding: 1px;
 
-// The grid the calendars share, with each calendar's own class prefix, `$block`, and its level's cells, `$cell`:
-// `awc-date-calendar` and `day` style `.awc-date-calendar-day`, and its tokens are `--awc-date-calendar-*`. It expects
-// Bootstrap 4's Sass functions, variables and mixins to be loaded already.
-@mixin calendar-grid($block, $cell: 'day') {
+// The class names of `$block`'s cells of each level in `$cells`: `awc-month-calendar` and `month year` give
+// `.awc-month-calendar-month, .awc-month-calendar-year`.
+@function calendar-grid-cells($block, $cells) {
+  $selector: ();
+  @each $cell in $cells {
+    $selector: append($selector, '.#{$block}-#{$cell}', $separator: comma);
+  }
+  @return $selector;
+}
+
+// The grid the calendars share, with each calendar's own class prefix, `$block`, and its levels' cells, `$cells`:
+// `awc-date-calendar` and `day` style `.awc-date-calendar-day`, and its tokens are `--awc-date-calendar-*`. A calendar
+// that drills up lists each level's cells, as its grid shows each in turn. It expects Bootstrap 4's Sass functions,
+// variables and mixins to be loaded already.
+@mixin calendar-grid($block, $cells: 'day') {
   :where(:root) {
     // At least 24px square, so each day is a large enough target (WCAG 2.5.8).
     --#{$block}-day-size: 2.25rem;
@@ -74,7 +85,7 @@ $calendar-grid-cell-padding: 1px;
     }
   }
 
-  .#{$block}-#{$cell} {
+  #{calendar-grid-cells($block, $cells)} {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -132,4 +143,57 @@ $calendar-grid-cell-padding: 1px;
 // outer cells line up with the header's buttons.
 @function calendar-grid-width($block) {
   @return calc(7 * (var(--#{$block}-day-size) + #{2 * $calendar-grid-cell-padding}));
+}
+
+// A level of twelve cells, months or years, as wide as the day grid, so it lines up with the other calendars. Each cell
+// is a compact button, as tall as a day, three to a row: the outer cells reach the grid's sides, as the outer days do,
+// and the middle ones sit evenly between them. On its own it takes only the height its cells need.
+@mixin calendar-compact-grid($block, $cells) {
+  .#{$block}-grid {
+    width: calendar-grid-width($block);
+    table-layout: fixed;
+
+    td {
+      padding: 0;
+    }
+
+    tr:not(:last-child) td {
+      padding-bottom: 0.75rem;
+    }
+  }
+
+  #{calendar-grid-cells($block, $cells)} {
+    width: 4.5rem;
+    margin: 0 auto;
+
+    td:first-child > & {
+      margin-left: 0;
+    }
+
+    td:last-child > & {
+      margin-right: 0;
+    }
+  }
+}
+
+// The heading of a calendar that drills up (ADR 0017): below the top level, a button that fills the space between the
+// page buttons, as tall as they are, so the header keeps its size on every level.
+@mixin calendar-drill($block) {
+  .#{$block}-heading-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--awc-space-1);
+    width: 100%;
+    height: var(--#{$block}-day-size);
+    padding-top: 0;
+    padding-bottom: 0;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: 20px;
+
+    .bi {
+      font-size: 0.75em;
+    }
+  }
 }
