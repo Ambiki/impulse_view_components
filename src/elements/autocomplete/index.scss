@@ -1,3 +1,86 @@
+:where(:root) {
+  // The control is Bootstrap's `.form-control` and the options are `.dropdown-item`s, so these follow Bootstrap's Sass.
+  --awc-autocomplete-control-min-height: #{$input-height};
+  --awc-autocomplete-control-min-height-sm: #{$input-height-sm};
+  --awc-autocomplete-control-min-height-lg: #{$input-height-lg};
+  --awc-autocomplete-control-padding-x: #{$input-padding-x};
+  --awc-autocomplete-control-padding-x-sm: #{$input-padding-x-sm};
+  --awc-autocomplete-control-padding-x-lg: #{$input-padding-x-lg};
+  --awc-autocomplete-control-text-focus: var(--awc-autocomplete-control-focus-color);
+  --awc-autocomplete-control-bg-focus: #{$input-focus-bg};
+  --awc-autocomplete-control-border-focus: var(--awc-autocomplete-control-focus-border-color);
+  --awc-autocomplete-control-bg-disabled: var(--awc-autocomplete-control-disabled-bg-color);
+  --awc-autocomplete-control-box-shadow: #{$input-box-shadow};
+  @if $enable-shadows {
+    --awc-autocomplete-control-box-shadow-focus: var(--awc-autocomplete-control-box-shadow),
+      var(--awc-autocomplete-control-focus-box-shadow);
+  } @else {
+    --awc-autocomplete-control-box-shadow-focus: var(--awc-autocomplete-control-focus-box-shadow);
+  }
+  --awc-autocomplete-input-min-width: 2rem;
+  --awc-autocomplete-input-height: calc(#{$input-height} - (#{$input-padding-y} * 2) - (#{$input-border-width} * 2));
+  --awc-autocomplete-input-height-sm: calc(
+    #{$input-height-sm} - (#{$input-padding-y-sm} * 2) - (#{$input-border-width} * 2)
+  );
+  --awc-autocomplete-input-height-lg: calc(
+    #{$input-height-lg} - (#{$input-padding-y-lg} * 2) - (#{$input-border-width} * 2)
+  );
+  --awc-autocomplete-input-bg: var(--awc-autocomplete-input-bg-color);
+  --awc-autocomplete-input-placeholder-text: #{$input-placeholder-color};
+  --awc-autocomplete-adornment-item-size: 1.5rem;
+  --awc-autocomplete-listbox-font-size: var(--awc-font-size-3);
+  --awc-autocomplete-listbox-max-height: 256px;
+  --awc-autocomplete-option-padding-x: var(--awc-space-3);
+  --awc-autocomplete-option-padding-y: var(--awc-space-2);
+  --awc-autocomplete-option-font-size: var(--awc-font-size-3);
+  --awc-autocomplete-option-line-height: var(--awc-autocomplete-option-lh);
+  --awc-autocomplete-option-bg-hover: var(--awc-autocomplete-option-hover-bg-color);
+  --awc-autocomplete-option-text-hover: #{$dropdown-link-hover-color};
+  --awc-autocomplete-option-text-disabled: #{$dropdown-link-disabled-color};
+  --awc-autocomplete-option-check-text: var(--awc-autocomplete-option-check-color);
+  --awc-autocomplete-option-check-text-disabled: var(--awc-autocomplete-option-check-disabled-color);
+  --awc-autocomplete-group-header-padding-x: var(--awc-autocomplete-option-padding-x);
+  --awc-autocomplete-group-header-padding-y: var(--awc-space-1);
+  --awc-autocomplete-group-header-text: var(--awc-autocomplete-group-header-color);
+  --awc-autocomplete-group-header-font-size: var(--awc-font-size-1);
+  --awc-autocomplete-group-header-line-height: var(--awc-autocomplete-group-header-lh);
+  --awc-autocomplete-group-header-font-weight: var(--awc-autocomplete-group-header-fw);
+  --awc-autocomplete-tag-padding-x: var(--awc-space-2);
+  --awc-autocomplete-tag-btn-size: 1.25rem;
+  --awc-autocomplete-tag-btn-bg-hover: var(--awc-autocomplete-tag-btn-bg-hover-color);
+  --awc-autocomplete-tag-gap: var(--awc-space-1);
+  --awc-autocomplete-tag-gap-lg: 0.375rem;
+  --awc-autocomplete-tag-max-width: 24rem;
+  --awc-autocomplete-tag-bg: var(--awc-autocomplete-tag-bg-color);
+  --awc-autocomplete-tag-border: var(--awc-autocomplete-tag-border-color);
+  --awc-autocomplete-tag-border-radius: 0.125rem;
+  --awc-autocomplete-tag-font-size: var(--awc-font-size-1);
+  --awc-autocomplete-tag-font-size-lg: var(--awc-font-size-3);
+  --awc-autocomplete-blankslate-text: var(--awc-autocomplete-blankslate-color);
+  --awc-autocomplete-blankslate-padding-x: var(--awc-space-3);
+  --awc-autocomplete-blankslate-padding-y: var(--awc-space-2);
+  --awc-autocomplete-error-text: var(--awc-autocomplete-error-color);
+
+  /** Deprecated names, removed in 1.0. The tokens above read them, so an app that sets or reads one keeps working. */
+  --awc-autocomplete-control-focus-color: #{$input-focus-color};
+  --awc-autocomplete-control-focus-border-color: #{$input-focus-border-color};
+  --awc-autocomplete-control-disabled-bg-color: var(--awc-neutral-bg-subtle);
+  --awc-autocomplete-control-focus-box-shadow: #{$input-focus-box-shadow};
+  --awc-autocomplete-input-bg-color: #{$input-bg};
+  --awc-autocomplete-option-lh: 1.25rem;
+  --awc-autocomplete-option-hover-bg-color: #{$dropdown-link-hover-bg};
+  --awc-autocomplete-option-check-color: var(--awc-success-solid);
+  --awc-autocomplete-option-check-disabled-color: var(--awc-success-line);
+  --awc-autocomplete-group-header-color: var(--awc-neutral-text);
+  --awc-autocomplete-group-header-lh: 18px;
+  --awc-autocomplete-group-header-fw: var(--awc-font-weight-medium);
+  --awc-autocomplete-tag-btn-bg-hover-color: var(--awc-neutral-solid);
+  --awc-autocomplete-tag-bg-color: var(--awc-neutral-bg);
+  --awc-autocomplete-tag-border-color: var(--awc-neutral-border);
+  --awc-autocomplete-blankslate-color: var(--awc-neutral-text);
+  --awc-autocomplete-error-color: var(--awc-danger-text);
+}
+
 .awc-autocomplete {
   position: relative;
   display: block;
@@ -16,27 +99,22 @@
 // https://github.com/twbs/bootstrap/blob/v4.6.0/scss/mixins/_forms.scss#L13
 // Mimic input focus state.
 .awc-autocomplete:focus-within .awc-autocomplete-control {
-  color: var(--awc-autocomplete-control-focus-color);
-  background-color: $input-focus-bg;
-  border-color: var(--awc-autocomplete-control-focus-border-color);
+  color: var(--awc-autocomplete-control-text-focus);
+  background-color: var(--awc-autocomplete-control-bg-focus);
+  border-color: var(--awc-autocomplete-control-border-focus);
   outline: 0;
-
-  @if $enable-shadows {
-    @include box-shadow(var(--awc-autocomplete-control-box-shadow), var(--awc-autocomplete-control-focus-box-shadow));
-  } @else {
-    box-shadow: var(--awc-autocomplete-control-focus-box-shadow);
-  }
+  box-shadow: var(--awc-autocomplete-control-box-shadow-focus);
 }
 
 .awc-autocomplete[disabled] {
   .awc-autocomplete-control {
     cursor: default;
-    background-color: var(--awc-autocomplete-control-disabled-bg-color);
+    background-color: var(--awc-autocomplete-control-bg-disabled);
   }
 
   .awc-autocomplete-clear-btn {
-    background-color: var(--awc-autocomplete-control-disabled-bg-color);
-    border-color: var(--awc-autocomplete-control-disabled-bg-color);
+    background-color: var(--awc-autocomplete-control-bg-disabled);
+    border-color: var(--awc-autocomplete-control-bg-disabled);
   }
 }
 
@@ -57,19 +135,19 @@
   background-clip: padding-box;
 
   &::placeholder {
-    color: $input-placeholder-color;
+    color: var(--awc-autocomplete-input-placeholder-text);
   }
 }
 
 .awc-autocomplete-end-adornment {
   flex-shrink: 0;
   position: absolute;
-  right: $input-padding-x;
+  right: var(--awc-autocomplete-control-padding-x);
   top: 0;
   bottom: 0;
   display: flex;
   align-items: center;
-  margin-right: calc(#{$input-padding-x} / 2 * -1);
+  margin-right: calc(var(--awc-autocomplete-control-padding-x) / 2 * -1);
 }
 
 .awc-autocomplete-adornment-btn,
@@ -80,8 +158,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--rounded-sm);
-  font-size: var(--fs-sm);
+  border-radius: var(--awc-radius-1);
+  font-size: var(--awc-font-size-2);
 
   i {
     display: inline-flex;
@@ -98,8 +176,8 @@
 // Hide clear btn when there are no selections
 .awc-autocomplete-clear-btn {
   display: none;
-  background-color: var(--awc-autocomplete-input-bg-color);
-  border-color: var(--awc-autocomplete-input-bg-color);
+  background-color: var(--awc-autocomplete-input-bg);
+  border-color: var(--awc-autocomplete-input-bg);
 }
 
 .awc-autocomplete-adornment-decorator {
@@ -113,7 +191,7 @@
     var(--awc-auto-size-height, var(--awc-autocomplete-listbox-max-height))
   );
   overflow: hidden auto;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--awc-shadow-3);
 }
 
 .awc-autocomplete-options {
@@ -121,29 +199,31 @@
   padding: 0;
 
   .awc-autocomplete-group:not([hidden]) ~ :not([hidden]) {
-    border-top: 1px solid var(--color-border-default);
-    margin-top: var(--space-1);
+    border-top: 1px solid var(--awc-neutral-line);
+    margin-top: var(--awc-space-1);
   }
 }
 
 // Group
 .awc-autocomplete-group-header {
   padding: var(--awc-autocomplete-group-header-padding-y) var(--awc-autocomplete-group-header-padding-x);
-  line-height: var(--awc-autocomplete-group-header-lh);
+  line-height: var(--awc-autocomplete-group-header-line-height);
   font-size: var(--awc-autocomplete-group-header-font-size);
-  font-weight: var(--awc-autocomplete-group-header-fw);
-  color: var(--awc-autocomplete-group-header-color);
-  @include text-truncate();
+  font-weight: var(--awc-autocomplete-group-header-font-weight);
+  color: var(--awc-autocomplete-group-header-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .awc-autocomplete-option-check {
-  color: var(--awc-autocomplete-option-check-color);
+  color: var(--awc-autocomplete-option-check-text);
   flex-shrink: 0;
   visibility: hidden;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--fs-xl);
+  font-size: var(--awc-font-size-5);
 }
 
 .awc-autocomplete-option {
@@ -151,9 +231,9 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  column-gap: 0.25rem;
+  column-gap: var(--awc-space-1);
   padding: var(--awc-autocomplete-option-padding-y) var(--awc-autocomplete-option-padding-x);
-  line-height: var(--awc-autocomplete-option-lh);
+  line-height: var(--awc-autocomplete-option-line-height);
   cursor: pointer;
   user-select: none;
   text-decoration: none;
@@ -165,8 +245,8 @@
   &[data-active],
   &:active,
   .active {
-    color: $dropdown-link-hover-color;
-    @include gradient-bg(var(--awc-autocomplete-option-hover-bg-color));
+    color: var(--awc-autocomplete-option-text-hover);
+    background-color: var(--awc-autocomplete-option-bg-hover);
   }
 
   // Enable hover state.
@@ -179,15 +259,15 @@
   // https://github.com/twbs/bootstrap/blob/v4.6.0/scss/_dropdown.scss#L161
   // Mimic dropdown-item disabled state.
   &[data-active].disabled {
-    color: $dropdown-link-disabled-color;
+    color: var(--awc-autocomplete-option-text-disabled);
   }
 
   &.disabled .awc-autocomplete-option-check {
-    color: var(--awc-autocomplete-option-check-disabled-color);
+    color: var(--awc-autocomplete-option-check-text-disabled);
   }
 
   &:not(.disabled) .awc-autocomplete-option-description {
-    color: var(--color-fg-secondary);
+    color: var(--awc-neutral-text-subtle);
   }
 }
 
@@ -208,22 +288,22 @@
 }
 
 .awc-autocomplete-option-description {
-  font-size: var(--fs-sm);
+  font-size: var(--awc-font-size-2);
 }
 
 // Tag
 .awc-autocomplete-tag {
   display: flex;
   align-items: center;
-  column-gap: 0.25rem;
+  column-gap: var(--awc-space-1);
   padding-inline: var(--awc-autocomplete-tag-padding-x);
   min-width: 0;
   max-width: var(--awc-autocomplete-tag-max-width);
   height: var(--awc-autocomplete-input-height);
   vertical-align: middle;
-  background-color: var(--awc-autocomplete-tag-bg-color);
+  background-color: var(--awc-autocomplete-tag-bg);
   border-radius: var(--awc-autocomplete-tag-border-radius);
-  border: 1px solid var(--awc-autocomplete-tag-border-color);
+  border: 1px solid var(--awc-autocomplete-tag-border);
   user-select: none;
 }
 
@@ -233,7 +313,9 @@
   font-size: var(--awc-autocomplete-tag-font-size);
   text-decoration: none;
   flex: 1 1 0%;
-  @include text-truncate();
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .awc-autocomplete-tag-end-adornment {
@@ -251,12 +333,12 @@
   justify-content: center;
   height: var(--awc-autocomplete-tag-btn-size);
   width: var(--awc-autocomplete-tag-btn-size);
-  border-radius: var(--rounded-sm);
-  font-size: var(--fs-lg);
+  border-radius: var(--awc-radius-1);
+  font-size: var(--awc-font-size-4);
 
   &:hover {
-    background-color: var(--awc-autocomplete-tag-btn-bg-hover-color);
-    color: $white;
+    background-color: var(--awc-autocomplete-tag-btn-bg-hover);
+    color: var(--awc-neutral-contrast);
   }
 
   &[disabled] {
@@ -281,7 +363,7 @@
   display: none;
   text-align: center;
   padding: var(--awc-autocomplete-blankslate-padding-y) var(--awc-autocomplete-blankslate-padding-x);
-  color: var(--awc-autocomplete-blankslate-color);
+  color: var(--awc-autocomplete-blankslate-text);
 }
 
 // Error
@@ -289,7 +371,7 @@
   display: none;
   text-align: center;
   padding: var(--awc-autocomplete-blankslate-padding-y) var(--awc-autocomplete-blankslate-padding-x);
-  color: var(--awc-autocomplete-error-color);
+  color: var(--awc-autocomplete-error-text);
 }
 
 // Spinner
@@ -367,8 +449,8 @@
   }
 
   .awc-autocomplete-end-adornment {
-    right: $input-padding-x-sm;
-    margin-right: calc(#{$input-padding-x-sm} / 2 * -1);
+    right: var(--awc-autocomplete-control-padding-x-sm);
+    margin-right: calc(var(--awc-autocomplete-control-padding-x-sm) / 2 * -1);
   }
 }
 
@@ -385,7 +467,7 @@
   }
 
   .awc-autocomplete-end-adornment {
-    right: $input-padding-x-lg;
-    margin-right: calc(#{$input-padding-x-lg} / 2 * -1);
+    right: var(--awc-autocomplete-control-padding-x-lg);
+    margin-right: calc(var(--awc-autocomplete-control-padding-x-lg) / 2 * -1);
   }
 }

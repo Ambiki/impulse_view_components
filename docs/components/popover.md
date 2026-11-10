@@ -66,13 +66,13 @@ Without a title, the header renders only its block, and the trigger names the po
 
 ### Sizing the panel
 
-`with_panel` passes its arguments to the panel. The panel is at most Bootstrap's `$popover-max-width` wide. Set a
+`with_panel` passes its arguments to the panel. The panel is at most `--awc-popover-max-width` (20rem) wide. Set a
 fixed width with a class: the popover clears an inline `width` when it positions the panel.
 
 ```erb{3}
 <%= render(Impulse::PopoverComponent.new) do |c| %>
   <% c.with_trigger { "Open feed" } %>
-  <% c.with_panel(style: "max-width: 20rem") do |panel| %>
+  <% c.with_panel(style: "--awc-popover-max-width: 30rem") do |panel| %>
     <% panel.with_body { "Body" } %>
   <% end %>
 <% end %>
