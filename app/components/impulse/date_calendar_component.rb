@@ -1,14 +1,14 @@
 module Impulse
   # A static grid of a month's days for choosing one. It renders no input or popover of its own: the app shows it
   # inline or in a popover, and listens for `awc-date-calendar:commit`. It renders the first month, and the element
-  # renders the months the user turns to (ADR 0013).
+  # renders the months the user turns to (ADR 0014).
   class DateCalendarComponent < ApplicationComponent
     ISO_DATE = /\A\d{4}-\d{2}-\d{2}\z/
 
     # `value` is a `Date`, a `Time` or `ActiveSupport::TimeWithZone`, or a string, either `YYYY-MM-DD` or a time. Times
     # are read in the calendar's time zone: `time_zone:`, else the zone of an `ActiveSupport::TimeWithZone` value, else
     # `Time.zone`. The time zone, the first day of the week and the translations are always rendered, so the element
-    # never falls back to the browser's (ADR 0014).
+    # never falls back to the browser's (ADR 0015).
     def initialize(
       value: nil,
       min: nil,

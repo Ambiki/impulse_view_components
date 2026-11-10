@@ -61,8 +61,10 @@ the popover closes, so that it reopens there rather than on a month the user pag
 ```erb
 <%= render(Impulse::PopoverComponent.new(data: { action: "awc-date-calendar:commit->awc-popover#requestHide" })) do |c| %>
   <% c.with_trigger(class: "btn btn-outline-secondary") { l(@date, format: :long) } %>
-  <% c.with_body do %>
-    <%= render(Impulse::DateCalendarComponent.new(value: @date)) %>
+  <% c.with_panel do |panel| %>
+    <% panel.with_body do %>
+      <%= render(Impulse::DateCalendarComponent.new(value: @date)) %>
+    <% end %>
   <% end %>
 <% end %>
 ```
