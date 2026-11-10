@@ -27,6 +27,12 @@
   --awc-red-8: #cd4235; // red-400
   --awc-red-9: #c01303; // red-500
 
+  --awc-blue-3: #d4daec; // blue-dark-100
+  --awc-blue-6: #a9b6d9; // blue-dark-200
+  --awc-blue-7: #7f91c6; // blue-dark-300
+  --awc-blue-8: #546db3; // blue-dark-400
+  --awc-blue-9: #2948a0; // blue-dark-500
+
   --awc-space-1: var(--space-1);
   --awc-space-2: var(--space-2);
   --awc-space-3: var(--space-3);
@@ -71,8 +77,19 @@
   --awc-neutral-text-contrast: var(--color-fg-default);
   // Secondary text, such as an option's description, on step 9.
   --awc-neutral-text-subtle: var(--color-fg-secondary);
+  // A disabled control's text, which needs no contrast (WCAG 1.4.3).
+  --awc-neutral-text-disabled: var(--awc-gray-7);
   // Text on a solid background.
   --awc-neutral-contrast: var(--white);
+
+  --awc-accent-bg: var(--awc-blue-3);
+  --awc-accent-line: var(--awc-blue-6);
+  --awc-accent-border: var(--awc-blue-7);
+  --awc-accent-border-hover: var(--awc-blue-8);
+  --awc-accent-solid: var(--awc-blue-9);
+  --awc-accent-text: var(--awc-blue-9);
+  // Text on a solid background.
+  --awc-accent-contrast: var(--white);
 
   --awc-success-bg: var(--awc-green-3);
   --awc-success-line: var(--awc-green-6);
