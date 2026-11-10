@@ -1,3 +1,8 @@
+:where(:root) {
+  --awc-popover-max-width: 20rem;
+  --awc-popover-header-bg: var(--awc-panel);
+}
+
 .awc-popover {
   display: block;
 }
@@ -5,17 +10,30 @@
 .awc-popover-container {
   outline: none;
   background-clip: padding-box;
-  background-color: var(--white);
-  border-radius: var(--rounded-default);
-  box-shadow: var(--shadow-md);
-  max-width: $popover-max-width;
+  background-color: var(--awc-panel);
+  border-radius: var(--awc-radius-2);
+  box-shadow: var(--awc-shadow-3);
+  max-width: var(--awc-popover-max-width);
   margin: 0;
   padding: 0;
-  // Reset our font and text properties to avoid inheriting weird values.
-  @include reset-text();
-  @include font-size(var(--fs-default));
+  // Reset the font and text properties, which the panel inherits from wherever the popover is.
+  font-family: var(--awc-font-family);
+  font-size: var(--awc-font-size-3);
+  font-style: normal;
+  font-weight: var(--awc-font-weight-regular);
+  line-height: var(--awc-line-height);
+  text-align: left;
+  text-align: start;
+  text-decoration: none;
+  text-shadow: none;
+  text-transform: none;
+  letter-spacing: normal;
+  word-break: normal;
+  white-space: normal;
+  word-spacing: normal;
+  line-break: auto;
   overflow: visible; // So that the arrow is visible.
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--awc-neutral-line);
   animation-duration: 400ms;
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   word-wrap: break-word;
@@ -24,6 +42,7 @@
     display: none;
   }
 
+  // Bootstrap draws the arrow, so its size follows Bootstrap's Sass.
   .arrow {
     position: absolute;
     display: block;
@@ -39,6 +58,10 @@
       border-color: transparent;
       border-style: solid;
     }
+  }
+
+  .popover-header {
+    background-color: var(--awc-popover-header-bg);
   }
 }
 
@@ -96,6 +119,30 @@
       margin-top: 0;
       margin-bottom: 0;
     }
+  }
+}
+
+// The arrow takes the panel's color, and Bootstrap's line under a bottom arrow takes the header's. Both classes, so
+// this beats Bootstrap's popover CSS in any order, and leaves Bootstrap's own popovers alone.
+.awc-popover-container.bs-popover-auto {
+  &[x-placement^='top'] > .arrow::after {
+    border-top-color: var(--awc-panel);
+  }
+
+  &[x-placement^='right'] > .arrow::after {
+    border-right-color: var(--awc-panel);
+  }
+
+  &[x-placement^='bottom'] > .arrow::after {
+    border-bottom-color: var(--awc-panel);
+  }
+
+  &[x-placement^='left'] > .arrow::after {
+    border-left-color: var(--awc-panel);
+  }
+
+  &[x-placement^='bottom'] .popover-header::before {
+    border-bottom-color: var(--awc-popover-header-bg);
   }
 }
 

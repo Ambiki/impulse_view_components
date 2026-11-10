@@ -1,14 +1,106 @@
-:root {
-  /** Colors */
+// Design tokens (see docs/adr/0013-design-tokens-come-in-three-layers.md). Each is declared on `:where(:root)`, which
+// has no specificity, so an app overrides it from any selector and in any order. Components read the aliases, never a
+// scale step, and never a hex value or Bootstrap's Sass.
+:where(:root) {
+  /** Scales: the palette on 12 steps, from the app background (1) to high-contrast text (12). A step the palette has no
+   * color for is left out. */
+  --awc-gray-1: #f9faff; // n10
+  --awc-gray-2: #eef4ff; // n20
+  --awc-gray-3: #e0e7f7; // n30
+  --awc-gray-6: #d2daea; // n40
+  --awc-gray-7: #c4cdde; // n50
+  --awc-gray-8: #b6c0d3; // n60
+  --awc-gray-9: #627291; // n300
+  --awc-gray-10: #546586; // n400
+  --awc-gray-11: #384b6e; // n600
+  --awc-gray-12: #1c3158; // n800
+
+  --awc-green-3: #d7f0e5; // green-light-100
+  --awc-green-6: #afe1cb; // green-light-200
+  --awc-green-7: #88d3b0; // green-light-300
+  --awc-green-8: #60c496; // green-light-400
+  --awc-green-9: #38b57c; // green-light-500
+
+  --awc-red-3: #f2d0cd; // red-100
+  --awc-red-6: #e6a19a; // red-200
+  --awc-red-7: #d97168; // red-300
+  --awc-red-8: #cd4235; // red-400
+  --awc-red-9: #c01303; // red-500
+
+  --awc-space-1: var(--space-1);
+  --awc-space-2: var(--space-2);
+  --awc-space-3: var(--space-3);
+  --awc-space-4: var(--space-4);
+
+  --awc-radius-1: var(--rounded-sm);
+  --awc-radius-2: var(--rounded-default);
+  --awc-radius-3: var(--rounded-md);
+  --awc-radius-4: var(--rounded-lg);
+  --awc-radius-5: var(--rounded-xl);
+  --awc-radius-full: var(--rounded-full);
+
+  --awc-font-family: #{inspect($font-family-base)};
+  --awc-line-height: #{$line-height-base};
+
+  --awc-font-size-1: 0.75rem;
+  --awc-font-size-2: var(--fs-sm);
+  --awc-font-size-3: var(--fs-default);
+  --awc-font-size-4: var(--fs-lg);
+  --awc-font-size-5: var(--fs-xl);
+
+  --awc-font-weight-regular: var(--fw-default);
+  --awc-font-weight-medium: var(--fw-medium);
+  --awc-font-weight-semibold: var(--fw-semibold);
+  --awc-font-weight-bold: var(--fw-bold);
+
+  --awc-shadow-1: var(--shadow-sm);
+  --awc-shadow-2: var(--shadow-default);
+  --awc-shadow-3: var(--shadow-md);
+  --awc-shadow-4: var(--shadow-lg);
+
+  /** Aliases: what each step is for. A use whose step is left out takes the nearest step. */
+  --awc-neutral-base: var(--awc-gray-1);
+  --awc-neutral-bg-subtle: var(--awc-gray-2);
+  --awc-neutral-bg: var(--awc-gray-3);
+  --awc-neutral-line: var(--color-border-default);
+  --awc-neutral-border: var(--awc-gray-7);
+  --awc-neutral-border-hover: var(--awc-gray-8);
+  --awc-neutral-solid: var(--n300);
+  --awc-neutral-solid-hover: var(--awc-gray-10);
+  --awc-neutral-text: var(--awc-gray-11);
+  --awc-neutral-text-contrast: var(--color-fg-default);
+  // Secondary text, such as an option's description, on step 9.
+  --awc-neutral-text-subtle: var(--color-fg-secondary);
+  // Text on a solid background.
+  --awc-neutral-contrast: var(--white);
+
+  --awc-success-bg: var(--awc-green-3);
+  --awc-success-line: var(--awc-green-6);
+  --awc-success-border: var(--awc-green-7);
+  --awc-success-border-hover: var(--awc-green-8);
+  --awc-success-solid: var(--awc-green-9);
+
+  --awc-danger-bg: var(--awc-red-3);
+  --awc-danger-line: var(--awc-red-6);
+  --awc-danger-border: var(--awc-red-7);
+  --awc-danger-border-hover: var(--awc-red-8);
+  --awc-danger-solid: var(--awc-red-9);
+  --awc-danger-text: var(--awc-red-9);
+
+  // Surfaces, such as a popover or a dialog, and what sits behind a modal one.
+  --awc-panel: var(--white);
+  --awc-overlay: rgb(0 23 66 / 0.5);
+  // Bootstrap's focus ring, so it matches the app's buttons and fields.
+  --awc-focus-ring: #{$input-btn-focus-color};
+  --awc-focus-ring-width: #{$input-btn-focus-width};
+
+  /** Deprecated names, removed in 1.0. The tokens above read them, so an app that sets or reads one keeps working. */
   --white: #ffffff;
-
-  --n300: #627291;
-
-  --color-fg-default: #1c3158;
+  --n300: var(--awc-gray-9);
+  --color-fg-default: var(--awc-gray-12);
   --color-fg-secondary: var(--n300);
-  --color-border-default: #d0d7de;
+  --color-border-default: var(--awc-gray-6);
 
-  /** Border radii */
   --rounded-sm: 2px;
   --rounded-default: 4px;
   --rounded-md: 6px;
@@ -16,79 +108,23 @@
   --rounded-xl: 12px;
   --rounded-full: 9999px;
 
-  /** Font sizes */
   --fs-sm: 0.8125rem;
   --fs-default: 0.875rem;
   --fs-lg: 1rem;
   --fs-xl: 1.25rem;
 
-  /** Font weights */
   --fw-default: 400;
   --fw-medium: 500;
   --fw-semibold: 600;
   --fw-bold: 700;
 
-  /** Shadows */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-default: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 
-  /** Spacings **/
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 1rem;
   --space-4: 1.5rem;
-
-  /** Autocomplete */
-  --awc-autocomplete-control-min-height: #{$input-height};
-  --awc-autocomplete-control-min-height-sm: #{$input-height-sm};
-  --awc-autocomplete-control-min-height-lg: #{$input-height-lg};
-  --awc-autocomplete-control-focus-color: #{$input-focus-color};
-  --awc-autocomplete-control-focus-border-color: #{$input-focus-border-color};
-  --awc-autocomplete-control-disabled-bg-color: #eef4ff; // n20
-  --awc-autocomplete-control-box-shadow: #{$input-box-shadow};
-  --awc-autocomplete-control-focus-box-shadow: #{$input-focus-box-shadow};
-  --awc-autocomplete-input-min-width: 2rem;
-  --awc-autocomplete-input-height: calc(#{$input-height} - (#{$input-padding-y} * 2) - (#{$input-border-width} * 2));
-  --awc-autocomplete-input-bg-color: #{$input-bg};
-  --awc-autocomplete-adornment-item-size: 1.5rem;
-  --awc-autocomplete-listbox-font-size: 0.875rem;
-  --awc-autocomplete-listbox-max-height: 256px;
-  --awc-autocomplete-option-padding-x: 1rem;
-  --awc-autocomplete-option-padding-y: 0.5rem;
-  --awc-autocomplete-option-font-size: 0.875rem;
-  --awc-autocomplete-option-lh: 1.25rem;
-  --awc-autocomplete-option-hover-bg-color: #{$dropdown-link-hover-bg};
-  --awc-autocomplete-option-check-color: #38b57c; // green-light-500
-  --awc-autocomplete-option-check-disabled-color: #afe1cb; // green-light-200
-  --awc-autocomplete-group-header-padding-x: var(--awc-autocomplete-option-padding-x);
-  --awc-autocomplete-group-header-padding-y: 0.25rem;
-  --awc-autocomplete-group-header-color: #384b6e; // n600
-  --awc-autocomplete-group-header-font-size: 0.75rem;
-  --awc-autocomplete-group-header-lh: 18px;
-  --awc-autocomplete-group-header-fw: 500;
-  --awc-autocomplete-tag-padding-x: 0.5rem;
-  --awc-autocomplete-tag-btn-size: 1.25rem;
-  --awc-autocomplete-tag-btn-bg-hover-color: var(--n300);
-  --awc-autocomplete-tag-gap: 0.25rem;
-  --awc-autocomplete-tag-max-width: 24rem;
-  --awc-autocomplete-tag-bg-color: #e0e7f7; // n30
-  --awc-autocomplete-tag-border-color: #c4cdde; // n50
-  --awc-autocomplete-tag-border-radius: 0.125rem;
-  --awc-autocomplete-tag-font-size: 0.75rem;
-  --awc-autocomplete-blankslate-color: #384b6e; // n600
-  --awc-autocomplete-blankslate-padding-x: 1rem;
-  --awc-autocomplete-blankslate-padding-y: 0.5rem;
-  --awc-autocomplete-error-color: #c01303; // red-500
-  // sm
-  --awc-autocomplete-input-height-sm: calc(
-    #{$input-height-sm} - (#{$input-padding-y-sm} * 2) - (#{$input-border-width} * 2)
-  );
-  // lg
-  --awc-autocomplete-input-height-lg: calc(
-    #{$input-height-lg} - (#{$input-padding-y-lg} * 2) - (#{$input-border-width} * 2)
-  );
-  --awc-autocomplete-tag-font-size-lg: 0.875rem;
-  --awc-autocomplete-tag-gap-lg: 0.375rem;
 }
