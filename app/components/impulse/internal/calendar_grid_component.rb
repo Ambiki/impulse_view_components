@@ -8,8 +8,8 @@ module Impulse
     #
     # The selection is a date range: a day, a week, a month or a year. The value names it, written as the calendar writes
     # values, and so do `min` and `max`. A subclass names its element and its level, and decides what a cell selects,
-    # which cells are disabled, and any hint. A calendar with a level above its own renders its heading as the button
-    # that drills up to it (ADR 0017); the element alone renders the levels above.
+    # which cells are disabled, and any hint. A calendar with levels above its base level renders its heading as the
+    # button that drills up to them (ADR 0017); the element alone renders the levels above.
     class CalendarGridComponent < ApplicationComponent
       ISO_DATE = /\A\d{4}-\d{2}-\d{2}\z/
 
@@ -31,8 +31,6 @@ module Impulse
         id = self.class.generate_id
         @heading_id = "#{id}-heading"
         @hint_id = "#{id}-hint"
-        # The element names the hint the same way when it renders the heading again.
-        @drill_hint_id = "#{@heading_id}-#{level_above.cell}" if level_above
 
         @system_args = system_args
         @system_args[:tag] = tag_name.to_sym
@@ -68,17 +66,17 @@ module Impulse
         raise NotImplementedError
       end
 
-      # The level the heading drills up to, or `nil` for none. By default, none.
-      def level_above
-        nil
+      # The levels the heading drills up to, nearest first. By default, none.
+      def levels_above
+        []
       end
 
       # The names and patterns the element renders the pages the user moves to with: its level's, and, for a calendar
-      # that drills up, the level above's too, and the page buttons' names on each, under `paging`.
+      # that drills up, those of the levels above too, and the page buttons' names on each, under `paging`.
       def i18n
-        return level.i18n unless level_above
+        return level.i18n if levels_above.empty?
 
-        levels = [level, level_above]
+        levels = [level, *levels_above]
         levels.map(&:i18n).reduce(:deep_merge).merge(
           paging: levels.to_h { |each| [each.cell, { previous: each.previous_label, next: each.next_label }] }
         )
@@ -93,9 +91,15 @@ module Impulse
       # for its clicks, as the element replaces it on every drill.
       def heading_content
         heading = level.heading(@displayed_page)
-        return heading unless level_above
+        return heading if levels_above.empty?
 
-        tag.button(heading, type: "button", class: "btn btn-sm btn-light #{tag_name}-heading-button", "aria-describedby": @drill_hint_id)
+        tag.button(heading, type: "button", class: "btn btn-sm btn-light #{tag_name}-heading-button", "aria-describedby": drill_hint_id(levels_above.first))
+      end
+
+      # The hint describing the heading's button on the level below `level_above`, which the element names the same way
+      # when it renders the heading again.
+      def drill_hint_id(level_above)
+        "#{@heading_id}-#{level_above.cell}"
       end
 
       # The value naming the selection, or a limit, that starts with `cell`. By default, the day as `YYYY-MM-DD`.

@@ -1,5 +1,5 @@
 <%= render(Impulse::BaseRenderer.new(**@system_args)) do %>
-  <%= tag.div(class: "#{tag_name}-header", "data-action": ("click->#{tag_name}#handleHeadingClick" if level_above)) do %>
+  <%= tag.div(class: "#{tag_name}-header", "data-action": ("click->#{tag_name}#handleHeadingClick" if levels_above.any?)) do %>
     <button type="button" class="btn btn-sm btn-light <%= tag_name %>-nav" aria-label="<%= level.previous_label %>" aria-disabled="<%= previous_page_disabled? %>" data-target="<%= tag_name %>.previousButton" data-action="click-><%= tag_name %>#handlePreviousClick">
       <i class="bi bi-chevron-left" aria-hidden="true"></i>
     </button>
@@ -8,8 +8,8 @@
       <i class="bi bi-chevron-right" aria-hidden="true"></i>
     </button>
   <% end %>
-  <% if level_above %>
-    <span id="<%= @drill_hint_id %>" class="sr-only"><%= level_above.drill_hint %></span>
+  <% levels_above.each do |level_above| %>
+    <span id="<%= drill_hint_id(level_above) %>" class="sr-only"><%= level_above.drill_hint %></span>
   <% end %>
   <% if hint %>
     <span id="<%= @hint_id %>" class="sr-only"><%= hint %></span>

@@ -45,6 +45,29 @@ module Impulse
       assert_selector "awc-week-calendar[value='2026-11-22']", visible: :all
     end
 
+    test "renders the days again as the component does after drilling up and back down" do
+      visit_preview(:default, value: "2026-11-18")
+      server = calendar_markup
+
+      find(".awc-week-calendar-heading-button").click
+      find("button[data-date='2026-11-01']").click
+
+      assert_equal server, calendar_markup
+    end
+
+    test "drills up to the months in the same box, where choosing isn't described as choosing a week" do
+      visit_preview(:default, value: "2026-11-18")
+      days = page.evaluate_script("document.querySelector('awc-week-calendar').getBoundingClientRect().height")
+
+      find(".awc-week-calendar-heading-button").click
+
+      assert_nil accessible_description("awc-week-calendar table")
+      assert_equal days, page.evaluate_script("document.querySelector('awc-week-calendar').getBoundingClientRect().height")
+
+      find("button[data-date='2026-12-01']").click
+      assert_equal "Choosing a day chooses its week.", accessible_description("awc-week-calendar table")
+    end
+
     private
 
     # The parts of the calendar the element renders, without the whitespace between tags, which doesn't render.
@@ -54,7 +77,7 @@ module Impulse
           const el = document.querySelector('awc-week-calendar');
           const html = (node) => node.innerHTML.replace(/>\\s+</g, '><').trim();
           return {
-            heading: el.querySelector('[aria-live]').textContent,
+            heading: html(el.querySelector('[aria-live]')),
             month: el.querySelector('table').dataset.month,
             weekdays: html(el.querySelector('thead')),
             days: html(el.querySelector('tbody')),
@@ -62,15 +85,6 @@ module Impulse
           };
         })()
       JS
-    end
-
-    # The description Chrome's accessibility tree gives the element `selector` matches, which a screen reader reads.
-    def accessible_description(selector)
-      browser = page.driver.browser
-      document = browser.execute_cdp("DOM.getDocument")
-      node = browser.execute_cdp("DOM.querySelector", nodeId: document["root"]["nodeId"], selector: selector)
-      tree = browser.execute_cdp("Accessibility.getPartialAXTree", nodeId: node["nodeId"], fetchRelatives: false)
-      tree["nodes"].first.dig("description", "value")
     end
   end
 end

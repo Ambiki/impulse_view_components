@@ -144,7 +144,26 @@ module Impulse
       assert_equal %w[Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec], i18n["abbrMonthNames"]
       assert_equal %w[Sunday Monday Tuesday Wednesday Thursday Friday Saturday], i18n["dayNames"]
       assert_equal %w[Sun Mon Tue Wed Thu Fri Sat], i18n["abbrDayNames"]
-      assert_equal({ "heading" => "%B %Y", "day" => "%A, %B %-d, %Y" }, i18n["formats"])
+      assert_equal({ "heading" => "%B %Y", "day" => "%A, %B %-d, %Y", "month" => "%B %Y", "decade" => "%{start} – %{end}" }, i18n["formats"])
+      assert_equal(
+        {
+          "day" => { "previous" => "Previous month", "next" => "Next month" },
+          "month" => { "previous" => "Previous year", "next" => "Next year" },
+          "year" => { "previous" => "Previous decade", "next" => "Next decade" }
+        },
+        i18n["paging"]
+      )
+    end
+
+    test "heads the grid with a button naming the month, which drills up to months, then years" do
+      render_inline(Impulse::DateCalendarComponent.new(value: Date.new(2026, 11, 6)))
+
+      heading = page.find("[aria-live='polite']")
+      button = heading.find("button.btn.btn-sm.btn-light.awc-date-calendar-heading-button[type='button']", text: "November 2026")
+      assert_equal "#{heading[:id]}-month", button["aria-describedby"]
+      assert_selector "##{heading[:id]}-month.sr-only", text: "Choose a month", visible: :all
+      assert_selector "##{heading[:id]}-year.sr-only", text: "Choose a year", visible: :all
+      assert_selector ".awc-date-calendar-header[data-action='click->awc-date-calendar#handleHeadingClick']"
     end
 
     test "uses the app's translations" do
@@ -160,7 +179,9 @@ module Impulse
       assert_selector "[aria-live='polite']", text: "Nov 2026"
       assert_selector "button[data-date='2026-11-06'][aria-label='6 November 2026']"
       assert_selector "button[aria-label='Earlier']"
-      assert_equal({ "heading" => "%b %Y", "day" => "%-d %B %Y" }, JSON.parse(page.find("awc-date-calendar")["i18n"])["formats"])
+      i18n = JSON.parse(page.find("awc-date-calendar")["i18n"])
+      assert_equal({ "heading" => "%b %Y", "day" => "%-d %B %Y" }, i18n["formats"].slice("heading", "day"))
+      assert_equal "Earlier", i18n.dig("paging", "day", "previous")
     end
 
     test "marks the selected day, and makes it the one tab stop" do

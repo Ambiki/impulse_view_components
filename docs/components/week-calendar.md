@@ -14,6 +14,9 @@ selected week as one band. Clicking a day, or pressing Enter or Space on it, com
 the calendar emits `awc-week-calendar:commit` with the week's first and last days. Committing a day of the week already
 selected emits nothing.
 
+Its heading drills up to the months and the years, as the [date calendar](./date-calendar.md#usage)'s does. A month or
+year is marked selected when the selected week has a day in it, so a week across two months marks both.
+
 ## Arguments
 
 ### Keyword arguments
@@ -84,8 +87,8 @@ The calendar follows the grid of the
 [APG date picker dialog example](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/examples/datepicker-dialog/),
 as the [date calendar](./date-calendar.md#accessibility) does: one tab stop, the same keys, and each day named by its
 full date. The user moves by day, and every day of the selected week is announced as selected. A hint describes the
-grid, so that screen reader users know that choosing a day chooses its week. The week under the pointer, and the week of
-the day the user has moved to, are highlighted.
+grid, so that screen reader users know that choosing a day chooses its week; the months and years don't have it. The
+week under the pointer, and the week of the day the user has moved to, are highlighted.
 
 ## Imports
 

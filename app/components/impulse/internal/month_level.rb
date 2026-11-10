@@ -61,6 +61,11 @@ module Impulse
         I18n.t("impulse.calendar.next_year")
       end
 
+      # Describes the heading's button on the level below, which drills up to months.
+      def drill_hint
+        I18n.t("impulse.calendar.choose_month")
+      end
+
       # The names and pattern the element renders the years the user moves to with, so they read like this one.
       def i18n
         {

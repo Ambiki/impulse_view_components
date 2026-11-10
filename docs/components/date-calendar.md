@@ -14,6 +14,10 @@ The calendar shows the month of its value, with previous and next month buttons.
 Space on it, commits it: the day becomes the value and the calendar emits `awc-date-calendar:commit`. Committing the
 day already selected emits nothing.
 
+Pressing the heading, which names the month, shows the months of its year in the same box, and pressing it again shows
+the years of its decade. Choosing a year shows its months, and choosing a month shows its days. Neither commits
+anything.
+
 ## Arguments
 
 ### Keyword arguments
@@ -78,7 +82,7 @@ popover.addEventListener('awc-popover:hidden', () => calendar.resetView());
 ### Translations
 
 Month and weekday names come from Rails' `date.month_names`, `date.abbr_month_names`, `date.day_names` and
-`date.abbr_day_names`. The button labels and the two `strftime` patterns are shared by the calendars:
+`date.abbr_day_names`. The button labels and the patterns are shared by the calendars:
 
 ```yaml
 en:
@@ -86,12 +90,20 @@ en:
     calendar:
       previous_month: Previous month
       next_month: Next month
+      previous_year: Previous year
+      next_year: Next year
+      previous_decade: Previous decade
+      next_decade: Next decade
+      choose_month: Choose a month # Describes the heading's button on the days.
+      choose_year: Choose a year # Describes the heading's button on the months.
       formats:
         heading: "%B %Y" # Names the displayed month, above the grid.
         day: "%A, %B %-d, %Y" # Each day's accessible name.
+        month: "%B %Y" # Each month's accessible name.
+        decade: "%{start} – %{end}" # Names the displayed decade, above the years.
 ```
 
-Add them for each other locale. The patterns can use `%A %a %B %b %d %-d %e %m %Y` and `%%`.
+Add them for each other locale. The `strftime` patterns can use `%A %a %B %b %d %-d %e %m %Y` and `%%`.
 
 ## Accessibility
 
@@ -99,6 +111,13 @@ The calendar follows the grid of the
 [APG date picker dialog example](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/examples/datepicker-dialog/).
 The grid is one tab stop, named by the month, and each day is a button named by its full date. Turning the page
 announces the new month.
+
+The heading is a button named by its month and described as "Choose a month". Pressing it moves focus to the month
+shown, in a grid named by its year; that heading, described as "Choose a year", moves on to the years, named by their
+decade. Choosing a year moves focus to the same month in it, and choosing a month to the same day, or the nearest one
+`min` and `max` allow. The decade heading can't be pressed: choose the year shown to go back. On the months and years,
+the keys are the [month calendar](./month-calendar.md#accessibility)'s and the
+[year calendar](./year-calendar.md#accessibility)'s, and Enter or Space chooses.
 
 | Key                              | Moves to                             |
 | ------                           | ------------                         |
@@ -109,7 +128,7 @@ announces the new month.
 | Shift + Page Up, Shift + Page Down | The same day of the year before or after |
 | Enter, Space                     | Commits the day                      |
 
-Moving past the edge of the month turns the page.
+Moving past the edge of the month turns the page. The calendar keeps its size on the months and years.
 
 ## Imports
 

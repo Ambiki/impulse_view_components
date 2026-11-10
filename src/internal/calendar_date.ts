@@ -119,6 +119,11 @@ export function rangeIncludes(range: DateRange | null, date: CalendarDate): bool
   return !!range && date.compare(range.start) >= 0 && date.compare(range.end) <= 0;
 }
 
+/** Whether `a` and `b` share a day. */
+export function rangesOverlap(a: DateRange | null, b: DateRange | null): boolean {
+  return !!a && !!b && a.start.compare(b.end) <= 0 && b.start.compare(a.end) <= 0;
+}
+
 /** Whether `a` and `b` are the same range of days. */
 export function rangeEquals(a: DateRange | null, b: DateRange | null): boolean {
   return !!a && !!b && a.start.equals(b.start) && a.end.equals(b.end);

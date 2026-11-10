@@ -59,5 +59,16 @@ module Impulse
       # Each day keeps its full date as its name.
       assert_selector "button[data-date='2026-11-04'][aria-label='Wednesday, November 4, 2026']"
     end
+
+    test "drills up from its heading as the date calendar does, keeping its grid's hint apart" do
+      render_inline(Impulse::WeekCalendarComponent.new(value: Date.new(2026, 11, 4)))
+
+      heading = page.find("[aria-live='polite']")
+      assert_equal "#{heading[:id]}-month", heading.find("button.awc-week-calendar-heading-button")["aria-describedby"]
+      assert_selector "##{heading[:id]}-month", text: "Choose a month", visible: :all
+      assert_selector "##{heading[:id]}-year", text: "Choose a year", visible: :all
+      assert_selector "##{page.find("table[role='grid']")["aria-describedby"]}", text: "Choosing a day chooses its week.", visible: :all
+      assert_equal %w[day month year], JSON.parse(page.find("awc-week-calendar")["i18n"])["paging"].keys
+    end
   end
 end

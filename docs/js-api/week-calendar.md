@@ -45,15 +45,15 @@ The IANA time zone that decides which day is today, such as `America/New_York`.
 
 ### `i18n`
 
-The month and weekday names and the `strftime` patterns the months are written with, as the component renders them
-from the app's translations. Its type is exported as `WeekCalendarI18n`.
+The names and patterns the days, months and years are written with, and the page buttons' names on each, as the
+component renders them from the app's translations. Its type is exported as `WeekCalendarI18n`.
 
 ## Methods
 
 ### `previousView`
 
-Shows the month before, as the previous button does: the day with the tab stop moves back a month. It stops at the
-month holding `min`.
+Shows the month before, as the previous button does: the day with the tab stop moves back a month. It stops at the month
+holding `min`. On the months or years, it shows the year or decade before.
 
 ```js
 calendar.previousView();
@@ -62,7 +62,7 @@ calendar.previousView();
 ### `nextView`
 
 Shows the month after, as the next button does: the day with the tab stop moves on a month. It stops at the month
-holding `max`.
+holding `max`. On the months or years, it shows the year or decade after.
 
 ```js
 calendar.nextView();
@@ -70,8 +70,8 @@ calendar.nextView();
 
 ### `goToDate`
 
-Shows the month of a `YYYY-MM-DD` day and gives that day the tab stop, without selecting its week. It can go past `min`
-and `max`.
+Shows the month of a `YYYY-MM-DD` day, on the days, and gives that day the tab stop, without selecting its week. It can
+go past `min` and `max`.
 
 ```js
 calendar.goToDate('2027-03-09');
@@ -79,7 +79,7 @@ calendar.goToDate('2027-03-09');
 
 ### `goToToday`
 
-Shows today's month, in the calendar's time zone, and gives today the tab stop, without selecting its week.
+Shows today's month, in the calendar's time zone, on the days, and gives today the tab stop, without selecting its week.
 
 ```js
 calendar.goToToday();
@@ -87,7 +87,7 @@ calendar.goToToday();
 
 ### `clear`
 
-Selects no week and shows today's month, as setting an empty `value` does.
+Selects no week and shows today's month, on the days, as setting an empty `value` does.
 
 ```js
 calendar.clear();
@@ -103,7 +103,7 @@ calendar.isDateDisabled('2026-11-07'); // true when min is 2026-11-11, with week
 
 ### `focus`
 
-Focuses the day with the tab stop.
+Focuses the day with the tab stop, or the month or year on the months or years.
 
 ```js
 calendar.focus();
@@ -111,7 +111,8 @@ calendar.focus();
 
 ### `resetView`
 
-Moves the calendar back to the month of the value's day, or today's without one, and makes that day the one tab stop.
+Moves the calendar back to the month of the value's day, or today's without one, on the days, and makes that day the one
+tab stop.
 
 ```js
 calendar.resetView();

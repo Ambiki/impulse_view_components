@@ -63,6 +63,8 @@ export const DAY_LEVEL: Level<DayLevelI18n> = {
   compareViews: (a, b) => a.compareMonth(b),
   addViews: (cell, views) => cell.add({ months: views }),
   range: (cell) => ({ start: cell, end: cell }),
+  // The day drilled down to keeps its number, cut to the month's length: January 31 placed in February is its last day.
+  placeIn: (cell, view) => view.startOfMonth().add({ days: Math.min(cell.day, view.endOfMonth().day) - 1 }),
   rows: (view, firstDayOfWeek) => view.monthGrid(firstDayOfWeek),
   // Per the APG date picker: a day, a week, the week's ends, a month, and with Shift a year.
   move: (cell, event, { firstDayOfWeek }) => {

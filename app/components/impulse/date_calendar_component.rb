@@ -19,6 +19,11 @@ module Impulse
       @level ||= Internal::DayLevel.new(first_day_of_week: @first_day_of_week)
     end
 
+    # Its heading drills up to months, then years (ADR 0017).
+    def levels_above
+      @levels_above ||= [Internal::MonthLevel.new, Internal::YearLevel.new]
+    end
+
     # A day selects itself.
     def range_of(date)
       date..date

@@ -105,12 +105,13 @@ _Avoid_: Change event
 ### Date calendar
 
 **Date calendar**:
-A static grid of a month's days for choosing one. It has no input or popover of its own: the app shows it inline or in a popover.
+A static grid of a month's days for choosing one. Its heading drills up to months, then years. It has no input or
+popover of its own: the app shows it inline or in a popover.
 _Avoid_: Inline date picker, datepicker, calendar
 
 **Week calendar**:
-A date calendar's grid for choosing a week: committing any day commits its week. Like a date calendar, it has no input
-or popover of its own.
+A date calendar's grid for choosing a week: committing any day commits its week. It drills up as a date calendar does,
+and like one, it has no input or popover of its own.
 _Avoid_: Week picker, inline week picker
 
 **Year calendar**:
@@ -157,9 +158,10 @@ months, and a year calendar years. A calendar's base level is the one its value 
 _Avoid_: View, mode, zoom, scale
 
 **Drill up**:
-Pressing a calendar's heading to show the level above, in the same grid: a month calendar's months drill up to years.
-The top level's heading can't be pressed. Choosing a cell there drills back down, to the view holding it; choosing the
-cell the user drilled up from leaves the view as it was.
+Pressing a calendar's heading to show the level above, in the same grid: a date calendar's days drill up to months,
+and its months to years. The top level's heading can't be pressed. Choosing a cell there drills back down, to the view
+holding it; choosing the cell the user drilled up from leaves the view as it was. On a level above the base level, a
+cell is selected when any of its days is selected, so a week across two months selects both.
 _Avoid_: Zoom out, switch view, toggle view
 
 **View**:
