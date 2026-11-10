@@ -48,8 +48,10 @@ back to the selected year's decade when the popover closes.
 ```erb
 <%= render(Impulse::PopoverComponent.new(data: { action: "awc-year-calendar:commit->awc-popover#requestHide" })) do |c| %>
   <% c.with_trigger(class: "btn btn-outline-secondary") { @year.to_s } %>
-  <% c.with_body do %>
-    <%= render(Impulse::YearCalendarComponent.new(value: @year)) %>
+  <% c.with_panel do |panel| %>
+    <% panel.with_body do %>
+      <%= render(Impulse::YearCalendarComponent.new(value: @year)) %>
+    <% end %>
   <% end %>
 <% end %>
 ```

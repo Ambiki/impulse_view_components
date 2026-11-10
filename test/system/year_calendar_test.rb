@@ -2,7 +2,7 @@ require "system/test_helper"
 
 module Impulse
   class YearCalendarSystemTest < ApplicationSystemTest
-    # The element renders the decades the user moves to, and the component the first one (ADR 0013). They must agree,
+    # The element renders the decades the user moves to, and the component the first one (ADR 0014). They must agree,
     # or the calendar would change the first time the user moves back to it.
     [
       ["a decade", { value: "2026" }],

@@ -16,7 +16,7 @@ export interface DayLevelI18n extends DateNames {
   };
 }
 
-/** Rails' English, used only when the component's `i18n` attribute is missing (ADR 0014). */
+/** Rails' English, used only when the component's `i18n` attribute is missing (ADR 0015). */
 export const DAY_ENGLISH: DayLevelI18n = {
   monthNames: [
     'January',

@@ -15,7 +15,7 @@ export interface YearLevelI18n {
   };
 }
 
-/** Rails' English, used only when the component's `i18n` attribute is missing (ADR 0014). */
+/** Rails' English, used only when the component's `i18n` attribute is missing (ADR 0015). */
 export const YEAR_ENGLISH: YearLevelI18n = { formats: { decade: '%{start} – %{end}' } };
 
 /** A four-digit year, from 1000 to 9999, which is all a calendar date can name. */

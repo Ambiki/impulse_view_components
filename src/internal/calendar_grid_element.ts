@@ -1,6 +1,6 @@
 /**
  * The behaviour the calendars share, whatever their level shows: days for `<awc-date-calendar>` and
- * `<awc-week-calendar>`, years for `<awc-year-calendar>` (ADR 0015). It is internal: the package's `exports` map doesn't
+ * `<awc-week-calendar>`, years for `<awc-year-calendar>` (ADR 0016). It is internal: the package's `exports` map doesn't
  * list it. Its public members reach apps, though, through the elements that extend it, so changing those changes the
  * public API.
  *

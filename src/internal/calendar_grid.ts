@@ -1,6 +1,6 @@
 /**
- * The grid the calendars share, driven by a level: days, months or years (ADR 0015). What a calendar shows, and the
- * markup its component renders, which the element renders again for the views the user moves to (ADR 0013). It is
+ * The grid the calendars share, driven by a level: days, months or years (ADR 0016). What a calendar shows, and the
+ * markup its component renders, which the element renders again for the views the user moves to (ADR 0014). It is
  * internal: the package's `exports` map doesn't list it.
  */
 import type { CalendarDate, DateRange } from 'src/internal/calendar_date';

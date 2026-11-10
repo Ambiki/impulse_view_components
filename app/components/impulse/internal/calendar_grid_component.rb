@@ -1,9 +1,9 @@
 module Impulse
   module Internal
     # The grid the calendars share, whatever their level shows: days for `DateCalendarComponent` and
-    # `WeekCalendarComponent`, years for `YearCalendarComponent` (ADR 0015). It is internal, and not part of the public
-    # API. It renders the first page, and the element renders the pages the user moves to (ADR 0013). The Rails settings
-    # a calendar uses are always rendered, so the element never falls back to the browser's (ADR 0014).
+    # `WeekCalendarComponent`, years for `YearCalendarComponent` (ADR 0016). It is internal, and not part of the public
+    # API. It renders the first page, and the element renders the pages the user moves to (ADR 0014). The Rails settings
+    # a calendar uses are always rendered, so the element never falls back to the browser's (ADR 0015).
     #
     # The selection is a date range: a day, a week or a year. The value names it, written as the calendar writes values,
     # and so do `min` and `max`. A subclass names its element and its level, and decides what a cell selects, which
