@@ -9,6 +9,8 @@ on:
   push:
     branches:
       - main
+  # The publish workflow runs CI on the release tag before publishing.
+  workflow_call:
 
 # A new push to a pull request cancels the run still going for its previous push. Runs on main always finish.
 concurrency:

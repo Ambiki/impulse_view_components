@@ -1,0 +1,76 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - "v[0-9]*"
+
+permissions:
+  contents: read
+
+jobs:
+  check_version:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      # Both packages ship under the tag's version, so a tag that doesn't match both files publishes nothing.
+      - name: Check versions match the tag
+        run: |
+          tag=${GITHUB_REF_NAME#v}
+          npm_version=$(node -p "require('./package.json').version")
+          gem_version=$(ruby -r ./lib/impulse/view_components/version -e "puts Impulse::ViewComponents::VERSION")
+          if [ "$npm_version" != "$tag" ] || [ "$gem_version" != "$tag" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME doesn't match package.json ($npm_version) and version.rb ($gem_version)"
+            exit 1
+          fi
+
+  # A patch release can be tagged on a branch other than main, where CI hasn't run.
+  ci:
+    needs: check_version
+    uses: ./.github/workflows/ci.yml
+
+  # Authenticates as a trusted publisher, set up on the gem's page at rubygems.org.
+  publish_gem:
+    needs: ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+      - uses: rubygems/configure-rubygems-credentials@v2.1.0
+      - name: Publish
+        run: |
+          gem build impulse_view_components.gemspec
+          gem push impulse_view_components-*.gem
+
+  # Authenticates as a trusted publisher, set up in the package's settings at npmjs.com. npm adds provenance on its own.
+  publish_npm:
+    needs: ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .tool-versions
+          cache: yarn
+          registry-url: "https://registry.npmjs.org"
+      - run: yarn install --frozen-lockfile
+      - name: Publish
+        # `prepublishOnly` builds dist/. A prerelease goes to the dist-tag named by its identifier (1.0.0-rc.0 -> rc),
+        # never latest.
+        run: |
+          version=$(node -p "require('./package.json').version")
+          prerelease=${version#*-}
+          if [ "$prerelease" = "$version" ]; then
+            npm publish
+          else
+            npm publish --tag "${prerelease%%.*}"
+          fi
