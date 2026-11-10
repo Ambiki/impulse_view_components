@@ -10,10 +10,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - `Impulse::WeekCalendarComponent` and `<awc-week-calendar>`, the date calendar's grid for choosing a week, committed as its first and last days ([#378](https://github.com/Ambiki/impulse_view_components/pull/378))
 - `Impulse::DateCalendarComponent` and `<awc-date-calendar>`, a grid of a month's days for choosing one, to show inline or in a popover ([#377](https://github.com/Ambiki/impulse_view_components/pull/377))
+- `--awc-` design tokens on `:where(:root)`, which an app overrides from any selector: scales such as `--awc-gray-6`, aliases such as `--awc-neutral-line`, and component tokens such as `--awc-popover-max-width` ([#382](https://github.com/Ambiki/impulse_view_components/pull/382))
 
 ### Changed
 
+- `<awc-popover>`'s corners are 8px (`--awc-radius-4`), up from 4px ([#383](https://github.com/Ambiki/impulse_view_components/pull/383))
+- `<awc-popover>` is at most `--awc-popover-max-width` (20rem) wide, up from `$popover-max-width` (276px), with a white header (`--awc-popover-header-bg`). `<awc-dialog>`'s margins come from `--awc-dialog-margin-y` and `--awc-dialog-margin-y-sm-up`, not `$modal-dialog-margin`. Borders are `#d2daea`, from `#d0d7de` ([#382](https://github.com/Ambiki/impulse_view_components/pull/382))
+- **Breaking:** `Impulse::PopoverComponent` nests its header and body in a `with_panel` slot, whose arguments reach the panel. `title:` is removed: set the title with the header's `with_title` ([#381](https://github.com/Ambiki/impulse_view_components/pull/381))
 - **Breaking:** `select` and `time_zone_select` in a form without a model take the selected option from the view's instance variable named after the form, such as `@user` for `scope: :user`, as Rails' own fields do ([#368](https://github.com/Ambiki/impulse_view_components/pull/368))
+
+### Deprecated
+
+- `--white`, `--n300`, `--color-*`, `--rounded-*`, `--fs-*`, `--fw-*`, `--shadow-*`, `--space-*`, and the autocomplete's custom properties that end in `-color`, `-lh` or `-fw`. They keep working until 1.0; use their `--awc-` replacements, such as `--awc-radius-5` for `--rounded-xl` ([#382](https://github.com/Ambiki/impulse_view_components/pull/382))
 
 ### Removed
 

@@ -4,9 +4,14 @@ module Impulse
     # @param title text
     # @param placement select ["top", "top-start", "top-end", "right", "right-start", "right-end", "bottom", "bottom-start", "bottom-end", "left", "left-start", "left-end"]
     def default(title: "Activity feed", placement: "bottom")
-      render(Impulse::PopoverComponent.new(title: title, placement: placement)) do |c|
+      render(Impulse::PopoverComponent.new(placement: placement)) do |c|
         c.with_trigger(class: "btn btn-primary") { "Toggle popover" }
-        c.with_body { "And here's some amazing content. It's very amazing. Right?" }
+        c.with_panel do |panel|
+          panel.with_header do |header|
+            header.with_title { title }
+          end
+          panel.with_body { "And here's some amazing content. It's very amazing. Right?" }
+        end
       end
     end
 

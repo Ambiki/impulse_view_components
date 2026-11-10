@@ -16,7 +16,7 @@ export interface CalendarI18n extends DateNames {
   };
 }
 
-/** Rails' English, used only when the component's `i18n` attribute is missing (ADR 0014). */
+/** Rails' English, used only when the component's `i18n` attribute is missing (ADR 0015). */
 export const ENGLISH: CalendarI18n = {
   monthNames: [
     'January',

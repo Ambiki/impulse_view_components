@@ -1,7 +1,9 @@
 <%= render(Impulse::PopoverComponent.new(placement: "bottom-start", data: { action: "awc-date-calendar:commit->awc-popover#requestHide" })) do |c| %>
   <% c.with_trigger(class: "btn btn-outline-secondary", data: { test_id: "date-trigger" }) { "November 18, 2026" } %>
-  <% c.with_body do %>
-    <%= render(Impulse::DateCalendarComponent.new(value: Date.new(2026, 11, 18))) %>
+  <% c.with_panel do |panel| %>
+    <% panel.with_body do %>
+      <%= render(Impulse::DateCalendarComponent.new(value: Date.new(2026, 11, 18))) %>
+    <% end %>
   <% end %>
 <% end %>
 

@@ -1,19 +1,34 @@
 <div class="d-flex align-items-center">
-  <%= render(Impulse::PopoverComponent.new(title: "Activity feed")) do |c| %>
+  <%= render(Impulse::PopoverComponent.new) do |c| %>
     <% c.with_trigger { "Open" } %>
-    <% c.with_body(data: {test_id: "parent-popover"}) do %>
-      Here is some activity feed for you!
-      <%= render(Impulse::PopoverComponent.new(title: "Nested popover", class: "d-block mt-3", placement: :right)) do |c| %>
-        <% c.with_trigger { "Open nested popover" } %>
-        <% c.with_body(data: {test_id: "nested-popover"}) { "Awesome body content!" } %>
+    <% c.with_panel do |panel| %>
+      <% panel.with_header do |header| %>
+        <% header.with_title { "Activity feed" } %>
+      <% end %>
+      <% panel.with_body(data: {test_id: "parent-popover"}) do %>
+        Here is some activity feed for you!
+        <%= render(Impulse::PopoverComponent.new(class: "d-block mt-3", placement: :right)) do |nested| %>
+          <% nested.with_trigger { "Open nested popover" } %>
+          <% nested.with_panel do |nested_panel| %>
+            <% nested_panel.with_header do |nested_header| %>
+              <% nested_header.with_title { "Nested popover" } %>
+            <% end %>
+            <% nested_panel.with_body(data: {test_id: "nested-popover"}) { "Awesome body content!" } %>
+          <% end %>
+        <% end %>
       <% end %>
     <% end %>
   <% end %>
 
-  <%= render(Impulse::PopoverComponent.new(title: "Another popover")) do |c| %>
+  <%= render(Impulse::PopoverComponent.new) do |c| %>
     <% c.with_trigger { "Event" } %>
-    <% c.with_body(data: {test_id: "non-related-popover"}) do %>
-      Event details goes here.
+    <% c.with_panel do |panel| %>
+      <% panel.with_header do |header| %>
+        <% header.with_title { "Another popover" } %>
+      <% end %>
+      <% panel.with_body(data: {test_id: "non-related-popover"}) do %>
+        Event details goes here.
+      <% end %>
     <% end %>
   <% end %>
 </div>

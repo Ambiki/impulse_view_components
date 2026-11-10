@@ -8,7 +8,7 @@ The date calendar depends on three settings an app already has in Rails and a br
 
 ## Considered Options
 
-- **Default to the browser and the locale in JavaScript**, and render only what the app passes. Rejected: the calendar's weeks could start on another day than the app's `beginning_of_week` and `all_week`, which matters once a week calendar's value is a week's first day. `I18n` and `Intl` text differ in some locales, so the server's first month and the JavaScript's next one wouldn't match (ADR 0013).
+- **Default to the browser and the locale in JavaScript**, and render only what the app passes. Rejected: the calendar's weeks could start on another day than the app's `beginning_of_week` and `all_week`, which matters once a week calendar's value is a week's first day. `I18n` and `Intl` text differ in some locales, so the server's first month and the JavaScript's next one wouldn't match (ADR 0014).
 - **Render a setting only when it differs from the JavaScript default**, as ADR 0006 does for options. Rejected: Ruby can't know the browser's zone, and comparing the app's translations with English to save a few hundred bytes adds code for nothing.
 
 ## Consequences

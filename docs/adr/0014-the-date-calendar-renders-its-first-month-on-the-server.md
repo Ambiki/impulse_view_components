@@ -15,7 +15,7 @@ A date calendar's grid changes on every page turn, so its JavaScript has to rend
 ## Consequences
 
 - The grid is rendered in Ruby and in TypeScript, and the two must agree. A browser test turns the page, takes the calendar back to its first month with `resetView()`, and compares the markup with the server's. Turning back would land on a clamped day after the 28th, not the server's.
-- Both read the same `I18n` names and patterns (ADR 0014), so their text agrees in every locale.
+- Both read the same `I18n` names and patterns (ADR 0015), so their text agrees in every locale.
 - A morph takes the calendar back to the server's month and value (ADR 0003). A page the user turned to is lost.
 - An `<awc-date-calendar>` written by hand or created in JavaScript renders no first month. The component is the only supported way to render one.
 - The month, year and week calendars follow the same split.
