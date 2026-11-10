@@ -55,6 +55,7 @@ $calendar-grid-cell-padding: 1px;
     height: var(--#{$block}-day-size);
     padding: 0;
     line-height: 20px;
+    user-select: none;
 
     // It stays focusable, so pressing it at a limit doesn't drop focus to the page.
     &[aria-disabled='true'] {
@@ -99,6 +100,8 @@ $calendar-grid-cell-padding: 1px;
     font: inherit;
     line-height: 20px;
     cursor: pointer;
+    // Clicking or dragging across the cells chooses them, so it doesn't select their text.
+    user-select: none;
 
     &:hover {
       background-color: var(--#{$block}-day-bg-hover);
@@ -190,5 +193,6 @@ $calendar-grid-cell-padding: 1px;
     font-size: inherit;
     font-weight: inherit;
     line-height: 20px;
+    user-select: none;
   }
 }
