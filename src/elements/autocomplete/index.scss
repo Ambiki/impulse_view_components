@@ -12,8 +12,8 @@
   --awc-autocomplete-control-bg-disabled: var(--awc-autocomplete-control-disabled-bg-color);
   --awc-autocomplete-control-box-shadow: #{$input-box-shadow};
   @if $enable-shadows {
-    --awc-autocomplete-control-box-shadow-focus: var(--awc-autocomplete-control-box-shadow),
-      var(--awc-autocomplete-control-focus-box-shadow);
+    --awc-autocomplete-control-box-shadow-focus:
+      var(--awc-autocomplete-control-box-shadow), var(--awc-autocomplete-control-focus-box-shadow);
   } @else {
     --awc-autocomplete-control-box-shadow-focus: var(--awc-autocomplete-control-focus-box-shadow);
   }
