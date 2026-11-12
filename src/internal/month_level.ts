@@ -4,7 +4,7 @@
  */
 import type { DateNames, DateRange } from 'src/internal/calendar_date';
 import type { Level } from 'src/internal/calendar_grid';
-import { CalendarDate, formatDate } from 'src/internal/calendar_date';
+import { CalendarDate, ENGLISH_DATE_NAMES, formatDate } from 'src/internal/calendar_date';
 
 /** The names and pattern a month-level calendar formats its months with, as its component renders them. */
 export interface MonthLevelI18n extends Pick<DateNames, 'monthNames' | 'abbrMonthNames'> {
@@ -16,21 +16,8 @@ export interface MonthLevelI18n extends Pick<DateNames, 'monthNames' | 'abbrMont
 
 /** Rails' English, used only when the component's `i18n` attribute is missing (ADR 0015). */
 export const MONTH_ENGLISH: MonthLevelI18n = {
-  monthNames: [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ],
-  abbrMonthNames: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+  monthNames: ENGLISH_DATE_NAMES.monthNames,
+  abbrMonthNames: ENGLISH_DATE_NAMES.abbrMonthNames,
   formats: { month: '%B %Y' },
 };
 
@@ -61,6 +48,7 @@ const addMonths = (cell: CalendarDate, months: number) => monthOf(cell.year, cel
 export const MONTH_LEVEL: Level<MonthLevelI18n> = {
   cell: 'month',
   viewAttribute: 'year',
+  paging: { previous: 'Previous year', next: 'Next year' },
   formatView: (view) => String(view.year),
   parseView: (value) => (value && /^[1-9]\d{3}$/.test(value) ? monthOf(Number(value), 1) : null),
   cellOf: (date) => monthOf(date.year, date.month),

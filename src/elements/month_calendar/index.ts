@@ -3,6 +3,7 @@ import type { PagingI18n } from 'src/internal/calendar_grid';
 import type { MonthLevelI18n } from 'src/internal/month_level';
 import type { YearLevelI18n } from 'src/internal/year_level';
 import { property, registerElement, target } from '@ambiki/impulse';
+import { englishPaging } from 'src/internal/calendar_grid';
 import CalendarGridElement from 'src/internal/calendar_grid_element';
 import { formatMonth, MONTH_ENGLISH, MONTH_LEVEL, monthRange, parseMonth } from 'src/internal/month_level';
 import { YEAR_ENGLISH, YEAR_LEVEL } from 'src/internal/year_level';
@@ -16,10 +17,7 @@ export type MonthCalendarI18n = MonthLevelI18n & YearLevelI18n & PagingI18n;
 /** Rails' English, used only when the component's `i18n` attribute is missing (ADR 0015). */
 const MONTH_CALENDAR_ENGLISH: MonthCalendarI18n = {
   ...MONTH_ENGLISH,
-  paging: {
-    month: { previous: 'Previous year', next: 'Next year' },
-    year: { previous: 'Previous decade', next: 'Next decade' },
-  },
+  paging: englishPaging([MONTH_LEVEL, YEAR_LEVEL]),
   formats: { ...MONTH_ENGLISH.formats, ...YEAR_ENGLISH.formats },
 };
 

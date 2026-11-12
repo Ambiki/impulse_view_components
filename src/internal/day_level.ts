@@ -4,7 +4,7 @@
  */
 import type { DateNames } from 'src/internal/calendar_date';
 import type { Level } from 'src/internal/calendar_grid';
-import { CalendarDate, formatDate } from 'src/internal/calendar_date';
+import { CalendarDate, ENGLISH_DATE_NAMES, formatDate } from 'src/internal/calendar_date';
 
 /** The names and patterns a day-level calendar formats its text with, as its component renders them. */
 export interface DayLevelI18n extends DateNames {
@@ -18,23 +18,7 @@ export interface DayLevelI18n extends DateNames {
 
 /** Rails' English, used only when the component's `i18n` attribute is missing (ADR 0015). */
 export const DAY_ENGLISH: DayLevelI18n = {
-  monthNames: [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ],
-  abbrMonthNames: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-  dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-  abbrDayNames: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+  ...ENGLISH_DATE_NAMES,
   formats: { heading: '%B %Y', day: '%A, %B %-d, %Y' },
 };
 
@@ -55,6 +39,7 @@ export function weekdayRow(firstDayOfWeek: number, i18n: DateNames): HTMLTableRo
 export const DAY_LEVEL: Level<DayLevelI18n> = {
   cell: 'day',
   viewAttribute: 'month',
+  paging: { previous: 'Previous month', next: 'Next month' },
   weekdayRow,
   formatView: (view) => view.toString().slice(0, 7),
   parseView: (value) => CalendarDate.parse(`${value}-01`),
