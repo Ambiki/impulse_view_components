@@ -28,8 +28,8 @@
   }
 
   #{$cell}:first-child > #{$day} {
-    border-top-left-radius: var(--awc-week-calendar-day-border-radius);
-    border-bottom-left-radius: var(--awc-week-calendar-day-border-radius);
+    border-top-left-radius: var(--awc-week-calendar-cell-border-radius);
+    border-bottom-left-radius: var(--awc-week-calendar-cell-border-radius);
     box-shadow: none;
 
     @if $today-ring {
@@ -40,8 +40,8 @@
   }
 
   #{$cell}:last-child > #{$day} {
-    border-top-right-radius: var(--awc-week-calendar-day-border-radius);
-    border-bottom-right-radius: var(--awc-week-calendar-day-border-radius);
+    border-top-right-radius: var(--awc-week-calendar-cell-border-radius);
+    border-bottom-right-radius: var(--awc-week-calendar-cell-border-radius);
   }
 }
 
@@ -53,7 +53,7 @@
     @include week-band(
       "td:not([aria-selected='true'])",
       ".awc-week-calendar-day:not([aria-disabled='true'])",
-      var(--awc-week-calendar-day-bg-hover),
+      var(--awc-week-calendar-cell-bg-hover),
       $today-ring: var(--awc-accent-solid)
     );
   }

@@ -161,7 +161,7 @@ module Impulse
       assert_equal %w[Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec], i18n["abbrMonthNames"]
       assert_equal %w[Sunday Monday Tuesday Wednesday Thursday Friday Saturday], i18n["dayNames"]
       assert_equal %w[Sun Mon Tue Wed Thu Fri Sat], i18n["abbrDayNames"]
-      assert_equal({ "heading" => "%B %Y", "day" => "%A, %B %-d, %Y", "month" => "%B %Y", "decade" => "%{start} – %{end}" }, i18n["formats"])
+      assert_equal({ "monthHeading" => "%B %Y", "day" => "%A, %B %-d, %Y", "month" => "%B %Y", "decade" => "%{start} – %{end}" }, i18n["formats"])
       assert_equal(
         {
           "day" => { "previous" => "Previous month", "next" => "Next month" },
@@ -188,7 +188,7 @@ module Impulse
       I18n.backend.eager_load!
       I18n.backend.store_translations(:en, impulse: { calendar: {
         previous_month: "Earlier",
-        formats: { heading: "%b %Y", day: "%-d %B %Y" }
+        formats: { month_heading: "%b %Y", day: "%-d %B %Y" }
       } })
 
       render_inline(Impulse::DateCalendarComponent.new(value: Date.new(2026, 11, 6)))
@@ -197,7 +197,7 @@ module Impulse
       assert_selector "button[data-date='2026-11-06'][aria-label='6 November 2026']"
       assert_selector "button[aria-label='Earlier']"
       i18n = JSON.parse(page.find("awc-date-calendar")["i18n"])
-      assert_equal({ "heading" => "%b %Y", "day" => "%-d %B %Y" }, i18n["formats"].slice("heading", "day"))
+      assert_equal({ "monthHeading" => "%b %Y", "day" => "%-d %B %Y" }, i18n["formats"].slice("monthHeading", "day"))
       assert_equal "Earlier", i18n.dig("paging", "day", "previous")
     end
 

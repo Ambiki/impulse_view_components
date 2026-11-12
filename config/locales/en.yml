@@ -14,11 +14,11 @@ en:
       choose_month: Choose a month
       choose_year: Choose a year
       formats:
-        # Names the displayed month, above the grid.
-        heading: "%B %Y"
+        # Names the displayed month, above a calendar of days.
+        month_heading: "%B %Y"
         # Each day's accessible name.
         day: "%A, %B %-d, %Y"
-        # Each month's accessible name, in a month calendar.
+        # Each month's accessible name, in a month calendar or a calendar of days drilled up.
         month: "%B %Y"
         # Names the displayed decade, above a year calendar's grid. Rails interpolation, not strftime.
         decade: "%{start} – %{end}"

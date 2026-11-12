@@ -97,7 +97,7 @@ en:
       choose_month: Choose a month # Describes the heading's button on the days.
       choose_year: Choose a year # Describes the heading's button on the months.
       formats:
-        heading: "%B %Y" # Names the displayed month, above the grid.
+        month_heading: "%B %Y" # Names the displayed month, above the grid.
         day: "%A, %B %-d, %Y" # Each day's accessible name.
         month: "%B %Y" # Each month's accessible name.
         decade: "%{start} – %{end}" # Names the displayed decade, above the years.

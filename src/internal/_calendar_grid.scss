@@ -19,12 +19,12 @@ $calendar-grid-weekday-line-height: 20px;
 // variables and mixins to be loaded already.
 @mixin calendar-grid($block, $cells: 'day') {
   :where(:root) {
-    // At least 24px square, so each day is a large enough target (WCAG 2.5.8).
-    --#{$block}-day-size: 2.25rem;
+    // At least 24px square, so each cell is a large enough target (WCAG 2.5.8). Months and years are as tall, and wider.
+    --#{$block}-cell-size: 2.25rem;
     // The page buttons are Bootstrap's `.btn-sm`, so the cells take their radius and the buttons their disabled opacity.
-    --#{$block}-day-border-radius: #{$btn-border-radius-sm};
+    --#{$block}-cell-border-radius: #{$btn-border-radius-sm};
     // Light enough that an outside day's text keeps 4.5:1 on it (WCAG 1.4.3).
-    --#{$block}-day-bg-hover: var(--awc-neutral-base);
+    --#{$block}-cell-bg-hover: var(--awc-neutral-base);
     --#{$block}-nav-opacity-disabled: #{$btn-disabled-opacity};
   }
 
@@ -53,8 +53,8 @@ $calendar-grid-weekday-line-height: 20px;
     flex: none;
     align-items: center;
     justify-content: center;
-    width: var(--#{$block}-day-size);
-    height: var(--#{$block}-day-size);
+    width: var(--#{$block}-cell-size);
+    height: var(--#{$block}-cell-size);
     padding: 0;
     line-height: 20px;
     user-select: none;
@@ -94,11 +94,11 @@ $calendar-grid-weekday-line-height: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: var(--#{$block}-day-size);
-    height: var(--#{$block}-day-size);
+    width: var(--#{$block}-cell-size);
+    height: var(--#{$block}-cell-size);
     padding: 0;
     border: 0;
-    border-radius: var(--#{$block}-day-border-radius);
+    border-radius: var(--#{$block}-cell-border-radius);
     background-color: transparent;
     color: inherit;
     font: inherit;
@@ -108,7 +108,7 @@ $calendar-grid-weekday-line-height: 20px;
     user-select: none;
 
     &:hover {
-      background-color: var(--#{$block}-day-bg-hover);
+      background-color: var(--#{$block}-cell-bg-hover);
     }
 
     &:focus-visible {
@@ -149,14 +149,14 @@ $calendar-grid-weekday-line-height: 20px;
 // The width of the day grid, seven days and the space around them, which a calendar of another level takes too, so the
 // outer cells line up with the header's buttons.
 @function calendar-grid-width($block) {
-  @return calc(7 * (var(--#{$block}-day-size) + #{2 * $calendar-grid-cell-padding}));
+  @return calc(7 * (var(--#{$block}-cell-size) + #{2 * $calendar-grid-cell-padding}));
 }
 
 // The height of the day grid: its row of weekday headings, and six weeks of days.
 @function calendar-grid-height($block) {
   @return calc(
     #{$calendar-grid-weekday-line-height} + var(--awc-space-1) + 6 *
-      (var(--#{$block}-day-size) + #{2 * $calendar-grid-cell-padding})
+      (var(--#{$block}-cell-size) + #{2 * $calendar-grid-cell-padding})
   );
 }
 
@@ -220,7 +220,7 @@ $calendar-grid-weekday-line-height: 20px;
     align-items: center;
     justify-content: center;
     width: 100%;
-    height: var(--#{$block}-day-size);
+    height: var(--#{$block}-cell-size);
     padding-top: 0;
     padding-bottom: 0;
     font-size: inherit;
