@@ -13,6 +13,8 @@ module Impulse
     class CalendarGridComponent < ApplicationComponent
       # The years a calendar names, those with four digits, as `YYYY-MM-DD` and the element's values write them.
       YEARS = 1000..9999
+      FIRST_DAY = Date.new(YEARS.begin, 1, 1)
+      LAST_DAY = Date.new(YEARS.end, 12, 31)
 
       # `value`, `min` and `max` are a `Date`, a `Time` or `ActiveSupport::TimeWithZone`, or a string, as the level
       # writes its cells. Times are read in the calendar's time zone: `time_zone:`, else the zone of an
@@ -69,7 +71,18 @@ module Impulse
       # `max`.
       def disabled?(cell)
         range = range_of(cell)
-        (@min && range.end < @min) || (@max && range.begin > @max)
+        range.end < earliest || range.begin > latest
+      end
+
+      # The earliest day the user can commit: `min`'s, and never before the four-digit years, which are all a value
+      # names.
+      def earliest
+        [@min, FIRST_DAY].compact.max
+      end
+
+      # The latest day the user can commit: `max`'s, and never after the four-digit years.
+      def latest
+        [@max, LAST_DAY].compact.min
       end
 
       # The levels the heading drills up to, nearest first.
@@ -159,11 +172,11 @@ module Impulse
 
       # Paging stops at the pages holding `min` and `max`, and never goes further from them than the displayed page.
       def previous_page_disabled?
-        !!@min && level.compare_pages(@displayed_page, @min) <= 0
+        level.compare_pages(@displayed_page, earliest) <= 0
       end
 
       def next_page_disabled?
-        !!@max && level.compare_pages(@displayed_page, @max) >= 0
+        level.compare_pages(@displayed_page, latest) >= 0
       end
     end
   end

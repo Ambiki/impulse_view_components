@@ -1,4 +1,4 @@
-const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
+const ISO_DATE = /^([1-9]\d{3})-(\d{2})-(\d{2})$/;
 
 /** The number of days in `month` (1 to 12) of `year`. */
 export function daysInMonth(year: number, month: number): number {
@@ -17,7 +17,10 @@ export class CalendarDate {
     readonly day: number,
   ) {}
 
-  /** The calendar date `value` names as `YYYY-MM-DD`, or `null` when it names none, such as `2026-02-30`. */
+  /**
+   * The calendar date `value` names as `YYYY-MM-DD`, or `null` when it names none, such as `2026-02-30`. Its year has
+   * four digits, from 1000 to 9999, as do the years of every value a calendar writes.
+   */
   static parse(value: string | null | undefined): CalendarDate | null {
     const match = ISO_DATE.exec(value ?? '');
     if (!match) return null;
@@ -103,6 +106,10 @@ export class CalendarDate {
     return `${String(this.year).padStart(4, '0')}-${pad(this.month)}-${pad(this.day)}`;
   }
 }
+
+/** The first and last days a calendar names, those of the four-digit years. */
+export const FIRST_DAY = new CalendarDate(1000, 1, 1);
+export const LAST_DAY = new CalendarDate(9999, 12, 31);
 
 function pad(value: number) {
   return String(value).padStart(2, '0');

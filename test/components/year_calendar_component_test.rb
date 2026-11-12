@@ -79,6 +79,16 @@ module Impulse
       end
     end
 
+    test "disables the years past the four-digit ones, and stops paging at their decades" do
+      render_inline(Impulse::YearCalendarComponent.new(value: 1005))
+      assert_selector "button[data-date='0999-01-01'][aria-disabled='true']"
+      assert_selector "button[aria-label='Previous decade'][aria-disabled='true']"
+
+      render_inline(Impulse::YearCalendarComponent.new(value: 9995))
+      assert_selector "button[data-date='10000-01-01'][aria-disabled='true']"
+      assert_selector "button[aria-label='Next decade'][aria-disabled='true']"
+    end
+
     test "takes no first day of the week, as it has no weeks" do
       assert_raises(ArgumentError) { Impulse::YearCalendarComponent.new(value: 2026, first_day_of_week: :monday) }
     end
