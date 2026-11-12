@@ -1,0 +1,115 @@
+:where(:root) {
+  // At least 24px square, so each day is a large enough target (WCAG 2.5.8).
+  --awc-date-calendar-day-size: 2.25rem;
+  // The page buttons are Bootstrap's `.btn-sm`, so the days take their radius and the buttons their disabled opacity.
+  --awc-date-calendar-day-border-radius: #{$btn-border-radius-sm};
+  // Light enough that an outside day's text keeps 4.5:1 on it (WCAG 1.4.3).
+  --awc-date-calendar-day-bg-hover: var(--awc-neutral-base);
+  --awc-date-calendar-nav-opacity-disabled: #{$btn-disabled-opacity};
+}
+
+.awc-date-calendar {
+  display: inline-block;
+  color: var(--awc-neutral-text-contrast);
+  font-size: var(--awc-font-size-3);
+}
+
+.awc-date-calendar-header {
+  display: flex;
+  align-items: center;
+  gap: var(--awc-space-1);
+  margin-bottom: var(--awc-space-2);
+}
+
+.awc-date-calendar-heading {
+  flex: 1;
+  text-align: center;
+  font-weight: var(--awc-font-weight-semibold);
+}
+
+// Square, and as large as a day, so the buttons line up with the grid's first and last columns.
+.awc-date-calendar-nav {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--awc-date-calendar-day-size);
+  height: var(--awc-date-calendar-day-size);
+  padding: 0;
+  line-height: 20px;
+
+  // It stays focusable, so pressing it at a limit doesn't drop focus to the page.
+  &[aria-disabled='true'] {
+    opacity: var(--awc-date-calendar-nav-opacity-disabled);
+    cursor: not-allowed;
+  }
+}
+
+.awc-date-calendar-grid {
+  border-collapse: collapse;
+
+  th {
+    padding: 0 0 var(--awc-space-1);
+    text-align: center;
+    font-size: var(--awc-font-size-2);
+    font-weight: var(--awc-font-weight-medium);
+    color: var(--awc-neutral-text-subtle);
+  }
+
+  td {
+    padding: 1px;
+  }
+}
+
+.awc-date-calendar-day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--awc-date-calendar-day-size);
+  height: var(--awc-date-calendar-day-size);
+  padding: 0;
+  border: 0;
+  border-radius: var(--awc-date-calendar-day-border-radius);
+  background-color: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 20px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--awc-date-calendar-day-bg-hover);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--awc-accent-solid);
+    outline-offset: 1px;
+  }
+
+  &[aria-current='date'] {
+    color: var(--awc-accent-text);
+    font-weight: var(--awc-font-weight-medium);
+    box-shadow: inset 0 0 0 1px var(--awc-accent-solid);
+  }
+
+  &--outside {
+    color: var(--awc-neutral-text-subtle);
+  }
+
+  &[aria-disabled='true'] {
+    color: var(--awc-neutral-text-disabled);
+    text-decoration: line-through;
+    cursor: not-allowed;
+
+    &:hover {
+      background-color: transparent;
+    }
+  }
+
+  // Also on hover, which a disabled day would otherwise clear: a value outside `min` and `max` is still selected.
+  [aria-selected='true'] > &,
+  [aria-selected='true'] > &:hover {
+    background-color: var(--awc-accent-solid);
+    color: var(--awc-accent-contrast);
+    font-weight: var(--awc-font-weight-medium);
+  }
+}

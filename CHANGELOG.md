@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- `Impulse::DateCalendarComponent` and `<awc-date-calendar>`, a grid of a month's days for choosing one, to show inline or in a popover ([#377](https://github.com/Ambiki/impulse_view_components/pull/377))
 - `--awc-` design tokens on `:where(:root)`, which an app overrides from any selector: scales such as `--awc-gray-6`, aliases such as `--awc-neutral-line`, and component tokens such as `--awc-popover-max-width` ([#382](https://github.com/Ambiki/impulse_view_components/pull/382))
 
 ### Changed
