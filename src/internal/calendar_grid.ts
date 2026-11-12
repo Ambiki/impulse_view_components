@@ -46,6 +46,8 @@ export interface Level<I> {
   rows: (view: CalendarDate, firstDayOfWeek: number) => CalendarDate[][];
   /** The cell `event`'s key moves to from `cell`, or `null` when it isn't one that moves. */
   move: (cell: CalendarDate, event: Pick<KeyboardEvent, 'key' | 'shiftKey'>, context: MoveContext) => CalendarDate | null;
+  /** The page buttons' names in Rails' English, for a calendar whose `i18n` has none for the level (ADR 0015). */
+  readonly paging: PagingLabels;
   /** Names the view, above the grid. `view` may be any of its cells. */
   heading: (view: CalendarDate, i18n: I) => string;
   /** A cell's text. */
@@ -59,7 +61,17 @@ export interface Level<I> {
  * renders them: on a month calendar, "Previous year" under `month` and "Previous decade" under `year`.
  */
 export interface PagingI18n {
-  paging: Record<string, { previous: string; next: string }>;
+  paging?: Record<string, PagingLabels>;
+}
+
+export interface PagingLabels {
+  previous: string;
+  next: string;
+}
+
+/** The English names of the page buttons on each of `levels`, as `PagingI18n` keys them. */
+export function englishPaging(levels: readonly Pick<Level<never>, 'cell' | 'paging'>[]): Record<string, PagingLabels> {
+  return Object.fromEntries(levels.map((level) => [level.cell, level.paging]));
 }
 
 /** What a calendar shows: everything its grid is rendered from. */

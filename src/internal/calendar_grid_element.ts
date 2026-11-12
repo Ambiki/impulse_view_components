@@ -11,7 +11,7 @@
  * A calendar with levels above its base level, the one its value is a cell of, drills up to them through its heading,
  * in the same grid, and back down by choosing a cell (ADR 0017). The level shown is read from the grid's markup, like
  * the displayed view, so a morph putting the server's markup back takes the calendar back to its base level. Its
- * `i18n` then names the page buttons on each level, under `paging`.
+ * `i18n` then names the page buttons on each level, under `paging`, or the level's English without it.
  *
  * A subclass declares its properties and targets with `@property()` and `@target()`, since impulse reads only a class's
  * own declarations, and renders the markup of `Impulse::Internal::CalendarGridComponent`.
@@ -436,8 +436,8 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
     this.cells.replaceChildren(...gridRows(view));
     if (hadFocus) this.button(view.active)?.focus();
     // A calendar that drills pages by another view on each level, so its buttons are renamed on each.
-    const labels = (this.i18n as Partial<PagingI18n>).paging?.[level.cell];
-    if (labels) {
+    if (this.levelsAbove.length) {
+      const labels = (this.i18n as PagingI18n).paging?.[level.cell] ?? level.paging;
       this.previousButton.setAttribute('aria-label', labels.previous);
       this.nextButton.setAttribute('aria-label', labels.next);
     }

@@ -155,6 +155,27 @@ export interface DateNames {
   abbrDayNames: string[];
 }
 
+/** Rails' English month and weekday names. */
+export const ENGLISH_DATE_NAMES: DateNames = {
+  monthNames: [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ],
+  abbrMonthNames: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+  dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+  abbrDayNames: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+};
+
 /**
  * Formats `date` with a `strftime` pattern the way Ruby's `I18n.l` does, so a page turn reads exactly like the month
  * the server rendered. Only the directives a date needs are known (`%A %a %B %b %d %-d %e %m %Y %%`); any other is

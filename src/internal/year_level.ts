@@ -37,6 +37,7 @@ export function yearRange(cell: CalendarDate): DateRange {
 export const YEAR_LEVEL: Level<YearLevelI18n> = {
   cell: 'year',
   viewAttribute: 'decade',
+  paging: { previous: 'Previous decade', next: 'Next decade' },
   formatView: (view) => String(decadeOf(view.year)),
   parseView: parseYear,
   cellOf: (date) => yearOf(date.year),
