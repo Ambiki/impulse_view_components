@@ -8,7 +8,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- The date and week calendars' heading drills up to the months and years, in the same box ([#388](https://github.com/Ambiki/impulse_view_components/pull/388))
 - `Impulse::MonthCalendarComponent` and `<awc-month-calendar>`, a grid of a year's months for choosing one, whose heading drills up to years ([#386](https://github.com/Ambiki/impulse_view_components/pull/386))
 - `Impulse::YearCalendarComponent` and `<awc-year-calendar>`, a grid of years for choosing one, a decade at a time ([#380](https://github.com/Ambiki/impulse_view_components/pull/380))
 - `Impulse::WeekCalendarComponent` and `<awc-week-calendar>`, the date calendar's grid for choosing a week, committed as its first and last days ([#378](https://github.com/Ambiki/impulse_view_components/pull/378))

@@ -533,7 +533,7 @@ describe('awc-date-calendar', () => {
       const months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
       const days = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
 
-      el.i18n = { ...el.i18n, monthNames: months, dayNames: days, formats: { ...el.i18n.formats, heading: '%B de %Y', day: '%A, %-d de %B de %Y' } };
+      el.i18n = { ...el.i18n, monthNames: months, dayNames: days, formats: { ...el.i18n.formats, monthHeading: '%B de %Y', day: '%A, %-d de %B de %Y' } };
       nextButton(el).click();
 
       expect(el.heading.textContent).to.equal('diciembre de 2026');

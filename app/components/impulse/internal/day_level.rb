@@ -81,7 +81,7 @@ module Impulse
       end
 
       def heading(page)
-        I18n.l(page, format: heading_format)
+        I18n.l(page, format: month_heading_format)
       end
 
       def text(cell)
@@ -112,14 +112,14 @@ module Impulse
           abbrMonthNames: I18n.t("date.abbr_month_names").compact,
           dayNames: I18n.t("date.day_names"),
           abbrDayNames: I18n.t("date.abbr_day_names"),
-          formats: { heading: heading_format, day: day_format }
+          formats: { monthHeading: month_heading_format, day: day_format }
         }
       end
 
       private
 
-      def heading_format
-        I18n.t("impulse.calendar.formats.heading")
+      def month_heading_format
+        I18n.t("impulse.calendar.formats.month_heading")
       end
 
       def day_format

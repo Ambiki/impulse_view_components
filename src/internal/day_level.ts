@@ -10,7 +10,7 @@ import { CalendarDate, daysInMonth, ENGLISH_DATE_NAMES, formatDate } from 'src/i
 export interface DayLevelI18n extends DateNames {
   formats: {
     /** Names the displayed month, above the grid. */
-    heading: string;
+    monthHeading: string;
     /** Each day's accessible name. */
     day: string;
   };
@@ -19,7 +19,7 @@ export interface DayLevelI18n extends DateNames {
 /** Rails' English, used only when the component's `i18n` attribute is missing (ADR 0015). */
 export const DAY_ENGLISH: DayLevelI18n = {
   ...ENGLISH_DATE_NAMES,
-  formats: { heading: '%B %Y', day: '%A, %B %-d, %Y' },
+  formats: { monthHeading: '%B %Y', day: '%A, %B %-d, %Y' },
 };
 
 /** The row of weekday headings, from the first day of the week. */
@@ -74,7 +74,7 @@ export const DAY_LEVEL: Level<DayLevelI18n> = {
         return null;
     }
   },
-  heading: (view, i18n) => formatDate(view, i18n.formats.heading, i18n),
+  heading: (view, i18n) => formatDate(view, i18n.formats.monthHeading, i18n),
   text: (cell) => String(cell.day),
   label: (cell, i18n) => formatDate(cell, i18n.formats.day, i18n),
 };
