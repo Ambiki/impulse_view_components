@@ -42,6 +42,9 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
   /** The IANA time zone that decides what today is. Defaults to the browser's. */
   abstract timeZone: string;
 
+  /** The day each week starts on, `0` being Sunday, on a calendar of days. */
+  firstDayOfWeek?: number;
+
   /** The names and patterns the views are rendered with. Defaults to English. */
   abstract i18n: I;
 
@@ -73,11 +76,6 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
 
   /** The detail of `commit`, for the range the user committed. */
   protected abstract commitDetail(range: DateRange): object;
-
-  /** The day each week starts on, `0` being Sunday, for a calendar with weeks. By default, Sunday. */
-  protected weekStart(): number {
-    return 0;
-  }
 
   /** The cell a value names, or `null` when it names none. By default, a `YYYY-MM-DD` day. */
   protected parseValue(value: string): CalendarDate | null {
@@ -128,6 +126,10 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
   }
 
   maxChanged() {
+    this.refresh();
+  }
+
+  firstDayOfWeekChanged() {
     this.refresh();
   }
 
@@ -229,7 +231,7 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
     if (!from || event.altKey || event.ctrlKey || event.metaKey) return;
 
     const view = this.view();
-    const to = view.level.move(from, event, { firstDayOfWeek: this.weekStart(), displayed: view.displayed });
+    const to = view.level.move(from, event, { firstDayOfWeek: this.firstDayOfWeek ?? 0, displayed: view.displayed });
     if (!to) return;
 
     // The keys move through the grid, so they don't scroll the page, even where the grid stops them.
@@ -406,7 +408,7 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
       isDisabled: base ?
         (date) => this.isDisabledCell(date, min, max) :
         (date) => !date.equals(back ?? null) && isOutsideLimits(level.range(date), min, max),
-      firstDayOfWeek: this.weekStart(),
+      firstDayOfWeek: this.firstDayOfWeek ?? 0,
       i18n: this.i18n,
     };
   }
