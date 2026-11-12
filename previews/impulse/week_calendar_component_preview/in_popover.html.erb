@@ -1,0 +1,25 @@
+<%= render(Impulse::PopoverComponent.new(placement: "bottom-start", data: { action: "awc-week-calendar:commit->awc-popover#requestHide" })) do |c| %>
+  <% c.with_trigger(class: "btn btn-outline-secondary", data: { test_id: "week-trigger" }) { "Nov 15 - 21, 2026" } %>
+  <% c.with_panel do |panel| %>
+    <% panel.with_body do %>
+      <%= render(Impulse::WeekCalendarComponent.new(value: Date.new(2026, 11, 15), first_day_of_week: :sunday)) %>
+    <% end %>
+  <% end %>
+<% end %>
+
+<script type="module">
+  // Opening the popover focuses the selected week's first day. Committing a day closes it, and closing it takes the
+  // calendar back to the selected week. The trigger names the selected week.
+  const popover = document.querySelector('awc-popover');
+  const calendar = popover.querySelector('awc-week-calendar');
+  const trigger = popover.querySelector('[data-test-id="week-trigger"]');
+  const format = (value) => {
+    const [year, month, day] = value.split('-').map(Number);
+    return new Date(year, month - 1, day).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+  popover.addEventListener('awc-popover:shown', () => calendar.focus());
+  popover.addEventListener('awc-popover:hidden', () => calendar.resetView());
+  calendar.addEventListener('awc-week-calendar:commit', (event) => {
+    trigger.textContent = `${format(event.detail.start)} - ${format(event.detail.end)}`;
+  });
+</script>

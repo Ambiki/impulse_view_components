@@ -53,12 +53,27 @@ export class CalendarDate {
     return this.add({ days: -((this.dayOfWeek - firstDayOfWeek + 7) % 7) });
   }
 
+  /** The last day of the week the date is in, a week starting on `firstDayOfWeek`. */
+  endOfWeek(firstDayOfWeek: number): CalendarDate {
+    return this.startOfWeek(firstDayOfWeek).add({ days: 6 });
+  }
+
+  /** The first day of the date's month. */
+  startOfMonth(): CalendarDate {
+    return new CalendarDate(this.year, this.month, 1);
+  }
+
+  /** The last day of the date's month. */
+  endOfMonth(): CalendarDate {
+    return new CalendarDate(this.year, this.month, daysInMonth(this.year, this.month));
+  }
+
   /**
    * The date's month as six weeks starting on `firstDayOfWeek`, filled with days of the months before and after, so a
    * grid of it has the same height for every month.
    */
   monthGrid(firstDayOfWeek: number): CalendarDate[][] {
-    const first = new CalendarDate(this.year, this.month, 1).startOfWeek(firstDayOfWeek);
+    const first = this.startOfMonth().startOfWeek(firstDayOfWeek);
     return Array.from({ length: 6 }, (_, week) =>
       Array.from({ length: 7 }, (_, day) => first.add({ days: week * 7 + day })));
   }
@@ -91,6 +106,22 @@ export class CalendarDate {
 
 function pad(value: number) {
   return String(value).padStart(2, '0');
+}
+
+/** Two calendar dates and every day from one to the other, both included. A week is one, and a single day is too. */
+export interface DateRange {
+  start: CalendarDate;
+  end: CalendarDate;
+}
+
+/** Whether `date` falls in `range`, its start and end included. */
+export function rangeIncludes(range: DateRange | null, date: CalendarDate): boolean {
+  return !!range && date.compare(range.start) >= 0 && date.compare(range.end) <= 0;
+}
+
+/** Whether `a` and `b` are the same range of days. */
+export function rangeEquals(a: DateRange | null, b: DateRange | null): boolean {
+  return !!a && !!b && a.start.equals(b.start) && a.end.equals(b.end);
 }
 
 const DATE_PARTS = { year: 'numeric', month: 'numeric', day: 'numeric' } as const;

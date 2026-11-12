@@ -1,0 +1,51 @@
+<%= render(Impulse::BaseRenderer.new(**@system_args)) do %>
+  <div class="<%= tag_name %>-header">
+    <button type="button" class="btn btn-sm btn-light <%= tag_name %>-nav" aria-label="<%= t("impulse.calendar.previous_month") %>" aria-disabled="<%= previous_month_disabled? %>" data-target="<%= tag_name %>.previousButton" data-action="click-><%= tag_name %>#handlePreviousClick">
+      <i class="bi bi-chevron-left" aria-hidden="true"></i>
+    </button>
+    <div id="<%= @heading_id %>" class="<%= tag_name %>-heading" aria-live="polite" data-target="<%= tag_name %>.heading"><%= heading %></div>
+    <button type="button" class="btn btn-sm btn-light <%= tag_name %>-nav" aria-label="<%= t("impulse.calendar.next_month") %>" aria-disabled="<%= next_month_disabled? %>" data-target="<%= tag_name %>.nextButton" data-action="click-><%= tag_name %>#handleNextClick">
+      <i class="bi bi-chevron-right" aria-hidden="true"></i>
+    </button>
+  </div>
+  <% if hint %>
+    <span id="<%= @hint_id %>" class="sr-only"><%= hint %></span>
+  <% end %>
+  <%= tag.table(
+    class: "#{tag_name}-grid",
+    role: "grid",
+    "aria-labelledby": @heading_id,
+    "aria-describedby": (@hint_id if hint),
+    "data-month": @displayed_month.strftime("%Y-%m"),
+    "data-target": "#{tag_name}.grid",
+    "data-action": "click->#{tag_name}#handleClick keydown->#{tag_name}#handleKeydown focusin->#{tag_name}#handleFocusin"
+  ) do %>
+    <thead data-target="<%= tag_name %>.weekdays">
+      <tr>
+        <% days_of_week.each do |day| %>
+          <th scope="col" abbr="<%= t("date.day_names")[day] %>"><%= t("date.abbr_day_names")[day] %></th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody data-target="<%= tag_name %>.days">
+      <% weeks.each do |week| %>
+        <tr>
+          <% week.each do |date| %>
+            <%= tag.td("aria-selected": ("true" if selected?(date))) do %>
+              <%= tag.button(
+                date.day,
+                type: "button",
+                class: class_names("#{tag_name}-day", "#{tag_name}-day--outside": date.beginning_of_month != @displayed_month),
+                tabindex: (date == @active_day) ? 0 : -1,
+                "data-date": date.iso8601,
+                "aria-label": I18n.l(date, format: day_format),
+                "aria-current": ("date" if date == @today),
+                "aria-disabled": ("true" if disabled?(date))
+              ) %>
+            <% end %>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  <% end %>
+<% end %>

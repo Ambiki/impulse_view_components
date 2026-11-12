@@ -1,0 +1,126 @@
+// The day grid the calendars share, with each calendar's own class prefix, `$block`: `awc-date-calendar` styles
+// `.awc-date-calendar-day`, and its tokens are `--awc-date-calendar-*`. It expects Bootstrap 4's Sass functions,
+// variables and mixins to be loaded already.
+@mixin day-grid($block) {
+  :where(:root) {
+    // At least 24px square, so each day is a large enough target (WCAG 2.5.8).
+    --#{$block}-day-size: 2.25rem;
+    // The page buttons are Bootstrap's `.btn-sm`, so the days take their radius and the buttons their disabled opacity.
+    --#{$block}-day-border-radius: #{$btn-border-radius-sm};
+    // Light enough that an outside day's text keeps 4.5:1 on it (WCAG 1.4.3).
+    --#{$block}-day-bg-hover: var(--awc-neutral-base);
+    --#{$block}-nav-opacity-disabled: #{$btn-disabled-opacity};
+  }
+
+  .#{$block} {
+    display: inline-block;
+    color: var(--awc-neutral-text-contrast);
+    font-size: var(--awc-font-size-3);
+  }
+
+  .#{$block}-header {
+    display: flex;
+    align-items: center;
+    gap: var(--awc-space-1);
+    margin-bottom: var(--awc-space-2);
+  }
+
+  .#{$block}-heading {
+    flex: 1;
+    text-align: center;
+    font-weight: var(--awc-font-weight-semibold);
+  }
+
+  // Square, and as large as a day, so the buttons line up with the grid's first and last columns.
+  .#{$block}-nav {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: var(--#{$block}-day-size);
+    height: var(--#{$block}-day-size);
+    padding: 0;
+    line-height: 20px;
+
+    // It stays focusable, so pressing it at a limit doesn't drop focus to the page.
+    &[aria-disabled='true'] {
+      opacity: var(--#{$block}-nav-opacity-disabled);
+      cursor: not-allowed;
+    }
+  }
+
+  .#{$block}-grid {
+    border-collapse: collapse;
+
+    th {
+      padding: 0 0 var(--awc-space-1);
+      text-align: center;
+      font-size: var(--awc-font-size-2);
+      font-weight: var(--awc-font-weight-medium);
+      color: var(--awc-neutral-text-subtle);
+    }
+
+    // A click on the padding around a day's button commits the day, so it shows the day's cursor.
+    td {
+      padding: 1px;
+      cursor: pointer;
+
+      &:has(> [aria-disabled='true']) {
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  .#{$block}-day {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--#{$block}-day-size);
+    height: var(--#{$block}-day-size);
+    padding: 0;
+    border: 0;
+    border-radius: var(--#{$block}-day-border-radius);
+    background-color: transparent;
+    color: inherit;
+    font: inherit;
+    line-height: 20px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--#{$block}-day-bg-hover);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--awc-accent-solid);
+      outline-offset: 1px;
+    }
+
+    &[aria-current='date'] {
+      color: var(--awc-accent-text);
+      font-weight: var(--awc-font-weight-medium);
+      box-shadow: inset 0 0 0 1px var(--awc-accent-solid);
+    }
+
+    &--outside {
+      color: var(--awc-neutral-text-subtle);
+    }
+
+    &[aria-disabled='true'] {
+      color: var(--awc-neutral-text-disabled);
+      text-decoration: line-through;
+      cursor: not-allowed;
+
+      &:hover {
+        background-color: transparent;
+      }
+    }
+
+    // Also on hover, which a disabled day would otherwise clear: a value outside `min` and `max` is still selected.
+    [aria-selected='true'] > &,
+    [aria-selected='true'] > &:hover {
+      background-color: var(--awc-accent-solid);
+      color: var(--awc-accent-contrast);
+      font-weight: var(--awc-font-weight-medium);
+    }
+  }
+}

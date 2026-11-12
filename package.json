@@ -66,6 +66,11 @@
       "sass": "./dist/elements/popover/index.scss",
       "default": "./dist/elements/popover/index.js"
     },
+    "./week-calendar": {
+      "types": "./dist/elements/week_calendar/index.d.ts",
+      "sass": "./dist/elements/week_calendar/index.scss",
+      "default": "./dist/elements/week_calendar/index.js"
+    },
     "./hooks": {
       "types": "./dist/hooks/index.d.ts",
       "default": "./dist/hooks/index.js"

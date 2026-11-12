@@ -1,8 +1,13 @@
-import type { CalendarDate, DateNames } from 'src/internal/calendar_date';
-import { formatDate } from 'src/internal/calendar_date';
+/**
+ * The day grid the calendars share: what they show, and the markup their components render, which the elements
+ * render again for the months the user moves to (ADR 0014). It is internal: the package's `exports` map doesn't list
+ * it.
+ */
+import type { CalendarDate, DateNames, DateRange } from 'src/internal/calendar_date';
+import { formatDate, rangeIncludes } from 'src/internal/calendar_date';
 
-/** The names and patterns a date calendar formats its text with, as `Impulse::DateCalendarComponent` renders them. */
-export interface DateCalendarI18n extends DateNames {
+/** The names and patterns a calendar formats its text with, as its component renders them. */
+export interface CalendarI18n extends DateNames {
   formats: {
     /** Names the displayed month, above the grid. */
     heading: string;
@@ -12,7 +17,7 @@ export interface DateCalendarI18n extends DateNames {
 }
 
 /** Rails' English, used only when the component's `i18n` attribute is missing (ADR 0015). */
-export const ENGLISH: DateCalendarI18n = {
+export const ENGLISH: CalendarI18n = {
   monthNames: [
     'January',
     'February',
@@ -33,28 +38,23 @@ export const ENGLISH: DateCalendarI18n = {
   formats: { heading: '%B %Y', day: '%A, %B %-d, %Y' },
 };
 
-/** What a date calendar shows: everything its grid is rendered from. */
+/** What a calendar shows: everything its grid is rendered from. */
 export interface CalendarView {
+  /** The element's tag, which prefixes the grid's class names, such as `awc-date-calendar-day`. */
+  tagName: string;
   /** A day of the displayed month. */
   displayed: CalendarDate;
   /** The day holding the grid's one tab stop. */
   active: CalendarDate;
-  selected: CalendarDate | null;
+  /** The selected range: one day for a date calendar, a week for a week calendar. */
+  selected: DateRange | null;
   today: CalendarDate;
   min: CalendarDate | null;
   max: CalendarDate | null;
-  disabledDaysOfWeek: number[];
+  /** Whether the user can move to `date` but not commit it. */
+  isDisabled: (date: CalendarDate) => boolean;
   firstDayOfWeek: number;
-  i18n: DateCalendarI18n;
-}
-
-/** Whether the user can move to `date` but not commit it. */
-export function isDisabledDay(date: CalendarDate, view: CalendarView): boolean {
-  return (
-    (!!view.min && date.compare(view.min) < 0) ||
-    (!!view.max && date.compare(view.max) > 0) ||
-    view.disabledDaysOfWeek.includes(date.dayOfWeek)
-  );
+  i18n: CalendarI18n;
 }
 
 /**
@@ -90,7 +90,7 @@ export function weekdayRow(view: Pick<CalendarView, 'firstDayOfWeek' | 'i18n'>):
   return row;
 }
 
-/** The displayed month's six weeks, marked up as `Impulse::DateCalendarComponent` renders them. */
+/** The displayed month's six weeks, marked up as the calendar's component renders them. */
 export function weekRows(view: CalendarView): HTMLTableRowElement[] {
   return view.displayed.monthGrid(view.firstDayOfWeek).map((week) => {
     const row = document.createElement('tr');
@@ -103,17 +103,17 @@ function dayCell(date: CalendarDate, view: CalendarView) {
   const button = document.createElement('button');
   button.setAttribute('type', 'button');
   button.className = date.isSameMonth(view.displayed) ?
-    'awc-date-calendar-day' :
-    'awc-date-calendar-day awc-date-calendar-day--outside';
+    `${view.tagName}-day` :
+    `${view.tagName}-day ${view.tagName}-day--outside`;
   button.setAttribute('tabindex', date.equals(view.active) ? '0' : '-1');
   button.dataset.date = date.toString();
   button.setAttribute('aria-label', formatDate(date, view.i18n.formats.day, view.i18n));
   if (date.equals(view.today)) button.setAttribute('aria-current', 'date');
-  if (isDisabledDay(date, view)) button.setAttribute('aria-disabled', 'true');
+  if (view.isDisabled(date)) button.setAttribute('aria-disabled', 'true');
   button.textContent = String(date.day);
 
   const cell = document.createElement('td');
-  if (date.equals(view.selected)) cell.setAttribute('aria-selected', 'true');
+  if (rangeIncludes(view.selected, date)) cell.setAttribute('aria-selected', 'true');
   cell.append(button);
   return cell;
 }
