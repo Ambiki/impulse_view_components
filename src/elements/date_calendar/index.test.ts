@@ -68,7 +68,7 @@ function dateCalendarHtml(options: CalendarOptions = {}) {
     <span id="heading-year" class="sr-only">Choose a year</span>
     <table class="awc-date-calendar-grid" role="grid" aria-labelledby="heading" data-month="${month}" data-target="awc-date-calendar.grid" data-action="click->awc-date-calendar#handleClick keydown->awc-date-calendar#handleKeydown focusin->awc-date-calendar#handleFocusin">
       <thead data-target="awc-date-calendar.weekdays">${html([weekdayRow(firstDayOfWeek, ENGLISH)])}</thead>
-      <tbody data-target="awc-date-calendar.days">${html(gridRows(view))}</tbody>
+      <tbody data-target="awc-date-calendar.cells">${html(gridRows(view))}</tbody>
     </table>
   </awc-date-calendar>`;
 }

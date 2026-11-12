@@ -32,15 +32,11 @@ export default class AwcYearCalendarElement extends CalendarGridElement<YearCale
 
   @target() heading: HTMLElement;
   @target() grid: HTMLTableElement;
-  @target() years: HTMLTableSectionElement;
+  @target() cells: HTMLTableSectionElement;
   @target() previousButton: HTMLButtonElement;
   @target() nextButton: HTMLButtonElement;
 
   protected readonly level = YEAR_LEVEL;
-
-  protected get cells() {
-    return this.years;
-  }
 
   /** A year selects its days, from January 1 to December 31, so it's disabled before `min`'s year or after `max`'s. */
   protected rangeOf(cell: CalendarDate): DateRange {

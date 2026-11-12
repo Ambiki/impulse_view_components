@@ -9,13 +9,9 @@ module Impulse
         @first_day_of_week = first_day_of_week
       end
 
-      # The word after the tag in a cell's class name, and the grid's target for its cells.
+      # The word after the tag in a cell's class name.
       def cell
         "day"
-      end
-
-      def cells_target
-        "days"
       end
 
       # The grid's data attribute naming the displayed page.

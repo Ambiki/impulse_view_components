@@ -46,7 +46,7 @@ export default class AwcWeekCalendarElement extends CalendarGridElement<DayDrill
   @target() heading: HTMLElement;
   @target() grid: HTMLTableElement;
   @target() weekdays: HTMLTableSectionElement;
-  @target() days: HTMLTableSectionElement;
+  @target() cells: HTMLTableSectionElement;
   @target() previousButton: HTMLButtonElement;
   @target() nextButton: HTMLButtonElement;
 
@@ -54,14 +54,6 @@ export default class AwcWeekCalendarElement extends CalendarGridElement<DayDrill
 
   /** Its heading drills up to months, then years (ADR 0017). */
   protected readonly levelsAbove = LEVELS_ABOVE_DAYS;
-
-  protected get cells() {
-    return this.days;
-  }
-
-  protected get weekdayHeadings() {
-    return this.weekdays;
-  }
 
   protected weekStart() {
     return this.firstDayOfWeek;

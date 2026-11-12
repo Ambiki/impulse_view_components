@@ -61,7 +61,7 @@ function yearCalendarHtml(options: CalendarOptions = {}) {
       <button type="button" class="awc-year-calendar-nav" aria-label="Next decade" aria-disabled="${!canMoveView(view, 1)}" data-target="awc-year-calendar.nextButton" data-action="click->awc-year-calendar#handleNextClick"></button>
     </div>
     <table class="awc-year-calendar-grid" role="grid" aria-labelledby="heading" data-decade="${YEAR_LEVEL.formatView(YEAR_LEVEL.viewOf(shown))}" data-target="awc-year-calendar.grid" data-action="click->awc-year-calendar#handleClick keydown->awc-year-calendar#handleKeydown focusin->awc-year-calendar#handleFocusin">
-      <tbody data-target="awc-year-calendar.years">${html(gridRows(view))}</tbody>
+      <tbody data-target="awc-year-calendar.cells">${html(gridRows(view))}</tbody>
     </table>
   </awc-year-calendar>`;
 }

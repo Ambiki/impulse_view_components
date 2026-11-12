@@ -47,6 +47,10 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
 
   abstract heading: HTMLElement;
   abstract grid: HTMLTableElement;
+  /** The grid's head, holding its weekday headings, on a calendar of days. */
+  weekdays?: HTMLTableSectionElement;
+  /** The grid's body, holding its rows of cells, whatever level they are. */
+  abstract cells: HTMLTableSectionElement;
   abstract previousButton: HTMLButtonElement;
   abstract nextButton: HTMLButtonElement;
 
@@ -55,14 +59,6 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
 
   /** The levels the calendar drills up to from its base level, nearest first. By default, none. */
   protected readonly levelsAbove: readonly Level<I>[] = [];
-
-  /** The body of the grid, holding its rows of cells, whatever level they are. */
-  protected abstract get cells(): HTMLTableSectionElement;
-
-  /** The head of the grid, holding its weekday headings, for a level that has them. */
-  protected get weekdayHeadings(): HTMLTableSectionElement | null {
-    return null;
-  }
 
   /** The range committing `cell` selects, and that a value naming `cell` selects: a day, its week, a month or a year. */
   protected abstract rangeOf(cell: CalendarDate): DateRange;
@@ -436,7 +432,7 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
     this.grid.dataset[level.viewAttribute] = level.formatView(level.viewOf(view.displayed));
     this.renderHeading(view, drilled);
     const weekdays = level.weekdayRow?.(view.firstDayOfWeek, view.i18n);
-    this.weekdayHeadings?.replaceChildren(...(weekdays ? [weekdays] : []));
+    this.weekdays?.replaceChildren(...(weekdays ? [weekdays] : []));
     this.cells.replaceChildren(...gridRows(view));
     if (hadFocus) this.button(view.active)?.focus();
     // A calendar that drills pages by another view on each level, so its buttons are renamed on each.

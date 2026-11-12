@@ -48,7 +48,7 @@ export default class AwcMonthCalendarElement extends CalendarGridElement<MonthCa
 
   @target() heading: HTMLElement;
   @target() grid: HTMLTableElement;
-  @target() months: HTMLTableSectionElement;
+  @target() cells: HTMLTableSectionElement;
   @target() previousButton: HTMLButtonElement;
   @target() nextButton: HTMLButtonElement;
 
@@ -56,11 +56,6 @@ export default class AwcMonthCalendarElement extends CalendarGridElement<MonthCa
 
   /** Its heading drills up to years (ADR 0017). */
   protected readonly levelsAbove = [YEAR_LEVEL];
-
-  /** The grid's body, which holds years when the calendar is drilled up. */
-  protected get cells() {
-    return this.months;
-  }
 
   /** A month selects its days, from its first to its last, so it's disabled before `min`'s month or after `max`'s. */
   protected rangeOf(cell: CalendarDate): DateRange {

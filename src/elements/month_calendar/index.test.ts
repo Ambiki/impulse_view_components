@@ -64,7 +64,7 @@ function monthCalendarHtml(options: CalendarOptions = {}) {
     </div>
     <span id="heading-year" class="sr-only">Choose a year</span>
     <table class="awc-month-calendar-grid" role="grid" aria-labelledby="heading" data-year="${MONTH_LEVEL.formatView(MONTH_LEVEL.viewOf(shown))}" data-target="awc-month-calendar.grid" data-action="click->awc-month-calendar#handleClick keydown->awc-month-calendar#handleKeydown focusin->awc-month-calendar#handleFocusin">
-      <tbody data-target="awc-month-calendar.months">${html(gridRows(view))}</tbody>
+      <tbody data-target="awc-month-calendar.cells">${html(gridRows(view))}</tbody>
     </table>
   </awc-month-calendar>`;
 }
