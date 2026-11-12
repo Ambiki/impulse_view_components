@@ -7,10 +7,6 @@ module Impulse
         "month"
       end
 
-      def cells_target
-        "months"
-      end
-
       def page_attribute
         "year"
       end

@@ -8,10 +8,6 @@ module Impulse
         "year"
       end
 
-      def cells_target
-        "years"
-      end
-
       def page_attribute
         "decade"
       end

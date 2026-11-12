@@ -71,7 +71,7 @@ function weekCalendarHtml(options: CalendarOptions = {}) {
     <span id="hint" class="sr-only">Choosing a day chooses its week.</span>
     <table class="awc-week-calendar-grid" role="grid" aria-labelledby="heading" aria-describedby="hint" data-month="${month}" data-target="awc-week-calendar.grid" data-action="click->awc-week-calendar#handleClick keydown->awc-week-calendar#handleKeydown focusin->awc-week-calendar#handleFocusin">
       <thead data-target="awc-week-calendar.weekdays">${html([weekdayRow(firstDayOfWeek, ENGLISH)])}</thead>
-      <tbody data-target="awc-week-calendar.days">${html(gridRows(view))}</tbody>
+      <tbody data-target="awc-week-calendar.cells">${html(gridRows(view))}</tbody>
     </table>
   </awc-week-calendar>`;
 }

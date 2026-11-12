@@ -32,7 +32,7 @@
         </tr>
       </thead>
     <% end %>
-    <tbody data-target="<%= tag_name %>.<%= level.cells_target %>">
+    <tbody data-target="<%= tag_name %>.cells">
       <% level.rows(@displayed_page).each do |row| %>
         <tr>
           <% row.each do |cell| %>
