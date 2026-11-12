@@ -77,6 +77,15 @@ module Impulse
       refute_selector "td[aria-selected]"
     end
 
+    test "names no day outside the four-digit years, which the element can't write" do
+      [Date.new(999, 12, 31), Date.new(10_000, 1, 1)].each do |value|
+        render_inline(Impulse::DateCalendarComponent.new(value: value))
+
+        refute_selector "td[aria-selected]"
+        assert_selector "table[data-month='2026-11']"
+      end
+    end
+
     test "shows today's month in the calendar's zone without a value" do
       # 13:22 UTC on October 31 is already November 1 in Kiritimati.
       travel_to Time.utc(2026, 10, 31, 13, 22)

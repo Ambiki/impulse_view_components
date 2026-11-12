@@ -1,9 +1,8 @@
 module Impulse
   # A static grid of a month's days for choosing one. It renders no input or popover of its own: the app shows it
-  # inline or in a popover, and listens for `awc-date-calendar:commit`.
+  # inline or in a popover, and listens for `awc-date-calendar:commit`. Its heading drills up to months, then years.
   class DateCalendarComponent < Internal::CalendarGridComponent
     def initialize(disabled_days_of_week: [], **)
-      # Set before the base's `initialize`, which calls `disabled?` and the other hooks.
       @disabled_days_of_week = disabled_days_of_week.map { |day| to_day_of_week(day) }.uniq.sort
       super(**)
       @system_args[:"disabled-days-of-week"] = @disabled_days_of_week.to_json if @disabled_days_of_week.any?
@@ -19,19 +18,9 @@ module Impulse
       @level ||= Internal::DayLevel.new(first_day_of_week: @first_day_of_week)
     end
 
-    # Its heading drills up to months, then years (ADR 0017).
-    def levels_above
-      @levels_above ||= [Internal::MonthLevel.new, Internal::YearLevel.new]
-    end
-
-    # A day selects itself.
-    def range_of(date)
-      date..date
-    end
-
-    # A day is disabled before `min`, after `max`, or on a disabled day of the week.
+    # A day is also disabled on a disabled day of the week.
     def disabled?(date)
-      (@min && date < @min) || (@max && date > @max) || @disabled_days_of_week.include?(date.wday)
+      super || @disabled_days_of_week.include?(date.wday)
     end
   end
 end

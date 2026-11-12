@@ -16,8 +16,26 @@ module Impulse
         page.year.to_s
       end
 
+      # The January 1 of the year an `Integer` or a four-digit string names, or `nil` for anything else.
+      def parse(value, _time_zone)
+        case value
+        when Integer then Date.new(value, 1, 1)
+        when /\A\d{4}\z/ then Date.new(value.to_i, 1, 1)
+        end
+      end
+
+      # A cell's value: its year, `YYYY`.
+      def format(cell)
+        cell.year.to_s
+      end
+
       def cell_of(date)
         Date.new(date.year, 1, 1)
+      end
+
+      # The days a cell covers: its year's.
+      def range(cell)
+        cell..cell.end_of_year
       end
 
       def page_of(date)
@@ -48,6 +66,11 @@ module Impulse
       # A year's text names it.
       def label(_cell)
         nil
+      end
+
+      # A calendar of years drills up to no level.
+      def levels_above
+        []
       end
 
       def previous_label
