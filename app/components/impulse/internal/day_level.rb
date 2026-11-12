@@ -4,6 +4,8 @@ module Impulse
     # it. It is internal, and not part of the public API. A cell is named by its day, and a page by its month's first day.
     class DayLevel
       ISO_DATE = /\A\d{4}-\d{2}-\d{2}\z/
+      # An ISO 8601 time, its date and time apart by a `T` or, as RFC 3339 and databases write them, a space.
+      ISO_TIME = /\A\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/
 
       attr_reader :first_day_of_week
 
@@ -25,11 +27,16 @@ module Impulse
         page.strftime("%Y-%m")
       end
 
-      # The day a string names: `YYYY-MM-DD`, or a time, read in `time_zone`. `nil` for anything else.
+      # The day an ISO 8601 string names: `YYYY-MM-DD`, or a time, read in `time_zone` without an offset. `nil` for
+      # anything else, as a looser date, such as `"11/12/2026"`, reads differently from one locale to another.
       def parse(value, time_zone)
         return unless value.is_a?(String)
 
-        ISO_DATE.match?(value) ? Date.iso8601(value) : time_zone.parse(value)&.to_date
+        if ISO_DATE.match?(value)
+          Date.iso8601(value)
+        elsif ISO_TIME.match?(value)
+          time_zone.iso8601(value.sub(" ", "T")).to_date
+        end
       rescue ArgumentError
         nil
       end

@@ -24,7 +24,7 @@ anything.
 
 | Name                  | Default                 | Description                                                                                                                       |
 | ------                | -------                 | -------------                                                                                                                     |
-| value                 | `nil`                   | The selected day: a `Date`, a `Time` or `ActiveSupport::TimeWithZone`, or a string, `YYYY-MM-DD` or a time. Times are read in the time zone. |
+| value                 | `nil`                   | The selected day: a `Date`, a `Time` or `ActiveSupport::TimeWithZone`, or an ISO 8601 string, `YYYY-MM-DD` or a time. Times are read in the time zone. |
 | min                   | `nil`                   | The earliest day the user can commit, given as `value` is.                                                                         |
 | max                   | `nil`                   | The latest day the user can commit, given as `value` is.                                                                           |
 | disabled_days_of_week | `[]`                    | The days of the week the user can't commit, as names (`%i[saturday sunday]`) or numbers (`0` is Sunday).                          |
