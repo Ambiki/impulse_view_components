@@ -52,14 +52,6 @@ export default class AwcDateCalendarElement extends CalendarGridElement<DayDrill
   /** Its heading drills up to months, then years (ADR 0017). */
   protected readonly levelsAbove = LEVELS_ABOVE_DAYS;
 
-  protected weekStart() {
-    return this.firstDayOfWeek;
-  }
-
-  firstDayOfWeekChanged() {
-    this.refresh();
-  }
-
   disabledDaysOfWeekChanged() {
     this.refresh();
   }

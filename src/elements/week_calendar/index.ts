@@ -55,14 +55,6 @@ export default class AwcWeekCalendarElement extends CalendarGridElement<DayDrill
   /** Its heading drills up to months, then years (ADR 0017). */
   protected readonly levelsAbove = LEVELS_ABOVE_DAYS;
 
-  protected weekStart() {
-    return this.firstDayOfWeek;
-  }
-
-  firstDayOfWeekChanged() {
-    this.refresh();
-  }
-
   /**
    * A day selects its week, so it's disabled when none of its week's days falls between `min` and `max`: a week can be
    * committed when any of them does, and commits whole.

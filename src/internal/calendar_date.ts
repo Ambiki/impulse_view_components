@@ -131,17 +131,28 @@ export function rangeEquals(a: DateRange | null, b: DateRange | null): boolean {
 
 const DATE_PARTS = { year: 'numeric', month: 'numeric', day: 'numeric' } as const;
 
+/** A formatter for each time zone asked for, as a calendar asks on every key it handles. */
+const dateFormats = new Map<string, Intl.DateTimeFormat>();
+
+function dateFormat(timeZone: string) {
+  let format = dateFormats.get(timeZone);
+  if (!format) {
+    try {
+      format = new Intl.DateTimeFormat('en-US', { timeZone: timeZone || undefined, ...DATE_PARTS });
+    } catch {
+      format = new Intl.DateTimeFormat('en-US', DATE_PARTS);
+    }
+    dateFormats.set(timeZone, format);
+  }
+  return format;
+}
+
 /**
  * The calendar date it is at `now` in `timeZone`, an IANA name such as `America/New_York`. A missing or unknown zone
  * falls back to the browser's.
  */
 export function today(timeZone?: string, now = new Date()): CalendarDate {
-  let format: Intl.DateTimeFormat;
-  try {
-    format = new Intl.DateTimeFormat('en-US', { timeZone: timeZone || undefined, ...DATE_PARTS });
-  } catch {
-    format = new Intl.DateTimeFormat('en-US', DATE_PARTS);
-  }
+  const format = dateFormat(timeZone ?? '');
   const parts: Partial<Record<Intl.DateTimeFormatPartTypes, string>> = {};
   for (const part of format.formatToParts(now)) parts[part.type] = part.value;
   return new CalendarDate(Number(parts.year), Number(parts.month), Number(parts.day));

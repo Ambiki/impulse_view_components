@@ -4,7 +4,7 @@
  */
 import type { DateNames } from 'src/internal/calendar_date';
 import type { Level } from 'src/internal/calendar_grid';
-import { CalendarDate, ENGLISH_DATE_NAMES, formatDate } from 'src/internal/calendar_date';
+import { CalendarDate, daysInMonth, ENGLISH_DATE_NAMES, formatDate } from 'src/internal/calendar_date';
 
 /** The names and patterns a day-level calendar formats its text with, as its component renders them. */
 export interface DayLevelI18n extends DateNames {
@@ -49,7 +49,7 @@ export const DAY_LEVEL: Level<DayLevelI18n> = {
   addViews: (cell, views) => cell.add({ months: views }),
   range: (cell) => ({ start: cell, end: cell }),
   // The day drilled down to keeps its number, cut to the month's length: January 31 placed in February is its last day.
-  placeIn: (cell, view) => view.startOfMonth().add({ days: Math.min(cell.day, view.endOfMonth().day) - 1 }),
+  placeIn: (cell, view) => new CalendarDate(view.year, view.month, Math.min(cell.day, daysInMonth(view.year, view.month))),
   rows: (view, firstDayOfWeek) => view.monthGrid(firstDayOfWeek),
   // Per the APG date picker: a day, a week, the week's ends, a month, and with Shift a year.
   move: (cell, event, { firstDayOfWeek }) => {
