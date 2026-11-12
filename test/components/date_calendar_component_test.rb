@@ -56,7 +56,7 @@ module Impulse
         render_inline(Impulse::DateCalendarComponent.new(value: "2026-11-07T03:00:00Z"))
         assert_selector "awc-date-calendar[value='2026-11-06']"
 
-        # A time without an offset is a time in the zone, as `Time.zone.parse` reads it.
+        # A time without an offset is a time in the zone.
         render_inline(Impulse::DateCalendarComponent.new(value: "2026-11-07 03:00:00"))
         assert_selector "awc-date-calendar[value='2026-11-07']"
       end
@@ -67,6 +67,14 @@ module Impulse
 
       assert_selector "awc-date-calendar[value='2026-02-28']"
       assert_selector "table[data-month='2026-02']"
+    end
+
+    test "reads only ISO 8601 strings, a day or a time, and no looser date as one" do
+      ["31", "Nov", "11/12/2026", "next monday", "2026-11-07 03:00:00 UTC"].each do |value|
+        render_inline(Impulse::DateCalendarComponent.new(value: value))
+
+        assert_empty page.all("td[aria-selected]"), value.inspect
+      end
     end
 
     test "renders a value it can't read as given, with no selected day, on today's month" do

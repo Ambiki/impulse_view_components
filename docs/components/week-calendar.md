@@ -23,7 +23,7 @@ year is marked selected when the selected week has a day in it, so a week across
 
 | Name              | Default                  | Description                                                                                                                                       |
 | ------            | -------                  | -------------                                                                                                                                     |
-| value             | `nil`                    | Any day of the selected week: a `Date`, a `Time` or `ActiveSupport::TimeWithZone`, or a string, `YYYY-MM-DD` or a time. It renders as the week's first day. |
+| value             | `nil`                    | Any day of the selected week: a `Date`, a `Time` or `ActiveSupport::TimeWithZone`, or an ISO 8601 string, `YYYY-MM-DD` or a time. It renders as the week's first day. |
 | min               | `nil`                    | The earliest day the user can commit, given as `value` is.                                                                                         |
 | max               | `nil`                    | The latest day the user can commit, given as `value` is.                                                                                           |
 | first_day_of_week | `Date.beginning_of_week` | The day each week starts on, as a name or a number.                                                                                               |
