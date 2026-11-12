@@ -39,6 +39,8 @@ export function weekdayRow(firstDayOfWeek: number, i18n: DateNames): HTMLTableRo
 export const DAY_LEVEL: Level<DayLevelI18n> = {
   cell: 'day',
   viewAttribute: 'month',
+  parse: (value) => CalendarDate.parse(value),
+  format: (cell) => cell.toString(),
   paging: { previous: 'Previous month', next: 'Next month' },
   weekdayRow,
   formatView: (view) => view.toString().slice(0, 7),

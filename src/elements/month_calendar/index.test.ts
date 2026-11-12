@@ -226,6 +226,17 @@ describe('awc-month-calendar', () => {
       expect(el.isDateDisabled('2026-11')).to.equal(false);
       expect(el.isDateDisabled('2026-12')).to.equal(true);
     });
+
+    it('never let the user drill down into a year past the four-digit years', async () => {
+      const el = await monthCalendarFixture({ value: '1003-05' });
+
+      drillUp(el);
+      expect(year(el, '0999').getAttribute('aria-disabled')).to.equal('true');
+      year(el, '0999').click();
+
+      expect(el.grid.dataset.decade).to.equal('1000');
+      expect(el.previousButton.getAttribute('aria-disabled')).to.equal('true');
+    });
   });
 
   describe('drilling up', () => {

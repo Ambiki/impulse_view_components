@@ -25,18 +25,20 @@ const yearOf = (year: number) => new CalendarDate(year, 1, 1);
 const decadeOf = (year: number) => Math.floor(year / 10) * 10;
 
 /** The January 1 of the year `value` names, as `YYYY`, or `null` when it names none. */
-export function parseYear(value: string | undefined): CalendarDate | null {
+function parseYear(value: string | undefined): CalendarDate | null {
   return value && YEAR.test(value) ? yearOf(Number(value)) : null;
 }
 
 /** The days of `cell`'s year, from January 1 to December 31. */
-export function yearRange(cell: CalendarDate): DateRange {
+function yearRange(cell: CalendarDate): DateRange {
   return { start: yearOf(cell.year), end: new CalendarDate(cell.year, 12, 31) };
 }
 
 export const YEAR_LEVEL: Level<YearLevelI18n> = {
   cell: 'year',
   viewAttribute: 'decade',
+  parse: parseYear,
+  format: (cell) => String(cell.year),
   paging: { previous: 'Previous decade', next: 'Next decade' },
   formatView: (view) => String(decadeOf(view.year)),
   parseView: parseYear,

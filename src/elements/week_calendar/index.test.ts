@@ -219,6 +219,20 @@ describe('awc-week-calendar', () => {
       expect(el.isDateDisabled('2026-11-07')).to.equal(true);
       expect(el.isDateDisabled('2026-11-22')).to.equal(true);
     });
+
+    it('disable a week reaching past the four-digit years, whose first day no value can name', async () => {
+      const el = await weekCalendarFixture({ value: '1000-01-15' });
+      const commits = recordCommits();
+      el.resetView();
+
+      // January 1, 1000 is a Wednesday, so its week starts on December 29, 999.
+      expect(day(el, '1000-01-01').getAttribute('aria-disabled')).to.equal('true');
+      expect(day(el, '1000-01-05').hasAttribute('aria-disabled')).to.equal(false);
+      day(el, '1000-01-01').click();
+
+      expect(commits).to.eql([]);
+      expect(el.value).to.equal('1000-01-15');
+    });
   });
 
   describe('outside days', () => {

@@ -4,7 +4,7 @@ module Impulse
     # it. It is internal, and not part of the public API. A cell is named by its day, and a page by its month's first day.
     class DayLevel
       ISO_DATE = /\A\d{4}-\d{2}-\d{2}\z/
-      # An ISO 8601 time, its date and time apart by a `T` or, as RFC 3339 and databases write them, a space.
+      # An ISO 8601 time, its date and time apart by a `T` or, as RFC 3339 allows, a space.
       ISO_TIME = /\A\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/
 
       attr_reader :first_day_of_week

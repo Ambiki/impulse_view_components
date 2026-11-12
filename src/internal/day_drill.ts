@@ -6,8 +6,7 @@ import type { PagingI18n } from 'src/internal/calendar_grid';
 import type { DayLevelI18n } from 'src/internal/day_level';
 import type { MonthLevelI18n } from 'src/internal/month_level';
 import type { YearLevelI18n } from 'src/internal/year_level';
-import { englishPaging } from 'src/internal/calendar_grid';
-import { DAY_ENGLISH, DAY_LEVEL } from 'src/internal/day_level';
+import { DAY_ENGLISH } from 'src/internal/day_level';
 import { MONTH_ENGLISH, MONTH_LEVEL } from 'src/internal/month_level';
 import { YEAR_ENGLISH, YEAR_LEVEL } from 'src/internal/year_level';
 
@@ -23,6 +22,5 @@ export const LEVELS_ABOVE_DAYS = [MONTH_LEVEL, YEAR_LEVEL];
 /** Rails' English, used only when the component's `i18n` attribute is missing (ADR 0015). */
 export const DAY_DRILL_ENGLISH: DayDrillI18n = {
   ...DAY_ENGLISH,
-  paging: englishPaging([DAY_LEVEL, ...LEVELS_ABOVE_DAYS]),
   formats: { ...DAY_ENGLISH.formats, ...MONTH_ENGLISH.formats, ...YEAR_ENGLISH.formats },
 };
