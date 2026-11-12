@@ -195,7 +195,8 @@ _Avoid_: Blocked day, unavailable day
 
 **Disabled week**:
 A week in a week calendar that the user can move through but can't commit, because none of its days falls between the
-earliest and the latest day allowed. Its days are the week calendar's only disabled days.
+earliest and the latest day allowed, or because it reaches past the four-digit years. Its days are the week calendar's
+only disabled days.
 _Avoid_: Blocked week, unavailable week
 
 **Disabled month**:
@@ -205,8 +206,9 @@ _Avoid_: Blocked month, unavailable month
 
 **Disabled year**:
 A year that the user can move to but can't choose. In a year calendar, it falls before the earliest or after the latest
-year allowed. In a month calendar drilled up, none of its months falls between the earliest and the latest month
-allowed, unless it's the year the user drilled up from, which always takes them back.
+year allowed, or outside the four-digit years, 1000 to 9999, which are all a value names. In a month calendar drilled
+up, none of its months falls between the earliest and the latest month allowed, unless it's the year the user drilled up
+from, which always takes them back.
 _Avoid_: Blocked year, unavailable year
 
 **Today**:

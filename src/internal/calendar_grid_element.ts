@@ -17,7 +17,7 @@
  * own declarations, and renders the markup of `Impulse::Internal::CalendarGridComponent`.
  */
 import type { DateRange } from 'src/internal/calendar_date';
-import type { CalendarView, Level, PagingI18n } from 'src/internal/calendar_grid';
+import type { CalendarView, Level, PagingI18n, PagingLabels } from 'src/internal/calendar_grid';
 import { ImpulseElement } from '@ambiki/impulse';
 import { CalendarDate, FIRST_DAY, LAST_DAY, rangeEquals, today } from 'src/internal/calendar_date';
 import {
@@ -27,6 +27,7 @@ import {
   headingContent,
   headingText,
   isOutsideLimits,
+  isPastFourDigitYears,
 } from 'src/internal/calendar_grid';
 
 export default abstract class CalendarGridElement<I> extends ImpulseElement {
@@ -63,8 +64,13 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
   /** The levels the calendar drills up to from its base level, nearest first. By default, none. */
   protected readonly levelsAbove: readonly Level<I>[] = [];
 
-  /** The range committing `cell` selects, and that a value naming `cell` selects: a day, its week, a month or a year. */
-  protected abstract rangeOf(cell: CalendarDate): DateRange;
+  /**
+   * The range committing `cell` selects, and that a value naming `cell` selects: a day, its week, a month or a year. By
+   * default, the days the cell covers.
+   */
+  protected rangeOf(cell: CalendarDate): DateRange {
+    return this.level.range(cell);
+  }
 
   /**
    * Whether the user can move to `cell` but not commit it, given the earliest and latest allowed. By default, when none
@@ -77,19 +83,20 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
   /** The detail of `commit`, for the range the user committed. */
   protected abstract commitDetail(range: DateRange): object;
 
-  /** The cell a value names, or `null` when it names none. By default, a `YYYY-MM-DD` day. */
-  protected parseValue(value: string): CalendarDate | null {
-    return CalendarDate.parse(value);
+  /** The cell a value names, as the base level writes its cells, or `null` when it names none. */
+  private parseValue(value: string): CalendarDate | null {
+    return this.level.parse(value);
   }
 
-  /** The value naming `range`. By default, its first day as `YYYY-MM-DD`. */
+  /** The value naming `range`: its first cell, as the base level writes it. */
   protected formatValue(range: DateRange): string {
-    return range.start.toString();
+    return this.level.format(range.start);
   }
 
-  /** The earliest day `min` allows, or the latest `max` does. By default, the day itself. */
-  protected parseLimit(value: string, _limit: 'min' | 'max'): CalendarDate | null {
-    return this.parseValue(value);
+  /** The earliest day `min` allows, or the latest `max` does: the first or last day of the cell it names. */
+  private parseLimit(value: string, limit: 'min' | 'max'): CalendarDate | null {
+    const cell = this.parseValue(value);
+    return cell && (limit === 'max' ? this.level.range(cell).end : cell);
   }
 
   /**
@@ -108,6 +115,9 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
 
   /** The grid's description, which tells what committing a base level's cell does, kept while a level above is shown. */
   private gridDescription: string | null = null;
+
+  /** The page buttons' names on the base level, as the markup gave them, kept while a level above is shown. */
+  private basePaging: PagingLabels | null = null;
 
   connected() {
     // The server marked today when it rendered, which a cached page, or one left open past midnight, outlived.
@@ -277,7 +287,9 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
   /** The cell the value names, on the base level, or `null`. */
   private valueCell(): CalendarDate | null {
     const day = this.parseValue(this.value);
-    return day && this.level.cellOf(day);
+    const cell = day && this.level.cellOf(day);
+    // A selection no value can name, such as the week of January 1, 1000, is none.
+    return cell && !isPastFourDigitYears(this.rangeOf(cell)) ? cell : null;
   }
 
   /**
@@ -386,14 +398,14 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
    * What `level` shows with `displayed` as a cell of its view and `active` holding the tab stop, or, without `active`,
    * the selected cell or the displayed one. On a level above the base level, a cell with any day of the selection is
    * selected, and one with none of its days between `min` and `max` is disabled, except the one drilled up from, which
-   * always takes the user back.
+   * always takes the user back. On every level, a cell reaching past the four-digit years is disabled.
    */
   private levelView(level: Level<I>, displayed: CalendarDate, active: CalendarDate | null): CalendarView<I> {
     const value = this.valueCell();
     const cell = value && level.cellOf(value);
     // The user never goes past the four-digit years, which are all a value names.
-    const min = latest(this.parseLimit(this.min, 'min'), FIRST_DAY);
-    const max = earliest(this.parseLimit(this.max, 'max'), LAST_DAY);
+    const min = later(this.parseLimit(this.min, 'min'), FIRST_DAY);
+    const max = earlier(this.parseLimit(this.max, 'max'), LAST_DAY);
     const base = level === this.level;
     const from = this.drilledFrom[this.levels.indexOf(level) - 1];
     const back = from && level.cellOf(from);
@@ -406,9 +418,11 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
       today: level.cellOf(today(this.timeZone)),
       min,
       max,
-      isDisabled: base ?
-        (date) => this.isDisabledCell(date, min, max) :
-        (date) => !date.equals(back ?? null) && isOutsideLimits(level.range(date), min, max),
+      isDisabled: (date) => {
+        if (isPastFourDigitYears(base ? this.rangeOf(date) : level.range(date))) return true;
+        if (base) return this.isDisabledCell(date, min, max);
+        return !date.equals(back ?? null) && isOutsideLimits(level.range(date), min, max);
+      },
       firstDayOfWeek: this.firstDayOfWeek ?? 0,
       i18n: this.i18n,
     };
@@ -427,6 +441,7 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
   private render(view: CalendarView<I>) {
     const { level } = view;
     const drilled = level !== this.shownLevel();
+    if (drilled && level !== this.level) this.basePaging ??= this.pagingShown();
     // The cells' buttons are replaced, so focus on one moves to the active cell rather than to the page.
     const hadFocus = this.cells.contains(document.activeElement);
     for (const other of this.levels) {
@@ -438,16 +453,36 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
     this.weekdays?.replaceChildren(...(weekdays ? [weekdays] : []));
     this.cells.replaceChildren(...gridRows(view));
     if (hadFocus) this.button(view.active)?.focus();
-    // A calendar that drills pages by another view on each level, so its buttons are renamed on each.
-    if (this.levelsAbove.length) {
-      const labels = (this.i18n as PagingI18n).paging?.[level.cell] ?? level.paging;
-      this.previousButton.setAttribute('aria-label', labels.previous);
-      this.nextButton.setAttribute('aria-label', labels.next);
-    }
+    this.renderPaging(level);
     this.previousButton.setAttribute('aria-disabled', String(!canMoveView(view, -1)));
     this.nextButton.setAttribute('aria-disabled', String(!canMoveView(view, 1)));
     this.renderDescription(level);
-    if (level === this.level) this.drilledFrom = [];
+    if (level === this.level) {
+      this.drilledFrom = [];
+      this.basePaging = null;
+    }
+  }
+
+  /**
+   * A calendar that drills pages by another view on each level, so its buttons are renamed on each: from `i18n`'s
+   * `paging`, or without it, by their names in the markup on the base level, and the level's English above it.
+   */
+  private renderPaging(level: Level<I>) {
+    if (!this.levelsAbove.length) return;
+
+    const labels =
+      (this.i18n as PagingI18n).paging?.[level.cell] ?? (level === this.level ? this.basePaging : level.paging);
+    if (!labels) return;
+
+    this.previousButton.setAttribute('aria-label', labels.previous);
+    this.nextButton.setAttribute('aria-label', labels.next);
+  }
+
+  private pagingShown(): PagingLabels {
+    return {
+      previous: this.previousButton.getAttribute('aria-label') ?? '',
+      next: this.nextButton.getAttribute('aria-label') ?? '',
+    };
   }
 
   /**
@@ -498,10 +533,10 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
   }
 }
 
-function latest(date: CalendarDate | null, bound: CalendarDate) {
+function later(date: CalendarDate | null, bound: CalendarDate) {
   return date && date.compare(bound) > 0 ? date : bound;
 }
 
-function earliest(date: CalendarDate | null, bound: CalendarDate) {
+function earlier(date: CalendarDate | null, bound: CalendarDate) {
   return date && date.compare(bound) < 0 ? date : bound;
 }

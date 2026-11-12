@@ -27,18 +27,18 @@ const MONTH = /^([1-9]\d{3})-(0[1-9]|1[0-2])$/;
 const monthOf = (year: number, month: number) => new CalendarDate(year, month, 1);
 
 /** The first day of the month `value` names, as `YYYY-MM`, or `null` when it names none. */
-export function parseMonth(value: string | undefined): CalendarDate | null {
+function parseMonth(value: string | undefined): CalendarDate | null {
   const match = MONTH.exec(value ?? '');
   return match ? monthOf(Number(match[1]), Number(match[2])) : null;
 }
 
 /** The month `cell` names as `YYYY-MM`. */
-export function formatMonth(cell: CalendarDate): string {
+function formatMonth(cell: CalendarDate): string {
   return cell.toString().slice(0, 7);
 }
 
 /** The days of `cell`'s month, from its first to its last. */
-export function monthRange(cell: CalendarDate): DateRange {
+function monthRange(cell: CalendarDate): DateRange {
   return { start: monthOf(cell.year, cell.month), end: cell.endOfMonth() };
 }
 
@@ -48,6 +48,8 @@ const addMonths = (cell: CalendarDate, months: number) => monthOf(cell.year, cel
 export const MONTH_LEVEL: Level<MonthLevelI18n> = {
   cell: 'month',
   viewAttribute: 'year',
+  parse: parseMonth,
+  format: formatMonth,
   paging: { previous: 'Previous year', next: 'Next year' },
   formatView: (view) => String(view.year),
   parseView: (value) => (value && /^[1-9]\d{3}$/.test(value) ? monthOf(Number(value), 1) : null),

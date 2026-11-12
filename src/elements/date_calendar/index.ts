@@ -56,11 +56,6 @@ export default class AwcDateCalendarElement extends CalendarGridElement<DayDrill
     this.refresh();
   }
 
-  /** A day selects itself. */
-  protected rangeOf(date: CalendarDate): DateRange {
-    return { start: date, end: date };
-  }
-
   /** A day is disabled before `min`, after `max`, or on a disabled day of the week. */
   protected isDisabledCell(date: CalendarDate, min: CalendarDate | null, max: CalendarDate | null): boolean {
     return (

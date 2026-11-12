@@ -26,6 +26,8 @@ module Impulse
 
         day = to_date(value)
         @selected = day && range_of(level.cell_of(day))
+        # A selection no value can name, such as the week of December 31, 9999, is none.
+        @selected = nil if @selected && past_four_digit_years?(@selected)
         @min = to_limit(min, :min)
         @max = to_limit(max, :max)
         @today = level.cell_of(@time_zone.today)
@@ -71,7 +73,12 @@ module Impulse
       # `max`.
       def disabled?(cell)
         range = range_of(cell)
-        range.end < earliest || range.begin > latest
+        past_four_digit_years?(range) || range.end < earliest || range.begin > latest
+      end
+
+      # Whether any of `range`'s days falls outside the four-digit years, which are all a value names.
+      def past_four_digit_years?(range)
+        range.begin < FIRST_DAY || range.end > LAST_DAY
       end
 
       # The earliest day the user can commit: `min`'s, and never before the four-digit years, which are all a value

@@ -1,11 +1,10 @@
-import type { CalendarDate, DateRange } from 'src/internal/calendar_date';
+import type { DateRange } from 'src/internal/calendar_date';
 import type { PagingI18n } from 'src/internal/calendar_grid';
 import type { MonthLevelI18n } from 'src/internal/month_level';
 import type { YearLevelI18n } from 'src/internal/year_level';
 import { property, registerElement, target } from '@ambiki/impulse';
-import { englishPaging } from 'src/internal/calendar_grid';
 import CalendarGridElement from 'src/internal/calendar_grid_element';
-import { formatMonth, MONTH_ENGLISH, MONTH_LEVEL, monthRange, parseMonth } from 'src/internal/month_level';
+import { MONTH_ENGLISH, MONTH_LEVEL } from 'src/internal/month_level';
 import { YEAR_ENGLISH, YEAR_LEVEL } from 'src/internal/year_level';
 
 /**
@@ -17,7 +16,6 @@ export type MonthCalendarI18n = MonthLevelI18n & YearLevelI18n & PagingI18n;
 /** Rails' English, used only when the component's `i18n` attribute is missing (ADR 0015). */
 const MONTH_CALENDAR_ENGLISH: MonthCalendarI18n = {
   ...MONTH_ENGLISH,
-  paging: englishPaging([MONTH_LEVEL, YEAR_LEVEL]),
   formats: { ...MONTH_ENGLISH.formats, ...YEAR_ENGLISH.formats },
 };
 
@@ -55,28 +53,8 @@ export default class AwcMonthCalendarElement extends CalendarGridElement<MonthCa
   /** Its heading drills up to years (ADR 0017). */
   protected readonly levelsAbove = [YEAR_LEVEL];
 
-  /** A month selects its days, from its first to its last, so it's disabled before `min`'s month or after `max`'s. */
-  protected rangeOf(cell: CalendarDate): DateRange {
-    return monthRange(cell);
-  }
-
   protected commitDetail(range: DateRange): AwcMonthCalendarCommitEvent {
     return { value: this.formatValue(range) };
-  }
-
-  /** A month, `YYYY-MM`, names its first day. */
-  protected parseValue(value: string): CalendarDate | null {
-    return parseMonth(value);
-  }
-
-  protected formatValue(range: DateRange): string {
-    return formatMonth(range.start);
-  }
-
-  /** `max` allows its whole month. */
-  protected parseLimit(value: string, limit: 'min' | 'max'): CalendarDate | null {
-    const month = parseMonth(value);
-    return month && limit === 'max' ? monthRange(month).end : month;
   }
 }
 

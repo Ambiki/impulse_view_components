@@ -745,9 +745,13 @@ describe('awc-date-calendar', () => {
       expect(commits).to.eql([]);
     });
 
-    it('names the page buttons in English on each level when the names and patterns given have none for them', async () => {
+    it('names the page buttons in English above the days when the names and patterns given have none for them', async () => {
       const el = await dateCalendarFixture({ value: '2026-11-18' });
+      // As the server renders them in another locale.
+      el.previousButton.setAttribute('aria-label', 'Mes anterior');
+      el.nextButton.setAttribute('aria-label', 'Mes siguiente');
       el.i18n = { ...el.i18n, paging: undefined };
+      expect(el.previousButton.getAttribute('aria-label')).to.equal('Mes anterior');
 
       drillUp(el);
       expect(el.previousButton.getAttribute('aria-label')).to.equal('Previous year');
@@ -755,6 +759,11 @@ describe('awc-date-calendar', () => {
 
       drillUp(el);
       expect(el.previousButton.getAttribute('aria-label')).to.equal('Previous decade');
+
+      day(el, '2026-01-01').click();
+      day(el, '2026-11-01').click();
+      expect(el.previousButton.getAttribute('aria-label')).to.equal('Mes anterior');
+      expect(el.nextButton.getAttribute('aria-label')).to.equal('Mes siguiente');
     });
 
     it('marks the month and the year holding the selected day', async () => {

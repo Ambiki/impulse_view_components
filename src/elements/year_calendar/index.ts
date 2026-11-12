@@ -1,8 +1,8 @@
-import type { CalendarDate, DateRange } from 'src/internal/calendar_date';
+import type { DateRange } from 'src/internal/calendar_date';
 import type { YearLevelI18n } from 'src/internal/year_level';
 import { property, registerElement, target } from '@ambiki/impulse';
 import CalendarGridElement from 'src/internal/calendar_grid_element';
-import { parseYear, YEAR_ENGLISH, YEAR_LEVEL, yearRange } from 'src/internal/year_level';
+import { YEAR_ENGLISH, YEAR_LEVEL } from 'src/internal/year_level';
 
 /** The pattern a year calendar names its decades with, as `Impulse::YearCalendarComponent` renders it. */
 export type YearCalendarI18n = YearLevelI18n;
@@ -38,28 +38,8 @@ export default class AwcYearCalendarElement extends CalendarGridElement<YearCale
 
   protected readonly level = YEAR_LEVEL;
 
-  /** A year selects its days, from January 1 to December 31, so it's disabled before `min`'s year or after `max`'s. */
-  protected rangeOf(cell: CalendarDate): DateRange {
-    return yearRange(cell);
-  }
-
   protected commitDetail(range: DateRange): AwcYearCalendarCommitEvent {
     return { value: this.formatValue(range) };
-  }
-
-  /** A year, `YYYY`, names its January 1. */
-  protected parseValue(value: string): CalendarDate | null {
-    return parseYear(value);
-  }
-
-  protected formatValue(range: DateRange): string {
-    return String(range.start.year);
-  }
-
-  /** `max` allows its whole year. */
-  protected parseLimit(value: string, limit: 'min' | 'max'): CalendarDate | null {
-    const year = parseYear(value);
-    return year && limit === 'max' ? yearRange(year).end : year;
   }
 }
 

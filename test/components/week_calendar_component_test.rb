@@ -50,6 +50,16 @@ module Impulse
       refute_selector "button[data-date='2026-11-21'][aria-disabled]"
     end
 
+    test "selects and allows no week reaching past the four-digit years, whose first day no value can name" do
+      # December 31, 9999 is a Friday, so its week ends on January 1, 10000.
+      render_inline(Impulse::WeekCalendarComponent.new(value: Date.new(9999, 12, 31), first_day_of_week: :sunday))
+      refute_selector "td[aria-selected]"
+
+      render_inline(Impulse::WeekCalendarComponent.new(value: Date.new(9999, 12, 5), first_day_of_week: :sunday))
+      assert_selector "button[data-date='9999-12-31'][aria-disabled='true']", visible: :all
+      refute_selector "button[data-date='9999-12-25'][aria-disabled]", visible: :all
+    end
+
     test "describes the grid with a hint that choosing a day chooses its week" do
       render_inline(Impulse::WeekCalendarComponent.new(value: Date.new(2026, 11, 4)))
 

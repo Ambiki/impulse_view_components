@@ -4,7 +4,7 @@
  * internal: the package's `exports` map doesn't list it.
  */
 import type { CalendarDate, DateRange } from 'src/internal/calendar_date';
-import { rangesOverlap } from 'src/internal/calendar_date';
+import { FIRST_DAY, LAST_DAY, rangesOverlap } from 'src/internal/calendar_date';
 
 /** What a key's move depends on besides the cell it moves from. */
 export interface MoveContext {
@@ -25,6 +25,10 @@ export interface Level<I> {
   readonly viewAttribute: string;
   /** The row of weekday headings above the cells, for a level that has one. */
   readonly weekdayRow?: (firstDayOfWeek: number, i18n: I) => HTMLTableRowElement;
+  /** The cell a value names, written as the level writes its cells, or `null` when it names none. */
+  parse: (value: string | undefined) => CalendarDate | null;
+  /** A cell's value: `YYYY-MM-DD`, `YYYY-MM` or `YYYY`. */
+  format: (cell: CalendarDate) => string;
   formatView: (view: CalendarDate) => string;
   parseView: (value: string | undefined) => CalendarDate | null;
   /** The cell `date` falls in. */
@@ -67,11 +71,6 @@ export interface PagingI18n {
 export interface PagingLabels {
   previous: string;
   next: string;
-}
-
-/** The English names of the page buttons on each of `levels`, as `PagingI18n` keys them. */
-export function englishPaging(levels: readonly Pick<Level<never>, 'cell' | 'paging'>[]): Record<string, PagingLabels> {
-  return Object.fromEntries(levels.map((level) => [level.cell, level.paging]));
 }
 
 /** What a calendar shows: everything its grid is rendered from. */
@@ -134,6 +133,14 @@ export function headingContent<I>(view: CalendarView<I>, hintId: string | null):
   button.setAttribute('aria-describedby', hintId);
   button.textContent = text;
   return button;
+}
+
+/**
+ * Whether any of `range`'s days falls outside the four-digit years, which are all a value names: the week of January 1,
+ * 1000 starts in 999.
+ */
+export function isPastFourDigitYears(range: DateRange): boolean {
+  return range.start.compare(FIRST_DAY) < 0 || range.end.compare(LAST_DAY) > 0;
 }
 
 /** Whether none of `range`'s days falls between `min` and `max`. */
