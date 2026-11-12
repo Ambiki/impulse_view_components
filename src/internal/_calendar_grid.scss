@@ -1,11 +1,14 @@
-// The day grid the calendars share, with each calendar's own class prefix, `$block`: `awc-date-calendar` styles
-// `.awc-date-calendar-day`, and its tokens are `--awc-date-calendar-*`. It expects Bootstrap 4's Sass functions,
-// variables and mixins to be loaded already.
-@mixin day-grid($block) {
+// The space around a day's button, which the day grid's width is worked out from.
+$calendar-grid-cell-padding: 1px;
+
+// The grid the calendars share, with each calendar's own class prefix, `$block`, and its level's cells, `$cell`:
+// `awc-date-calendar` and `day` style `.awc-date-calendar-day`, and its tokens are `--awc-date-calendar-*`. It expects
+// Bootstrap 4's Sass functions, variables and mixins to be loaded already.
+@mixin calendar-grid($block, $cell: 'day') {
   :where(:root) {
     // At least 24px square, so each day is a large enough target (WCAG 2.5.8).
     --#{$block}-day-size: 2.25rem;
-    // The page buttons are Bootstrap's `.btn-sm`, so the days take their radius and the buttons their disabled opacity.
+    // The page buttons are Bootstrap's `.btn-sm`, so the cells take their radius and the buttons their disabled opacity.
     --#{$block}-day-border-radius: #{$btn-border-radius-sm};
     // Light enough that an outside day's text keeps 4.5:1 on it (WCAG 1.4.3).
     --#{$block}-day-bg-hover: var(--awc-neutral-base);
@@ -60,9 +63,9 @@
       color: var(--awc-neutral-text-subtle);
     }
 
-    // A click on the padding around a day's button commits the day, so it shows the day's cursor.
+    // A click on the padding around a cell's button commits the cell, so it shows the cell's cursor.
     td {
-      padding: 1px;
+      padding: $calendar-grid-cell-padding;
       cursor: pointer;
 
       &:has(> [aria-disabled='true']) {
@@ -71,7 +74,7 @@
     }
   }
 
-  .#{$block}-day {
+  .#{$block}-#{$cell} {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -123,4 +126,10 @@
       font-weight: var(--awc-font-weight-medium);
     }
   }
+}
+
+// The width of the day grid, seven days and the space around them, which a calendar of another level takes too, so the
+// outer cells line up with the header's buttons.
+@function calendar-grid-width($block) {
+  @return calc(7 * (var(--#{$block}-day-size) + #{2 * $calendar-grid-cell-padding}));
 }

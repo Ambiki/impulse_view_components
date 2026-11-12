@@ -1,0 +1,21 @@
+<%= render(Impulse::PopoverComponent.new(placement: "bottom-start", data: { action: "awc-year-calendar:commit->awc-popover#requestHide" })) do |c| %>
+  <% c.with_trigger(class: "btn btn-outline-secondary", data: { test_id: "year-trigger" }) { "2026" } %>
+  <% c.with_panel do |panel| %>
+    <% panel.with_body do %>
+      <%= render(Impulse::YearCalendarComponent.new(value: 2026)) %>
+    <% end %>
+  <% end %>
+<% end %>
+
+<script type="module">
+  // Opening the popover focuses the selected year. Committing a year closes it, and closing it takes the calendar back
+  // to the selected year's decade. The trigger names the selected year.
+  const popover = document.querySelector('awc-popover');
+  const calendar = popover.querySelector('awc-year-calendar');
+  const trigger = popover.querySelector('[data-test-id="year-trigger"]');
+  popover.addEventListener('awc-popover:shown', () => calendar.focus());
+  popover.addEventListener('awc-popover:hidden', () => calendar.resetView());
+  calendar.addEventListener('awc-year-calendar:commit', (event) => {
+    trigger.textContent = event.detail.value;
+  });
+</script>

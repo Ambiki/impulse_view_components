@@ -1,11 +1,11 @@
 import type { CalendarDate, DateRange } from 'src/internal/calendar_date';
-import type { CalendarI18n } from 'src/internal/day_grid';
+import type { DayLevelI18n } from 'src/internal/day_level';
 import { property, registerElement, target } from '@ambiki/impulse';
-import { ENGLISH } from 'src/internal/day_grid';
-import DayGridElement from 'src/internal/day_grid_element';
+import CalendarGridElement from 'src/internal/calendar_grid_element';
+import { DAY_ENGLISH, DAY_LEVEL } from 'src/internal/day_level';
 
 /** The names and patterns a date calendar formats its text with, as `Impulse::DateCalendarComponent` renders them. */
-export type DateCalendarI18n = CalendarI18n;
+export type DateCalendarI18n = DayLevelI18n;
 
 /** The detail of `awc-date-calendar:commit`, emitted when the user commits a day other than the selected one. */
 export interface AwcDateCalendarCommitEvent {
@@ -14,7 +14,7 @@ export interface AwcDateCalendarCommitEvent {
 }
 
 @registerElement('awc-date-calendar')
-export default class AwcDateCalendarElement extends DayGridElement {
+export default class AwcDateCalendarElement extends CalendarGridElement<DayLevelI18n> {
   /** The selected day, as `YYYY-MM-DD`. Anything else means no day is selected. */
   @property() value = '';
 
@@ -34,7 +34,7 @@ export default class AwcDateCalendarElement extends DayGridElement {
   @property() timeZone = '';
 
   /** The names and patterns the months are rendered with. Defaults to English. */
-  @property({ type: Object }) i18n: DateCalendarI18n = ENGLISH;
+  @property({ type: Object }) i18n: DateCalendarI18n = DAY_ENGLISH;
 
   @target() heading: HTMLElement;
   @target() grid: HTMLTableElement;
@@ -42,6 +42,24 @@ export default class AwcDateCalendarElement extends DayGridElement {
   @target() days: HTMLTableSectionElement;
   @target() previousButton: HTMLButtonElement;
   @target() nextButton: HTMLButtonElement;
+
+  protected readonly level = DAY_LEVEL;
+
+  protected get cells() {
+    return this.days;
+  }
+
+  protected get weekdayHeadings() {
+    return this.weekdays;
+  }
+
+  protected weekStart() {
+    return this.firstDayOfWeek;
+  }
+
+  firstDayOfWeekChanged() {
+    this.refresh();
+  }
 
   disabledDaysOfWeekChanged() {
     this.refresh();
@@ -53,7 +71,7 @@ export default class AwcDateCalendarElement extends DayGridElement {
   }
 
   /** A day is disabled before `min`, after `max`, or on a disabled day of the week. */
-  protected isDisabledDay(date: CalendarDate, min: CalendarDate | null, max: CalendarDate | null): boolean {
+  protected isDisabledCell(date: CalendarDate, min: CalendarDate | null, max: CalendarDate | null): boolean {
     return (
       (!!min && date.compare(min) < 0) ||
       (!!max && date.compare(max) > 0) ||

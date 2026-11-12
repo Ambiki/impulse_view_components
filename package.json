@@ -71,6 +71,11 @@
       "sass": "./dist/elements/week_calendar/index.scss",
       "default": "./dist/elements/week_calendar/index.js"
     },
+    "./year-calendar": {
+      "types": "./dist/elements/year_calendar/index.d.ts",
+      "sass": "./dist/elements/year_calendar/index.scss",
+      "default": "./dist/elements/year_calendar/index.js"
+    },
     "./hooks": {
       "types": "./dist/hooks/index.d.ts",
       "default": "./dist/hooks/index.js"

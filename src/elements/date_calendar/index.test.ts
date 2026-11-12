@@ -4,7 +4,8 @@ import { expect, fixture } from '@open-wc/testing';
 import { sendKeys } from '@web/test-runner-commands';
 import { Idiomorph } from 'idiomorph';
 import { CalendarDate, today } from '../../internal/calendar_date';
-import { canMoveView, ENGLISH, headingText, weekdayRow, weekRows } from '../../internal/day_grid';
+import { canMoveView, gridRows, headingText } from '../../internal/calendar_grid';
+import { DAY_LEVEL, DAY_ENGLISH as ENGLISH, weekdayRow } from '../../internal/day_level';
 // Registers `awc-date-calendar`. Kept separate from the type import above, which the bundler elides.
 import './index';
 
@@ -31,6 +32,7 @@ function dateCalendarHtml(options: CalendarOptions = {}) {
   const minDay = CalendarDate.parse(min);
   const maxDay = CalendarDate.parse(max);
   const view = {
+    level: DAY_LEVEL,
     tagName: 'awc-date-calendar',
     displayed: active,
     active,
@@ -63,8 +65,8 @@ function dateCalendarHtml(options: CalendarOptions = {}) {
       <button type="button" class="awc-date-calendar-nav" aria-label="Next month" aria-disabled="${!canMoveView(view, 1)}" data-target="awc-date-calendar.nextButton" data-action="click->awc-date-calendar#handleNextClick"></button>
     </div>
     <table class="awc-date-calendar-grid" role="grid" aria-labelledby="heading" data-month="${month}" data-target="awc-date-calendar.grid" data-action="click->awc-date-calendar#handleClick keydown->awc-date-calendar#handleKeydown focusin->awc-date-calendar#handleFocusin">
-      <thead data-target="awc-date-calendar.weekdays">${html([weekdayRow(view)])}</thead>
-      <tbody data-target="awc-date-calendar.days">${html(weekRows(view))}</tbody>
+      <thead data-target="awc-date-calendar.weekdays">${html([weekdayRow(firstDayOfWeek, ENGLISH)])}</thead>
+      <tbody data-target="awc-date-calendar.days">${html(gridRows(view))}</tbody>
     </table>
   </awc-date-calendar>`;
 }

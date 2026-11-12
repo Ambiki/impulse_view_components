@@ -1,12 +1,13 @@
 import type { CalendarDate, DateRange } from 'src/internal/calendar_date';
-import type { CalendarI18n, CalendarView } from 'src/internal/day_grid';
+import type { CalendarView } from 'src/internal/calendar_grid';
+import type { DayLevelI18n } from 'src/internal/day_level';
 import { property, registerElement, target } from '@ambiki/impulse';
 import { rangeIncludes } from 'src/internal/calendar_date';
-import { ENGLISH } from 'src/internal/day_grid';
-import DayGridElement from 'src/internal/day_grid_element';
+import CalendarGridElement from 'src/internal/calendar_grid_element';
+import { DAY_ENGLISH, DAY_LEVEL } from 'src/internal/day_level';
 
 /** The names and patterns a week calendar formats its text with, as `Impulse::WeekCalendarComponent` renders them. */
-export type WeekCalendarI18n = CalendarI18n;
+export type WeekCalendarI18n = DayLevelI18n;
 
 /** The detail of `awc-week-calendar:commit`, emitted when the user commits a day of a week other than the selected one. */
 export interface AwcWeekCalendarCommitEvent {
@@ -19,7 +20,7 @@ export interface AwcWeekCalendarCommitEvent {
 }
 
 @registerElement('awc-week-calendar')
-export default class AwcWeekCalendarElement extends DayGridElement {
+export default class AwcWeekCalendarElement extends CalendarGridElement<DayLevelI18n> {
   /** The selected week's first day, as `YYYY-MM-DD`. Any day names the week it falls in; anything else selects none. */
   @property() value = '';
 
@@ -36,7 +37,7 @@ export default class AwcWeekCalendarElement extends DayGridElement {
   @property() timeZone = '';
 
   /** The names and patterns the months are rendered with. Defaults to English. */
-  @property({ type: Object }) i18n: WeekCalendarI18n = ENGLISH;
+  @property({ type: Object }) i18n: WeekCalendarI18n = DAY_ENGLISH;
 
   @target() heading: HTMLElement;
   @target() grid: HTMLTableElement;
@@ -44,6 +45,24 @@ export default class AwcWeekCalendarElement extends DayGridElement {
   @target() days: HTMLTableSectionElement;
   @target() previousButton: HTMLButtonElement;
   @target() nextButton: HTMLButtonElement;
+
+  protected readonly level = DAY_LEVEL;
+
+  protected get cells() {
+    return this.days;
+  }
+
+  protected get weekdayHeadings() {
+    return this.weekdays;
+  }
+
+  protected weekStart() {
+    return this.firstDayOfWeek;
+  }
+
+  firstDayOfWeekChanged() {
+    this.refresh();
+  }
 
   /** A day selects its week. */
   protected rangeOf(date: CalendarDate): DateRange {
@@ -54,7 +73,7 @@ export default class AwcWeekCalendarElement extends DayGridElement {
    * A day is disabled when none of its week's days falls between `min` and `max`: a week can be committed when any of
    * them does, and commits whole.
    */
-  protected isDisabledDay(date: CalendarDate, min: CalendarDate | null, max: CalendarDate | null): boolean {
+  protected isDisabledCell(date: CalendarDate, min: CalendarDate | null, max: CalendarDate | null): boolean {
     const week = this.rangeOf(date);
     return (!!min && week.end.compare(min) < 0) || (!!max && week.start.compare(max) > 0);
   }
@@ -64,7 +83,7 @@ export default class AwcWeekCalendarElement extends DayGridElement {
    * page: the tab stop goes to its day in the month nearest the one committed, since outside days never hold it. A week
    * with no day in the month turns the page to the committed day's month.
    */
-  protected viewAfterCommit(view: CalendarView, date: CalendarDate, range: DateRange) {
+  protected viewAfterCommit(view: CalendarView<DayLevelI18n>, date: CalendarDate, range: DateRange) {
     if (date.isSameMonth(view.displayed)) return { displayed: view.displayed, active: date };
 
     const nearest = date.compare(view.displayed) < 0 ? view.displayed.startOfMonth() : view.displayed.endOfMonth();

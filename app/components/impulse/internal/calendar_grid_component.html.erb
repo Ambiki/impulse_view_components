@@ -1,0 +1,53 @@
+<%= render(Impulse::BaseRenderer.new(**@system_args)) do %>
+  <div class="<%= tag_name %>-header">
+    <button type="button" class="btn btn-sm btn-light <%= tag_name %>-nav" aria-label="<%= level.previous_label %>" aria-disabled="<%= previous_page_disabled? %>" data-target="<%= tag_name %>.previousButton" data-action="click-><%= tag_name %>#handlePreviousClick">
+      <i class="bi bi-chevron-left" aria-hidden="true"></i>
+    </button>
+    <div id="<%= @heading_id %>" class="<%= tag_name %>-heading" aria-live="polite" data-target="<%= tag_name %>.heading"><%= level.heading(@displayed_page) %></div>
+    <button type="button" class="btn btn-sm btn-light <%= tag_name %>-nav" aria-label="<%= level.next_label %>" aria-disabled="<%= next_page_disabled? %>" data-target="<%= tag_name %>.nextButton" data-action="click-><%= tag_name %>#handleNextClick">
+      <i class="bi bi-chevron-right" aria-hidden="true"></i>
+    </button>
+  </div>
+  <% if hint %>
+    <span id="<%= @hint_id %>" class="sr-only"><%= hint %></span>
+  <% end %>
+  <%= tag.table(
+    class: "#{tag_name}-grid",
+    role: "grid",
+    "aria-labelledby": @heading_id,
+    "aria-describedby": (@hint_id if hint),
+    "data-#{level.page_attribute}": level.format_page(@displayed_page),
+    "data-target": "#{tag_name}.grid",
+    "data-action": "click->#{tag_name}#handleClick keydown->#{tag_name}#handleKeydown focusin->#{tag_name}#handleFocusin"
+  ) do %>
+    <% if level.weekdays %>
+      <thead data-target="<%= tag_name %>.weekdays">
+        <tr>
+          <% level.weekdays.each do |day| %>
+            <th scope="col" abbr="<%= t("date.day_names")[day] %>"><%= t("date.abbr_day_names")[day] %></th>
+          <% end %>
+        </tr>
+      </thead>
+    <% end %>
+    <tbody data-target="<%= tag_name %>.<%= level.cells_target %>">
+      <% level.rows(@displayed_page).each do |row| %>
+        <tr>
+          <% row.each do |cell| %>
+            <%= tag.td("aria-selected": ("true" if selected?(cell))) do %>
+              <%= tag.button(
+                level.text(cell),
+                type: "button",
+                class: class_names("#{tag_name}-#{level.cell}", "#{tag_name}-#{level.cell}--outside": outside?(cell)),
+                tabindex: (cell == @active_cell) ? 0 : -1,
+                "data-date": cell.iso8601,
+                "aria-label": level.label(cell),
+                "aria-current": ("date" if cell == @today),
+                "aria-disabled": ("true" if disabled?(cell))
+              ) %>
+            <% end %>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  <% end %>
+<% end %>

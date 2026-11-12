@@ -2,16 +2,20 @@ module Impulse
   # A static grid of a month's days for choosing a week: committing a day commits its week. It renders no input or
   # popover of its own: the app shows it inline or in a popover, and listens for `awc-week-calendar:commit`. Its value
   # is the week's first day; any day given as the value names the week it falls in.
-  class WeekCalendarComponent < Internal::DayGridComponent
+  class WeekCalendarComponent < Internal::CalendarGridComponent
     private
 
     def tag_name
       "awc-week-calendar"
     end
 
+    def level
+      @level ||= Internal::DayLevel.new(first_day_of_week: @first_day_of_week)
+    end
+
     # A day selects its week.
     def range_of(date)
-      first = beginning_of_week(date)
+      first = level.beginning_of_week(date)
       first..(first + 6)
     end
 
