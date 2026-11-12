@@ -152,6 +152,21 @@ describe('awc-date-calendar', () => {
       expect(commits).to.eql(['2026-11-18']);
     });
 
+    it('doesn\'t happen on a click outside the days, even inside an app\'s table cell', async () => {
+      const table = await fixture<HTMLTableElement>(
+        `<table><tbody><tr><td>${dateCalendarHtml({ value: '2026-11-06' })}</td></tr></tbody></table>`,
+      );
+      const el = table.querySelector('awc-date-calendar')!;
+      await whenInitialized(el);
+      const commits = recordCommits();
+
+      el.querySelector('th')!.click();
+      el.querySelector<HTMLElement>('tbody[data-target] tr')!.click();
+
+      expect(el.value).to.equal('2026-11-06');
+      expect(commits).to.eql([]);
+    });
+
     it('emits nothing for the day already selected', async () => {
       const el = await dateCalendarFixture({ value: '2026-11-06' });
       const commits = recordCommits();

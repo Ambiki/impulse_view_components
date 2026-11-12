@@ -490,8 +490,11 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
    * as the cell: a week calendar's band spans it, so a click there is meant for the cell.
    */
   private cellOf(node: EventTarget | null): CalendarDate | null {
+    // `closest` can leave the grid, for a cell of an app's table the calendar sits in.
     const td = node instanceof Element ? node.closest('td') : null;
-    const button = td?.querySelector<HTMLElement>('button[data-date]');
-    return button && this.cells.contains(button) ? CalendarDate.parse(button.dataset.date) : null;
+    if (!td || !this.cells.contains(td)) return null;
+
+    const button = td.querySelector<HTMLElement>(':scope > button[data-date]');
+    return button ? CalendarDate.parse(button.dataset.date) : null;
   }
 }
