@@ -10,7 +10,8 @@ en:
       next_year: Next year
       previous_decade: Previous decade
       next_decade: Next decade
-      # Describes the heading's button, which drills up from a month calendar's months to years.
+      # Describe the heading's button, which drills up from days to months, and from months to years.
+      choose_month: Choose a month
       choose_year: Choose a year
       formats:
         # Names the displayed month, above the grid.

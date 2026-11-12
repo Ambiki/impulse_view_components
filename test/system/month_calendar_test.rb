@@ -121,14 +121,5 @@ module Impulse
         })()
       JS
     end
-
-    # The description Chrome's accessibility tree gives the element `selector` matches, which a screen reader reads.
-    def accessible_description(selector)
-      browser = page.driver.browser
-      document = browser.execute_cdp("DOM.getDocument")
-      node = browser.execute_cdp("DOM.querySelector", nodeId: document["root"]["nodeId"], selector: selector)
-      tree = browser.execute_cdp("Accessibility.getPartialAXTree", nodeId: node["nodeId"], fetchRelatives: false)
-      tree["nodes"].first.dig("description", "value")
-    end
   end
 end

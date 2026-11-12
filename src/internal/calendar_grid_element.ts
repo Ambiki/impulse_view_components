@@ -112,6 +112,9 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
   /** The active cell of each level below the one shown, from the base level up, which drilling down goes back to. */
   private drilledFrom: CalendarDate[] = [];
 
+  /** The grid's description, which tells what committing a base level's cell does, kept while a level above is shown. */
+  private gridDescription: string | null = null;
+
   connected() {
     // The server marked today when it rendered, which a cached page, or one left open past midnight, outlived.
     const view = this.view();
@@ -383,9 +386,9 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
 
   /**
    * What `level` shows with `displayed` as a cell of its view and `active` holding the tab stop, or, without `active`,
-   * the selected cell or the displayed one. On a level above the base level, the cell holding the value is selected,
-   * and a cell with none of its days between `min` and `max` is disabled, except the one drilled up from, which always
-   * takes the user back.
+   * the selected cell or the displayed one. On a level above the base level, a cell with any day of the selection is
+   * selected, and one with none of its days between `min` and `max` is disabled, except the one drilled up from, which
+   * always takes the user back.
    */
   private levelView(level: Level<I>, displayed: CalendarDate, active: CalendarDate | null): CalendarView<I> {
     const value = this.valueCell();
@@ -400,7 +403,7 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
       tagName: this.localName,
       displayed,
       active: active ?? cell ?? displayed,
-      selected: value && cell && (base ? this.rangeOf(value) : level.range(cell)),
+      selected: value && this.rangeOf(value),
       today: level.cellOf(today(this.timeZone)),
       min,
       max,
@@ -444,7 +447,22 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
     }
     this.previousButton.setAttribute('aria-disabled', String(!canMoveView(view, -1)));
     this.nextButton.setAttribute('aria-disabled', String(!canMoveView(view, 1)));
+    this.renderDescription(level);
     if (level === this.level) this.drilledFrom = [];
+  }
+
+  /**
+   * A grid's description, such as the week calendar's, tells what committing a day does, so only the base level has
+   * one. The markup's own description wins, as a morph may bring the server's, under a new id.
+   */
+  private renderDescription(level: Level<I>) {
+    const description = this.grid.getAttribute('aria-describedby');
+    if (description) this.gridDescription = description;
+    if (level !== this.level) {
+      this.grid.removeAttribute('aria-describedby');
+    } else if (!description && this.gridDescription) {
+      this.grid.setAttribute('aria-describedby', this.gridDescription);
+    }
   }
 
   /**

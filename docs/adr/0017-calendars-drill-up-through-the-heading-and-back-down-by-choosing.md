@@ -5,7 +5,7 @@ status: accepted
 # Calendars drill up through the heading, and back down by choosing
 
 A calendar can show more than one level in the same grid: the month calendar's months drill up to years (#374), and the
-date calendar's days will drill up to months and then years. Pressing the heading shows the level above. The top
+date and week calendars' days drill up to months and then years (#387). Pressing the heading shows the level above. The top
 level's heading is plain text. Choosing a cell there drills back down to the view holding it; choosing the cell the
 user drilled up from leaves the view as it was. `Escape` does nothing, as a popover holding the calendar already closes
 on it.
@@ -29,6 +29,8 @@ cell of it. Drilling emits no event, as paging emits none.
 - A user leaves an upper level without changing anything by choosing the cell they came from, which holds the tab stop,
   so `Enter` takes a keyboard user straight back. That cell is never disabled, even when none of its days falls between
   `min` and `max`, so the way back is always open.
+- On a level above the base level, a cell is selected when any of its days is selected, so a week across two months
+  selects both (#387).
 - Focus moves into the new level's grid on every drill, as the heading button is gone on the top level. The focus move
   announces the change; the heading's live region stays quiet on a drill.
 - The server renders only the base level. The element alone renders the levels above it, so the parity test covers

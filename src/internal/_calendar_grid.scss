@@ -1,5 +1,7 @@
 // The space around a day's button, which the day grid's width is worked out from.
 $calendar-grid-cell-padding: 1px;
+// The weekday headings' line, which the day grid's height is worked out from.
+$calendar-grid-weekday-line-height: 20px;
 
 // The class names of `$block`'s cells of each level in `$cells`: `awc-month-calendar` and `month year` give
 // `.awc-month-calendar-month, .awc-month-calendar-year`.
@@ -67,8 +69,10 @@ $calendar-grid-cell-padding: 1px;
   .#{$block}-grid {
     border-collapse: collapse;
 
+    // One fixed line, so the day grid's height is known: a level drilled up to fills it.
     th {
       padding: 0 0 var(--awc-space-1);
+      line-height: $calendar-grid-weekday-line-height;
       text-align: center;
       font-size: var(--awc-font-size-2);
       font-weight: var(--awc-font-weight-medium);
@@ -148,9 +152,33 @@ $calendar-grid-cell-padding: 1px;
   @return calc(7 * (var(--#{$block}-day-size) + #{2 * $calendar-grid-cell-padding}));
 }
 
-// A level of twelve cells, months or years, as wide as the day grid, so it lines up with the other calendars. Each cell
-// is a compact button, as tall as a day, three to a row: the outer cells reach the grid's sides, as the outer days do,
-// and the middle ones sit evenly between them. On its own it takes only the height its cells need.
+// The height of the day grid: its row of weekday headings, and six weeks of days.
+@function calendar-grid-height($block) {
+  @return calc(
+    #{$calendar-grid-weekday-line-height} + var(--awc-space-1) + 6 *
+      (var(--#{$block}-day-size) + #{2 * $calendar-grid-cell-padding})
+  );
+}
+
+// Twelve compact cells, months or years, three to a row: each as tall as a day, the outer ones reaching the grid's
+// sides, as the outer days do, and the middle ones evenly between them.
+@mixin calendar-compact-cells($block, $cells) {
+  #{calendar-grid-cells($block, $cells)} {
+    width: 4.5rem;
+    margin: 0 auto;
+
+    td:first-child > & {
+      margin-left: 0;
+    }
+
+    td:last-child > & {
+      margin-right: 0;
+    }
+  }
+}
+
+// A month or year calendar's grid: as wide as the day grid, so it lines up with the other calendars, with compact
+// cells. It takes only the height its cells need.
 @mixin calendar-compact-grid($block, $cells) {
   .#{$block}-grid {
     width: calendar-grid-width($block);
@@ -165,18 +193,23 @@ $calendar-grid-cell-padding: 1px;
     }
   }
 
-  #{calendar-grid-cells($block, $cells)} {
-    width: 4.5rem;
-    margin: 0 auto;
+  @include calendar-compact-cells($block, $cells);
+}
 
-    td:first-child > & {
-      margin-left: 0;
-    }
+// A calendar of days drilled up to months or years (ADR 0016): their compact cells fill the day grid's box, the four
+// rows spread over its height, so drilling never changes the calendar's size.
+@mixin calendar-drill-from-days($block) {
+  .#{$block}-grid:is([data-year], [data-decade]) {
+    width: calendar-grid-width($block);
+    height: calendar-grid-height($block);
+    table-layout: fixed;
 
-    td:last-child > & {
-      margin-right: 0;
+    td {
+      padding: 0;
     }
   }
+
+  @include calendar-compact-cells($block, ('month', 'year'));
 }
 
 // The heading of a calendar that drills up (ADR 0017): below the top level, a button that fills the space between the

@@ -26,8 +26,8 @@ module Impulse
       @level ||= Internal::MonthLevel.new
     end
 
-    def level_above
-      @level_above ||= Internal::YearLevel.new
+    def levels_above
+      @levels_above ||= [Internal::YearLevel.new]
     end
 
     # A month selects its days, from its first to its last.

@@ -4,7 +4,7 @@
  * internal: the package's `exports` map doesn't list it.
  */
 import type { CalendarDate, DateRange } from 'src/internal/calendar_date';
-import { rangeIncludes } from 'src/internal/calendar_date';
+import { rangesOverlap } from 'src/internal/calendar_date';
 
 /** What a key's move depends on besides the cell it moves from. */
 export interface MoveContext {
@@ -71,7 +71,10 @@ export interface CalendarView<I> {
   displayed: CalendarDate;
   /** The cell holding the grid's one tab stop. */
   active: CalendarDate;
-  /** The selected range: a day, a week, a month or a year. */
+  /**
+   * The selected range: a day, a week, a month or a year. A cell is selected when any of its days is, so on a level
+   * above, a week across two months selects both.
+   */
   selected: DateRange | null;
   /** The cell today falls in. */
   today: CalendarDate;
@@ -150,7 +153,7 @@ function gridCell<I>(cell: CalendarDate, view: CalendarView<I>) {
   button.textContent = level.text(cell, view.i18n);
 
   const td = document.createElement('td');
-  if (rangeIncludes(view.selected, cell)) td.setAttribute('aria-selected', 'true');
+  if (rangesOverlap(level.range(cell), view.selected)) td.setAttribute('aria-selected', 'true');
   td.append(button);
   return td;
 }

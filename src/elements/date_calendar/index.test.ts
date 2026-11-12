@@ -59,11 +59,13 @@ function dateCalendarHtml(options: CalendarOptions = {}) {
   const html = (rows: Element[]) => rows.map((row) => row.outerHTML).join('');
 
   return `<awc-date-calendar class="awc-date-calendar" ${attributes.join(' ')}>
-    <div class="awc-date-calendar-header">
+    <div class="awc-date-calendar-header" data-action="click->awc-date-calendar#handleHeadingClick">
       <button type="button" class="awc-date-calendar-nav" aria-label="Previous month" aria-disabled="${!canMoveView(view, -1)}" data-target="awc-date-calendar.previousButton" data-action="click->awc-date-calendar#handlePreviousClick"></button>
-      <div id="heading" class="awc-date-calendar-heading" aria-live="polite" data-target="awc-date-calendar.heading">${headingText(view)}</div>
+      <div id="heading" class="awc-date-calendar-heading" aria-live="polite" data-target="awc-date-calendar.heading"><button type="button" class="btn btn-sm btn-light awc-date-calendar-heading-button" aria-describedby="heading-month">${headingText(view)}</button></div>
       <button type="button" class="awc-date-calendar-nav" aria-label="Next month" aria-disabled="${!canMoveView(view, 1)}" data-target="awc-date-calendar.nextButton" data-action="click->awc-date-calendar#handleNextClick"></button>
     </div>
+    <span id="heading-month" class="sr-only">Choose a month</span>
+    <span id="heading-year" class="sr-only">Choose a year</span>
     <table class="awc-date-calendar-grid" role="grid" aria-labelledby="heading" data-month="${month}" data-target="awc-date-calendar.grid" data-action="click->awc-date-calendar#handleClick keydown->awc-date-calendar#handleKeydown focusin->awc-date-calendar#handleFocusin">
       <thead data-target="awc-date-calendar.weekdays">${html([weekdayRow(firstDayOfWeek, ENGLISH)])}</thead>
       <tbody data-target="awc-date-calendar.days">${html(gridRows(view))}</tbody>
@@ -99,6 +101,11 @@ function focusedDay() {
 async function press(el: Element, key: string, date?: string) {
   if (date) day(el, date).focus();
   await sendKeys({ press: key });
+}
+
+/** Presses the heading, which drills up a level. */
+function drillUp(el: Element) {
+  el.querySelector<HTMLButtonElement>('[data-target$=".heading"] button')!.click();
 }
 
 /** The selected day, as the grid marks it. */
@@ -511,7 +518,7 @@ describe('awc-date-calendar', () => {
       const months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
       const days = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
 
-      el.i18n = { ...ENGLISH, monthNames: months, dayNames: days, formats: { heading: '%B de %Y', day: '%A, %-d de %B de %Y' } };
+      el.i18n = { ...el.i18n, monthNames: months, dayNames: days, formats: { ...el.i18n.formats, heading: '%B de %Y', day: '%A, %-d de %B de %Y' } };
       nextButton(el).click();
 
       expect(el.heading.textContent).to.equal('diciembre de 2026');
@@ -695,6 +702,201 @@ describe('awc-date-calendar', () => {
       const el = await dateCalendarFixture({ value: '2026-11-18' });
 
       expect(el.isDateDisabled('2026-02-30')).to.equal(false);
+    });
+  });
+  describe('drilling up', () => {
+    it('shows the displayed month\'s year as months, then its decade as years, in the same grid', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18' });
+      const commits = recordCommits();
+
+      drillUp(el);
+      expect(el.grid.dataset.year).to.equal('2026');
+      expect(el.grid.dataset.month).to.equal(undefined);
+      expect(el.weekdays.children.length).to.equal(0);
+      expect(focusedDay()).to.equal('2026-11-01');
+      expect(el.heading.textContent).to.equal('2026');
+      expect(el.heading.querySelector('button')!.getAttribute('aria-describedby')).to.equal('heading-year');
+      expect(el.previousButton.getAttribute('aria-label')).to.equal('Previous year');
+      expect(day(el, '2026-11-01').textContent).to.equal('Nov');
+      expect(day(el, '2026-11-01').getAttribute('aria-label')).to.equal('November 2026');
+
+      drillUp(el);
+      expect(el.grid.dataset.decade).to.equal('2020');
+      expect(el.grid.dataset.year).to.equal(undefined);
+      expect(el.heading.textContent).to.equal('2020 – 2029');
+      expect(el.heading.querySelector('button')).to.equal(null);
+      expect(focusedDay()).to.equal('2026-01-01');
+      expect(el.previousButton.getAttribute('aria-label')).to.equal('Previous decade');
+      expect(commits).to.eql([]);
+    });
+
+    it('marks the month and the year holding the selected day', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18' });
+
+      drillUp(el);
+      expect(selectedDay(el)).to.equal('2026-11-01');
+
+      drillUp(el);
+      expect(selectedDay(el)).to.equal('2026-01-01');
+    });
+
+    it('disables a month with no day between min and max, whatever days of the week are disabled', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18', min: '2026-03-15', disabledDaysOfWeek: [0, 6] });
+
+      drillUp(el);
+
+      expect(day(el, '2026-02-01').getAttribute('aria-disabled')).to.equal('true');
+      expect(day(el, '2026-03-01').hasAttribute('aria-disabled')).to.equal(false);
+      expect(el.isDateDisabled('2026-03-14')).to.equal(true);
+      expect(el.isDateDisabled('2026-03-21')).to.equal(true);
+      expect(el.isDateDisabled('2026-03-16')).to.equal(false);
+    });
+  });
+
+  describe('drilling down', () => {
+    it('shows the chosen month\'s days, focusing the same day cut to the month\'s length, and commits nothing', async () => {
+      const el = await dateCalendarFixture({ value: '2027-01-31' });
+      const commits = recordCommits();
+
+      drillUp(el);
+      day(el, '2027-02-01').click();
+
+      expect(el.grid.dataset.month).to.equal('2027-02');
+      expect(el.grid.dataset.year).to.equal(undefined);
+      expect(el.weekdays.children.length).to.equal(1);
+      expect(focusedDay()).to.equal('2027-02-28');
+      expect(el.heading.querySelector('button')!.textContent).to.equal('February 2027');
+      expect(el.heading.querySelector('button')!.getAttribute('aria-describedby')).to.equal('heading-month');
+      expect(el.previousButton.getAttribute('aria-label')).to.equal('Previous month');
+      expect(el.value).to.equal('2027-01-31');
+      expect(commits).to.eql([]);
+    });
+
+    it('goes back down through the years and the months to the same day', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18' });
+      const commits = recordCommits();
+
+      drillUp(el);
+      drillUp(el);
+      day(el, '2024-01-01').click();
+      expect(el.grid.dataset.year).to.equal('2024');
+      expect(focusedDay()).to.equal('2024-11-01');
+
+      day(el, '2024-11-01').click();
+      expect(el.grid.dataset.month).to.equal('2024-11');
+      expect(focusedDay()).to.equal('2024-11-18');
+
+      day(el, '2024-11-20').click();
+      expect(commits).to.eql(['2024-11-20']);
+    });
+
+    it('leaves the days as they were when the user chooses the month they drilled up from', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18' });
+      el.goToDate('2026-11-25');
+
+      drillUp(el);
+      await sendKeys({ press: 'Enter' });
+
+      expect(el.grid.dataset.month).to.equal('2026-11');
+      expect(focusedDay()).to.equal('2026-11-25');
+    });
+
+    it('keeps focus on a disabled day of the week, which the user can move to', async () => {
+      // October 18, 2026 is a Sunday.
+      const el = await dateCalendarFixture({ value: '2026-11-18', disabledDaysOfWeek: [0] });
+
+      drillUp(el);
+      day(el, '2026-10-01').click();
+
+      expect(focusedDay()).to.equal('2026-10-18');
+      expect(day(el, '2026-10-18').getAttribute('aria-disabled')).to.equal('true');
+    });
+
+    it('focuses the nearest allowed day when min or max rules out the day drilled up from', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18', min: '2026-10-20', max: '2026-12-10' });
+
+      drillUp(el);
+      day(el, '2026-10-01').click();
+      expect(focusedDay()).to.equal('2026-10-20');
+
+      drillUp(el);
+      day(el, '2026-12-01').click();
+      expect(focusedDay()).to.equal('2026-12-10');
+    });
+  });
+
+  describe('changes made by code while drilled up', () => {
+    it('page the level shown, and go back to the days for whatever names a day', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18' });
+
+      drillUp(el);
+      el.nextView();
+      expect(el.grid.dataset.year).to.equal('2027');
+
+      el.goToDate('2030-05-04');
+      expect(el.grid.dataset.month).to.equal('2030-05');
+      expect(el.weekdays.children.length).to.equal(1);
+      expect(day(el, '2030-05-04').tabIndex).to.equal(0);
+
+      drillUp(el);
+      drillUp(el);
+      el.resetView();
+      expect(el.grid.dataset.month).to.equal('2026-11');
+      expect(el.heading.querySelector('button')!.textContent).to.equal('November 2026');
+    });
+
+    it('focus and page the level shown, keep it when a setting changes, and emit nothing', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18' });
+      const commits = recordCommits();
+
+      drillUp(el);
+      el.previousView();
+      expect(el.grid.dataset.year).to.equal('2025');
+      el.focus();
+      expect(focusedDay()).to.equal('2025-11-01');
+
+      el.min = '2025-06-10';
+      el.firstDayOfWeek = 1;
+      expect(el.grid.dataset.year).to.equal('2025');
+      expect(day(el, '2025-05-01').getAttribute('aria-disabled')).to.equal('true');
+      expect(day(el, '2025-06-01').hasAttribute('aria-disabled')).to.equal(false);
+      expect(commits).to.eql([]);
+    });
+
+    it('go back to the days on goToToday, a new value and clear', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18', timeZone: 'UTC' });
+      const now = today('UTC');
+      const month = now.toString().slice(0, 7);
+
+      drillUp(el);
+      el.goToToday();
+      expect(el.grid.dataset.month).to.equal(month);
+
+      drillUp(el);
+      drillUp(el);
+      el.value = '2031-04-09';
+      expect(el.grid.dataset.month).to.equal('2031-04');
+      expect(selectedDay(el)).to.equal('2031-04-09');
+
+      drillUp(el);
+      el.clear();
+      expect(el.grid.dataset.month).to.equal(month);
+      expect(el.weekdays.children.length).to.equal(1);
+    });
+
+    it('are put back to the days by a morph, which can drill up again', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18' });
+
+      drillUp(el);
+      drillUp(el);
+      Idiomorph.morph(el, dateCalendarHtml({ value: '2012-06-15' }));
+
+      expect(el.grid.dataset.month).to.equal('2012-06');
+      expect(el.grid.dataset.decade).to.equal(undefined);
+      expect(selectedDay(el)).to.equal('2012-06-15');
+
+      drillUp(el);
+      expect(el.grid.dataset.year).to.equal('2012');
     });
   });
 });

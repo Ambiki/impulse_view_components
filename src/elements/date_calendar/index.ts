@@ -1,11 +1,15 @@
 import type { CalendarDate, DateRange } from 'src/internal/calendar_date';
-import type { DayLevelI18n } from 'src/internal/day_level';
+import type { DayDrillI18n } from 'src/internal/day_drill';
 import { property, registerElement, target } from '@ambiki/impulse';
 import CalendarGridElement from 'src/internal/calendar_grid_element';
-import { DAY_ENGLISH, DAY_LEVEL } from 'src/internal/day_level';
+import { DAY_DRILL_ENGLISH, LEVELS_ABOVE_DAYS } from 'src/internal/day_drill';
+import { DAY_LEVEL } from 'src/internal/day_level';
 
-/** The names and patterns a date calendar formats its text with, as `Impulse::DateCalendarComponent` renders them. */
-export type DateCalendarI18n = DayLevelI18n;
+/**
+ * The names and patterns a date calendar renders its days, months and years with, and its page buttons' names on
+ * each, as `Impulse::DateCalendarComponent` renders them.
+ */
+export type DateCalendarI18n = DayDrillI18n;
 
 /** The detail of `awc-date-calendar:commit`, emitted when the user commits a day other than the selected one. */
 export interface AwcDateCalendarCommitEvent {
@@ -14,7 +18,7 @@ export interface AwcDateCalendarCommitEvent {
 }
 
 @registerElement('awc-date-calendar')
-export default class AwcDateCalendarElement extends CalendarGridElement<DayLevelI18n> {
+export default class AwcDateCalendarElement extends CalendarGridElement<DayDrillI18n> {
   /** The selected day, as `YYYY-MM-DD`. Anything else means no day is selected. */
   @property() value = '';
 
@@ -33,8 +37,8 @@ export default class AwcDateCalendarElement extends CalendarGridElement<DayLevel
   /** The IANA time zone that decides which day is today. Defaults to the browser's. */
   @property() timeZone = '';
 
-  /** The names and patterns the months are rendered with. Defaults to English. */
-  @property({ type: Object }) i18n: DateCalendarI18n = DAY_ENGLISH;
+  /** The names and patterns the days, months and years are rendered with. Defaults to English. */
+  @property({ type: Object }) i18n: DateCalendarI18n = DAY_DRILL_ENGLISH;
 
   @target() heading: HTMLElement;
   @target() grid: HTMLTableElement;
@@ -44,6 +48,9 @@ export default class AwcDateCalendarElement extends CalendarGridElement<DayLevel
   @target() nextButton: HTMLButtonElement;
 
   protected readonly level = DAY_LEVEL;
+
+  /** Its heading drills up to months, then years (ADR 0017). */
+  protected readonly levelsAbove = LEVELS_ABOVE_DAYS;
 
   protected get cells() {
     return this.days;

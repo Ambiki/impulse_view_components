@@ -1,3 +1,6 @@
 @import '../../internal/calendar_grid';
 
-@include calendar-grid('awc-date-calendar');
+// The grid shows days, and months or years when the calendar is drilled up, in the same box.
+@include calendar-grid('awc-date-calendar', ('day', 'month', 'year'));
+@include calendar-drill('awc-date-calendar');
+@include calendar-drill-from-days('awc-date-calendar');

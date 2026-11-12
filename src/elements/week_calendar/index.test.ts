@@ -61,11 +61,13 @@ function weekCalendarHtml(options: CalendarOptions = {}) {
   const html = (rows: Element[]) => rows.map((row) => row.outerHTML).join('');
 
   return `<awc-week-calendar class="awc-week-calendar" ${attributes.join(' ')}>
-    <div class="awc-week-calendar-header">
+    <div class="awc-week-calendar-header" data-action="click->awc-week-calendar#handleHeadingClick">
       <button type="button" class="awc-week-calendar-nav" aria-label="Previous month" aria-disabled="${!canMoveView(view, -1)}" data-target="awc-week-calendar.previousButton" data-action="click->awc-week-calendar#handlePreviousClick"></button>
-      <div id="heading" class="awc-week-calendar-heading" aria-live="polite" data-target="awc-week-calendar.heading">${headingText(view)}</div>
+      <div id="heading" class="awc-week-calendar-heading" aria-live="polite" data-target="awc-week-calendar.heading"><button type="button" class="btn btn-sm btn-light awc-week-calendar-heading-button" aria-describedby="heading-month">${headingText(view)}</button></div>
       <button type="button" class="awc-week-calendar-nav" aria-label="Next month" aria-disabled="${!canMoveView(view, 1)}" data-target="awc-week-calendar.nextButton" data-action="click->awc-week-calendar#handleNextClick"></button>
     </div>
+    <span id="heading-month" class="sr-only">Choose a month</span>
+    <span id="heading-year" class="sr-only">Choose a year</span>
     <span id="hint" class="sr-only">Choosing a day chooses its week.</span>
     <table class="awc-week-calendar-grid" role="grid" aria-labelledby="heading" aria-describedby="hint" data-month="${month}" data-target="awc-week-calendar.grid" data-action="click->awc-week-calendar#handleClick keydown->awc-week-calendar#handleKeydown focusin->awc-week-calendar#handleFocusin">
       <thead data-target="awc-week-calendar.weekdays">${html([weekdayRow(firstDayOfWeek, ENGLISH)])}</thead>
@@ -83,6 +85,11 @@ async function weekCalendarFixture(options?: CalendarOptions) {
 /** The button of the day `date` names, in the grid shown. */
 function day(el: Element, date: string) {
   return el.querySelector<HTMLButtonElement>(`tbody button[data-date="${date}"]`)!;
+}
+
+/** Presses the heading, which drills up a level. */
+function drillUp(el: Element) {
+  el.querySelector<HTMLButtonElement>('[data-target$=".heading"] button')!.click();
 }
 
 /** The days the grid marks as selected. */
@@ -321,6 +328,51 @@ describe('awc-week-calendar', () => {
       expect(el.grid.dataset.month).to.equal('2026-12');
       expect(day(el, '2026-12-02').tabIndex).to.equal(0);
       expect(selectedDays(el)[0]).to.equal('2026-11-29');
+    });
+  });
+  describe('drilling up', () => {
+    it('selects every month the selected week has a day in', async () => {
+      const el = await weekCalendarFixture({ value: '2026-11-29', firstDayOfWeek: 0 });
+
+      drillUp(el);
+
+      expect(selectedDays(el)).to.eql(['2026-11-01', '2026-12-01']);
+    });
+
+    it('describes only the days as choosing their week', async () => {
+      const el = await weekCalendarFixture({ value: '2026-11-18' });
+      expect(el.grid.getAttribute('aria-describedby')).to.equal('hint');
+
+      drillUp(el);
+      expect(el.grid.hasAttribute('aria-describedby')).to.equal(false);
+
+      day(el, '2026-12-01').click();
+      expect(el.grid.getAttribute('aria-describedby')).to.equal('hint');
+    });
+
+    it('follows the description a morph brings, after drilling up and back down', async () => {
+      const el = await weekCalendarFixture({ value: '2026-11-18' });
+
+      drillUp(el);
+      day(el, '2026-11-01').click();
+      // The server names the hint afresh on each render.
+      Idiomorph.morph(el, weekCalendarHtml({ value: '2026-11-18' }).replace(/"hint"/g, '"hint-2"'));
+      el.nextView();
+
+      expect(el.grid.getAttribute('aria-describedby')).to.equal('hint-2');
+    });
+
+    it('commits the week of a day chosen after drilling back down', async () => {
+      const el = await weekCalendarFixture({ value: '2026-11-18', firstDayOfWeek: 0 });
+      const commits = recordCommits();
+
+      drillUp(el);
+      day(el, '2026-12-01').click();
+      expect(el.grid.dataset.month).to.equal('2026-12');
+      expect(commits).to.eql([]);
+
+      day(el, '2026-12-16').click();
+      expect(commits).to.eql([{ value: '2026-12-13', start: '2026-12-13', end: '2026-12-19' }]);
     });
   });
 });
