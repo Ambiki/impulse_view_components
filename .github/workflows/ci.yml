@@ -12,10 +12,11 @@ on:
   # The publish workflow runs CI on the release tag before publishing.
   workflow_call:
 
-# A new push to a pull request cancels the run still going for its previous push. Runs on main always finish.
+# A new push to a pull request cancels the run still going for its previous push. Every other run gets a group of its
+# own, so it always finishes: in a group shared by main's runs, a newer push would cancel a run still waiting to start.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
   lint_js:
