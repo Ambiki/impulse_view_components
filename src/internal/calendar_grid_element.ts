@@ -19,7 +19,7 @@
 import type { DateRange } from 'src/internal/calendar_date';
 import type { CalendarView, Level, PagingI18n } from 'src/internal/calendar_grid';
 import { ImpulseElement } from '@ambiki/impulse';
-import { CalendarDate, rangeEquals, today } from 'src/internal/calendar_date';
+import { CalendarDate, FIRST_DAY, LAST_DAY, rangeEquals, today } from 'src/internal/calendar_date';
 import {
   canMoveView,
   canShowView,
@@ -391,8 +391,9 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
   private levelView(level: Level<I>, displayed: CalendarDate, active: CalendarDate | null): CalendarView<I> {
     const value = this.valueCell();
     const cell = value && level.cellOf(value);
-    const min = this.parseLimit(this.min, 'min');
-    const max = this.parseLimit(this.max, 'max');
+    // The user never goes past the four-digit years, which are all a value names.
+    const min = latest(this.parseLimit(this.min, 'min'), FIRST_DAY);
+    const max = earliest(this.parseLimit(this.max, 'max'), LAST_DAY);
     const base = level === this.level;
     const from = this.drilledFrom[this.levels.indexOf(level) - 1];
     const back = from && level.cellOf(from);
@@ -495,4 +496,12 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
     const button = td.querySelector<HTMLElement>(':scope > button[data-date]');
     return button ? CalendarDate.parse(button.dataset.date) : null;
   }
+}
+
+function latest(date: CalendarDate | null, bound: CalendarDate) {
+  return date && date.compare(bound) > 0 ? date : bound;
+}
+
+function earliest(date: CalendarDate | null, bound: CalendarDate) {
+  return date && date.compare(bound) < 0 ? date : bound;
 }

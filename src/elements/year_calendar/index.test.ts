@@ -211,6 +211,23 @@ describe('awc-year-calendar', () => {
       expect(el.isDateDisabled('2028')).to.equal(false);
       expect(el.isDateDisabled('2029')).to.equal(true);
     });
+
+    it('never let the user past the four-digit years, which are all a value can name', async () => {
+      const el = await yearCalendarFixture({ value: '1015' });
+
+      el.previousButton.click();
+      expect(el.heading.textContent).to.equal('1000 – 1009');
+      expect(el.previousButton.getAttribute('aria-disabled')).to.equal('true');
+      expect(el.querySelector('[data-date="0999-01-01"]')!.getAttribute('aria-disabled')).to.equal('true');
+      el.previousButton.click();
+      expect(el.heading.textContent).to.equal('1000 – 1009');
+
+      el.goToDate('9985');
+      el.nextButton.click();
+      expect(el.heading.textContent).to.equal('9990 – 9999');
+      expect(el.nextButton.getAttribute('aria-disabled')).to.equal('true');
+      expect(el.querySelector('[data-date="10000-01-01"]')!.getAttribute('aria-disabled')).to.equal('true');
+    });
   });
 
   describe('changes made by code', () => {
