@@ -3,6 +3,8 @@ module Impulse
     # The day level: a month's days, in six weeks, under a row of weekday headings. The date and week calendars show
     # it. It is internal, and not part of the public API. A cell is named by its day, and a page by its month's first day.
     class DayLevel
+      ISO_DATE = /\A\d{4}-\d{2}-\d{2}\z/
+
       attr_reader :first_day_of_week
 
       def initialize(first_day_of_week:)
@@ -23,8 +25,27 @@ module Impulse
         page.strftime("%Y-%m")
       end
 
+      # The day a string names: `YYYY-MM-DD`, or a time, read in `time_zone`. `nil` for anything else.
+      def parse(value, time_zone)
+        return unless value.is_a?(String)
+
+        ISO_DATE.match?(value) ? Date.iso8601(value) : time_zone.parse(value)&.to_date
+      rescue ArgumentError
+        nil
+      end
+
+      # A cell's value: the day, `YYYY-MM-DD`.
+      def format(cell)
+        cell.iso8601
+      end
+
       def cell_of(date)
         date
+      end
+
+      # The days a cell covers: itself.
+      def range(cell)
+        cell..cell
       end
 
       def page_of(date)
@@ -62,6 +83,11 @@ module Impulse
 
       def label(cell)
         I18n.l(cell, format: day_format)
+      end
+
+      # The levels a calendar of days drills up to, nearest first (ADR 0017).
+      def levels_above
+        [MonthLevel.new, YearLevel.new]
       end
 
       def previous_label

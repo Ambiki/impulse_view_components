@@ -7,17 +7,21 @@ module Impulse
     # browser's (ADR 0015).
     #
     # The selection is a date range: a day, a week, a month or a year. The value names it, written as the calendar writes
-    # values, and so do `min` and `max`. A subclass names its element and its level, and decides what a cell selects,
-    # which cells are disabled, and any hint. A calendar with levels above its base level renders its heading as the
-    # button that drills up to them (ADR 0017); the element alone renders the levels above.
+    # values, and so do `min` and `max`. A subclass names its element and its level, and may change what a cell selects,
+    # which cells are disabled, and add a hint. A calendar renders its heading as the button that drills up to its
+    # level's levels above (ADR 0017); the element alone renders the levels above.
     class CalendarGridComponent < ApplicationComponent
-      ISO_DATE = /\A\d{4}-\d{2}-\d{2}\z/
+      # The years a calendar names, those with four digits, as `YYYY-MM-DD` and the element's values write them.
+      YEARS = 1000..9999
 
-      # `value`, `min` and `max` are a `Date`, a `Time` or `ActiveSupport::TimeWithZone`, or a string. Times are read in
-      # the calendar's time zone: `time_zone:`, else the zone of an `ActiveSupport::TimeWithZone` value, else `Time.zone`.
-      def initialize(value: nil, min: nil, max: nil, time_zone: nil, first_day_of_week: Date.beginning_of_week, **system_args)
+      # `value`, `min` and `max` are a `Date`, a `Time` or `ActiveSupport::TimeWithZone`, or a string, as the level
+      # writes its cells. Times are read in the calendar's time zone: `time_zone:`, else the zone of an
+      # `ActiveSupport::TimeWithZone` value, else `Time.zone`. Only a calendar of days takes `first_day_of_week:`.
+      def initialize(value: nil, min: nil, max: nil, time_zone: nil, first_day_of_week: nil, **system_args)
         @time_zone = find_time_zone(time_zone, value)
-        @first_day_of_week = to_day_of_week(first_day_of_week)
+        @first_day_of_week = to_day_of_week(first_day_of_week || Date.beginning_of_week)
+        raise ArgumentError, "unknown keyword: :first_day_of_week" if first_day_of_week && !level.weekdays
+
         day = to_date(value)
         @selected = day && range_of(level.cell_of(day))
         @min = to_limit(min, :min)
@@ -56,19 +60,21 @@ module Impulse
         raise NotImplementedError
       end
 
-      # The range of dates a cell selects: a day, its week, a month or a year.
-      def range_of(_cell)
-        raise NotImplementedError
+      # The range of dates a cell selects: a day, its week, a month or a year. By default, the days the cell covers.
+      def range_of(cell)
+        level.range(cell)
       end
 
-      # A cell the user can move to but not commit.
-      def disabled?(_cell)
-        raise NotImplementedError
+      # A cell the user can move to but not commit. By default, one with none of the days it selects between `min` and
+      # `max`.
+      def disabled?(cell)
+        range = range_of(cell)
+        (@min && range.end < @min) || (@max && range.begin > @max)
       end
 
-      # The levels the heading drills up to, nearest first. By default, none.
+      # The levels the heading drills up to, nearest first.
       def levels_above
-        []
+        @levels_above ||= level.levels_above
       end
 
       # The names and patterns the element renders the pages the user moves to with: its level's, and, for a calendar
@@ -102,14 +108,18 @@ module Impulse
         "#{@heading_id}-#{level_above.cell}"
       end
 
-      # The value naming the selection, or a limit, that starts with `cell`. By default, the day as `YYYY-MM-DD`.
+      # The value naming the selection, or a limit, that starts with `cell`, as the level writes its cells.
       def format_value(cell)
-        cell.iso8601
+        level.format(cell)
       end
 
-      # The earliest day `min` allows, or the latest `max` does. By default, the day itself.
-      def to_limit(value, _limit)
-        to_date(value)
+      # The earliest day `min` allows, or the latest `max` does: the first or last day of the cell it names.
+      def to_limit(value, limit)
+        date = to_date(value)
+        return unless date
+
+        range = level.range(level.cell_of(date))
+        (limit == :max) ? range.end : range.begin
       end
 
       def find_time_zone(time_zone, value)
@@ -121,18 +131,13 @@ module Impulse
 
       # The calendar date `value` names in the calendar's time zone, or `nil` when it names none.
       def to_date(value)
-        case value
-        when ActiveSupport::TimeWithZone, Time, DateTime
-          value.in_time_zone(@time_zone).to_date
-        when Date
-          value
-        when ISO_DATE
-          Date.iso8601(value)
-        when String
-          @time_zone.parse(value)&.to_date
-        end
-      rescue ArgumentError
-        nil
+        date =
+          case value
+          when ActiveSupport::TimeWithZone, Time, DateTime then value.in_time_zone(@time_zone).to_date
+          when Date then value
+          else level.parse(value, @time_zone)
+          end
+        date if date && YEARS.cover?(date.year)
       end
 
       # A day of the week as `Date#wday` counts it, `0` being Sunday, from a number or a name such as `:sunday`.
