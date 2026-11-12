@@ -1,13 +1,15 @@
 module Impulse
   module Internal
     # The grid the calendars share, whatever their level shows: days for `DateCalendarComponent` and
-    # `WeekCalendarComponent`, years for `YearCalendarComponent` (ADR 0016). It is internal, and not part of the public
-    # API. It renders the first page, and the element renders the pages the user moves to (ADR 0014). The Rails settings
-    # a calendar uses are always rendered, so the element never falls back to the browser's (ADR 0015).
+    # `WeekCalendarComponent`, months for `MonthCalendarComponent`, years for `YearCalendarComponent` (ADR 0016). It is
+    # internal, and not part of the public API. It renders the first page, and the element renders the pages the user
+    # moves to (ADR 0014). The Rails settings a calendar uses are always rendered, so the element never falls back to the
+    # browser's (ADR 0015).
     #
-    # The selection is a date range: a day, a week or a year. The value names it, written as the calendar writes values,
-    # and so do `min` and `max`. A subclass names its element and its level, and decides what a cell selects, which
-    # cells are disabled, and any hint.
+    # The selection is a date range: a day, a week, a month or a year. The value names it, written as the calendar writes
+    # values, and so do `min` and `max`. A subclass names its element and its level, and decides what a cell selects,
+    # which cells are disabled, and any hint. A calendar with a level above its own renders its heading as the button
+    # that drills up to it (ADR 0017); the element alone renders the levels above.
     class CalendarGridComponent < ApplicationComponent
       ISO_DATE = /\A\d{4}-\d{2}-\d{2}\z/
 
@@ -29,6 +31,8 @@ module Impulse
         id = self.class.generate_id
         @heading_id = "#{id}-heading"
         @hint_id = "#{id}-hint"
+        # The element names the hint the same way when it renders the heading again.
+        @drill_hint_id = "#{@heading_id}-#{level_above.cell}" if level_above
 
         @system_args = system_args
         @system_args[:tag] = tag_name.to_sym
@@ -39,7 +43,7 @@ module Impulse
         # Rails names zones its own way, such as "Eastern Time (US & Canada)". The browser needs the IANA name.
         @system_args[:"time-zone"] = @time_zone.tzinfo.identifier
         @system_args[:"first-day-of-week"] = @first_day_of_week if level.weekdays
-        @system_args[:i18n] = level.i18n.to_json
+        @system_args[:i18n] = i18n.to_json
       end
 
       private
@@ -54,7 +58,7 @@ module Impulse
         raise NotImplementedError
       end
 
-      # The range of dates a cell selects: a day, its week, or a year.
+      # The range of dates a cell selects: a day, its week, a month or a year.
       def range_of(_cell)
         raise NotImplementedError
       end
@@ -64,9 +68,34 @@ module Impulse
         raise NotImplementedError
       end
 
+      # The level the heading drills up to, or `nil` for none. By default, none.
+      def level_above
+        nil
+      end
+
+      # The names and patterns the element renders the pages the user moves to with: its level's, and, for a calendar
+      # that drills up, the level above's too, and the page buttons' names on each, under `paging`.
+      def i18n
+        return level.i18n unless level_above
+
+        levels = [level, level_above]
+        levels.map(&:i18n).reduce(:deep_merge).merge(
+          paging: levels.to_h { |each| [each.cell, { previous: each.previous_label, next: each.next_label }] }
+        )
+      end
+
       # Text that describes the grid to screen readers, or `nil` for none.
       def hint
         nil
+      end
+
+      # The heading's content: below the top level, a button that drills up, named by its text. The header listens
+      # for its clicks, as the element replaces it on every drill.
+      def heading_content
+        heading = level.heading(@displayed_page)
+        return heading unless level_above
+
+        tag.button(heading, type: "button", class: "btn btn-sm btn-light #{tag_name}-heading-button", "aria-describedby": @drill_hint_id)
       end
 
       # The value naming the selection, or a limit, that starts with `cell`. By default, the day as `YYYY-MM-DD`.

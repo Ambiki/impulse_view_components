@@ -3,6 +3,7 @@ import './elements/autocomplete';
 import './elements/clipboard_copy';
 import './elements/date_calendar';
 import './elements/dialog';
+import './elements/month_calendar';
 import './elements/popover';
 import './elements/week_calendar';
 import './elements/year_calendar';

@@ -43,6 +43,7 @@ export const YEAR_LEVEL: Level<YearLevelI18n> = {
   viewOf: (date) => yearOf(decadeOf(date.year)),
   compareViews: (a, b) => decadeOf(a.year) - decadeOf(b.year),
   addViews: (cell, views) => yearOf(cell.year + views * 10),
+  range: yearRange,
   rows: (view) => {
     const first = decadeOf(view.year) - 1;
     return Array.from({ length: 4 }, (_, row) => Array.from({ length: 3 }, (_, column) => yearOf(first + row * 3 + column)));

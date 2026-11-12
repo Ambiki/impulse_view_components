@@ -29,8 +29,8 @@ Impulse ViewComponents is a library of accessible, interactive UI components for
 with a matching custom element, built on [\`@ambiki/impulse\`](https://github.com/Ambiki/impulse), for behavior, so \
 you get progressive enhancement without a heavy client framework.
 
-Components include Ajax select, Anchor, Clipboard copy, Date calendar, Dialog, Popover, Select, Spinner, Time zone select, Week calendar, and Year calendar. \
-JavaScript behavior is exposed through a small JS API (Anchor, Autocomplete, Clipboard copy, Date calendar, Dialog, Popover, Week calendar, Year calendar) and \
+Components include Ajax select, Anchor, Clipboard copy, Date calendar, Dialog, Month calendar, Popover, Select, Spinner, Time zone select, Week calendar, and Year calendar. \
+JavaScript behavior is exposed through a small JS API (Anchor, Autocomplete, Clipboard copy, Date calendar, Dialog, Month calendar, Popover, Week calendar, Year calendar) and \
 reusable hooks (\`useFloatingUI\`, \`useFocusOut\`, \`useOutsideClick\`). Components are imported individually, so you \
 only ship what you use.`,
       }),
@@ -91,6 +91,10 @@ only ship what you use.`,
             link: '/components/dialog',
           },
           {
+            text: 'Month calendar',
+            link: '/components/month-calendar',
+          },
+          {
             text: 'Popover',
             link: '/components/popover',
           },
@@ -139,6 +143,10 @@ only ship what you use.`,
           {
             text: 'Dialog',
             link: '/js-api/dialog',
+          },
+          {
+            text: 'Month calendar',
+            link: '/js-api/month-calendar',
           },
           {
             text: 'Popover',

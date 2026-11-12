@@ -1,0 +1,22 @@
+<%= render(Impulse::PopoverComponent.new(placement: "bottom-start", data: { action: "awc-month-calendar:commit->awc-popover#requestHide" })) do |c| %>
+  <% c.with_trigger(class: "btn btn-outline-secondary", data: { test_id: "month-trigger" }) { "Nov 2026" } %>
+  <% c.with_panel do |panel| %>
+    <% panel.with_body do %>
+      <%= render(Impulse::MonthCalendarComponent.new(value: "2026-11")) %>
+    <% end %>
+  <% end %>
+<% end %>
+
+<script type="module">
+  // Opening the popover focuses the selected month. Committing a month closes it, and closing it takes the calendar
+  // back to the selected month and to the months. The trigger names the selected month.
+  const popover = document.querySelector('awc-popover');
+  const calendar = popover.querySelector('awc-month-calendar');
+  const trigger = popover.querySelector('[data-test-id="month-trigger"]');
+  const format = new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+  popover.addEventListener('awc-popover:shown', () => calendar.focus());
+  popover.addEventListener('awc-popover:hidden', () => calendar.resetView());
+  calendar.addEventListener('awc-month-calendar:commit', (event) => {
+    trigger.textContent = format.format(new Date(`${event.detail.value}-01T00:00:00Z`));
+  });
+</script>

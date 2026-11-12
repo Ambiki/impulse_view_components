@@ -1,13 +1,16 @@
 <%= render(Impulse::BaseRenderer.new(**@system_args)) do %>
-  <div class="<%= tag_name %>-header">
+  <%= tag.div(class: "#{tag_name}-header", "data-action": ("click->#{tag_name}#handleHeadingClick" if level_above)) do %>
     <button type="button" class="btn btn-sm btn-light <%= tag_name %>-nav" aria-label="<%= level.previous_label %>" aria-disabled="<%= previous_page_disabled? %>" data-target="<%= tag_name %>.previousButton" data-action="click-><%= tag_name %>#handlePreviousClick">
       <i class="bi bi-chevron-left" aria-hidden="true"></i>
     </button>
-    <div id="<%= @heading_id %>" class="<%= tag_name %>-heading" aria-live="polite" data-target="<%= tag_name %>.heading"><%= level.heading(@displayed_page) %></div>
+    <div id="<%= @heading_id %>" class="<%= tag_name %>-heading" aria-live="polite" data-target="<%= tag_name %>.heading"><%= heading_content %></div>
     <button type="button" class="btn btn-sm btn-light <%= tag_name %>-nav" aria-label="<%= level.next_label %>" aria-disabled="<%= next_page_disabled? %>" data-target="<%= tag_name %>.nextButton" data-action="click-><%= tag_name %>#handleNextClick">
       <i class="bi bi-chevron-right" aria-hidden="true"></i>
     </button>
-  </div>
+  <% end %>
+  <% if level_above %>
+    <span id="<%= @drill_hint_id %>" class="sr-only"><%= level_above.drill_hint %></span>
+  <% end %>
   <% if hint %>
     <span id="<%= @hint_id %>" class="sr-only"><%= hint %></span>
   <% end %>

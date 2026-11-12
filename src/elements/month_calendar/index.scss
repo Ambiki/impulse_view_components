@@ -1,0 +1,7 @@
+@import '../../internal/calendar_grid';
+
+// The grid shows months, and years when the calendar is drilled up. Both are twelve compact cells, so drilling up
+// keeps the calendar's size.
+@include calendar-grid('awc-month-calendar', ('month', 'year'));
+@include calendar-compact-grid('awc-month-calendar', ('month', 'year'));
+@include calendar-drill('awc-month-calendar');
