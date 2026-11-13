@@ -96,7 +96,7 @@ An error is displayed when the network request fails.
 
 ```erb
 <%= render(Impulse::AjaxSelectComponent.new(:post, :person_id, :id, :name, src: "/persons")) do |c| %>
-  <% c.with_error { "An error occurred. Please try again!" } %>
+  <% c.with_error { "We couldn't load the people. Please try again!" } %>
 <% end %>
 ```
 
@@ -113,8 +113,15 @@ Wrap your `ajax_select` tag with the `impulse_form_with` method. The `f.ajax_sel
 
 ### Translations
 
-The default blankslate shares the select's translation, `impulse.autocomplete.blankslate` (see
-[Translations](./select.md#translations)).
+The ajax select shares the select's blankslate, `impulse.autocomplete.blankslate` (see
+[Translations](./select.md#translations)), and adds its error:
+
+```yaml
+en:
+  impulse:
+    autocomplete:
+      error: An error occurred. Please try again!
+```
 
 ## Slots
 

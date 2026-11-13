@@ -77,7 +77,7 @@
 
     <% if ajax? %>
       <div role="presentation" class="awc-autocomplete-error">
-        <%= error.presence || "An error occurred. Please try again!" %>
+        <%= error.presence || default_error %>
       </div>
     <% end %>
   </div>
