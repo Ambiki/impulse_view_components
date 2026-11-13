@@ -32,6 +32,26 @@ module Impulse
       assert_selector "[data-test-id='parent-dialog']"
     end
 
+    test "opens a dialog with no close button focused on its header's field" do
+      visit_preview(:custom_header)
+
+      click_on "Open dialog"
+
+      assert_selector "dialog .awc-dialog-header input[type='search']:focus"
+      refute_selector ".awc-dialog-close-btn"
+      assert_equal({ "position" => "absolute", "width" => "1px" }, find("h2", text: "Command palette").style("position", "width"))
+    end
+
+    test "closes a dialog with no close button on Escape" do
+      visit_preview(:custom_header)
+
+      click_on "Open dialog"
+      assert_selector "dialog"
+
+      send_keys :escape
+      refute_selector "dialog"
+    end
+
     test "renders any arbitrary content inside the dialog" do
       visit_preview(:with_form)
 

@@ -57,7 +57,7 @@
   display: flex;
   align-items: flex-start;
   gap: var(--awc-space-2);
-  padding: var(--awc-space-2) var(--awc-space-1) var(--awc-space-2) var(--awc-space-3);
+  padding: var(--awc-space-2) var(--awc-space-3);
   border-bottom: 1px solid var(--awc-neutral-line);
 }
 
@@ -77,6 +77,8 @@
 .awc-dialog-close-btn {
   position: relative;
   flex-shrink: 0;
+  // Sits closer to the edge than the header's padding puts the rest of the header.
+  margin-right: calc(var(--awc-space-1) - var(--awc-space-3));
   padding: 0;
   width: 32px;
   height: 32px;

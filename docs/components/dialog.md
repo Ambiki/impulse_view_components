@@ -27,7 +27,7 @@ button.addEventListener('click', () => {
 
 | Name                  | Default                  | Description                                                                                                                    |
 | ------                | ---------                | -------------                                                                                                                  |
-| title                 | N/A                      | The title of the dialog element.                                                                                               |
+| title                 | N/A                      | The title of the dialog element, which names it.                                                                               |
 | id                    | `self.class.generate_id` | The `id` of the dialog element.                                                                                                |
 | size                  | `:md`                    | The `size` of the dialog element. One of `:sm`, `:md`, or `:lg`.                                                               |
 | center                | `true`                   | Whether or not to center the dialog vertically.                                                                                |
@@ -61,6 +61,49 @@ You can add a footer by calling the `with_footer` slot.
   <% end %>
 <% end %>
 ```
+
+### Custom header
+
+The header renders its block between the title and the close button.
+
+```erb{2-4}
+<%= render(Impulse::DialogComponent.new(title: "Edit profile")) do |c| %>
+  <% c.with_header(class: "align-items-center") do %>
+    <span class="badge badge-secondary">Draft</span>
+  <% end %>
+  <% c.with_body { "Dialog body" } %>
+<% end %>
+```
+
+### Hiding the title
+
+Hide the title with `visually_hide_title: true`, such as when a search field takes its place. It still names the
+dialog for assistive technology.
+
+```erb{2-4}
+<%= render(Impulse::DialogComponent.new(title: "Command palette")) do |c| %>
+  <% c.with_header(visually_hide_title: true) do %>
+    <input type="search" placeholder="Search or jump to..." aria-label="Search or jump to">
+  <% end %>
+  <% c.with_body { "Dialog body" } %>
+<% end %>
+```
+
+### Hiding the close button
+
+Leave the close button out with `hide_close_button: true`. Escape and a click outside still close the dialog. Give it
+another button that closes it, [as below](#closing-the-dialog), when `hide_on_outside_click` is off.
+
+```erb{2}
+<%= render(Impulse::DialogComponent.new(title: "Delete project")) do |c| %>
+  <% c.with_header(hide_close_button: true) %>
+  <% c.with_footer do %>
+    <button type="button" data-action="click->awc-dialog#requestHide">Cancel</button>
+  <% end %>
+<% end %>
+```
+
+A header with nothing to show, with its title and close button both hidden and no block, isn't rendered.
 
 ### Adding a form
 
@@ -142,6 +185,16 @@ You can nest as many dialogs as you want and it will be stacked on top of the pa
 ```
 
 ## Slots
+
+### `with_header`
+
+The header of the dialog, which holds its title and close button.
+
+| Name                  | Default   | Description                                                               |
+| ------                | --------- | -------------                                                             |
+| `visually_hide_title` | `false`   | Whether or not to hide the title, which still names the dialog.           |
+| `hide_close_button`   | `false`   | Whether or not to leave out the close button.                             |
+| `system_args`         | `{}`      | HTML attributes for the slot's element.                                   |
 
 ### `with_body`
 
