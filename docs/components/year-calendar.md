@@ -23,6 +23,7 @@ calendar emits `awc-year-calendar:commit`. Committing the year already selected 
 | min       | `nil`     | The earliest year the user can commit, given as `value` is.                                                                                         |
 | max       | `nil`     | The latest year the user can commit, given as `value` is.                                                                                           |
 | time_zone | see below | The time zone that decides which year today falls in, and which year a time falls in.                                                                  |
+| disabled  | `false`   | Whether the calendar is disabled: nothing in it can be focused or pressed. It still shows its value.                                                   |
 
 Any other keyword arguments, such as `class` or `data`, are passed to the `<awc-year-calendar>` element as HTML
 attributes. Render the calendar with the component: the element relies on the decade and the settings it renders.

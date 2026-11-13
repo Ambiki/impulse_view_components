@@ -26,12 +26,31 @@ $calendar-grid-weekday-line-height: 20px;
     // Light enough that an outside day's text keeps 4.5:1 on it (WCAG 1.4.3).
     --#{$block}-cell-bg-hover: var(--awc-neutral-base);
     --#{$block}-nav-opacity-disabled: #{$btn-disabled-opacity};
+    // A disabled calendar dims as a whole in place of its Bootstrap buttons, which dim themselves when disabled, and by
+    // as much.
+    --#{$block}-opacity-disabled: #{$btn-disabled-opacity};
   }
 
   .#{$block} {
     display: inline-block;
     color: var(--awc-neutral-text-contrast);
     font-size: var(--awc-font-size-3);
+  }
+
+  // Its selected day, today and disabled days still show, dimmed with the rest, and its buttons don't dim again inside
+  // it.
+  .#{$block}[disabled] {
+    opacity: var(--#{$block}-opacity-disabled);
+
+    &,
+    :where(td, button) {
+      cursor: not-allowed;
+    }
+
+    .btn:disabled,
+    .#{$block}-nav {
+      opacity: 1;
+    }
   }
 
   .#{$block}-header {
@@ -134,6 +153,11 @@ $calendar-grid-weekday-line-height: 20px;
       &:hover {
         background-color: transparent;
       }
+    }
+
+    // A disabled calendar's cells can't be pressed, so they show no hover.
+    &:disabled:hover {
+      background-color: transparent;
     }
 
     // Also on hover, which a disabled day would otherwise clear: a value outside `min` and `max` is still selected.

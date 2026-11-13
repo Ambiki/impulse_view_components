@@ -39,6 +39,9 @@ export default class AwcMonthCalendarElement extends CalendarGridElement<MonthCa
   /** The IANA time zone that decides which month today falls in. Defaults to the browser's. */
   @property() timeZone = '';
 
+  /** Whether the calendar is disabled: none of its buttons can be focused or pressed. */
+  @property({ type: Boolean }) disabled = false;
+
   /** The names and patterns the months and years are rendered with. Defaults to English. */
   @property({ type: Object }) i18n: MonthCalendarI18n = MONTH_CALENDAR_ENGLISH;
 

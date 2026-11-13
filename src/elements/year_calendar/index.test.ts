@@ -45,6 +45,7 @@ function yearCalendarHtml(options: CalendarOptions = {}) {
     isDisabled: (cell: CalendarDate) => (!!minYear && cell.year < minYear.year) || (!!maxYear && cell.year > maxYear.year),
     firstDayOfWeek: 0,
     i18n: YEAR_ENGLISH,
+    disabled: false,
   };
   const attributes = [
     value !== undefined && `value="${value}"`,
@@ -120,6 +121,21 @@ describe('awc-year-calendar', () => {
 
       year(el, '2026').click();
 
+      expect(commits).to.eql([]);
+    });
+  });
+
+  describe('a disabled calendar', () => {
+    it('disables every button and the grid, and commits nothing, even on a click in the gap around a cell', async () => {
+      const el = await yearCalendarFixture({ value: '2026' });
+      const commits = recordCommits();
+
+      el.disabled = true;
+      year(el, '2023').closest('td')!.click();
+
+      expect(el.grid.getAttribute('aria-disabled')).to.equal('true');
+      expect(el.querySelectorAll('button:enabled')).to.have.length(0);
+      expect(el.value).to.equal('2026');
       expect(commits).to.eql([]);
     });
   });

@@ -6,13 +6,15 @@ module Impulse
     # @param max text
     # @param first_day_of_week select [sunday, monday, saturday]
     # @param time_zone text
-    def default(value: "2026-11-18", min: nil, max: nil, first_day_of_week: :sunday, time_zone: nil)
+    # @param disabled toggle
+    def default(value: "2026-11-18", min: nil, max: nil, first_day_of_week: :sunday, time_zone: nil, disabled: false)
       render(Impulse::WeekCalendarComponent.new(
         value: value.presence,
         min: min.presence,
         max: max.presence,
         first_day_of_week: first_day_of_week.to_sym,
-        time_zone: time_zone.presence
+        time_zone: time_zone.presence,
+        disabled: disabled
       ))
     end
 

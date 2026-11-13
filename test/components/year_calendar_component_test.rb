@@ -92,5 +92,13 @@ module Impulse
     test "takes no first day of the week, as it has no weeks" do
       assert_raises(ArgumentError) { Impulse::YearCalendarComponent.new(value: 2026, first_day_of_week: :monday) }
     end
+
+    test "disables the calendar, its grid and every button in it" do
+      render_inline(Impulse::YearCalendarComponent.new(value: 2026, disabled: true))
+
+      assert_selector "awc-year-calendar[disabled]"
+      assert_selector "table[role='grid'][aria-disabled='true']"
+      refute_selector "button:not([disabled])"
+    end
   end
 end

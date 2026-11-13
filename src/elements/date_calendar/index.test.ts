@@ -1,7 +1,7 @@
 import type AwcDateCalendarElement from './index';
 import { whenInitialized } from '@ambiki/impulse';
 import { expect, fixture } from '@open-wc/testing';
-import { sendKeys } from '@web/test-runner-commands';
+import { resetMouse, sendKeys, sendMouse } from '@web/test-runner-commands';
 import { Idiomorph } from 'idiomorph';
 import { CalendarDate, today } from '../../internal/calendar_date';
 import { canMoveView, gridRows, headingText } from '../../internal/calendar_grid';
@@ -18,6 +18,7 @@ interface CalendarOptions {
   timeZone?: string;
   /** The day the server marked as today. Defaults to today in `timeZone`. */
   markedToday?: string;
+  disabled?: boolean;
 }
 
 /**
@@ -25,7 +26,7 @@ interface CalendarOptions {
  * the element's own renderer; the system test checks that it matches the component's.
  */
 function dateCalendarHtml(options: CalendarOptions = {}) {
-  const { value, min, max, disabledDaysOfWeek = [], firstDayOfWeek = 0, timeZone = 'UTC' } = options;
+  const { value, min, max, disabledDaysOfWeek = [], firstDayOfWeek = 0, timeZone = 'UTC', disabled = false } = options;
   const selected = CalendarDate.parse(value);
   const marked = CalendarDate.parse(options.markedToday) ?? today(timeZone);
   const active = selected ?? marked;
@@ -46,6 +47,7 @@ function dateCalendarHtml(options: CalendarOptions = {}) {
       disabledDaysOfWeek.includes(date.dayOfWeek),
     firstDayOfWeek,
     i18n: ENGLISH,
+    disabled,
   };
   const attributes = [
     value !== undefined && `value="${value}"`,
@@ -54,19 +56,21 @@ function dateCalendarHtml(options: CalendarOptions = {}) {
     disabledDaysOfWeek.length && `disabled-days-of-week="${JSON.stringify(disabledDaysOfWeek)}"`,
     `time-zone="${timeZone}"`,
     `first-day-of-week="${firstDayOfWeek}"`,
+    disabled && 'disabled',
   ].filter(Boolean);
+  const disabledButton = disabled ? ' disabled="disabled"' : '';
   const month = `${active.year}-${String(active.month).padStart(2, '0')}`;
   const html = (rows: Element[]) => rows.map((row) => row.outerHTML).join('');
 
   return `<awc-date-calendar class="awc-date-calendar" ${attributes.join(' ')}>
     <div class="awc-date-calendar-header" data-action="click->awc-date-calendar#handleHeadingClick">
-      <button type="button" class="awc-date-calendar-nav" aria-label="Previous month" aria-disabled="${!canMoveView(view, -1)}" data-target="awc-date-calendar.previousButton" data-action="click->awc-date-calendar#handlePreviousClick"></button>
-      <div id="heading" class="awc-date-calendar-heading" aria-live="polite" data-target="awc-date-calendar.heading"><button type="button" class="btn btn-sm btn-light awc-date-calendar-heading-button" aria-describedby="heading-month">${headingText(view)}</button></div>
-      <button type="button" class="awc-date-calendar-nav" aria-label="Next month" aria-disabled="${!canMoveView(view, 1)}" data-target="awc-date-calendar.nextButton" data-action="click->awc-date-calendar#handleNextClick"></button>
+      <button type="button" class="awc-date-calendar-nav" aria-label="Previous month" aria-disabled="${!canMoveView(view, -1)}"${disabledButton} data-target="awc-date-calendar.previousButton" data-action="click->awc-date-calendar#handlePreviousClick"></button>
+      <div id="heading" class="awc-date-calendar-heading" aria-live="polite" data-target="awc-date-calendar.heading"><button type="button" class="btn btn-sm btn-light awc-date-calendar-heading-button" aria-describedby="heading-month"${disabledButton}>${headingText(view)}</button></div>
+      <button type="button" class="awc-date-calendar-nav" aria-label="Next month" aria-disabled="${!canMoveView(view, 1)}"${disabledButton} data-target="awc-date-calendar.nextButton" data-action="click->awc-date-calendar#handleNextClick"></button>
     </div>
     <span id="heading-month" class="sr-only">Choose a month</span>
     <span id="heading-year" class="sr-only">Choose a year</span>
-    <table class="awc-date-calendar-grid" role="grid" aria-labelledby="heading" data-month="${month}" data-target="awc-date-calendar.grid" data-action="click->awc-date-calendar#handleClick keydown->awc-date-calendar#handleKeydown focusin->awc-date-calendar#handleFocusin">
+    <table class="awc-date-calendar-grid" role="grid" aria-labelledby="heading"${disabled ? ' aria-disabled="true"' : ''} data-month="${month}" data-target="awc-date-calendar.grid" data-action="click->awc-date-calendar#handleClick keydown->awc-date-calendar#handleKeydown focusin->awc-date-calendar#handleFocusin">
       <thead data-target="awc-date-calendar.weekdays">${html([weekdayRow(firstDayOfWeek, ENGLISH)])}</thead>
       <tbody data-target="awc-date-calendar.cells">${html(gridRows(view))}</tbody>
     </table>
@@ -441,6 +445,115 @@ describe('awc-date-calendar', () => {
     });
   });
 
+  describe('a disabled calendar', () => {
+    it('disables every button, and marks the grid disabled, until enabled again, without emitting', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18' });
+      const commits = recordCommits();
+
+      el.disabled = true;
+
+      expect(el.hasAttribute('disabled')).to.equal(true);
+      expect(el.grid.getAttribute('aria-disabled')).to.equal('true');
+      expect(el.querySelectorAll('button:enabled')).to.have.length(0);
+
+      el.disabled = false;
+
+      expect(el.grid.hasAttribute('aria-disabled')).to.equal(false);
+      expect(el.querySelectorAll('button:disabled')).to.have.length(0);
+      expect(day(el, '2026-11-18').tabIndex).to.equal(0);
+      expect(commits).to.eql([]);
+    });
+
+    it('starts disabled from the server\'s markup, and commits nothing', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18', disabled: true });
+      const commits = recordCommits();
+
+      day(el, '2026-11-20').closest('td')!.click();
+
+      expect(el.disabled).to.equal(true);
+      expect(el.querySelectorAll('button:enabled')).to.have.length(0);
+      expect(commits).to.eql([]);
+    });
+
+    it('commits nothing, even on a click in the gap around a day, which the browser still fires', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18' });
+      const commits = recordCommits();
+      el.disabled = true;
+
+      day(el, '2026-11-20').click();
+      day(el, '2026-11-20').closest('td')!.click();
+
+      expect(el.value).to.equal('2026-11-18');
+      expect(selectedDay(el)).to.equal('2026-11-18');
+      expect(commits).to.eql([]);
+    });
+
+    it('turns no page and drills up nowhere when the user presses the buttons, or the icons inside them', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18' });
+      // The component's page buttons hold an icon, which the pointer lands on.
+      for (const button of [previousButton(el), nextButton(el)]) {
+        button.innerHTML = '<i style="display: inline-block; width: 16px; height: 16px"></i>';
+      }
+      el.disabled = true;
+
+      for (const target of [previousButton(el).firstElementChild!, nextButton(el).firstElementChild!, el.heading.querySelector('button')!]) {
+        const box = target.getBoundingClientRect();
+        await sendMouse({ type: 'click', position: [Math.round(box.x + box.width / 2), Math.round(box.y + box.height / 2)] });
+      }
+      await resetMouse();
+
+      expect(el.grid.dataset.month).to.equal('2026-11');
+      expect(el.heading.textContent).to.equal('November 2026');
+    });
+
+    it('still takes a value and moves its view from code, rendering the new month disabled, without emitting', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18' });
+      const commits = recordCommits();
+      el.disabled = true;
+
+      el.value = '2027-03-15';
+      expect(el.grid.dataset.month).to.equal('2027-03');
+      expect(selectedDay(el)).to.equal('2027-03-15');
+
+      el.nextView();
+      expect(el.grid.dataset.month).to.equal('2027-04');
+      expect(el.querySelectorAll('button:enabled')).to.have.length(0);
+      expect(commits).to.eql([]);
+    });
+
+    it('disables a level drilled up to, and the days code takes it back to', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18' });
+      drillUp(el);
+
+      el.disabled = true;
+      expect(el.grid.dataset.year).to.equal('2026');
+      expect(el.querySelectorAll('button:enabled')).to.have.length(0);
+
+      el.resetView();
+      expect(el.grid.dataset.month).to.equal('2026-11');
+      expect(el.querySelectorAll('button:enabled')).to.have.length(0);
+    });
+
+    it('takes no focus, and drops the focus a day had when disabled', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18' });
+      el.focus();
+
+      el.disabled = true;
+      expect(el.contains(document.activeElement)).to.equal(false);
+
+      el.focus();
+      expect(el.contains(document.activeElement)).to.equal(false);
+    });
+
+    it('still tells which days are disabled by their own limits', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18', min: '2026-11-10' });
+      el.disabled = true;
+
+      expect(el.isDateDisabled('2026-11-18')).to.equal(false);
+      expect(el.isDateDisabled('2026-11-09')).to.equal(true);
+    });
+  });
+
   describe('resetView()', () => {
     it('goes back to the selected day\'s month, and makes it the active day', async () => {
       const el = await dateCalendarFixture({ value: '2026-11-18' });
@@ -569,6 +682,27 @@ describe('awc-date-calendar', () => {
       expect(el.grid.dataset.month).to.equal('2027-02');
       expect(selectedDay(el)).to.equal('2027-02-03');
       expect(day(el, '2027-02-03').tabIndex).to.equal(0);
+    });
+
+    it('disables and enables the calendar as the server\'s markup does, without emitting', async () => {
+      const el = await dateCalendarFixture({ value: '2026-11-18' });
+      const commits = recordCommits();
+
+      Idiomorph.morph(el, dateCalendarHtml({ value: '2026-11-18', disabled: true }));
+      expect(el.disabled).to.equal(true);
+      expect(el.grid.getAttribute('aria-disabled')).to.equal('true');
+      expect(el.querySelectorAll('button:enabled')).to.have.length(0);
+
+      el.disabled = false;
+      Idiomorph.morph(el, dateCalendarHtml({ value: '2026-11-18', disabled: true }));
+      expect(el.disabled).to.equal(true);
+      expect(el.querySelectorAll('button:enabled')).to.have.length(0);
+
+      Idiomorph.morph(el, dateCalendarHtml({ value: '2026-11-18' }));
+      expect(el.disabled).to.equal(false);
+      expect(el.grid.hasAttribute('aria-disabled')).to.equal(false);
+      expect(el.querySelectorAll('button:disabled')).to.have.length(0);
+      expect(commits).to.eql([]);
     });
   });
 

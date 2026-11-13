@@ -289,5 +289,24 @@ module Impulse
       refute_selector "tbody button[aria-disabled]"
       assert_selector "button.awc-date-calendar-nav[aria-disabled='false']", count: 2
     end
+
+    test "disables the calendar, its grid and every button in it" do
+      render_inline(Impulse::DateCalendarComponent.new(value: Date.new(2026, 11, 18), disabled: true))
+
+      assert_selector "awc-date-calendar[disabled]"
+      assert_selector "table[role='grid'][aria-disabled='true']"
+      assert_selector "tbody button[disabled]", count: 42
+      assert_selector "button.awc-date-calendar-nav[disabled]", count: 2
+      assert_selector ".awc-date-calendar-heading-button[disabled]"
+      refute_selector "button:not([disabled])"
+    end
+
+    test "renders nothing disabled by default" do
+      render_inline(Impulse::DateCalendarComponent.new(value: Date.new(2026, 11, 18)))
+
+      refute_selector "awc-date-calendar[disabled]"
+      refute_selector "table[aria-disabled]"
+      refute_selector "button[disabled]"
+    end
   end
 end

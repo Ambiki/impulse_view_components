@@ -27,6 +27,9 @@ export default class AwcYearCalendarElement extends CalendarGridElement<YearCale
   /** The IANA time zone that decides which year today falls in. Defaults to the browser's. */
   @property() timeZone = '';
 
+  /** Whether the calendar is disabled: none of its buttons can be focused or pressed. */
+  @property({ type: Boolean }) disabled = false;
+
   /** The pattern the decades are named with. Defaults to English. */
   @property({ type: Object }) i18n: YearCalendarI18n = YEAR_ENGLISH;
 

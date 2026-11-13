@@ -30,6 +30,7 @@ anything.
 | disabled_days_of_week | `[]`                    | The days of the week the user can't commit, as names (`%i[saturday sunday]`) or numbers (`0` is Sunday).                          |
 | first_day_of_week     | `Date.beginning_of_week` | The day each week starts on, as a name or a number.                                                                              |
 | time_zone             | see below               | The time zone that decides which day is today, and which day a time falls on.                                                    |
+| disabled              | `false`                 | Whether the calendar is disabled: nothing in it can be focused or pressed. It still shows its value.                             |
 
 Any other keyword arguments, such as `class` or `data`, are passed to the `<awc-date-calendar>` element as HTML
 attributes. Render the calendar with the component: the element relies on the month and the settings it renders.

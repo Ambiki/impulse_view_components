@@ -43,6 +43,15 @@ The day each week starts on, `0` being Sunday. Changing it reads the value's day
 
 The IANA time zone that decides which day is today, such as `America/New_York`.
 
+### `disabled`
+
+Whether the calendar is disabled: none of its buttons can be focused or pressed. Code can still change its value and its
+view.
+
+```js
+calendar.disabled = true;
+```
+
 ### `i18n`
 
 The names and patterns the days, months and years are written with, and the page buttons' names on each, as the
@@ -95,7 +104,8 @@ calendar.clear();
 
 ### `isDateDisabled`
 
-Whether the user can't commit a `YYYY-MM-DD` day: none of its week's days is between `min` and `max`.
+Whether a `YYYY-MM-DD` day is disabled: none of its week's days is between `min` and `max`. It doesn't follow
+`disabled`.
 
 ```js
 calendar.isDateDisabled('2026-11-07'); // true when min is 2026-11-11, with weeks from Sunday

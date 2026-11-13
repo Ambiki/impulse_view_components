@@ -37,6 +37,15 @@ calendar.max = '2030-12';
 
 The IANA time zone that decides which month today falls in, such as `America/New_York`.
 
+### `disabled`
+
+Whether the calendar is disabled: none of its buttons can be focused or pressed. Code can still change its value and its
+view.
+
+```js
+calendar.disabled = true;
+```
+
 ### `i18n`
 
 The names and patterns the months and years are rendered with, as the component renders them from the app's
@@ -90,7 +99,7 @@ calendar.clear();
 
 ### `isDateDisabled`
 
-Whether the user can't commit a `YYYY-MM` month: it's before `min` or after `max`.
+Whether a `YYYY-MM` month is disabled: it's before `min` or after `max`. It doesn't follow `disabled`.
 
 ```js
 calendar.isDateDisabled('2031-01'); // true when max is 2030-12

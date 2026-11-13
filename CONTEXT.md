@@ -221,6 +221,11 @@ up, none of its months falls between the earliest and the latest month allowed, 
 from, which always takes them back.
 _Avoid_: Blocked year, unavailable year
 
+**Disabled calendar**:
+A calendar the user can't reach or use, as a native disabled control: it holds no tab stop, and none of its cells or
+buttons can be pressed. Distinct from a disabled day, which the user can still move to.
+_Avoid_: Inactive calendar, locked calendar, read-only calendar
+
 **Today**:
 The calendar date it is now in a calendar's time zone, which may differ from the browser's.
 _Avoid_: Current date, now

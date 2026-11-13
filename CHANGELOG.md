@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- `disabled:` on `Impulse::DateCalendarComponent`, `WeekCalendarComponent`, `MonthCalendarComponent` and `YearCalendarComponent`, and `disabled` on their elements: a disabled calendar can't be focused or used, as a native disabled control, and dims by `--awc-*-calendar-opacity-disabled` ([#418](https://github.com/Ambiki/impulse_view_components/pull/418))
 - `Impulse::SheetComponent`, a modal dialog pinned to the right edge of the screen and filling its height, built on `<awc-dialog>` ([#414](https://github.com/Ambiki/impulse_view_components/pull/414))
 - `Impulse::DialogComponent`'s `with_header` slot renders its block between the title and the close button, and hides them with `visually_hide_title:` and `hide_close_button:` ([#410](https://github.com/Ambiki/impulse_view_components/pull/410))
 

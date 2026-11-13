@@ -80,5 +80,13 @@ module Impulse
       assert_selector "##{page.find("table[role='grid']")["aria-describedby"]}", text: "Choosing a day chooses its week.", visible: :all
       assert_equal %w[day month year], JSON.parse(page.find("awc-week-calendar")["i18n"])["paging"].keys
     end
+
+    test "disables the calendar, its grid and every button in it" do
+      render_inline(Impulse::WeekCalendarComponent.new(value: Date.new(2026, 11, 4), disabled: true))
+
+      assert_selector "awc-week-calendar[disabled]"
+      assert_selector "table[role='grid'][aria-disabled='true']"
+      refute_selector "button:not([disabled])"
+    end
   end
 end
