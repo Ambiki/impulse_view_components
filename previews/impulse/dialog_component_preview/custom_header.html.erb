@@ -1,0 +1,33 @@
+<button type="button" class="btn btn-primary" data-dialog-trigger-for="dialog-1">Open dialog</button>
+
+<%= render(Impulse::DialogComponent.new(id: "dialog-1", title: "Command palette", center: false)) do |c| %>
+  <% c.with_header(visually_hide_title: true, hide_close_button: true) do %>
+    <input type="search" class="form-control border-0 shadow-none px-0" placeholder="Search..." aria-label="Search">
+  <% end %>
+  <% c.with_body do %>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#">Home</a></li>
+      <li><a href="#">Projects</a></li>
+      <li><a href="#">Settings</a></li>
+    </ul>
+  <% end %>
+  <% c.with_footer do %>
+    <small class="text-muted mr-auto">Press <kbd>Esc</kbd> to close</small>
+  <% end %>
+<% end %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const buttons = Array.from(document.querySelectorAll('button[data-dialog-trigger-for]'));
+    buttons.forEach((b) => b.addEventListener('click', openDialog));
+  });
+
+  function openDialog(event) {
+    event.preventDefault();
+    const dialogId = event.target.getAttribute('data-dialog-trigger-for');
+    const dialog = document.getElementById(dialogId);
+    if (dialog) {
+      dialog.requestShow();
+    }
+  }
+</script>

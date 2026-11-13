@@ -1,9 +1,21 @@
-<%= render(Impulse::BaseRenderer.new(**@system_args)) do %>
-  <div class="awc-dialog-title-container">
-    <%= tag.h2 @title, id: @title_id, class: "awc-dialog-title" %>
-  </div>
+<% if nothing_to_show? %>
+  <%= title %>
+<% else %>
+  <%= render(Impulse::BaseRenderer.new(**@system_args)) do %>
+    <% if @visually_hide_title %>
+      <%= title %>
+    <% else %>
+      <div class="awc-dialog-title-container">
+        <%= title %>
+      </div>
+    <% end %>
 
-  <button type="button" class="btn btn-light awc-dialog-close-btn" data-action="click->awc-dialog#requestHide" aria-label="Close dialog">
-    <i class="bi bi-x" aria-hidden="true"></i>
-  </button>
+    <%= content %>
+
+    <% unless @hide_close_button %>
+      <button type="button" class="btn btn-light awc-dialog-close-btn" data-action="click->awc-dialog#requestHide" aria-label="Close dialog">
+        <i class="bi bi-x" aria-hidden="true"></i>
+      </button>
+    <% end %>
+  <% end %>
 <% end %>

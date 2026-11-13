@@ -61,6 +61,11 @@
   border-bottom: 1px solid var(--awc-neutral-line);
 }
 
+// The close button sits closer to the edge than the rest of the header. Without it, both sides are padded alike.
+.awc-dialog-header--no-close-btn {
+  padding-right: var(--awc-space-3);
+}
+
 .awc-dialog-title-container {
   flex: 1 1 0%;
   padding: var(--awc-space-2) 0;
@@ -77,6 +82,8 @@
 .awc-dialog-close-btn {
   position: relative;
   flex-shrink: 0;
+  // Keeps it at the end of the header when the title is hidden, as nothing else in the header grows then.
+  margin-left: auto;
   padding: 0;
   width: 32px;
   height: 32px;
