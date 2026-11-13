@@ -1,8 +1,14 @@
-# The strings the calendars share. Month and weekday names come from Rails' `date.*` translations. The patterns are
-# `strftime` patterns, formatted with `I18n.l`; the element formats the months it renders with the same ones, and knows
-# only `%A %a %B %b %d %-d %e %m %Y %%`.
 en:
   impulse:
+    autocomplete:
+      # Shown when no option matches the input's text, unless the component is given a blankslate.
+      blankslate: We couldn't find that!
+    time_zone_select:
+      # Shown when no time zone matches the input's text, unless the component is given a blankslate.
+      blankslate: We couldn't find that time zone!
+    # The strings the calendars share. Month and weekday names come from Rails' `date.*` translations. The patterns are
+    # `strftime` patterns, formatted with `I18n.l`; the element formats the months it renders with the same ones, and
+    # knows only `%A %a %B %b %d %-d %e %m %Y %%`.
     calendar:
       previous_month: Previous month
       next_month: Next month

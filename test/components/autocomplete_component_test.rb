@@ -4,6 +4,8 @@ module Impulse
   class AutocompleteComponentTest < ApplicationTest
     Option = Struct.new(:value, :text)
 
+    teardown { I18n.reload! }
+
     test "renders the component" do
       render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_id)) do |c|
         %w[Apple Banana Guava Kiwi Litchi Mango Pomegranate].each do |fruit|
@@ -20,6 +22,16 @@ module Impulse
       refute_selector ".awc-autocomplete--selected"
       refute_selector ".awc-autocomplete-clear-btn[disabled]"
       refute_selector "input[type='text'][disabled]"
+    end
+
+    test "uses the app's translation for the default blankslate" do
+      # Loads the translation files first, which would otherwise be loaded on the first lookup, over these.
+      I18n.backend.eager_load!
+      I18n.backend.store_translations(:en, impulse: { autocomplete: { blankslate: "Nothing here" } })
+
+      render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_id))
+
+      assert_selector ".awc-autocomplete-blankslate", text: "Nothing here", visible: false
     end
 
     test "selected option" do

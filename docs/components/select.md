@@ -179,6 +179,17 @@ Wrap your `select` tag with the `impulse_form_with` method. The `f.select` tag a
 <% end %>
 ```
 
+### Translations
+
+The default blankslate is a translation. Add it for each other locale:
+
+```yaml
+en:
+  impulse:
+    autocomplete:
+      blankslate: We couldn't find that!
+```
+
 ## Slots
 
 ### `with_option`
