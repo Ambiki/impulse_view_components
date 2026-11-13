@@ -17,6 +17,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `<awc-dialog>` scales in with `@starting-style`, scales out where the browser supports `overlay`, and doesn't animate under `prefers-reduced-motion` ([#415](https://github.com/Ambiki/impulse_view_components/pull/415))
 - `Impulse::PopoverComponent`'s close button is an icon button, `.awc-popover-close-btn` with a `bi-x` icon, as the dialog's is. It was Bootstrap's `.close` ([#412](https://github.com/Ambiki/impulse_view_components/pull/412))
 
+### Fixed
+
+- Fixed `<awc-dialog>` closing when a press inside it is released on the backdrop. It closes only when the press and the release both land there ([#417](https://github.com/Ambiki/impulse_view_components/pull/417))
+- Fixed `useOutsideClick`, and so `<awc-popover>`, counting a press inside a shadow root in a boundary as outside when released outside it ([#417](https://github.com/Ambiki/impulse_view_components/pull/417))
+
 ## [0.10.0] - 2026-11-10
 
 ### Added

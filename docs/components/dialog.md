@@ -34,7 +34,7 @@ button.addEventListener('click', () => {
 | size                  | `:md`                    | The `size` of the dialog element. One of `:sm`, `:md`, or `:lg`.                                                               |
 | center                | `true`                   | Whether or not to center the dialog vertically.                                                                                |
 | fullscreen            | `:never`                 | Whether or not to render the dialog fullscreen. One of `:never`, `:always`, `:sm_down`, `:md_down`, `:lg_down`, or `:xl_down`. |
-| hide_on_outside_click | `true`                   | Whether or not to hide the dialog element when clicked outside.                                                                |
+| hide_on_outside_click | `true`                   | Whether a press outside the dialog, released outside it, hides it.                                                             |
 
 Any other keyword arguments are passed to the `<awc-dialog>` element as HTML attributes.
 

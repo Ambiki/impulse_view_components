@@ -30,7 +30,7 @@ button.addEventListener('click', () => {
 | title                 | N/A                      | The title of the sheet, which names it.                                                                                       |
 | id                    | `self.class.generate_id` | The `id` of the `<awc-dialog>` element.                                                                                       |
 | fullscreen            | `:never`                 | Whether or not to render the sheet fullscreen. One of `:never`, `:always`, `:sm_down`, `:md_down`, `:lg_down`, or `:xl_down`. |
-| hide_on_outside_click | `true`                   | Whether or not to hide the sheet when clicked outside.                                                                        |
+| hide_on_outside_click | `true`                   | Whether a press outside the sheet, released outside it, hides it.                                                             |
 
 Any other keyword arguments are passed to the `<awc-dialog>` element as HTML attributes.
 

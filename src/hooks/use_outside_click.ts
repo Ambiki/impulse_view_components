@@ -1,4 +1,5 @@
 import type { ImpulseElement } from '@ambiki/impulse';
+import composedContains from 'src/internal/composed_contains';
 import onDisconnect from 'src/internal/on_disconnect';
 
 export type Boundary = Element | null;
@@ -33,11 +34,8 @@ export default function useOutsideClick(element: ImpulseElement, { boundaries, c
     // Return if the target is not present in the DOM anymore.
     if (!target.getRootNode().contains(target) || !target.isConnected) return;
 
-    for (const boundary of boundaries) {
-      if (boundary === null) continue;
-      if (boundary.contains(target)) return;
-      if (event.composed && event.composedPath().includes(boundary)) return;
-    }
+    // Judged by where the press started, in a shadow root too: released elsewhere, the click lands outside it.
+    if (boundaries.some((boundary) => boundary && composedContains(boundary, target))) return;
 
     callback(event, target);
   }
