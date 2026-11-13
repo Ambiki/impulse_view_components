@@ -93,6 +93,17 @@ attribute is `nil`.
 <% end %>
 ```
 
+### Translations
+
+The default blankslate is a translation. Add it for each other locale:
+
+```yaml
+en:
+  impulse:
+    time_zone_select:
+      blankslate: We couldn't find that time zone!
+```
+
 ## Slots
 
 ### `with_blankslate`

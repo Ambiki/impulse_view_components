@@ -4,6 +4,8 @@ module Impulse
   class AjaxSelectComponentTest < ApplicationTest
     Option = Struct.new(:value, :text)
 
+    teardown { I18n.reload! }
+
     test "raises an error if src attribute is missing" do
       assert_raises ArgumentError do
         render_inline(Impulse::AjaxSelectComponent.new(:user, :fruit_id, :value, :text))
@@ -39,6 +41,16 @@ module Impulse
       assert_selector "[data-behavior='tag'][data-persisted][value='apple']", count: 1 do
         assert_selector "[data-behavior='hidden-field'][value='apple']", visible: false
       end
+    end
+
+    test "uses the app's translation for the default blankslate" do
+      # Loads the translation files first, which would otherwise be loaded on the first lookup, over these.
+      I18n.backend.eager_load!
+      I18n.backend.store_translations(:en, impulse: { autocomplete: { blankslate: "Nothing here" } })
+
+      render_inline(Impulse::AjaxSelectComponent.new(:user, :fruit_id, :value, :text, src: "/users"))
+
+      assert_selector ".awc-autocomplete-blankslate", text: "Nothing here", visible: false
     end
 
     test "renders a custom blankslate" do

@@ -111,6 +111,11 @@ Wrap your `ajax_select` tag with the `impulse_form_with` method. The `f.ajax_sel
 <% end %>
 ```
 
+### Translations
+
+The default blankslate shares the select's translation, `impulse.autocomplete.blankslate` (see
+[Translations](./select.md#translations)).
+
 ## Slots
 
 ### `with_blankslate`

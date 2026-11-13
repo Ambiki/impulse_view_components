@@ -29,7 +29,7 @@ module Impulse
     end
 
     def default_blankslate
-      "We couldn't find that time zone!"
+      t("impulse.time_zone_select.blankslate")
     end
 
     def zones

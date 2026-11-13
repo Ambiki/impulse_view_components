@@ -4,6 +4,8 @@ module Impulse
   class TimeZoneSelectComponentTest < ApplicationTest
     TimeZone = Struct.new(:name, :to_s)
 
+    teardown { I18n.reload! }
+
     test "renders the component" do
       render_inline(Impulse::TimeZoneSelectComponent.new(:user, :time_zone))
 
@@ -75,6 +77,16 @@ module Impulse
       render_inline(Impulse::TimeZoneSelectComponent.new(:user, :time_zone))
 
       assert_selector ".awc-autocomplete-blankslate", text: "We couldn't find that time zone!", visible: false
+    end
+
+    test "uses the app's translation for the default blankslate" do
+      # Loads the translation files first, which would otherwise be loaded on the first lookup, over these.
+      I18n.backend.eager_load!
+      I18n.backend.store_translations(:en, impulse: { time_zone_select: { blankslate: "No such zone" } })
+
+      render_inline(Impulse::TimeZoneSelectComponent.new(:user, :time_zone))
+
+      assert_selector ".awc-autocomplete-blankslate", text: "No such zone", visible: false
     end
 
     test "renders a custom blankslate" do

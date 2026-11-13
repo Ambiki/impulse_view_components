@@ -85,7 +85,7 @@ module Impulse
 
     # Shown when no option matches and no `blankslate` is given.
     def default_blankslate
-      "We couldn't find that!"
+      t("impulse.autocomplete.blankslate")
     end
 
     def search_field_args
