@@ -21,6 +21,27 @@ module Impulse
       refute_selector "dialog"
     end
 
+    test "keeps its layout while it animates out" do
+      visit_preview(:default)
+
+      click_on "Open dialog"
+      assert_selector "dialog"
+
+      open_offset, closing_offset, closing_display = evaluate_async_script(<<~JS)
+        const done = arguments[0];
+        const dialog = document.querySelector('dialog');
+        const bodyOffset = () => dialog.querySelector('.awc-dialog-body').offsetTop;
+        const openOffset = bodyOffset();
+        dialog.closest('awc-dialog').requestHide();
+        requestAnimationFrame(() => done([openOffset, bodyOffset(), getComputedStyle(dialog).display]));
+      JS
+
+      assert_equal "flex", closing_display
+      assert_operator open_offset, :>, 0
+      assert_equal open_offset, closing_offset
+      refute_selector "dialog"
+    end
+
     test "closes the nested dialog without closing the parent dialog" do
       visit_preview(:nested_dialog)
 

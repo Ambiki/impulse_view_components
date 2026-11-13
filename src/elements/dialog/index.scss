@@ -4,7 +4,11 @@
   --awc-sheet-width: 400px;
 }
 
+// Positioned here, not by the browser's `dialog:modal` styles, as those stop applying as soon as the dialog closes,
+// while it may still be animating out.
 .awc-dialog-dialog {
+  position: fixed;
+  inset: 0;
   border: 0;
   border-radius: var(--awc-radius-5);
   max-width: 92vw;
@@ -16,11 +20,19 @@
   margin: var(--awc-dialog-margin-y) auto;
   max-height: calc(100vh - var(--awc-dialog-margin-y) * 2);
   overflow: hidden;
-  animation: dialog-show 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  // Here rather than with `display: flex`, so that a closing dialog keeps its layout while it animates out.
+  flex-direction: column;
+  opacity: 0;
+  transform: scale(0.96);
 
+  // A transition is read from the state it goes to: this one shows the dialog.
   &[open] {
     display: flex;
-    flex-direction: column;
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 150ms cubic-bezier(0.16, 1, 0.3, 1),
+      transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   &:focus-visible {
@@ -38,6 +50,46 @@
     max-height: calc(100vh - var(--awc-dialog-margin-y-sm-up) * 2);
     margin-top: var(--awc-dialog-margin-y-sm-up);
     margin-bottom: var(--awc-dialog-margin-y-sm-up);
+  }
+}
+
+@starting-style {
+  .awc-dialog-dialog[open] {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+// Animating out keeps a closed dialog in the top layer, which takes `overlay`. A browser without it closes the dialog
+// at once.
+@supports (overlay: auto) {
+  .awc-dialog-dialog {
+    transition:
+      opacity 150ms ease-in,
+      transform 150ms ease-in,
+      overlay 150ms allow-discrete,
+      display 150ms allow-discrete;
+
+    &::backdrop {
+      transition:
+        opacity 150ms ease-in,
+        overlay 150ms allow-discrete,
+        display 150ms allow-discrete;
+    }
+
+    &:not([open])::backdrop {
+      opacity: 0;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .awc-dialog-dialog {
+    &,
+    &[open],
+    &::backdrop {
+      transition: none;
+    }
   }
 }
 
@@ -147,10 +199,8 @@
 }
 
 // A sheet is pinned to the right edge and fills the height. These rules come before the full-screen ones, which widen
-// it. It's positioned here, not by the browser's `dialog:modal` styles, as those stop applying as soon as it closes,
-// while it may still be sliding out.
+// it.
 .awc-sheet .awc-dialog-dialog {
-  position: fixed;
   inset: 0 0 0 auto;
   width: 100%;
   // Leaves a strip of the backdrop to click on phones.
@@ -160,7 +210,8 @@
   margin: 0;
   // Every corner touches an edge of the viewport.
   border-radius: 0;
-  animation: none;
+  // A sheet slides rather than fades.
+  opacity: 1;
   transform: translateX(100%);
 
   @supports (max-height: 100dvh) {
@@ -180,33 +231,19 @@
   }
 }
 
-// Sliding out keeps a closed sheet in the top layer, which takes `overlay`. A browser without it closes the sheet at
-// once.
 @supports (overlay: auto) {
   .awc-sheet .awc-dialog-dialog {
     transition:
       transform 150ms ease-in,
       overlay 150ms allow-discrete,
       display 150ms allow-discrete;
-
-    &::backdrop {
-      transition:
-        opacity 150ms ease-in,
-        overlay 150ms allow-discrete,
-        display 150ms allow-discrete;
-    }
-
-    &:not([open])::backdrop {
-      opacity: 0;
-    }
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .awc-sheet .awc-dialog-dialog {
     &,
-    &[open],
-    &::backdrop {
+    &[open] {
       transition: none;
     }
   }
@@ -243,17 +280,6 @@
         @include dialog-fullscreen();
       }
     }
-  }
-}
-
-@keyframes dialog-show {
-  from {
-    opacity: 0;
-    transform: scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
   }
 }
 
