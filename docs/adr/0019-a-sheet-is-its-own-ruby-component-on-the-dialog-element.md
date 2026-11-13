@@ -18,5 +18,5 @@ A sheet, a modal dialog pinned to the right edge of the viewport and filling its
 - The sheet reuses `Impulse::Dialog::HeaderComponent`, `BodyComponent` and `FooterComponent`, so a form partial renders the same in a dialog and in a sheet. Its JS API and events are the dialog's: `awc-dialog:*`.
 - Its styles live in the dialog's stylesheet, so the `/dialog` import path brings both (ADR 0008).
 - It opens from the right only, in right-to-left pages too, since nothing else in the library flips for RTL. A `side:` argument can be added when a left sheet is needed, without breaking anything.
-- It slides in with `@starting-style`, and slides out only where `overlay` is supported. Elsewhere it closes at once, as the dialog does.
+- It slides in with `@starting-style`, and slides out only where `overlay` is supported. Elsewhere it closes at once. The dialog scales in and out the same way.
 - A non-modal panel that leaves the page usable is out of scope: it handles focus and Escape differently, so it would need its own element.
