@@ -75,10 +75,11 @@ module Impulse
       end
 
       assert_selector ".popover-header", text: "Activity feed"
-      assert_selector "button.close[aria-label='Close']"
+      assert_selector "button.btn.btn-light.awc-popover-close-btn[type='button'][aria-label='Close']"
+      assert_selector ".awc-popover-close-btn i.bi.bi-x[aria-hidden='true']"
       # Opening moves focus to it as the first element in the tab order. With `autofocus`, it would take focus from the
       # page's own `autofocus` field after a Turbo visit while the popover is closed.
-      refute_selector "button.close[autofocus]"
+      refute_selector "button.awc-popover-close-btn[autofocus]"
 
       title_id = page.find(".popover-header span[id]", text: "Activity feed")["id"]
       assert_selector ".awc-popover-container[aria-labelledby='#{title_id}']"
@@ -96,8 +97,8 @@ module Impulse
       end
 
       assert_selector ".popover-header > :first-child", text: "Activity feed"
-      assert_selector ".popover-header > :last-child.close"
-      assert_match(/\AActivity feed\s+Mark all as read\s+×\z/, page.find(".popover-header").text.strip)
+      assert_selector ".popover-header > :last-child.awc-popover-close-btn"
+      assert_match(/\AActivity feed\s+Mark all as read\z/, page.find(".popover-header").text.strip)
     end
 
     test "changes the title's HTML tag" do
@@ -123,7 +124,7 @@ module Impulse
       end
 
       assert_selector ".popover-header", text: "Delete feed?"
-      refute_selector "button.close"
+      refute_selector "button.awc-popover-close-btn"
 
       trigger_id = page.find("[data-test-id='btn']")["id"]
       assert_selector ".awc-popover-container[aria-labelledby='#{trigger_id}']"

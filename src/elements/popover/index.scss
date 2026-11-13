@@ -68,6 +68,50 @@
   }
 }
 
+/** TODO: extract IconButtonComponent */
+.awc-popover-close-btn {
+  // The header is only a flex container when the app makes it one, so the button floats to its end otherwise.
+  float: right;
+  flex-shrink: 0;
+  // As far from the header's end as from its top and bottom.
+  margin-right: calc(var(--awc-space-1) * -1);
+  padding: 0;
+  // As tall as a line of the header, so the header is no taller with it.
+  width: 24px;
+  height: 24px;
+  font-size: 1.25rem;
+  line-height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &:not(:hover) {
+    background-color: transparent;
+    border-color: transparent;
+  }
+
+  &:focus {
+    box-shadow: none;
+  }
+
+  &:focus-visible {
+    // Forced colors drop the ring, and show this outline in its place.
+    outline: 2px solid transparent;
+    box-shadow: 0 0 0 var(--awc-focus-ring-width) var(--awc-focus-ring);
+  }
+
+  i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-style: normal;
+
+    &::before {
+      line-height: inherit;
+    }
+  }
+}
+
 @supports not selector(:popover-open) {
   awc-popover:not([open]) > .awc-popover-container {
     display: none;
