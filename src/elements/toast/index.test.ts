@@ -337,6 +337,20 @@ function announcers(region: AwcToastRegionElement) {
   return () => [polite.textContent, assertive.textContent];
 }
 
+describe('<awc-toast-region> hover', () => {
+  it('stays paused while the pointer leaves a toast for the space between toasts', async () => {
+    const region = await regionFixture();
+    const toast = (await showToast('Saved', { duration: Infinity }))!;
+
+    region.dispatchEvent(new PointerEvent('pointerenter'));
+    toast.dispatchEvent(new PointerEvent('pointerleave'));
+
+    expect(region.paused).to.be.true;
+    region.dispatchEvent(new PointerEvent('pointerleave'));
+    expect(region.paused).to.be.false;
+  });
+});
+
 describe('<awc-toast-region> announcements', () => {
   it('announces a toast politely, and a danger toast assertively', async () => {
     const region = await regionFixture();
