@@ -35,8 +35,30 @@ module Impulse
       click_on "Toggle popover"
       assert_popover_open
 
-      click_button class: "close"
+      click_button class: "awc-popover-close-btn"
       assert_popover_close
+    end
+
+    test "keeps the close button at the end of the header" do
+      visit_preview(:default)
+
+      click_on "Toggle popover"
+
+      header = find(".popover-header")
+      button = find(".awc-popover-close-btn")
+      header_end = header["offsetLeft"].to_i + header["offsetWidth"].to_i
+      button_end = button["offsetLeft"].to_i + button["offsetWidth"].to_i
+
+      assert_equal 8, header_end - button_end
+    end
+
+    test "outlines the close button on keyboard focus, which forced colors show without its focus ring" do
+      visit_preview(:default)
+
+      find_button("Toggle popover").send_keys(:enter)
+
+      assert_selector ".awc-popover-close-btn:focus-visible"
+      assert_equal "solid", find(".awc-popover-close-btn").style("outline-style")["outline-style"]
     end
 
     test "closes the popover by clicking outside" do

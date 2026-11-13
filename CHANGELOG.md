@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - `Impulse::DialogComponent`'s `with_header` slot renders its block between the title and the close button, and hides them with `visually_hide_title:` and `hide_close_button:` ([#410](https://github.com/Ambiki/impulse_view_components/pull/410))
 
+### Changed
+
+- `Impulse::PopoverComponent`'s close button is an icon button, `.awc-popover-close-btn` with a `bi-x` icon, as the dialog's is. It was Bootstrap's `.close` ([#412](https://github.com/Ambiki/impulse_view_components/pull/412))
+
 ## [0.10.0] - 2026-11-10
 
 ### Added
