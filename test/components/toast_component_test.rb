@@ -31,10 +31,12 @@ module Impulse
       end
     end
 
-    test "raises on a variant it doesn't know" do
-      error = assert_raises(ArgumentError) { Impulse::ToastComponent.new(variant: :permission) }
+    test "falls back to info for a variant it doesn't know, rather than failing the page" do
+      [:permission, "link_to", 12, nil].each do |variant|
+        render_inline(Impulse::ToastComponent.new(variant:)) { "Message" }
 
-      assert_match "permission", error.message
+        assert_selector "awc-toast:not([variant])"
+      end
     end
 
     test "leaves the duration to the element unless given one" do

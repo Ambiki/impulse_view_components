@@ -34,14 +34,11 @@ module Impulse
 
     private
 
-    # The variant `key` names, itself or as a flash key. Raises on a key that names none, such as a flash key that holds
-    # something other than a message.
+    # The variant `key` names, itself or as a flash key, or info for one that names none, as other components fall back
+    # to their default.
     def resolve_variant(key)
       variant = key.to_sym if key.respond_to?(:to_sym)
-      variant = VARIANT_ALIASES.fetch(variant, variant)
-      return variant if VARIANTS.include?(variant)
-
-      raise ArgumentError, "unknown toast variant: #{key.inspect}. Use one of #{(VARIANTS + VARIANT_ALIASES.keys).join(", ")}"
+      fetch_or_fallback(VARIANTS, VARIANT_ALIASES.fetch(variant, variant), DEFAULT_VARIANT)
     end
   end
 end

@@ -46,7 +46,7 @@ Any other keyword arguments are passed to the `<awc-toast-region>` element as HT
 
 | Name     | Default  | Description                                                                                                                                              |
 | ------   | -------  | -------------                                                                                                                                            |
-| variant  | `:info`  | `:info`, `:success`, `:warning` or `:danger`. The flash keys `:notice` (info), `:alert` and `:error` (danger) are taken too. Any other key raises an `ArgumentError`. |
+| variant  | `:info`  | `:info`, `:success`, `:warning` or `:danger`. The flash keys `:notice` (info), `:alert` and `:error` (danger) are taken too. Anything else falls back to `:info`. |
 | duration | variant's | How long, in milliseconds, the toast shows. `nil` keeps it until it is dismissed. Without one, see [Timing](#timing).                                    |
 
 Any other keyword arguments, such as `id`, are passed to the `<awc-toast>` element as HTML attributes. Its content is the
@@ -75,7 +75,7 @@ Render a toast for each flash message. `variant:` takes the flash keys Rails app
 <% end %>
 ```
 
-`variant:` raises on any other key, so render only the flash keys that hold messages.
+Any other key shows as info, so render only the flash keys that hold messages.
 
 ### Showing a toast from the server
 
