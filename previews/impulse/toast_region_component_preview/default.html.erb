@@ -1,2 +1,6 @@
 <%= render "impulse/toast_region_component_preview/buttons" %>
-<%= render(Impulse::ToastRegionComponent.new(flash: flash_messages, placement: placement)) %>
+<%= render(Impulse::ToastRegionComponent.new(placement: placement)) do |region| %>
+  <% flash_messages.each do |type, message| %>
+    <% region.with_toast(variant: type) { message } %>
+  <% end %>
+<% end %>

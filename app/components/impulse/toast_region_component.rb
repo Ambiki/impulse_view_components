@@ -11,11 +11,8 @@ module Impulse
 
     renders_many :toasts, Impulse::ToastComponent
 
-    # `flash:` renders a toast for each message under a key that names a variant (`notice`, `alert`, `error`, or a
-    # variant itself), and skips the other keys, which a flash holds for other uses, and messages that aren't text.
     # `hotkey: nil` turns the hotkey off.
-    def initialize(flash: {}, placement: DEFAULT_PLACEMENT, hotkey: DEFAULT_HOTKEY, id: DEFAULT_ID, **system_args)
-      @flash = flash
+    def initialize(placement: DEFAULT_PLACEMENT, hotkey: DEFAULT_HOTKEY, id: DEFAULT_ID, **system_args)
       @hotkey = hotkey.to_s
       @system_args = system_args
       @system_args[:tag] = :"awc-toast-region"
@@ -30,17 +27,6 @@ module Impulse
 
     def before_render
       @system_args[:"aria-label"] = @hotkey.empty? ? t("impulse.toast.region_without_hotkey") : t("impulse.toast.region", hotkey: @hotkey)
-    end
-
-    private
-
-    def flash_messages
-      @flash.to_h.flat_map do |key, messages|
-        next [] unless Impulse::ToastComponent.variant?(key)
-
-        messages = [messages] unless messages.is_a?(Array)
-        messages.select { |message| message.is_a?(String) && message.present? }.map { |message| [key, message] }
-      end
     end
   end
 end

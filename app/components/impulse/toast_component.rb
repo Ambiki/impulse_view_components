@@ -41,8 +41,8 @@ module Impulse
 
     private
 
-    # The variant `key` names. Raises on a key that names none, which is a bug in the caller: only
-    # `Impulse::ToastRegionComponent`'s `flash:` skips such keys, as a flash holds keys that aren't messages.
+    # The variant `key` names. Raises on a key that names none, such as a flash key that holds something other than a
+    # message.
     def resolve_variant(key)
       raise ArgumentError, "unknown toast variant: #{key.inspect}. Use one of #{(VARIANTS + VARIANT_ALIASES.keys).join(", ")}" unless self.class.variant?(key)
 

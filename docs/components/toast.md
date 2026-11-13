@@ -6,13 +6,13 @@ never take focus.
 
 ## Usage
 
-Render the region once, in the layout, near the end of `<body>`. Pass it the flash to show its messages as toasts.
+Render the region once, in the layout, near the end of `<body>`.
 
 ```erb
 <body>
   <%= yield %>
 
-  <%= render(Impulse::ToastRegionComponent.new(flash: flash)) %>
+  <%= render(Impulse::ToastRegionComponent.new) %>
 </body>
 ```
 
@@ -30,7 +30,6 @@ showToast('Saved', { variant: 'success' });
 
 | Name      | Default              | Description                                                                                                                                                      |
 | ------    | -------              | -------------                                                                                                                                                    |
-| flash     | `{}`                 | Renders a toast for each message under a key that names a variant, and skips the other keys. A key holding an array renders a toast for each message in it.     |
 | placement | `:top_center`        | Where the toasts show: `:top_start`, `:top_center`, `:top_end`, `:bottom_start`, `:bottom_center` or `:bottom_end`. The newest toast is nearest the edge.       |
 | hotkey    | `"F8"`               | The key that moves focus to the newest toast and back. `nil` turns it off.                                                                                       |
 | id        | `"awc-toast-region"` | The region's `id`.                                                                                                                                               |
@@ -41,7 +40,7 @@ Any other keyword arguments are passed to the `<awc-toast-region>` element as HT
 
 | Name    | Description                                                                         |
 | ------  | -------------                                                                       |
-| toasts  | Toasts to show with the page, after the flash's. Takes `Impulse::ToastComponent`'s arguments. |
+| toasts  | Toasts to show with the page. Takes `Impulse::ToastComponent`'s arguments. |
 
 ### `Impulse::ToastComponent`
 
@@ -63,13 +62,20 @@ message.
 
 ### Showing a flash as a toast
 
-`flash:` takes the flash keys Rails apps use: `notice` is info, `alert` and `error` are danger, and a variant's own name
-is that variant. Keys that aren't messages are skipped. To keep some flash messages in the page instead, pass only the
-others.
+Render a toast for each flash message. `variant:` takes the flash keys Rails apps use: `notice` is info, `alert` and
+`error` are danger, and a variant's own name is that variant.
 
 ```erb
-<%= render(Impulse::ToastRegionComponent.new(flash: flash.to_hash.slice("notice", "success"))) %>
+<% flash_messages = { notice: "Goal created.", alert: "Couldn't email the parents." } %>
+
+<%= render(Impulse::ToastRegionComponent.new) do |region| %>
+  <% flash_messages.each do |type, message| %>
+    <% region.with_toast(variant: type) { message } %>
+  <% end %>
+<% end %>
 ```
+
+`variant:` raises on any other key, so render only the flash keys that hold messages.
 
 ### Showing a toast from the server
 

@@ -3,9 +3,6 @@
   <template data-target="awc-toast-region.template"><%= render(Impulse::ToastComponent.new) { |toast| toast.with_title { "" } } %></template>
   <div class="sr-only" aria-live="polite" aria-atomic="true" data-target="awc-toast-region.politeAnnouncer"></div>
   <div class="sr-only" aria-live="assertive" aria-atomic="true" data-target="awc-toast-region.assertiveAnnouncer"></div>
-  <% flash_messages.each do |variant, message| %>
-    <%= render(Impulse::ToastComponent.new(variant:)) { message } %>
-  <% end %>
   <% toasts.each do |toast| %>
     <%= toast %>
   <% end %>

@@ -53,26 +53,9 @@ module Impulse
       assert_equal 1, template.css("> awc-toast > .awc-toast-body > .awc-toast-title:empty").size
     end
 
-    test "renders a toast for each message in the flash whose key names a variant" do
-      flash = { notice: "Goal created.", error: ["Couldn't sync.", "Couldn't email."], permission: 12, link_to: "/help" }
-      render_inline(Impulse::ToastRegionComponent.new(flash:))
-
-      assert_selector "awc-toast-region > awc-toast", count: 3
-      assert_selector "awc-toast:not([variant])", text: "Goal created."
-      assert_selector "awc-toast[variant='danger']", text: "Couldn't sync."
-      assert_selector "awc-toast[variant='danger']", text: "Couldn't email."
-    end
-
-    test "skips flash messages that are blank or aren't text" do
-      flash = { notice: "", alert: nil, error: [42, :saved, "Couldn't sync."], success: { count: 2 }, warning: "  " }
-      render_inline(Impulse::ToastRegionComponent.new(flash:))
-
-      assert_selector "awc-toast-region > awc-toast", count: 1
-      assert_selector "awc-toast[variant='danger']", text: "Couldn't sync."
-    end
-
-    test "renders the toasts it is given, after the flash's" do
-      render_inline(Impulse::ToastRegionComponent.new(flash: { success: "Saved." })) do |region|
+    test "renders the toasts it is given" do
+      render_inline(Impulse::ToastRegionComponent.new) do |region|
+        region.with_toast(variant: :success) { "Saved." }
         region.with_toast(variant: :warning, id: "cutoff") { "Too early." }
       end
 
