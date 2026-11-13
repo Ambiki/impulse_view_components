@@ -34,6 +34,16 @@ module Impulse
       assert_selector ".awc-autocomplete-blankslate", text: "Nothing here", visible: false
     end
 
+    test "uses the app's translation for the default error" do
+      # Loads the translation files first, which would otherwise be loaded on the first lookup, over these.
+      I18n.backend.eager_load!
+      I18n.backend.store_translations(:en, impulse: { autocomplete: { error: "Couldn't load" } })
+
+      render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_id, src: "/fruits"))
+
+      assert_selector ".awc-autocomplete-error", text: "Couldn't load", visible: false
+    end
+
     test "selected option" do
       render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_id, selected: Option.new(value: "apple", text: "Apple")))
 

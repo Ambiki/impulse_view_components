@@ -88,6 +88,11 @@ module Impulse
       t("impulse.autocomplete.blankslate")
     end
 
+    # Shown when loading the options from `src` fails and no `error` is given.
+    def default_error
+      t("impulse.autocomplete.error")
+    end
+
     def search_field_args
       {}.tap do |args|
         args[:id] = @input_id if @input_id

@@ -3,6 +3,8 @@ en:
     autocomplete:
       # Shown when no option matches the input's text, unless the component is given a blankslate.
       blankslate: We couldn't find that!
+      # Shown when loading the options from `src` fails, unless the component is given an error.
+      error: An error occurred. Please try again!
     time_zone_select:
       # Shown when no time zone matches the input's text, unless the component is given a blankslate.
       blankslate: We couldn't find that time zone!
