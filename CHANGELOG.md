@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- `Impulse::ToastRegionComponent`, `Impulse::ToastComponent` and `showToast()` from `@ambiki/impulse-view-components/toast`: short messages in one region per page, which shows the flash with `flash:` and moves into an open modal dialog so its toasts stay usable ([#421](https://github.com/Ambiki/impulse_view_components/pull/421))
 - `Impulse::AjaxSelectComponent` takes its default error from the `impulse.autocomplete.error` translation ([#420](https://github.com/Ambiki/impulse_view_components/pull/420))
 - `Impulse::SelectComponent` and `AjaxSelectComponent` take their default blankslate from the `impulse.autocomplete.blankslate` translation, and `TimeZoneSelectComponent` from `impulse.time_zone_select.blankslate` ([#419](https://github.com/Ambiki/impulse_view_components/pull/419))
 - `disabled:` on `Impulse::DateCalendarComponent`, `WeekCalendarComponent`, `MonthCalendarComponent` and `YearCalendarComponent`, and `disabled` on their elements: a disabled calendar can't be focused or used, as a native disabled control, and dims by `--awc-*-calendar-opacity-disabled` ([#418](https://github.com/Ambiki/impulse_view_components/pull/418))
