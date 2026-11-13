@@ -1,0 +1,20 @@
+<button type="button" class="btn btn-primary" data-sheet-trigger-for="sheet-1">Open sheet</button>
+
+<%= render(Impulse::SheetComponent.new(id: "sheet-1", title: "Alerts", **local_assigns)) do |c| %>
+  <% c.with_body { "Overdue, coming due and missing alerts." } %>
+<% end %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const buttons = Array.from(document.querySelectorAll('button[data-sheet-trigger-for]'));
+    buttons.forEach((b) => b.addEventListener('click', openSheet));
+  });
+
+  function openSheet(event) {
+    event.preventDefault();
+    const sheet = document.getElementById(event.target.getAttribute('data-sheet-trigger-for'));
+    if (sheet) {
+      sheet.requestShow();
+    }
+  }
+</script>

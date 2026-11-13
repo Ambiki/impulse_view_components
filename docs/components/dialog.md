@@ -3,6 +3,8 @@
 Dialog uses the native HTML `<dialog>` element under the hood which provides full accessibility out of the box and
 solves z-index issues by rendering the element in the [top layer](https://developer.mozilla.org/en-US/docs/Glossary/Top_layer).
 
+For a dialog pinned to the right edge of the screen, use a [sheet](./sheet.md).
+
 ## Usage
 
 ```erb
