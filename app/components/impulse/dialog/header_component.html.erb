@@ -1,4 +1,6 @@
-<% if shown? %>
+<% if nothing_to_show? %>
+  <%= title %>
+<% else %>
   <%= render(Impulse::BaseRenderer.new(**@system_args)) do %>
     <% if @visually_hide_title %>
       <%= title %>
@@ -16,6 +18,4 @@
       </button>
     <% end %>
   <% end %>
-<% else %>
-  <%= title %>
 <% end %>

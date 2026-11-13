@@ -8,6 +8,7 @@ module Impulse
       assert_selector "awc-dialog.awc-dialog"
       assert_selector ".awc-dialog-header .awc-dialog-title-container h2.awc-dialog-title", text: "Edit your profile"
       refute_selector "h2.sr-only"
+      refute_selector ".awc-dialog-header--no-close-btn"
       assert_selector ".awc-dialog-header button.awc-dialog-close-btn[aria-label='Close dialog']"
 
       title_id = page.find("h2")["id"]
@@ -55,9 +56,8 @@ module Impulse
         c.with_header(hide_close_button: true)
       end
 
-      assert_selector ".awc-dialog-header"
+      assert_selector ".awc-dialog-header.awc-dialog-header--no-close-btn"
       refute_selector ".awc-dialog-close-btn"
-      refute_selector "button"
     end
 
     test "keeps the title when the close button is hidden" do
@@ -92,6 +92,12 @@ module Impulse
 
       refute_selector ".awc-dialog-header"
       refute_selector ".custom-header"
+
+      render_inline(Impulse::DialogComponent.new(title: "Event details")) do |c|
+        c.with_header(visually_hide_title: true, hide_close_button: true) { " \n " }
+      end
+
+      refute_selector ".awc-dialog-header"
     end
 
     test "labels the dialog by the hidden title when there is no header" do

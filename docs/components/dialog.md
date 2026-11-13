@@ -83,7 +83,7 @@ dialog for assistive technology.
 ```erb{2-4}
 <%= render(Impulse::DialogComponent.new(title: "Command palette")) do |c| %>
   <% c.with_header(visually_hide_title: true) do %>
-    <input type="search" placeholder="Search or jump to..." aria-label="Search or jump to">
+    <input type="search" placeholder="Search..." aria-label="Search">
   <% end %>
   <% c.with_body { "Dialog body" } %>
 <% end %>
@@ -103,7 +103,18 @@ another button that closes it, [as below](#closing-the-dialog), when `hide_on_ou
 <% end %>
 ```
 
-A header with nothing to show, with its title and close button both hidden and no block, isn't rendered.
+With both hidden, the header shows only its block.
+
+```erb{2-4}
+<%= render(Impulse::DialogComponent.new(title: "Command palette")) do |c| %>
+  <% c.with_header(visually_hide_title: true, hide_close_button: true) do %>
+    <input type="search" placeholder="Search..." aria-label="Search">
+  <% end %>
+  <% c.with_body { "Dialog body" } %>
+<% end %>
+```
+
+Without a block either, the header isn't rendered.
 
 ### Adding a form
 

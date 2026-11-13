@@ -1,0 +1,22 @@
+<button type="button" class="btn btn-primary" data-dialog-trigger-for="dialog-1">Open dialog</button>
+
+<%= render(Impulse::DialogComponent.new(id: "dialog-1", title: "Welcome")) do |c| %>
+  <% c.with_header(visually_hide_title: true) %>
+  <% c.with_body { "The title is hidden, and it still names the dialog." } %>
+<% end %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const buttons = Array.from(document.querySelectorAll('button[data-dialog-trigger-for]'));
+    buttons.forEach((b) => b.addEventListener('click', openDialog));
+  });
+
+  function openDialog(event) {
+    event.preventDefault();
+    const dialogId = event.target.getAttribute('data-dialog-trigger-for');
+    const dialog = document.getElementById(dialogId);
+    if (dialog) {
+      dialog.requestShow();
+    }
+  }
+</script>

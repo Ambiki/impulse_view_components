@@ -10,16 +10,17 @@ module Impulse
         @system_args[:tag] = :div
         @system_args[:class] = class_names(
           system_args[:class],
-          "awc-dialog-header"
+          "awc-dialog-header",
+          "awc-dialog-header--no-close-btn": hide_close_button
         )
       end
 
       private
 
-      # Whether the header has anything to show: its title, its block or its close button. With nothing to show, only the
-      # hidden title is rendered.
-      def shown?
-        !@visually_hide_title || !@hide_close_button || content.present?
+      # Whether the header has nothing to show: no title, no block and no close button. Only the hidden title is rendered
+      # then.
+      def nothing_to_show?
+        @visually_hide_title && @hide_close_button && content.blank?
       end
 
       # The title names the dialog, so a hidden one is still rendered, for assistive technology only.

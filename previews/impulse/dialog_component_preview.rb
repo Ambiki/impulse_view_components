@@ -21,6 +21,11 @@ module Impulse
     end
 
     # @display center true
+    def hidden_title
+      render_with_template
+    end
+
+    # @display center true
     def long_body
       render_with_template
     end

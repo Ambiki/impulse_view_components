@@ -4,7 +4,7 @@ status: accepted
 
 # A dialog always has a title
 
-A dialog needs an accessible name. A popover's panel gets one from its trigger when its header has no title, so its title is an optional `header.with_title` slot. A modal dialog has no trigger, so `Impulse::DialogComponent` keeps `title:` as a required argument and always renders it as the heading the `<dialog>` is labelled by. A header that shouldn't show it hides it with `with_header(visually_hide_title: true)`, which keeps it for assistive technology. The header's block renders between the title and the close button, as a popover's does, and `hide_close_button: true` leaves the close button out.
+A dialog needs an accessible name. A popover's panel gets one from its trigger when its header has no title, so its title is an optional `header.with_title` slot. A modal dialog has no trigger, so `Impulse::DialogComponent` keeps `title:` as a required argument and always renders it, with the `<dialog>` labelled by it. A header that shouldn't show it hides it with `with_header(visually_hide_title: true)`, which keeps it for assistive technology. The header's block renders between the title and the close button, as a popover's does, and `hide_close_button: true` leaves the close button out.
 
 ## Considered Options
 

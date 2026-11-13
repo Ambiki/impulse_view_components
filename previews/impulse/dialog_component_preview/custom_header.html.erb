@@ -2,7 +2,7 @@
 
 <%= render(Impulse::DialogComponent.new(id: "dialog-1", title: "Command palette", center: false)) do |c| %>
   <% c.with_header(visually_hide_title: true, hide_close_button: true) do %>
-    <input type="search" class="form-control border-0 shadow-none px-0" placeholder="Search or jump to..." aria-label="Search or jump to">
+    <input type="search" class="form-control border-0 shadow-none px-0" placeholder="Search..." aria-label="Search">
   <% end %>
   <% c.with_body do %>
     <ul class="list-unstyled mb-0">
