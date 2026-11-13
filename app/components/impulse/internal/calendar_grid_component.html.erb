@@ -31,9 +31,7 @@
       <thead data-target="<%= tag_name %>.weekdays">
         <tr>
           <% level.weekdays.each do |day| %>
-            <th scope="col" abbr="<%= t("date.day_names")[day] %>">
-              <%= t("date.abbr_day_names")[day] %>
-            </th>
+            <th scope="col" abbr="<%= t("date.day_names")[day] %>"><%= t("date.abbr_day_names")[day] %></th>
           <% end %>
         </tr>
       </thead>
