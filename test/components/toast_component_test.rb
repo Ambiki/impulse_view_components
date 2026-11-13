@@ -37,13 +37,6 @@ module Impulse
       assert_match "permission", error.message
     end
 
-    test "tells which keys name a variant" do
-      assert Impulse::ToastComponent.variant?(:notice)
-      assert Impulse::ToastComponent.variant?("danger")
-      assert_not Impulse::ToastComponent.variant?(:link_to)
-      assert_not Impulse::ToastComponent.variant?(nil)
-    end
-
     test "leaves the duration to the element unless given one" do
       render_inline(Impulse::ToastComponent.new) { "Message" }
       refute_selector "awc-toast[duration]"

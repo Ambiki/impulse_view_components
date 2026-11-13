@@ -19,13 +19,6 @@ module Impulse
 
     renders_one :title
 
-    # Whether `key` names a variant, either itself or as a flash key.
-    def self.variant?(key)
-      return false unless key.respond_to?(:to_sym)
-
-      VARIANTS.include?(key.to_sym) || VARIANT_ALIASES.key?(key.to_sym)
-    end
-
     # `duration:` is in milliseconds, and `nil` keeps the toast until it is dismissed. Without one, the element closes it
     # after 5 seconds, unless it is a danger toast or holds an action.
     def initialize(variant: DEFAULT_VARIANT, duration: DEFAULT_DURATION, **system_args)
@@ -41,12 +34,14 @@ module Impulse
 
     private
 
-    # The variant `key` names. Raises on a key that names none, such as a flash key that holds something other than a
-    # message.
+    # The variant `key` names, itself or as a flash key. Raises on a key that names none, such as a flash key that holds
+    # something other than a message.
     def resolve_variant(key)
-      raise ArgumentError, "unknown toast variant: #{key.inspect}. Use one of #{(VARIANTS + VARIANT_ALIASES.keys).join(", ")}" unless self.class.variant?(key)
+      variant = key.to_sym if key.respond_to?(:to_sym)
+      variant = VARIANT_ALIASES.fetch(variant, variant)
+      return variant if VARIANTS.include?(variant)
 
-      VARIANT_ALIASES.fetch(key.to_sym, key.to_sym)
+      raise ArgumentError, "unknown toast variant: #{key.inspect}. Use one of #{(VARIANTS + VARIANT_ALIASES.keys).join(", ")}"
     end
   end
 end
