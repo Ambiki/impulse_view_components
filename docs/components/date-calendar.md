@@ -63,12 +63,11 @@ date picker dialog. Close the popover when the user commits a day, and take the 
 the popover closes, so that it reopens there rather than on a month the user paged to.
 
 ```erb
-<%= render(Impulse::PopoverComponent.new(data: { action: "awc-date-calendar:commit->awc-popover#requestHide" })) do |c| %>
+<%= render(Impulse::PopoverComponent.new(title: "Choose a date", data: { action: "awc-date-calendar:commit->awc-popover#requestHide" })) do |c| %>
   <% c.with_trigger(class: "btn btn-outline-secondary") { l(@date, format: :long) } %>
-  <% c.with_panel do |panel| %>
-    <% panel.with_body do %>
-      <%= render(Impulse::DateCalendarComponent.new(value: @date)) %>
-    <% end %>
+  <% c.with_header(visually_hide_title: true, hide_close_button: true) %>
+  <% c.with_body do %>
+    <%= render(Impulse::DateCalendarComponent.new(value: @date)) %>
   <% end %>
 <% end %>
 ```

@@ -50,12 +50,11 @@ Focus the selected month when the popover opens, close the popover when the user
 back to the selected month when the popover closes.
 
 ```erb
-<%= render(Impulse::PopoverComponent.new(data: { action: "awc-month-calendar:commit->awc-popover#requestHide" })) do |c| %>
+<%= render(Impulse::PopoverComponent.new(title: "Choose a month", data: { action: "awc-month-calendar:commit->awc-popover#requestHide" })) do |c| %>
   <% c.with_trigger(class: "btn btn-outline-secondary") { l(@month, format: "%b %Y") } %>
-  <% c.with_panel do |panel| %>
-    <% panel.with_body do %>
-      <%= render(Impulse::MonthCalendarComponent.new(value: @month)) %>
-    <% end %>
+  <% c.with_header(visually_hide_title: true, hide_close_button: true) %>
+  <% c.with_body do %>
+    <%= render(Impulse::MonthCalendarComponent.new(value: @month)) %>
   <% end %>
 <% end %>
 ```

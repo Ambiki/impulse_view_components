@@ -1,10 +1,9 @@
 module Impulse
+  # A popover takes its title and slots as the dialog does (ADR 0020).
   class PopoverComponent < ApplicationComponent
     renders_one :trigger, lambda { |**system_args|
       system_args[:tag] = :button
       system_args[:type] = system_args.fetch(:type, "button")
-      # Labels the panel when it has no title, so it needs an id even when the caller didn't give one.
-      @trigger_id = system_args[:id] ||= "#{@panel_id}-trigger"
       system_args[:"aria-haspopup"] = :dialog
       system_args[:"aria-expanded"] = false
       system_args[:"aria-controls"] = @panel_id
@@ -19,14 +18,17 @@ module Impulse
       Impulse::BaseRenderer.new(**system_args)
     }
 
-    renders_one :panel, lambda { |**system_args|
-      Impulse::Popover::PanelComponent.new(**system_args, id: @panel_id, trigger_id_reader: -> { @trigger_id })
+    renders_one :header, lambda { |**system_args|
+      Impulse::Popover::HeaderComponent.new(**system_args, title: @title, title_id:)
     }
 
-    def initialize(**system_args)
+    renders_one :body, Impulse::Popover::BodyComponent
+
+    def initialize(title:, **system_args)
+      @title = title
+      @panel_id = self.class.generate_id
       @system_args = system_args
       @system_args[:tag] = :"awc-popover"
-      @panel_id = self.class.generate_id
 
       @system_args[:class] = class_names(
         system_args[:class],
@@ -44,7 +46,13 @@ module Impulse
     end
 
     def before_render
-      with_panel unless panel?
+      with_header unless header?
+    end
+
+    private
+
+    def title_id
+      "#{@panel_id}-title"
     end
   end
 end

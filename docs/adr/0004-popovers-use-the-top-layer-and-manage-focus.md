@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: accepted, superseded in part by ADR 0020
 ---
 
 # Popovers render in the top layer and manage focus like a non-modal dialog
@@ -27,7 +27,7 @@ The popover API was used before (#73) and removed (#187) after random Chromium c
 - On close, focus returns to the trigger if it was inside the popover, or lost to `<body>`. If it moved to something else, such as a field clicked outside, it stays there. `<awc-dialog>` gets the same from the native modal dialog, and `<awc-autocomplete>` never moves focus out of its input.
 - Focus moving to anything outside the popover and its trigger, such as Tab past the last element, requests a hide. Nested popovers count as inside. A dialog elsewhere on the page that takes focus closes the popover, unless a listener prevents the `hide`. The focus that a press outside moves is left to the outside click, so that one press asks once.
 - Hiding a popover hides the popovers nested in it first, each emitting `hidden`, as a dialog closes its nested dialog. A nested popover floats in the top layer on its own, and would otherwise stay behind.
-- The popover is labelled by its header's title, or by its trigger when it has none. The trigger has `aria-haspopup="dialog"`.
+- The popover is labelled by its title, which ADR 0020 makes required. The trigger has `aria-haspopup="dialog"`.
 - A `<form method="dialog">` inside a popover no longer closes it, and `handleClose` is gone.
 - The focus rules are shared pieces that the popover, and later the dropdown menu, compose: a `useFocusOut` hook, as `useOutsideClick` is, and helpers for moving focus in and deciding whether it returns. `OpenableElement` stays about state and events. Hooks register their cleanup through `onDisconnect`, which wraps `disconnected()` once per element (#284).
 - CI stress-tests opening and closing in Chromium, Firefox and WebKit, and in Chrome through the system tests. The popover is checked by hand in Chrome before the release that ships it.

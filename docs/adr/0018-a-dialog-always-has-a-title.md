@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: accepted, superseded in part by ADR 0020
 ---
 
 # A dialog always has a title
@@ -16,6 +16,6 @@ A dialog needs an accessible name. A popover's panel gets one from its trigger w
 
 ## Consequences
 
-- A dialog's title is required and a popover's is optional, on purpose. Whether a popover's title stays a slot or becomes an argument too isn't decided here (#411).
+- A dialog's title is required. ADR 0020 makes a popover's required too, as the same argument.
 - A header with nothing to show, with the title and the close button both hidden and no block, renders no header. The hidden title is still rendered in the `<dialog>`.
 - Without a close button, Escape and a click outside still close the dialog. An app that turns off `hide_on_outside_click` should render its own button that calls `requestHide`.

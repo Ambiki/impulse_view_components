@@ -53,12 +53,11 @@ Focus the selected week's first day when the popover opens, close the popover wh
 the calendar back to the selected week when the popover closes.
 
 ```erb
-<%= render(Impulse::PopoverComponent.new(data: { action: "awc-week-calendar:commit->awc-popover#requestHide" })) do |c| %>
+<%= render(Impulse::PopoverComponent.new(title: "Choose a week", data: { action: "awc-week-calendar:commit->awc-popover#requestHide" })) do |c| %>
   <% c.with_trigger(class: "btn btn-outline-secondary") { "Week of #{l(@week_start, format: :long)}" } %>
-  <% c.with_panel do |panel| %>
-    <% panel.with_body do %>
-      <%= render(Impulse::WeekCalendarComponent.new(value: @week_start)) %>
-    <% end %>
+  <% c.with_header(visually_hide_title: true, hide_close_button: true) %>
+  <% c.with_body do %>
+    <%= render(Impulse::WeekCalendarComponent.new(value: @week_start)) %>
   <% end %>
 <% end %>
 ```

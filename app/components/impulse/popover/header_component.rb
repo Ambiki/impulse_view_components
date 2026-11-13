@@ -1,16 +1,12 @@
 module Impulse
   module Popover
+    # The popover's header takes the dialog's arguments (ADR 0020).
     class HeaderComponent < ApplicationComponent
-      # Names the panel, so it always takes the id the panel is labelled by.
-      renders_one :title, lambda { |**system_args|
-        system_args[:tag] ||= :span
-        system_args[:id] = @title_id
-
-        Impulse::BaseRenderer.new(**system_args)
-      }
-
-      def initialize(title_id:, **system_args)
+      def initialize(title:, title_id:, visually_hide_title: false, hide_close_button: false, **system_args)
+        @title = title
         @title_id = title_id
+        @visually_hide_title = visually_hide_title
+        @hide_close_button = hide_close_button
         @system_args = system_args
         @system_args[:tag] = :div
         @system_args[:class] = class_names(
@@ -19,17 +15,17 @@ module Impulse
         )
       end
 
-      def render?
-        titled? || content.present?
+      private
+
+      # Whether the header has nothing to show: no title, no block and no close button. Only the hidden title is rendered
+      # then.
+      def nothing_to_show?
+        @visually_hide_title && @hide_close_button && content.blank?
       end
 
-      # Whether the header has a title that names the panel. A blank one doesn't, so it leaves the trigger to.
-      def titled?
-        return false unless title?
-
-        # The title's content is only set once it renders, which a slot does once.
-        title.to_s
-        title.content.present?
+      # The title names the panel, so a hidden one is still rendered, for assistive technology only.
+      def title
+        tag.h2 @title, id: @title_id, class: class_names("awc-popover-title", "sr-only": @visually_hide_title)
       end
     end
   end
