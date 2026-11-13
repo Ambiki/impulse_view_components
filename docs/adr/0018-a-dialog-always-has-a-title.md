@@ -4,7 +4,7 @@ status: accepted
 
 # A dialog always has a title
 
-A dialog needs an accessible name. A popover's panel gets one from its trigger when its header has no title, so its title is an optional `header.with_title` slot. A modal dialog has no trigger, so `Impulse::DialogComponent` keeps `title:` as a required argument and always renders it, with the `<dialog>` labelled by it. A header that shouldn't show it hides it with `with_header(visually_hide_title: true)`, which keeps it for assistive technology. The header's block renders between the title and the close button, as a popover's does, and `hide_close_button: true` leaves the close button out.
+A dialog needs an accessible name. A popover's panel gets one from its trigger when its header has no title, so its title, set with `header.with_title`, is optional. A modal dialog has no trigger, so `Impulse::DialogComponent` keeps `title:` as a required argument and always renders it, with the `<dialog>` labelled by it. A header that shouldn't show it hides it with `with_header(visually_hide_title: true)`, which keeps it for assistive technology. The header's block renders between the title and the close button, as a popover's does, and `hide_close_button: true` leaves the close button out.
 
 ## Considered Options
 
@@ -16,6 +16,6 @@ A dialog needs an accessible name. A popover's panel gets one from its trigger w
 
 ## Consequences
 
-- The dialog and the popover set their titles differently, on purpose: an argument that can be hidden, and a slot that can be left out.
+- A dialog's title is required and a popover's is optional, on purpose. Whether a popover's title stays a slot or becomes an argument too isn't decided here (#411).
 - A header with nothing to show, with the title and the close button both hidden and no block, renders no header. The hidden title is still rendered in the `<dialog>`.
 - Without a close button, Escape and a click outside still close the dialog. An app that turns off `hide_on_outside_click` should render its own button that calls `requestHide`.
