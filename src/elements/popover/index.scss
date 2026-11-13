@@ -68,6 +68,19 @@
   }
 }
 
+// Inline, so that the close button floats on its line, and in the header's font rather than a heading's. The margin
+// beats an app's `!important` heading margins, which a flex header would apply.
+.awc-popover-title {
+  display: inline;
+  margin: 0 !important;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+}
+
 /** TODO: extract IconButtonComponent */
 .awc-popover-close-btn {
   // The header is only a flex container when the app makes it one, so the button floats to its end otherwise.

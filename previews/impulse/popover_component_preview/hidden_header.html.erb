@@ -1,0 +1,10 @@
+<%= render(Impulse::PopoverComponent.new(title: "Notification settings")) do |c| %>
+  <% c.with_trigger(class: "btn btn-primary") { "Notifications" } %>
+  <% c.with_header(visually_hide_title: true, hide_close_button: true) %>
+  <% c.with_body do %>
+    <div class="custom-control custom-switch">
+      <input type="checkbox" class="custom-control-input" id="email-notifications">
+      <label class="custom-control-label" for="email-notifications">Email me</label>
+    </div>
+  <% end %>
+<% end %>

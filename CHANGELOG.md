@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **Breaking:** `Impulse::PopoverComponent` takes a required `title:`, and `with_header` and `with_body` on itself, as `Impulse::DialogComponent` does. `with_panel` and `header.with_title` are removed ([#416](https://github.com/Ambiki/impulse_view_components/pull/416))
 - `<awc-dialog>` scales in with `@starting-style`, scales out where the browser supports `overlay`, and doesn't animate under `prefers-reduced-motion` ([#415](https://github.com/Ambiki/impulse_view_components/pull/415))
 - `Impulse::PopoverComponent`'s close button is an icon button, `.awc-popover-close-btn` with a `bi-x` icon, as the dialog's is. It was Bootstrap's `.close` ([#412](https://github.com/Ambiki/impulse_view_components/pull/412))
 

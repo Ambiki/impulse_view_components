@@ -1,9 +1,8 @@
-<%= render(Impulse::PopoverComponent.new(placement: "bottom-start", data: { action: "awc-month-calendar:commit->awc-popover#requestHide" })) do |c| %>
+<%= render(Impulse::PopoverComponent.new(title: "Choose a month", placement: "bottom-start", data: { action: "awc-month-calendar:commit->awc-popover#requestHide" })) do |c| %>
   <% c.with_trigger(class: "btn btn-outline-secondary", data: { test_id: "month-trigger" }) { "Nov 2026" } %>
-  <% c.with_panel do |panel| %>
-    <% panel.with_body do %>
-      <%= render(Impulse::MonthCalendarComponent.new(value: "2026-11")) %>
-    <% end %>
+  <% c.with_header(visually_hide_title: true, hide_close_button: true) %>
+  <% c.with_body do %>
+    <%= render(Impulse::MonthCalendarComponent.new(value: "2026-11")) %>
   <% end %>
 <% end %>
 

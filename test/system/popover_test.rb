@@ -61,6 +61,19 @@ module Impulse
       assert_equal "solid", find(".awc-popover-close-btn").style("outline-style")["outline-style"]
     end
 
+    test "moves focus into the body when the title and the close button are hidden" do
+      visit_preview(:hidden_header)
+
+      click_on "Notifications"
+      assert_popover_open
+      refute_selector ".popover-header"
+      assert_equal "email-notifications", page.active_element["id"]
+
+      page.active_element.send_keys(:escape)
+      assert_popover_close
+      assert_equal "Notifications", page.active_element.text
+    end
+
     test "closes the popover by clicking outside" do
       visit_preview(:default)
 
@@ -103,7 +116,7 @@ module Impulse
       assert_selector "[data-test-id='nested-popover']"
 
       # The title, away from the nested popover's trigger in the body.
-      find("span", text: "Activity feed").click
+      find("h2", text: "Activity feed").click
       refute_selector "[data-test-id='nested-popover']"
       assert_selector "[data-test-id='parent-popover']"
     end

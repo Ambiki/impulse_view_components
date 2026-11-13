@@ -1,9 +1,0 @@
-<%= render(Impulse::BaseRenderer.new(**@system_args, "aria-labelledby": label_id)) do %>
-  <div class="arrow" data-target="awc-popover.arrow"></div>
-  <%= header %>
-  <% if content.present? %>
-    <%= content %>
-  <% else %>
-    <%= body %>
-  <% end %>
-<% end %>
