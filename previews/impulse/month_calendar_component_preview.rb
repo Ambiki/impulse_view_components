@@ -5,12 +5,14 @@ module Impulse
     # @param min text
     # @param max text
     # @param time_zone text
-    def default(value: "2026-11", min: nil, max: nil, time_zone: nil)
+    # @param disabled toggle
+    def default(value: "2026-11", min: nil, max: nil, time_zone: nil, disabled: false)
       render(Impulse::MonthCalendarComponent.new(
         value: value.presence,
         min: min.presence,
         max: max.presence,
-        time_zone: time_zone.presence
+        time_zone: time_zone.presence,
+        disabled: disabled
       ))
     end
 

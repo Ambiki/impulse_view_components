@@ -18,10 +18,12 @@ module Impulse
 
       # `value`, `min` and `max` are a `Date`, a `Time` or `ActiveSupport::TimeWithZone`, or a string, as the level
       # writes its cells. Times are read in the calendar's time zone: `time_zone:`, else the zone of an
-      # `ActiveSupport::TimeWithZone` value, else `Time.zone`. Only a calendar of days takes `first_day_of_week:`.
-      def initialize(value: nil, min: nil, max: nil, time_zone: nil, first_day_of_week: nil, **system_args)
+      # `ActiveSupport::TimeWithZone` value, else `Time.zone`. Only a calendar of days takes `first_day_of_week:`. A
+      # disabled calendar can't be focused or used, as a native disabled control (ADR 0021).
+      def initialize(value: nil, min: nil, max: nil, time_zone: nil, first_day_of_week: nil, disabled: false, **system_args)
         @time_zone = find_time_zone(time_zone, value)
         @first_day_of_week = to_day_of_week(first_day_of_week || Date.beginning_of_week)
+        @disabled = disabled
         raise ArgumentError, "unknown keyword: :first_day_of_week" if first_day_of_week && !level.weekdays
 
         day = to_date(value)
@@ -50,6 +52,7 @@ module Impulse
         @system_args[:"time-zone"] = @time_zone.tzinfo.identifier
         @system_args[:"first-day-of-week"] = @first_day_of_week if level.weekdays
         @system_args[:i18n] = i18n.to_json
+        @system_args[:disabled] = disabled
       end
 
       private
@@ -119,7 +122,7 @@ module Impulse
         heading = level.heading(@displayed_page)
         return heading if levels_above.empty?
 
-        tag.button(heading, type: "button", class: "btn btn-sm btn-light #{tag_name}-heading-button", "aria-describedby": drill_hint_id(levels_above.first))
+        tag.button(heading, type: "button", class: "btn btn-sm btn-light #{tag_name}-heading-button", "aria-describedby": drill_hint_id(levels_above.first), disabled: @disabled)
       end
 
       # The hint describing the heading's button on the level below `level_above`, which the element names the same way

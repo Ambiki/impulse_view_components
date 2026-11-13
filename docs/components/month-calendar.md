@@ -26,6 +26,7 @@ months again, and choosing the year shown leaves the months as they were. Neithe
 | min       | `nil`     | The earliest month the user can commit, given as `value` is.                                                                                       |
 | max       | `nil`     | The latest month the user can commit, given as `value` is.                                                                                         |
 | time_zone | see below | The time zone that decides which month today falls in, and which month a time falls in.                                                           |
+| disabled  | `false`   | Whether the calendar is disabled: nothing in it can be focused or pressed. It still shows its value.                                              |
 
 Any other keyword arguments, such as `class` or `data`, are passed to the `<awc-month-calendar>` element as HTML
 attributes. Render the calendar with the component: the element relies on the year and the settings it renders.

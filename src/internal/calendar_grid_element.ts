@@ -28,6 +28,7 @@ import {
   headingText,
   isOutsideLimits,
   isPastFourDigitYears,
+  setDisabled,
 } from 'src/internal/calendar_grid';
 
 export default abstract class CalendarGridElement<I> extends ImpulseElement {
@@ -42,6 +43,12 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
 
   /** The IANA time zone that decides what today is. Defaults to the browser's. */
   abstract timeZone: string;
+
+  /**
+   * Whether the calendar is disabled: none of its buttons can be focused or pressed, as on a native disabled control
+   * (ADR 0021). Code can still change its value and its view.
+   */
+  abstract disabled: boolean;
 
   /** The day each week starts on, `0` being Sunday, on a calendar of days. */
   firstDayOfWeek?: number;
@@ -151,6 +158,10 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
     this.refresh();
   }
 
+  disabledChanged() {
+    this.refresh();
+  }
+
   /**
    * Takes the view back to the value: its view becomes the displayed one, and its cell the active one, on the base
    * level. Without a value, today's. Changes nothing else, and emits nothing.
@@ -197,8 +208,9 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
   }
 
   /**
-   * Whether the user couldn't commit `value`, written as the calendar writes values, given `min`, `max` and the
-   * calendar's own limits. Anything else isn't disabled.
+   * Whether `value`, written as the calendar writes values, names a disabled cell, given `min`, `max` and the calendar's
+   * own limits. It doesn't follow `disabled`, which disables the calendar rather than its cells (ADR 0021). Anything
+   * else isn't disabled.
    */
   isDateDisabled(value: string): boolean {
     const day = this.parseValue(value);
@@ -256,7 +268,13 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
     if (cell && view.level.compareViews(cell, view.displayed) === 0) this.moveTabStop(cell);
   }
 
+  /**
+   * A click on a cell commits it. A disabled calendar's buttons hear no clicks, but the gap around one is its `<td>`,
+   * which still does.
+   */
   handleClick(event: MouseEvent) {
+    if (this.disabled) return;
+
     const cell = this.cellOf(event.target);
     if (cell) this.commit(cell);
   }
@@ -425,6 +443,7 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
       },
       firstDayOfWeek: this.firstDayOfWeek ?? 0,
       i18n: this.i18n,
+      disabled: this.disabled,
     };
   }
 
@@ -456,6 +475,13 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
     this.renderPaging(level);
     this.previousButton.setAttribute('aria-disabled', String(!canMoveView(view, -1)));
     this.nextButton.setAttribute('aria-disabled', String(!canMoveView(view, 1)));
+    setDisabled(this.previousButton, view.disabled);
+    setDisabled(this.nextButton, view.disabled);
+    if (view.disabled) {
+      this.grid.setAttribute('aria-disabled', 'true');
+    } else {
+      this.grid.removeAttribute('aria-disabled');
+    }
     this.renderDescription(level);
     if (level === this.level) {
       this.drilledFrom = [];
@@ -513,9 +539,11 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
       return;
     }
 
+    const button = this.heading.querySelector('button');
+    if (button) setDisabled(button, view.disabled);
     const text = headingText(view);
     if (this.heading.textContent !== text) {
-      (this.heading.querySelector('button') ?? this.heading).textContent = text;
+      (button ?? this.heading).textContent = text;
     }
   }
 

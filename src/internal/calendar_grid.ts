@@ -93,6 +93,8 @@ export interface CalendarView<I> {
   max: CalendarDate | null;
   /** Whether the user can move to `cell` but not commit it. */
   isDisabled: (cell: CalendarDate) => boolean;
+  /** Whether the whole calendar is disabled: none of its buttons can be focused or pressed (ADR 0021). */
+  disabled: boolean;
   /** The day each week starts on, `0` being Sunday, for a level with weeks. */
   firstDayOfWeek: number;
   i18n: I;
@@ -131,6 +133,7 @@ export function headingContent<I>(view: CalendarView<I>, hintId: string | null):
   button.setAttribute('type', 'button');
   button.className = `btn btn-sm btn-light ${view.tagName}-heading-button`;
   button.setAttribute('aria-describedby', hintId);
+  setDisabled(button, view.disabled);
   button.textContent = text;
   return button;
 }
@@ -146,6 +149,18 @@ export function isPastFourDigitYears(range: DateRange): boolean {
 /** Whether none of `range`'s days falls between `min` and `max`. */
 export function isOutsideLimits(range: DateRange, min: CalendarDate | null, max: CalendarDate | null): boolean {
   return (!!min && range.end.compare(min) < 0) || (!!max && range.start.compare(max) > 0);
+}
+
+/**
+ * Disables or enables one of the calendar's buttons, writing `disabled` as Rails' tag helpers do, so the element's
+ * markup and the component's match.
+ */
+export function setDisabled(button: HTMLButtonElement, disabled: boolean) {
+  if (disabled) {
+    button.setAttribute('disabled', 'disabled');
+  } else {
+    button.removeAttribute('disabled');
+  }
 }
 
 /** The displayed view's rows of cells, marked up as the calendar's component renders them. */
@@ -169,6 +184,7 @@ function gridCell<I>(cell: CalendarDate, view: CalendarView<I>) {
   if (label) button.setAttribute('aria-label', label);
   if (cell.equals(view.today)) button.setAttribute('aria-current', 'date');
   if (view.isDisabled(cell)) button.setAttribute('aria-disabled', 'true');
+  setDisabled(button, view.disabled);
   button.textContent = level.text(cell, view.i18n);
 
   const td = document.createElement('td');

@@ -49,6 +49,7 @@ function weekCalendarHtml(options: CalendarOptions = {}) {
     },
     firstDayOfWeek,
     i18n: ENGLISH,
+    disabled: false,
   };
   const attributes = [
     value !== undefined && `value="${value}"`,
@@ -149,6 +150,21 @@ describe('awc-week-calendar', () => {
 
       day(el, '2026-11-19').click();
 
+      expect(el.value).to.equal('2026-11-15');
+      expect(commits).to.eql([]);
+    });
+  });
+
+  describe('a disabled calendar', () => {
+    it('disables every button and the grid, and commits nothing, even on a click in the gap around a cell', async () => {
+      const el = await weekCalendarFixture({ value: '2026-11-15' });
+      const commits = recordCommits();
+
+      el.disabled = true;
+      day(el, '2026-11-25').closest('td')!.click();
+
+      expect(el.grid.getAttribute('aria-disabled')).to.equal('true');
+      expect(el.querySelectorAll('button:enabled')).to.have.length(0);
       expect(el.value).to.equal('2026-11-15');
       expect(commits).to.eql([]);
     });

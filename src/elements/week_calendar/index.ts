@@ -40,6 +40,9 @@ export default class AwcWeekCalendarElement extends CalendarGridElement<DayDrill
   /** The IANA time zone that decides which day is today. Defaults to the browser's. */
   @property() timeZone = '';
 
+  /** Whether the calendar is disabled: none of its buttons can be focused or pressed. */
+  @property({ type: Boolean }) disabled = false;
+
   /** The names and patterns the days, months and years are rendered with. Defaults to English. */
   @property({ type: Object }) i18n: WeekCalendarI18n = DAY_DRILL_ENGLISH;
 

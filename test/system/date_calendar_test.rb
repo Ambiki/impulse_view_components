@@ -22,6 +22,31 @@ module Impulse
       end
     end
 
+    test "renders a disabled calendar's first month as the element renders it" do
+      visit_preview(:default, value: "2026-11-18", disabled: true)
+      server = calendar_markup
+
+      page.execute_script("const el = document.querySelector('awc-date-calendar'); el.nextView(); el.resetView()")
+
+      assert_equal server, calendar_markup
+      assert_equal "true", server["disabled"]
+    end
+
+    test "renders a disabled calendar's heading as the component does after code takes it back from a level drilled up to" do
+      visit_preview(:default, value: "2026-11-18", disabled: true)
+      server = calendar_markup
+
+      page.execute_script(<<~JS)
+        const el = document.querySelector('awc-date-calendar');
+        el.disabled = false;
+        el.querySelector('.awc-date-calendar-heading-button').click();
+        el.disabled = true;
+        el.resetView();
+      JS
+
+      assert_equal server, calendar_markup
+    end
+
     test "names the grid by its month, and each day by its full date" do
       visit_preview(:default, value: "2026-11-18")
 
@@ -141,9 +166,10 @@ module Impulse
           return {
             heading: html(el.querySelector('[aria-live]')),
             month: el.querySelector('table').dataset.month,
+            disabled: el.querySelector('table').getAttribute('aria-disabled'),
             weekdays: html(el.querySelector('thead')),
             days: html(el.querySelector('tbody')),
-            paging: [...el.querySelectorAll('.awc-date-calendar-nav')].map((button) => [button.getAttribute('aria-label'), button.getAttribute('aria-disabled')]),
+            paging: [...el.querySelectorAll('.awc-date-calendar-nav')].map((button) => [button.getAttribute('aria-label'), button.getAttribute('aria-disabled'), button.disabled]),
           };
         })()
       JS

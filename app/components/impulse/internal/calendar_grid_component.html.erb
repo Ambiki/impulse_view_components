@@ -1,10 +1,10 @@
 <%= render(Impulse::BaseRenderer.new(**@system_args)) do %>
   <%= tag.div(class: "#{tag_name}-header", "data-action": ("click->#{tag_name}#handleHeadingClick" if levels_above.any?)) do %>
-    <button type="button" class="btn btn-sm btn-light <%= tag_name %>-nav" aria-label="<%= level.previous_label %>" aria-disabled="<%= previous_page_disabled? %>" data-target="<%= tag_name %>.previousButton" data-action="click-><%= tag_name %>#handlePreviousClick">
+    <button type="button" class="btn btn-sm btn-light <%= tag_name %>-nav" aria-label="<%= level.previous_label %>" aria-disabled="<%= previous_page_disabled? %>" <%= tag.attributes(disabled: @disabled) %> data-target="<%= tag_name %>.previousButton" data-action="click-><%= tag_name %>#handlePreviousClick">
       <i class="bi bi-chevron-left" aria-hidden="true"></i>
     </button>
     <div id="<%= @heading_id %>" class="<%= tag_name %>-heading" aria-live="polite" data-target="<%= tag_name %>.heading"><%= heading_content %></div>
-    <button type="button" class="btn btn-sm btn-light <%= tag_name %>-nav" aria-label="<%= level.next_label %>" aria-disabled="<%= next_page_disabled? %>" data-target="<%= tag_name %>.nextButton" data-action="click-><%= tag_name %>#handleNextClick">
+    <button type="button" class="btn btn-sm btn-light <%= tag_name %>-nav" aria-label="<%= level.next_label %>" aria-disabled="<%= next_page_disabled? %>" <%= tag.attributes(disabled: @disabled) %> data-target="<%= tag_name %>.nextButton" data-action="click-><%= tag_name %>#handleNextClick">
       <i class="bi bi-chevron-right" aria-hidden="true"></i>
     </button>
   <% end %>
@@ -23,6 +23,7 @@
     role: "grid",
     "aria-labelledby": @heading_id,
     "aria-describedby": (@hint_id if hint),
+    "aria-disabled": ("true" if @disabled),
     "data-#{level.page_attribute}": level.format_page(@displayed_page),
     "data-target": "#{tag_name}.grid",
     "data-action": "click->#{tag_name}#handleClick keydown->#{tag_name}#handleKeydown focusin->#{tag_name}#handleFocusin"
@@ -49,7 +50,8 @@
                 "data-date": cell.iso8601,
                 "aria-label": level.label(cell),
                 "aria-current": ("date" if cell == @today),
-                "aria-disabled": ("true" if disabled?(cell))
+                "aria-disabled": ("true" if disabled?(cell)),
+                disabled: @disabled
               ) %>
             <% end %>
           <% end %>

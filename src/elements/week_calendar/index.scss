@@ -47,12 +47,12 @@
 
 .awc-week-calendar-grid tbody tr {
   // The week under the pointer, and the active day's week as the user moves through the grid. The selected week keeps
-  // its band, and a disabled week stays plain, as it can't be committed.
+  // its band, and a disabled week, or a disabled calendar's, stays plain, as it can't be committed.
   &:hover,
   &:has(.awc-week-calendar-day:focus-visible) {
     @include week-band(
       "td:not([aria-selected='true'])",
-      ".awc-week-calendar-day:not([aria-disabled='true'])",
+      ".awc-week-calendar-day:not([aria-disabled='true']):not(:disabled)",
       var(--awc-week-calendar-cell-bg-hover),
       $today-ring: var(--awc-accent-solid)
     );

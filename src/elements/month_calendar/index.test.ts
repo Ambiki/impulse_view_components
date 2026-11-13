@@ -47,6 +47,7 @@ function monthCalendarHtml(options: CalendarOptions = {}) {
       (!!minMonth && cell.compareMonth(minMonth) < 0) || (!!maxMonth && cell.compareMonth(maxMonth) > 0),
     firstDayOfWeek: 0,
     i18n: MONTH_ENGLISH,
+    disabled: false,
   };
   const attributes = [
     value !== undefined && `value="${value}"`,
@@ -154,6 +155,21 @@ describe('awc-month-calendar', () => {
         'Dec',
       ]);
       expect(month(el, '2026-11').getAttribute('aria-label')).to.equal('November 2026');
+    });
+  });
+
+  describe('a disabled calendar', () => {
+    it('disables every button and the grid, and commits nothing, even on a click in the gap around a cell', async () => {
+      const el = await monthCalendarFixture({ value: '2026-11' });
+      const commits = recordCommits();
+
+      el.disabled = true;
+      month(el, '2026-03').closest('td')!.click();
+
+      expect(el.grid.getAttribute('aria-disabled')).to.equal('true');
+      expect(el.querySelectorAll('button:enabled')).to.have.length(0);
+      expect(el.value).to.equal('2026-11');
+      expect(commits).to.eql([]);
     });
   });
 
