@@ -40,6 +40,10 @@ _Avoid_: Clipped, cramped, overflowing
 The text that names a dialog or a panel. A dialog always has one, shown in its header or hidden. A panel may have none, and its trigger names it then.
 _Avoid_: Heading, caption
 
+**Sheet**:
+A modal dialog pinned to one edge of the viewport and filling its height. It is built on the dialog element, not a separate one.
+_Avoid_: Side dialog, panel, drawer, offcanvas, side modal
+
 ### Focus
 
 **Focus return**:

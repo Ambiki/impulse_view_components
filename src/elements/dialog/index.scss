@@ -1,6 +1,7 @@
 :where(:root) {
   --awc-dialog-margin-y: 0.5rem;
   --awc-dialog-margin-y-sm-up: 1.75rem;
+  --awc-sheet-width: 400px;
 }
 
 .awc-dialog-dialog {
@@ -143,6 +144,72 @@
 
 .awc-dialog--lg .awc-dialog-dialog {
   max-width: 798px;
+}
+
+// A sheet is pinned to the right edge and fills the height. These rules come before the full-screen ones, which widen
+// it. It's positioned here, not by the browser's `dialog:modal` styles, as those stop applying as soon as it closes,
+// while it may still be sliding out.
+.awc-sheet .awc-dialog-dialog {
+  position: fixed;
+  inset: 0 0 0 auto;
+  width: 100%;
+  // Leaves a strip of the backdrop to click on phones.
+  max-width: min(var(--awc-sheet-width), 92vw);
+  height: 100%;
+  max-height: 100vh;
+  margin: 0;
+  // Every corner touches an edge of the viewport.
+  border-radius: 0;
+  animation: none;
+  transform: translateX(100%);
+
+  @supports (max-height: 100dvh) {
+    max-height: 100dvh;
+  }
+
+  // A transition is read from the state it goes to: this one slides the sheet in.
+  &[open] {
+    transform: none;
+    transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+@starting-style {
+  .awc-sheet .awc-dialog-dialog[open] {
+    transform: translateX(100%);
+  }
+}
+
+// Sliding out keeps a closed sheet in the top layer, which takes `overlay`. A browser without it closes the sheet at
+// once.
+@supports (overlay: auto) {
+  .awc-sheet .awc-dialog-dialog {
+    transition:
+      transform 150ms ease-in,
+      overlay 150ms allow-discrete,
+      display 150ms allow-discrete;
+
+    &::backdrop {
+      transition:
+        opacity 150ms ease-in,
+        overlay 150ms allow-discrete,
+        display 150ms allow-discrete;
+    }
+
+    &:not([open])::backdrop {
+      opacity: 0;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .awc-sheet .awc-dialog-dialog {
+    &,
+    &[open],
+    &::backdrop {
+      transition: none;
+    }
+  }
 }
 
 @mixin dialog-fullscreen() {
