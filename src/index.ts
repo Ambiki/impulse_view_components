@@ -5,5 +5,6 @@ import './elements/date_calendar';
 import './elements/dialog';
 import './elements/month_calendar';
 import './elements/popover';
+import './elements/toast';
 import './elements/week_calendar';
 import './elements/year_calendar';

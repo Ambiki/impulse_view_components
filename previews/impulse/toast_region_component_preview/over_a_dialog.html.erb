@@ -1,0 +1,10 @@
+<button type="button" class="btn btn-primary" onclick="document.getElementById('share-dialog').show()">Open dialog</button>
+
+<%= render(Impulse::DialogComponent.new(id: "share-dialog", title: "Share goal")) do |dialog| %>
+  <% dialog.with_body do %>
+    <p>Everything outside this dialog is inert, so the toast region moves into it while it is open.</p>
+    <%= render "impulse/toast_region_component_preview/buttons" %>
+  <% end %>
+<% end %>
+
+<%= render(Impulse::ToastRegionComponent.new) %>

@@ -27,6 +27,12 @@
   --awc-red-8: #cd4235; // red-400
   --awc-red-9: #c01303; // red-500
 
+  --awc-yellow-3: #fcf0d9; // yellow-100
+  --awc-yellow-6: #f9e0b3; // yellow-200
+  --awc-yellow-7: #f7d18d; // yellow-300
+  --awc-yellow-8: #f4c167; // yellow-400
+  --awc-yellow-9: #f1b241; // yellow-500
+
   --awc-blue-3: #d4daec; // blue-dark-100
   --awc-blue-6: #a9b6d9; // blue-dark-200
   --awc-blue-7: #7f91c6; // blue-dark-300
@@ -96,6 +102,12 @@
   --awc-success-border: var(--awc-green-7);
   --awc-success-border-hover: var(--awc-green-8);
   --awc-success-solid: var(--awc-green-9);
+
+  --awc-warning-bg: var(--awc-yellow-3);
+  --awc-warning-line: var(--awc-yellow-6);
+  --awc-warning-border: var(--awc-yellow-7);
+  --awc-warning-border-hover: var(--awc-yellow-8);
+  --awc-warning-solid: var(--awc-yellow-9);
 
   --awc-danger-bg: var(--awc-red-3);
   --awc-danger-line: var(--awc-red-6);

@@ -16,7 +16,7 @@ Toasts must stay usable while a modal `<awc-dialog>` is open: apps copy to the c
 ## Consequences
 
 - The region watches modal dialogs opening and closing, and checks again on every `showToast`, so it also follows a dialog opened before it connected.
-- After each move the region shows itself again: `append()` closes a popover, and `moveBefore()`, which keeps it open, keeps it below the dialog in the top layer too. `moveBefore()`, where the browser has it, only spares the elements inside a toast a disconnect. Toasts keep their timers across a move either way.
+- The region moves with `append()` and shows itself again, since moving closes a popover. `moveBefore()` would keep it open, but below the dialog in the top layer, and elements inside the region still disconnect, as impulse elements define no `connectedMoveCallback`, so it isn't used. Toasts keep their timers across a move.
 - Closing a dialog leaves a popover inside it open but not rendered, so the region moves out as the dialog closes, and its toasts outlive the dialog.
 - The region has no fixed place in the DOM. App CSS must not select it by its ancestors.
-- Without `moveBefore()`, elements inside a toast disconnect and connect again on each move.
+- Elements inside a toast disconnect and connect again on each move.

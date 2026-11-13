@@ -1,0 +1,15 @@
+<%= render(Impulse::ToastRegionComponent.new) do |region| %>
+  <% region.with_toast(variant: :success, duration: nil) { "Copied to clipboard" } %>
+  <% region.with_toast(duration: nil) do |toast| %>
+    <% toast.with_title { "You're offline" } %>
+    We kept a copy of your work in this browser. It's sent when you're back online.
+  <% end %>
+  <% region.with_toast(variant: :warning, duration: nil) { "You can't create events before Nov 14, 2026, 8:00 AM." } %>
+  <% region.with_toast(variant: :danger) do |toast| %>
+    <% toast.with_title { "Couldn't save the goal" } %>
+    The server didn't respond. Your changes are still in the form, so you can try again.
+  <% end %>
+  <% region.with_toast(variant: :success) do %>
+    Event deleted. <button type="button" class="btn btn-link btn-sm p-0 align-baseline">Undo</button>
+  <% end %>
+<% end %>

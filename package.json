@@ -27,6 +27,8 @@
   "sideEffects": [
     "./dist/index.js",
     "./dist/elements/*/index.js",
+    "./dist/elements/toast/region.js",
+    "./dist/elements/toast/toast.js",
     "*.scss",
     "*.css"
   ],
@@ -70,6 +72,11 @@
       "types": "./dist/elements/popover/index.d.ts",
       "sass": "./dist/elements/popover/index.scss",
       "default": "./dist/elements/popover/index.js"
+    },
+    "./toast": {
+      "types": "./dist/elements/toast/index.d.ts",
+      "sass": "./dist/elements/toast/index.scss",
+      "default": "./dist/elements/toast/index.js"
     },
     "./week-calendar": {
       "types": "./dist/elements/week_calendar/index.d.ts",

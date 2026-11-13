@@ -1,0 +1,16 @@
+<%= render(Impulse::BaseRenderer.new(**@system_args)) do %>
+  <span class="awc-toast-icon" aria-hidden="true">
+    <% ICONS.each do |variant, icon| %>
+      <i class="bi <%= icon %> awc-toast-icon-<%= variant %>"></i>
+    <% end %>
+  </span>
+  <div class="awc-toast-body">
+    <% if title? %>
+      <div class="awc-toast-title"><%= title %></div>
+    <% end %>
+    <div class="awc-toast-message"><%= content %></div>
+  </div>
+  <button type="button" class="btn awc-toast-close-btn" data-action="click->awc-toast#requestHide" aria-label="<%= t("impulse.toast.close") %>">
+    <i class="bi bi-x" aria-hidden="true"></i>
+  </button>
+<% end %>

@@ -1,8 +1,8 @@
 /**
- * The open and close behaviour that `<awc-popover>`, `<awc-dialog>` and `<awc-autocomplete>` share. It is internal: the
- * package's `exports` map doesn't list it. Its public members reach apps, though, through the elements that extend it,
- * so changing those changes the public API. See docs/adr/0002-events-follow-native-elements.md and
- * docs/adr/0003-open-is-the-element-state.md.
+ * The open and close behaviour that `<awc-popover>`, `<awc-dialog>`, `<awc-autocomplete>` and `<awc-toast>` share. It
+ * is internal: the package's `exports` map doesn't list it. Its public members reach apps, though, through the
+ * elements that extend it, so changing those changes the public API. See docs/adr/0002-events-follow-native-elements.md
+ * and docs/adr/0003-open-is-the-element-state.md.
  *
  * - `requestShow` and `requestHide`, which user actions go through, emit a cancelable request event (`show`, `hide`)
  *   first, and do nothing if it is prevented.

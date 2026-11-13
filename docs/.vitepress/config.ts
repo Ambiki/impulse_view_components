@@ -115,6 +115,10 @@ only ship what you use.`,
             link: '/components/time-zone-select',
           },
           {
+            text: 'Toast',
+            link: '/components/toast',
+          },
+          {
             text: 'Week calendar',
             link: '/components/week-calendar',
           },
@@ -155,6 +159,10 @@ only ship what you use.`,
           {
             text: 'Popover',
             link: '/js-api/popover',
+          },
+          {
+            text: 'Toast',
+            link: '/js-api/toast',
           },
           {
             text: 'Week calendar',
