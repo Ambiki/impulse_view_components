@@ -47,7 +47,7 @@ _Avoid_: Side dialog, panel, drawer, offcanvas, side modal
 ### Focus
 
 **Focus return**:
-Moving focus back to where an element was opened from, such as its trigger, when it closes while focus is inside it or lost.
+Moving focus back to where an element was opened from, such as its trigger, when it closes while focus is inside it or lost. For a toast, back to where focus was before it moved into the toast region.
 _Avoid_: Focus restore, refocus, final focus
 
 ### Combobox
@@ -89,6 +89,25 @@ _Avoid_: Target, source, reference
 **Feedback state**:
 The state a clipboard copy is in for a moment after a press: copied, or error when nothing was copied. What it looks like is up to the app.
 _Avoid_: Status, result, copied attribute
+
+### Toast
+
+**Toast**:
+A short, non-modal message about something the user just did, or something in progress, shown in the page's one toast
+region. It goes away on its own or when dismissed, and never takes focus. It goes away with its page, and a page restored
+from cache never shows it again: a message that must outlive the page is a flash, which the next page shows. A flash
+message, such as one after a redirect, can be shown as a toast: the app decides which.
+_Avoid_: Notification, snackbar, flash, alert
+
+**Variant**:
+What kind of message a toast is: info, success, warning or danger. A flash key names one: `notice` is info, `alert` and
+`error` are danger.
+_Avoid_: Type, level, kind, error
+
+**Toast region**:
+The one place on a page where toasts appear, rendered by the page's layout. While a modal dialog is open, toasts appear
+over it and can still be used.
+_Avoid_: Toaster, container, stack, viewport
 
 ### Events
 
