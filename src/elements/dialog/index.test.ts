@@ -55,6 +55,34 @@ function cancel(el: AwcDialogElement) {
   return event;
 }
 
+/** Where a press or a release lands: the element under the pointer, at a point in the viewport. */
+interface Point {
+  element: Element;
+  x: number;
+  y: number;
+}
+
+/** A point on the backdrop, whose events land on the `<dialog>`. A modal dialog is centred, away from this corner. */
+function onBackdrop(el: AwcDialogElement): Point {
+  return { element: el.dialog, x: 1, y: 1 };
+}
+
+/** The centre of `element`, inside the dialog when `element` is in it. */
+function centerOf(element: Element): Point {
+  const rect = element.getBoundingClientRect();
+  return { element, x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+}
+
+/**
+ * Presses at `pressed`, and fires the click as a browser does on release at `released`. A press and a release on
+ * different elements land their click on what the two have in common, so pass that as `released.element`.
+ */
+function press(pressed: Point, released: Point = pressed) {
+  const init = { bubbles: true, cancelable: true, composed: true };
+  pressed.element.dispatchEvent(new MouseEvent('mousedown', { ...init, clientX: pressed.x, clientY: pressed.y }));
+  released.element.dispatchEvent(new MouseEvent('click', { ...init, clientX: released.x, clientY: released.y }));
+}
+
 /** Waits for the dialog's `close` event, which browsers dispatch asynchronously. */
 async function settle() {
   await nextFrame();
@@ -136,6 +164,59 @@ describe('awc-dialog', () => {
     expect(el.open).to.equal(false);
     expect(el.dialog.open).to.equal(false);
     expect(events).to.eql(['hide', 'hide', 'hidden']);
+  });
+
+  it('requests to hide on a press and release on the backdrop', async () => {
+    const el = await dialogFixture();
+    el.show();
+    const events = recordEvents(el);
+    preventNext(el, 'hide');
+
+    press(onBackdrop(el));
+    expect(el.dialog.open).to.equal(true);
+
+    press(onBackdrop(el));
+    await settle();
+
+    expect(el.open).to.equal(false);
+    expect(events).to.eql(['hide', 'hide', 'hidden']);
+  });
+
+  it('stays open when a press on the backdrop is released inside it', async () => {
+    const el = await dialogFixture();
+    el.show();
+    const events = recordEvents(el);
+
+    press(onBackdrop(el), { ...centerOf(el.querySelector('.close')!), element: el.dialog });
+    await settle();
+
+    expect(el.open).to.equal(true);
+    expect(events).to.eql([]);
+  });
+
+  it('stays open on a click on the backdrop without a press', async () => {
+    const el = await dialogFixture();
+    el.show();
+    const events = recordEvents(el);
+
+    const { x, y } = onBackdrop(el);
+    el.dialog.dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: x, clientY: y }));
+    await settle();
+
+    expect(el.open).to.equal(true);
+    expect(events).to.eql([]);
+  });
+
+  it('stays open when a press inside it is released on the backdrop', async () => {
+    const el = await dialogFixture();
+    el.show();
+    const events = recordEvents(el);
+
+    press(centerOf(el.querySelector('.close')!), onBackdrop(el));
+    await settle();
+
+    expect(el.open).to.equal(true);
+    expect(events).to.eql([]);
   });
 
   it('requests to hide on Escape', async () => {

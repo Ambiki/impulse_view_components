@@ -4,6 +4,7 @@ import { property, registerElement, target } from '@ambiki/impulse';
 import useFloatingUI from 'src/hooks/use_floating_ui';
 import useFocusOut from 'src/hooks/use_focus_out';
 import useOutsideClick from 'src/hooks/use_outside_click';
+import composedContains from 'src/internal/composed_contains';
 import { focusInto, focusIsInsideOrLost, keepFocusOn } from 'src/internal/focus';
 import OpenableElement from 'src/internal/openable_element';
 import { stripCSSUnit } from '../../helpers/string';
@@ -77,7 +78,7 @@ export default class AwcPopoverElement extends OpenableElement {
       callback: (event, target) => {
         // Pressing a closed popover's trigger opens that popover, which asks this one to hide itself.
         if (this.isClosedPopoverTrigger(target)) return;
-        if (this.open && !this.isAlsoOutsideParent(event, target)) {
+        if (this.open && !this.isAlsoOutsideParent(target)) {
           this.requestHide(event);
         }
       },
@@ -86,7 +87,7 @@ export default class AwcPopoverElement extends OpenableElement {
     useFocusOut(this, {
       boundaries: this.boundaries,
       callback: (event, target) => {
-        if (this.open && !this.opening && !this.isAlsoOutsideParent(event, target)) {
+        if (this.open && !this.opening && !this.isAlsoOutsideParent(target)) {
           this.requestHide(event);
         }
       },
@@ -247,14 +248,13 @@ export default class AwcPopoverElement extends OpenableElement {
   }
 
   /**
-   * Whether the popover this one is nested in is open, and `event` happened outside it too, as `useOutsideClick` sees
-   * it, through shadow roots. That popover then makes the request, and asks this one first.
+   * Whether the popover this one is nested in is open, and `target` is outside it too, as `useOutsideClick` sees it,
+   * through shadow roots. That popover then makes the request, and asks this one first.
    */
-  private isAlsoOutsideParent(event: Event, target: Node) {
+  private isAlsoOutsideParent(target: Node) {
     const parent = this.parentElement?.closest<AwcPopoverElement>(this.identifier);
     if (!parent?.open) return false;
-    const path = event.composedPath();
-    return !parent.boundaries.some((boundary) => boundary.contains(target) || path.includes(boundary));
+    return !parent.boundaries.some((boundary) => composedContains(boundary, target));
   }
 
   private get arrowPadding() {

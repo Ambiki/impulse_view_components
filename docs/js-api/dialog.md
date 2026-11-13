@@ -20,7 +20,7 @@ dialog.open = true;
 
 ### `hideOnOutsideClick`
 
-Whether a click outside the dialog asks it to close. Defaults to `true`.
+Whether a press outside the dialog, released outside it, asks it to close. Defaults to `true`.
 
 ```js
 dialog.hideOnOutsideClick = false;

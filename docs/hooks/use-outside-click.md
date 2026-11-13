@@ -2,9 +2,9 @@
 
 Listen for clicks that occur outside the defined `boundaries`.
 
-A click counts when the press that starts it, with the primary button, lands outside every boundary. A click without a
-press, such as from Enter or `click()`, doesn't count, and neither does one prevented before it reaches `document`, such
-as by a `window` capture listener.
+A click counts when the press that starts it, with the primary button, lands outside every boundary. A press in a
+shadow root inside a boundary is inside it. A click without a press, such as from Enter or `click()`, doesn't count,
+and neither does one prevented before it reaches `document`, such as by a `window` capture listener.
 
 ::: tip Pair it with `useFocusOut`
 Keyboard users leave a popover with Tab, not a click. Use [`useFocusOut`](./use-focus-out.md), with the same

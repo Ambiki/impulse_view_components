@@ -101,6 +101,31 @@ describe('useOutsideClick', () => {
     expect(targets(calls)).to.eql(['outside']);
   });
 
+  it('judges a press inside a shadow root in a boundary by where it started, not by where its click lands', async () => {
+    const { container, host } = await outsideClickFixture();
+    const shadowHost = host.appendChild(document.createElement('div'));
+    const span = shadowHost.attachShadow({ mode: 'open' }).appendChild(document.createElement('span'));
+    const calls = listen(host, [host]);
+
+    press(span, container);
+
+    expect(targets(calls)).to.eql([]);
+  });
+
+  it('skips a press on content slotted into a boundary inside a shadow root', async () => {
+    const { container, host } = await outsideClickFixture();
+    const shadowHost = container.appendChild(document.createElement('div'));
+    const shadowRoot = shadowHost.attachShadow({ mode: 'open' });
+    shadowRoot.innerHTML = '<div><slot></slot></div>';
+    const slotted = shadowHost.appendChild(document.createElement('button'));
+    const calls = listen(host, [shadowRoot.querySelector('div')]);
+
+    press(slotted);
+    press(slotted, container);
+
+    expect(targets(calls)).to.eql([]);
+  });
+
   it('skips a click without a press, such as one from Enter', async () => {
     const { host, outside } = await outsideClickFixture();
     const calls = listen(host, [host]);

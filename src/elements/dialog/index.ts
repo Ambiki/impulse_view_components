@@ -1,4 +1,4 @@
-import { property, registerElement, target } from '@ambiki/impulse';
+import { on, property, registerElement, target } from '@ambiki/impulse';
 import scrollLock from 'src/helpers/scroll_lock';
 import OpenableElement from 'src/internal/openable_element';
 
@@ -10,13 +10,37 @@ export default class AwcDialogElement extends OpenableElement {
   @property({ type: Boolean }) open = false;
 
   /**
-   * Whether or not to hide the dialog when clicking outside of its region.
+   * Whether a press outside the dialog, released outside it, asks it to close.
    */
   @property({ type: Boolean }) hideOnOutsideClick = true;
 
   @target() dialog: HTMLDialogElement;
 
   private _scrollLockController?: AbortController;
+
+  private listeners?: AbortController;
+
+  /** Whether the latest press started on the backdrop, until its click. */
+  private pressedBackdrop = false;
+
+  /**
+   * Called when the element is added to the DOM.
+   */
+  connected() {
+    this.listeners = new AbortController();
+    // Captured, so that a handler in the dialog that stops the press can't keep it from being recorded.
+    on('mousedown', this.localName, this.recordPress, { capture: true, signal: this.listeners.signal });
+    super.connected();
+  }
+
+  /**
+   * Called when the element is removed from the DOM.
+   */
+  disconnected() {
+    super.disconnected();
+    this.listeners?.abort();
+    this.pressedBackdrop = false;
+  }
 
   /**
    * Hides the dialog element, and the dialog nested in it first. Emits `hidden` but no `hide`: use `requestHide` to let
@@ -30,19 +54,13 @@ export default class AwcDialogElement extends OpenableElement {
   }
 
   handleClick(event: MouseEvent) {
+    // A click ends its press, so that a later click without one, such as from `click()`, isn't taken for it.
+    const pressedBackdrop = this.pressedBackdrop;
+    this.pressedBackdrop = false;
     if (!this.hideOnOutsideClick || event.defaultPrevented) return;
-    const target = event.target;
-    // Only close the top most dialog in the stack.
-    if (!(target instanceof HTMLElement) || target !== this.dialog) return;
-    const rect = target.getBoundingClientRect();
-    if (
-      rect.top <= event.clientY &&
-      event.clientY <= rect.top + rect.height &&
-      rect.left <= event.clientX &&
-      event.clientX <= rect.left + rect.width
-    ) {
-      return;
-    }
+    // As with a native dialog's light dismiss, the press and the release both land on the backdrop. A press inside
+    // released on the backdrop, such as to select text, lands its click there too.
+    if (!pressedBackdrop || !this.isOnBackdrop(event)) return;
 
     this.requestHide();
   }
@@ -103,6 +121,24 @@ export default class AwcDialogElement extends OpenableElement {
       this.dialog.close();
     }
     this.showOverflow();
+  }
+
+  private recordPress = (event: MouseEvent) => {
+    if (event.currentTarget !== this) return;
+    // A press with a button other than the primary one ends in no click, so it would linger.
+    this.pressedBackdrop = event.button === 0 && this.isOnBackdrop(event);
+  };
+
+  /**
+   * Whether `event` landed on the backdrop: on the `<dialog>` itself, outside its box. Only the top most dialog in the
+   * stack has its backdrop under the pointer, so a nested dialog's backdrop doesn't count for this one.
+   */
+  private isOnBackdrop(event: MouseEvent) {
+    if (event.target !== this.dialog) return false;
+    const rect = this.dialog.getBoundingClientRect();
+    return (
+      event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom
+    );
   }
 
   private hideOverflow() {

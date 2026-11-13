@@ -782,21 +782,15 @@ describe('awc-popover', () => {
       expect(events).to.eql(['nested:hide', 'nested:hidden']);
     });
 
+    /** Appends an element with an open shadow root to `panel`, and returns the span inside that root. */
+    function appendShadowSpan(panel: HTMLElement) {
+      const shadowHost = panel.appendChild(document.createElement('div'));
+      return shadowHost.attachShadow({ mode: 'open' }).appendChild(document.createElement('span'));
+    }
+
     it('stays open when a click inside a shadow root in it hides a popover nested in it', async () => {
-      if (!customElements.get('test-shadow-content')) {
-        customElements.define(
-          'test-shadow-content',
-          class extends HTMLElement {
-            constructor() {
-              super();
-              this.attachShadow({ mode: 'open' }).innerHTML = '<span>Shadow</span>';
-            }
-          },
-        );
-      }
       const { parent, nested } = await nestedFixture();
-      parent.panel.append(document.createElement('test-shadow-content'));
-      const span = parent.querySelector('test-shadow-content')!.shadowRoot!.querySelector('span')!;
+      const span = appendShadowSpan(parent.panel);
 
       span.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, composed: true }));
       span.click();
@@ -804,6 +798,21 @@ describe('awc-popover', () => {
 
       expect(nested.open).to.equal(false);
       expect(parent.open).to.equal(true);
+    });
+
+    it('stays open when a press inside a shadow root in it, released outside it, hides a popover nested in it', async () => {
+      const { parent, nested } = await nestedFixture();
+      const span = appendShadowSpan(parent.panel);
+      const events = recordEventsOf({ parent, nested });
+
+      span.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, composed: true }));
+      // Released elsewhere, the click lands on what the press and the release have in common.
+      document.body.click();
+      await settle();
+
+      expect(nested.open).to.equal(false);
+      expect(parent.open).to.equal(true);
+      expect(events).to.eql(['nested:hide', 'nested:hidden']);
     });
 
     it('waits for the popovers nested in it to close before asking itself when its close button is pressed', async () => {
