@@ -53,6 +53,27 @@ describe('ModalDialogStack', () => {
     stop();
   });
 
+  it('takes a dialog closed and opened again in one task for the topmost, and tells its watcher', async () => {
+    const { stack, first, second } = await setup();
+    let changes = 0;
+    const stop = stack.watch(() => changes++);
+    first.showModal();
+    await heard();
+    second.showModal();
+    await heard();
+    const before = changes;
+
+    first.close();
+    first.showModal();
+    await heard();
+
+    expect(stack.topmost() === first).to.be.true;
+    expect(changes).to.be.greaterThan(before);
+    first.close();
+    second.close();
+    stop();
+  });
+
   it('tells its watcher as a dialog opens and as it closes, until it is stopped', async () => {
     const { stack, first } = await setup();
     let changes = 0;

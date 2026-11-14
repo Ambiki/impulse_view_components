@@ -935,6 +935,27 @@ describe('<awc-toast-region> over modal dialogs', () => {
     dialog.dialog.close();
   });
 
+  it('follows a dialog that closes and opens again in one task, above the one that was on top', async () => {
+    const container = await fixture<HTMLDivElement>(`<div>${dialogHtml()}${dialogHtml()}${regionHtml()}</div>`);
+    const [first, second] = Array.from(container.querySelectorAll('awc-dialog'));
+    const region = container.querySelector('awc-toast-region')!;
+    await Promise.all([region, first, second].map((element) => whenInitialized(element)));
+    const toast = (await showToast('Copied', { duration: Infinity }))!;
+    first.dialog.showModal();
+    await moved();
+    second.dialog.showModal();
+    await moved();
+
+    first.dialog.close();
+    first.dialog.showModal();
+    await moved();
+
+    expect(region.parentElement === first.dialog).to.be.true;
+    expect(pressable(closeButton(toast))).to.be.true;
+    first.dialog.close();
+    second.dialog.close();
+  });
+
   it('leaves with its page while a dialog is open, without showing itself again', async () => {
     const container = await fixture<HTMLDivElement>(`<div><dialog open></dialog><div id="page">${regionHtml()}</div></div>`);
     const region = container.querySelector('awc-toast-region')!;

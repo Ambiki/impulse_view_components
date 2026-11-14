@@ -5,7 +5,7 @@
  *
  * The DOM doesn't say which modal dialog is on top, so the stack records each one as it opens.
  */
-import { connected } from '@ambiki/impulse';
+import { connected, on } from '@ambiki/impulse';
 
 export default class ModalDialogStack {
   /** The open modal dialogs, in the order they opened: the last one is on top. */
@@ -28,11 +28,30 @@ export default class ModalDialogStack {
    * watch won't be there to report it.
    */
   watch(onChange: () => void) {
-    return connected('dialog[open]', (dialog: HTMLDialogElement) => {
+    const stopWatching = connected('dialog[open]', (dialog: HTMLDialogElement) => {
       this.record(dialog);
       onChange();
       return onChange;
     });
+    // A dialog closed and opened again in one task was open whenever the watch looked, so it reports neither. The
+    // dialog's `close` still comes, and finds it open: it is then the one opened last. Captured, as `close` doesn't
+    // bubble.
+    const stopListening = on(
+      'close',
+      'dialog',
+      (event) => {
+        const dialog = event.currentTarget as HTMLDialogElement;
+        if (!dialog.matches(':modal')) return;
+        this.dialogs = this.dialogs.filter((other) => other !== dialog);
+        this.dialogs.push(dialog);
+        onChange();
+      },
+      { capture: true },
+    );
+    return () => {
+      stopListening();
+      stopWatching();
+    };
   }
 
   /** Records `dialog` as the topmost one when it is modal and newly open. */
