@@ -1,5 +1,5 @@
 ---
-status: accepted, superseded in part by ADR 0012
+status: accepted, superseded in part by ADRs 0012 and 0023
 ---
 
 # One import path per thing, shared by JS and Sass

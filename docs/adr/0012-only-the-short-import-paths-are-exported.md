@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: accepted, superseded in part by ADR 0023
 ---
 
 # Only the short import paths are exported

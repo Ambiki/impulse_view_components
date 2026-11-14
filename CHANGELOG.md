@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- `cycle`, `debounce` and `scrollLock` from `@ambiki/impulse-view-components/helpers` ([#435](https://github.com/Ambiki/impulse_view_components/pull/435))
 - `Impulse::ToastRegionComponent`, `Impulse::ToastComponent`, `showToast()` and `showToast.promise()` from `@ambiki/impulse-view-components/toast`: short messages in one region per page, which moves into an open modal dialog so its toasts stay usable ([#421](https://github.com/Ambiki/impulse_view_components/pull/421))
 - `Impulse::AjaxSelectComponent` takes its default error from the `impulse.autocomplete.error` translation ([#420](https://github.com/Ambiki/impulse_view_components/pull/420))
 - `Impulse::SelectComponent` and `AjaxSelectComponent` take their default blankslate from the `impulse.autocomplete.blankslate` translation, and `TimeZoneSelectComponent` from `impulse.time_zone_select.blankslate` ([#419](https://github.com/Ambiki/impulse_view_components/pull/419))
@@ -24,6 +25,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Fixed `<awc-dialog>`, and `scrollLock`, leaving the page unable to scroll after two dialogs closed in the order they opened ([#435](https://github.com/Ambiki/impulse_view_components/pull/435))
 - Fixed `<awc-dialog>` closing when a press inside it is released on the backdrop. It closes only when the press and the release both land there ([#417](https://github.com/Ambiki/impulse_view_components/pull/417))
 - Fixed `useOutsideClick`, and so `<awc-popover>`, counting a press inside a shadow root in a boundary as outside when released outside it ([#417](https://github.com/Ambiki/impulse_view_components/pull/417))
 

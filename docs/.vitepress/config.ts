@@ -196,6 +196,16 @@ only ship what you use.`,
           },
         ],
       },
+      {
+        text: 'Helpers',
+        collapsed: false,
+        items: [
+          {
+            text: 'See all',
+            link: '/helpers/',
+          },
+        ],
+      },
     ],
     editLink: {
       pattern: 'https://github.com/Ambiki/impulse_view_components/edit/main/docs/:path',

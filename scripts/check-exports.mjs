@@ -101,6 +101,7 @@ const scriptSpecifiers = [
   pkg.name,
   ...elementDirs.map((name) => subpath(elementName(name))),
   subpath('hooks'),
+  subpath('helpers'),
 ];
 
 for (const specifier of scriptSpecifiers) {
@@ -223,6 +224,11 @@ function bundle(contents) {
     imports: output.imports.map((entry) => entry.path),
   };
 }
+
+check(`bundle: one helper from ${subpath('helpers')}`, () => {
+  const { modules } = bundle(`import { cycle } from '${subpath('helpers')}'; cycle;`);
+  assert.deepEqual(modules.filter((file) => /debounce|scroll_lock/.test(file)), [], 'bundles helpers it does not import');
+});
 
 check(`bundle: one hook from ${subpath('hooks')}`, () => {
   const { modules, imports } = bundle(`import { useOutsideClick } from '${subpath('hooks')}'; useOutsideClick;`);

@@ -1,7 +1,7 @@
 import type AwcToastRegionElement from './region';
 import { property, registerElement, whenInitialized } from '@ambiki/impulse';
-import uniqueId from 'src/helpers/unique_id';
 import OpenableElement from 'src/internal/openable_element';
+import uniqueId from 'src/internal/unique_id';
 import { tabbable } from 'tabbable';
 
 export type ToastVariant = 'info' | 'success' | 'warning' | 'danger';
