@@ -802,6 +802,32 @@ describe('<awc-toast-region> keyboard', () => {
     expect(region.paused).to.be.false;
   });
 
+  it('returns focus to where it came from when a press closes a toast, and carries on with the other toasts’ timers', async () => {
+    const { region, button, newer } = await setup();
+    const close = closeButton(newer);
+
+    // As a press of the pointer does: the close button takes focus, then is clicked.
+    close.focus();
+    close.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 }));
+    await nextFrame();
+
+    expect(document.activeElement === button).to.be.true;
+    expect(region.paused).to.be.false;
+  });
+
+  it('moves focus to the next toast when the keyboard presses a toast’s close button', async () => {
+    const { region, older, newer } = await setup();
+    const close = closeButton(newer);
+
+    // As Enter does on the close button: a click that no pointer made.
+    close.focus();
+    close.click();
+    await nextFrame();
+
+    expect(document.activeElement === older).to.be.true;
+    expect(region.paused).to.be.true;
+  });
+
   it('returns focus to where it came from when a toast tabbed into hides', async () => {
     const { region, button, older } = await setup();
 

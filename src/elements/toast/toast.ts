@@ -26,6 +26,11 @@ function animationsFinished(element: Element) {
   return Promise.all(element.getAnimations().map((animation) => animation.finished.catch(() => undefined)));
 }
 
+/** Whether `event` is the click of a pointer: one the keyboard or code makes has no presses to count. */
+function isPointerPress(event?: Event) {
+  return event instanceof MouseEvent && event.detail > 0;
+}
+
 @registerElement('awc-toast')
 export default class AwcToastElement extends OpenableElement {
   /**
@@ -186,11 +191,14 @@ export default class AwcToastElement extends OpenableElement {
   }
 
   /** Stops the timer and, unless the toast is moving with its region, fades it out. */
-  protected async closeParts() {
+  protected async closeParts(event?: Event) {
     this.pauseTimer();
     if (!this.isConnected) return;
-    // Focus inside it moves on before it is removed.
-    if (this.contains(document.activeElement)) this.region?.moveFocusFrom(this);
+    // Focus inside it moves on before it is removed: to the next toast from the keyboard, which is going through them,
+    // and back to where it was after a press, which only put it on the close button.
+    if (this.contains(document.activeElement)) {
+      this.region?.moveFocusFrom(this, { toNeighbour: !isPointerPress(event) });
+    }
     this.classList.remove(ENTERING_CLASS);
     this.classList.add(LEAVING_CLASS);
     await animationsFinished(this);

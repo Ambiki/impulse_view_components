@@ -156,14 +156,15 @@ export default class AwcToastRegionElement extends ImpulseElement {
 
   /**
    * Moves focus out of `toast`, which is hiding: to the toast before it, else the one after it, else back to where it
-   * was before it moved into the region.
+   * was before it moved into the region. Without `toNeighbour`, straight back: focus left in the region would keep
+   * the other toasts' timers paused for a user who isn't going through them.
    * @internal
    */
-  moveFocusFrom(toast: AwcToastElement) {
+  moveFocusFrom(toast: AwcToastElement, { toNeighbour = true } = {}) {
     // The hiding toast among the open ones, to find its neighbours by.
     const open = this.toasts.filter((element) => element === toast || element.open);
     const index = open.indexOf(toast);
-    const next = open[index - 1] ?? open[index + 1];
+    const next = toNeighbour ? (open[index - 1] ?? open[index + 1]) : undefined;
     if (next) {
       next.focus();
     } else {
