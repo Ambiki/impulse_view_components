@@ -1,9 +1,9 @@
 import type { UseFloatingUIType } from 'src/hooks/use_floating_ui';
 import type { AutocompleteEventArgs, AutocompleteEventMap, AutocompleteEventName } from './events';
-import Combobox from '@ambiki/combobox';
 import { property, registerElement, target, targets } from '@ambiki/impulse';
 import useFloatingUI from 'src/hooks/use_floating_ui';
 import useOutsideClick from 'src/hooks/use_outside_click';
+import Combobox from 'src/internal/combobox';
 import { isLooselyFocusable } from 'src/internal/focus';
 import OpenableElement from 'src/internal/openable_element';
 import AjaxSearch from './ajax_search';
@@ -124,6 +124,9 @@ export default class AwcAutocompleteElement<
   @targets() tagDismissButtons: HTMLButtonElement[];
   @targets() groups: HTMLElement[];
 
+  /**
+   * @private
+   */
   combobox: Combobox;
   /**
    * @private
@@ -175,7 +178,12 @@ export default class AwcAutocompleteElement<
       },
     });
 
-    this.combobox = new Combobox(this.input, this.listbox, { multiple: this.multiple });
+    this.combobox = new Combobox({
+      input: this.input,
+      list: this.listbox,
+      tabCommits: true,
+      onCommit: (option, event) => this.commit(option, event),
+    });
     this.selectVariant = this.multiple ? new MultipleSelect(this) : new SingleSelect(this);
     this.selectVariant.connected();
     this.searchVariant = this.src ? new AjaxSearch(this) : new LocalSearch(this);
@@ -270,11 +278,7 @@ export default class AwcAutocompleteElement<
       this.requestShow();
     }
 
-    if (this.firstFocus && this.input.value) {
-      this.input.select();
-    }
-
-    this.firstFocus = false;
+    this.selectTextOnFirstFocus();
   }
 
   /**
@@ -337,20 +341,6 @@ export default class AwcAutocompleteElement<
         }
         break;
     }
-  }
-
-  /**
-   * Handles the `combobox:commit` event from the combobox.
-   * @private
-   */
-  handleCommit(event: Event) {
-    event.stopPropagation();
-    const option = event.target;
-    if (!(option instanceof HTMLElement)) return;
-
-    this.selectVariant.select(option);
-    const detail = optionEventDetail(option);
-    this.emitEvent('commit', { ...detail, selected: this.selectVariant.isSelected(detail.value) });
   }
 
   /**
@@ -500,11 +490,38 @@ export default class AwcAutocompleteElement<
   /** Hides the listbox. */
   protected async closeParts() {
     this.combobox.stop();
+    // The options only say what is selected while the listbox is open: `selectVariant.start` marks them on opening.
+    for (const option of this.options) {
+      this.markSelected(option, false);
+    }
     this.selectVariant.stop();
     this.searchVariant.stop();
     this.removeAttribute('no-options');
     this.removeAttribute('error');
     await this.floatingUI.stop();
+  }
+
+  /** Selects or deselects the option the user committed, as the select variant decides, and reports it. */
+  private commit(option: HTMLElement, event: KeyboardEvent | MouseEvent) {
+    this.selectVariant.select(option);
+    const detail = optionEventDetail(option);
+    this.emitEvent('commit', { ...detail, selected: this.selectVariant.isSelected(detail.value) });
+    // A click on an option reaches `handleClick`, which does this. A key press doesn't.
+    if (event instanceof KeyboardEvent) {
+      this.selectTextOnFirstFocus();
+    }
+  }
+
+  /**
+   * Selects the input's text the first time the user acts on the element since it took focus, so that typing replaces
+   * the text.
+   */
+  private selectTextOnFirstFocus() {
+    if (this.firstFocus && this.input.value) {
+      this.input.select();
+    }
+
+    this.firstFocus = false;
   }
 
   private removeLastTag(): HTMLElement | undefined {
@@ -526,6 +543,15 @@ export default class AwcAutocompleteElement<
    */
   checkIfListIsEmpty() {
     this.toggleAttribute('no-options', this.visibleOptions.length === 0);
+  }
+
+  /**
+   * Marks `option` as a selected option or not. The select variants decide which options are selected, and the
+   * combobox knows nothing of it.
+   * @private
+   */
+  markSelected(option: HTMLElement, selected: boolean) {
+    option.setAttribute('aria-selected', String(selected));
   }
 
   /**

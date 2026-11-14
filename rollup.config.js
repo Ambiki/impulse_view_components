@@ -26,7 +26,7 @@ export default [
         preserveModulesRoot: 'src',
       },
     ],
-    external: ['@ambiki/combobox', '@ambiki/impulse', '@floating-ui/dom', 'tabbable'],
+    external: ['@ambiki/impulse', '@floating-ui/dom', 'tabbable'],
     plugins: [
       resolve(),
       typescript({ tsconfig: './tsconfig.prod.json' }),

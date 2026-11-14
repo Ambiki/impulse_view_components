@@ -76,7 +76,7 @@ function autocompleteHtml({
 
   return `
     <awc-autocomplete ${multiple ? 'multiple' : ''} ${open ? 'open' : ''} ${src ? `src="${src}"` : ''} ${attributes}
-      data-action="mousedown->awc-autocomplete#handleMousedown click->awc-autocomplete#handleClick combobox:commit->awc-autocomplete#handleCommit">
+      data-action="mousedown->awc-autocomplete#handleMousedown click->awc-autocomplete#handleClick">
       <div class="awc-autocomplete-control" data-target="awc-autocomplete.control" data-trigger>
         ${selection}
         <input class="awc-autocomplete-input" type="text" autocomplete="off" value="${multiple ? '' : (singleSelection?.text ?? '')}"
@@ -763,6 +763,15 @@ describe('AwcAutocompleteElement', () => {
       });
     }
 
+    it('should say on the listbox, not the input, that several options can be selected', async () => {
+      const el = await autocompleteFixture({ multiple: true, options: FRUITS });
+      const single = await autocompleteFixture({ options: FRUITS });
+
+      expect(el.listbox.getAttribute('aria-multiselectable')).to.equal('true');
+      expect(el.input.hasAttribute('aria-multiselectable')).to.equal(false);
+      expect(single.listbox.hasAttribute('aria-multiselectable')).to.equal(false);
+    });
+
     it('should add a tag for each value, reading its text from the option', async () => {
       const el = await autocompleteFixture({ multiple: true, options: FRUITS });
 
@@ -877,6 +886,17 @@ describe('AwcAutocompleteElement', () => {
         expect(el.open).to.equal(false);
       });
     }
+
+    it('should select the committed text after a keyboard commit, so that typing replaces it', async () => {
+      const el = await autocompleteFixture({ options: FRUITS });
+      pressInput(el);
+      el.activate(el.options[1]);
+
+      pressKey(el, 'Enter');
+
+      expect(el.input.value).to.equal('Banana');
+      expect([el.input.selectionStart, el.input.selectionEnd]).to.eql([0, 6]);
+    });
 
     it('should keep Enter from submitting its form only while open', async () => {
       const el = await autocompleteFixture({ options: FRUITS });
@@ -1194,6 +1214,23 @@ describe('AwcAutocompleteElement', () => {
 
       expect(stub.urls).to.have.length(2);
       expect(valuesOf(el)).to.eql(['1', '2', '3']);
+    });
+
+    it('should leave no option active when the options it reopens with hold none', async () => {
+      const el = await autocompleteFixture({ src: '/fruits' });
+      const stub = stubFetch();
+      pressInput(el);
+      await requested(stub);
+      await respondAndWait(el, stub, '<p>Type to search</p>');
+      type(el, 'ap');
+      await requested(stub, 2);
+      await respondAndWait(el, stub, optionsHtml([FRUITS[0]]));
+      await el.hide();
+
+      pressInput(el);
+
+      expect(el.options).to.eql([]);
+      expect(el.input.hasAttribute('aria-activedescendant')).to.equal(false);
     });
 
     it('should commit nothing on Enter after a paste, until the options for it arrive', async () => {

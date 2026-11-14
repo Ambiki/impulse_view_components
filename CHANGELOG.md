@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- `<awc-autocomplete>` is built on the package's own combobox, and `@ambiki/combobox` is no longer a dependency. Home and End move the caret in its input, where they moved to the first and last option ([#438](https://github.com/Ambiki/impulse_view_components/pull/438))
 - `impulse_view_components` depends on view_component `~> 4.24.0`, up from `~> 4.17.0` ([#430](https://github.com/Ambiki/impulse_view_components/pull/430))
 - **Breaking:** `Impulse::PopoverComponent` takes a required `title:`, and `with_header` and `with_body` on itself, as `Impulse::DialogComponent` does. `with_panel` and `header.with_title` are removed ([#416](https://github.com/Ambiki/impulse_view_components/pull/416))
 - `<awc-dialog>` scales in with `@starting-style`, scales out where the browser supports `overlay`, and doesn't animate under `prefers-reduced-motion` ([#415](https://github.com/Ambiki/impulse_view_components/pull/415))
@@ -25,6 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Fixed a multiple `<awc-autocomplete>` putting `aria-multiselectable` on its input, where it isn't allowed, and not on its listbox ([#438](https://github.com/Ambiki/impulse_view_components/pull/438))
 - Fixed `<awc-dialog>`, and `scrollLock`, leaving the page unable to scroll after two dialogs closed in the order they opened ([#435](https://github.com/Ambiki/impulse_view_components/pull/435))
 - Fixed `<awc-dialog>` closing when a press inside it is released on the backdrop. It closes only when the press and the release both land there ([#417](https://github.com/Ambiki/impulse_view_components/pull/417))
 - Fixed `useOutsideClick`, and so `<awc-popover>`, counting a press inside a shadow root in a boundary as outside when released outside it ([#417](https://github.com/Ambiki/impulse_view_components/pull/417))

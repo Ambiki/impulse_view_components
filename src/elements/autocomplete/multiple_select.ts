@@ -20,6 +20,7 @@ export default class MultipleSelect implements SelectVariant {
       array.push({ value, text: hiddenField.getAttribute('data-text') || '' });
       return array;
     }, []);
+    this.autocomplete.listbox.setAttribute('aria-multiselectable', 'true');
   }
 
   start() {
@@ -62,7 +63,7 @@ export default class MultipleSelect implements SelectVariant {
 
     const option = this.autocomplete.options.find(this.findByValue(value));
     if (option) {
-      this.autocomplete.combobox.select(option);
+      this.autocomplete.markSelected(option, true);
     }
   }
 
@@ -78,7 +79,7 @@ export default class MultipleSelect implements SelectVariant {
     this.required = this.autocomplete.required;
     const option = this.autocomplete.options.find(this.findByValue(value));
     if (option) {
-      this.autocomplete.combobox.deselect(option);
+      this.autocomplete.markSelected(option, false);
     }
   }
 
@@ -99,11 +100,7 @@ export default class MultipleSelect implements SelectVariant {
   private selectOrDeselectOptions() {
     for (const option of this.autocomplete.options) {
       const value = option.getAttribute('value');
-      if (value && this.selectedValues.has(value)) {
-        this.autocomplete.combobox.select(option);
-      } else {
-        this.autocomplete.combobox.deselect(option);
-      }
+      this.autocomplete.markSelected(option, Boolean(value && this.selectedValues.has(value)));
     }
   }
 
