@@ -126,10 +126,13 @@ below.
 | `import useFocusOut from '…/dist/hooks/use_focus_out'`           | `import { useFocusOut } from '@ambiki/impulse-view-components/hooks'`          |
 | `@import '~…/dist/elements/<name>'`                              | `@import '@ambiki/impulse-view-components/<name>'`                             |
 | `@import '~…/dist/styles/variables'` and `'~…/dist/styles/base'` | `@import '@ambiki/impulse-view-components/base'`                               |
-| Any `…/dist/helpers/*`, or `…/dist/elements/autocomplete/<module>` such as `ajax_search` | None. These modules are internal. |
+| `import { cycle } from '…/dist/helpers/array'`                   | `import { cycle } from '@ambiki/impulse-view-components/helpers'`              |
+| `import debounce from '…/dist/helpers/debounce'`                 | `import { debounce } from '@ambiki/impulse-view-components/helpers'`           |
+| `import scrollLock from '…/dist/helpers/scroll_lock'`            | `import { scrollLock } from '@ambiki/impulse-view-components/helpers'`         |
+| Any other `…/dist/helpers/*`, or `…/dist/elements/autocomplete/<module>` such as `ajax_search` | None. These modules are internal. |
 
 The Sass rows need a setup that reads the package's `exports`. A setup that only passes `--load-path` keeps importing
 the files, as [Import the styles](#import-the-styles) shows.
 
 Each element path exports its class by name, such as `AwcPopoverElement`, along with the types its properties use.
-`…/hooks` exports the types the hooks take and return.
+`…/hooks` exports the types the hooks take and return, and `…/helpers` the [helpers](/helpers/) apps can use.

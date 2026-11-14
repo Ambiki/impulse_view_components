@@ -1,8 +1,8 @@
-import type { Cancelable } from 'src/helpers/debounce';
+import type { Cancelable } from 'src/internal/debounce';
 import type { AjaxEventName } from './events';
 import type AwcAutocompleteElement from './index';
 import type { SearchVariant } from './index';
-import debounce from 'src/helpers/debounce';
+import debounce from 'src/internal/debounce';
 import { AJAX_EVENT_INIT } from './events';
 
 export default class AjaxSearch implements SearchVariant {

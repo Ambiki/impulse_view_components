@@ -1,6 +1,6 @@
 import { on, property, registerElement, target } from '@ambiki/impulse';
-import scrollLock from 'src/helpers/scroll_lock';
 import OpenableElement from 'src/internal/openable_element';
+import scrollLock from 'src/internal/scroll_lock';
 
 @registerElement('awc-dialog')
 export default class AwcDialogElement extends OpenableElement {

@@ -3,7 +3,23 @@
  * It is internal: the package's `exports` map doesn't list it. See
  * docs/adr/0004-popovers-use-the-top-layer-and-manage-focus.md.
  */
-import { focusable, tabbable } from 'tabbable';
+import { focusable, isFocusable, tabbable } from 'tabbable';
+
+/**
+ * Whether `element`, or an element around it, can take focus, or is marked `data-loosely-focusable`.
+ */
+export function isLooselyFocusable(element: HTMLElement) {
+  let target: HTMLElement | null = element;
+  while (target !== null) {
+    if (isFocusable(target) || target.hasAttribute('data-loosely-focusable')) {
+      return true;
+    }
+
+    target = target.parentElement;
+  }
+
+  return false;
+}
 
 /**
  * Moves focus into `container`, as a non-modal dialog does when it opens: to its element with `autofocus`, else the

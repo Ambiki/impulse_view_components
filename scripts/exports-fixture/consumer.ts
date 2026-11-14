@@ -67,6 +67,9 @@ import type {
   VirtualAnchor,
 } from '@ambiki/impulse-view-components/hooks';
 
+import { cycle, debounce, scrollLock } from '@ambiki/impulse-view-components/helpers';
+import type { Cancelable } from '@ambiki/impulse-view-components/helpers';
+
 import type { VirtualElement } from '@floating-ui/dom';
 
 export const used = {
@@ -274,3 +277,14 @@ export const notFloatingUIControls: UseFloatingUIType = { start: true, update: t
 export const notFocusOutOptions: UseFocusOutOptions = {};
 // @ts-expect-error: outside-click options need boundaries and a callback
 export const notOutsideClickOptions: UseOutsideClickOptions = {};
+
+// The helpers path types its functions, and the type a debounced function carries.
+export const cycled: string = cycle(['pen', 'pencil'], 'pen', 1);
+// @ts-expect-error: cycle steps by 1 or -1
+export const notACycleStep = cycle(['pen'], 'pen', 2);
+export const debounced: ((value: string) => number) & Cancelable = debounce((value: string) => value.length, 10);
+// @ts-expect-error: a debounced function keeps its parameters
+export const notDebouncedArguments = debounced(1);
+export const lock: AbortController = scrollLock(document.body);
+// @ts-expect-error: a scroll lock takes an element
+export const notAScrollLock = scrollLock('body');
