@@ -86,6 +86,35 @@
     "inside": "behavior tag-template"
   },
   {
+    "tag": "span",
+    "target": null,
+    "actions": [],
+    "behavior": "text",
+    "role": null,
+    "popover": null,
+    "inside": "behavior tag"
+  },
+  {
+    "tag": "button",
+    "target": "awc-autocomplete.tagDismissButtons",
+    "actions": [
+      "click->awc-autocomplete#handleTagRemove"
+    ],
+    "behavior": null,
+    "role": null,
+    "popover": null,
+    "inside": "behavior tag"
+  },
+  {
+    "tag": "input",
+    "target": null,
+    "actions": [],
+    "behavior": "hidden-field",
+    "role": null,
+    "popover": null,
+    "inside": "behavior tag"
+  },
+  {
     "tag": "input",
     "target": "awc-autocomplete.input",
     "actions": [
@@ -127,6 +156,24 @@
     "role": "presentation",
     "popover": null,
     "inside": "target awc-autocomplete.listbox"
+  },
+  {
+    "tag": "div",
+    "target": null,
+    "actions": [],
+    "behavior": null,
+    "role": "option",
+    "popover": null,
+    "inside": "target awc-autocomplete.optionsContainer"
+  },
+  {
+    "tag": "div",
+    "target": null,
+    "actions": [],
+    "behavior": null,
+    "role": "option",
+    "popover": null,
+    "inside": "target awc-autocomplete.optionsContainer"
   },
   {
     "tag": "div",

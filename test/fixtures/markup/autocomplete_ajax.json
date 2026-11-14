@@ -89,5 +89,23 @@
     "role": "none",
     "popover": null,
     "inside": "target awc-autocomplete.listbox"
+  },
+  {
+    "tag": "div",
+    "target": null,
+    "actions": [],
+    "behavior": null,
+    "role": "presentation",
+    "popover": null,
+    "inside": "target awc-autocomplete.listbox"
+  },
+  {
+    "tag": "div",
+    "target": null,
+    "actions": [],
+    "behavior": null,
+    "role": "presentation",
+    "popover": null,
+    "inside": "target awc-autocomplete.listbox"
   }
 ]

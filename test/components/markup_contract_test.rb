@@ -68,7 +68,7 @@ module Impulse
     private
 
     # Every element with a target, an action, a behavior, a role or `popover`, a template's content included, as the
-    # element tests read their own markup. `inside` names what it is nested in: the nearest element around it that has
+    # element tests read their own markup, and as many times as it is rendered. `inside` names what it is nested in: the nearest element around it that has
     # a target or a behavior, or is a custom element.
     def marked_elements(html)
       Nokogiri::HTML.fragment(html).css("*").filter_map do |node|
@@ -83,7 +83,7 @@ module Impulse
           popover: node["popover"],
           inside: node.ancestors.filter_map { |ancestor| name_of(ancestor) }.first
         }
-      end.uniq
+      end
     end
 
     # What an element is known by to the ones nested in it, or `nil` for one they aren't said to be inside.

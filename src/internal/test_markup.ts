@@ -75,9 +75,10 @@ function nameOf(element: Element): string | null {
  * How the hand-written `html` differs from what the component asks of its element, each as a line to read, or none
  * when it doesn't.
  *
- * Targets, behaviors and custom elements have to match both ways: the markup has each one the component renders, marked
- * the same, and none of its own. Anything else that is marked, such as a close button or an option, only has to be
- * something the component renders too, as the markup leaves out what its tests don't need.
+ * Targets, behaviors and custom elements have to match both ways: the markup has each one the component renders, as
+ * many times, marked the same and nested in the same, and none of its own. Anything else that is marked, such as a
+ * close button or an option, only has to be something the component renders too, as the markup leaves out what its
+ * tests don't need.
  */
 export function markupDifferences(html: string, component: MarkedElement[]): string[] {
   const written = byKey(markedElements(html));
@@ -98,11 +99,11 @@ export function markupDifferences(html: string, component: MarkedElement[]): str
   return differences;
 }
 
-function byKey(elements: MarkedElement[]): Map<string, Set<string>> {
-  const map = new Map<string, Set<string>>();
+function byKey(elements: MarkedElement[]): Map<string, string[]> {
+  const map = new Map<string, string[]>();
   for (const element of elements) {
     const key = keyOf(element);
-    map.set(key, (map.get(key) ?? new Set()).add(summarize(element)));
+    map.set(key, [...(map.get(key) ?? []), summarize(element)]);
   }
   return map;
 }
