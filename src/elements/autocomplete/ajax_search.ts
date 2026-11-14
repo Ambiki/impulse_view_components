@@ -18,6 +18,8 @@ export default class AjaxSearch implements SearchVariant {
   private readonly autocomplete: AjaxSearchHost;
   private readonly onOptionsChange: OptionsChangeCallback;
   private abortController?: AbortController;
+  /** The latest query asked for. */
+  private query = '';
   private cachedOptions: string = '';
   // Held in its own field rather than assigned back over `makeRequest`, which would erase `Cancelable` from its type
   // and leave no way to cancel a request that is still waiting out the debounce.
@@ -35,6 +37,7 @@ export default class AjaxSearch implements SearchVariant {
     // The options on show, and any still on their way, are for an older query until the ones for `value` arrive. The
     // controller stays, as the request's `loadstart` still waits for its `loadend`.
     this.pending = true;
+    this.query = value;
     this.abortController?.abort();
     this.debouncedRequest(value);
   }
@@ -48,12 +51,23 @@ export default class AjaxSearch implements SearchVariant {
   }
 
   stop() {
-    //
+    // What the user typed goes as the listbox closes, so the options on their way for it would replace the ones the
+    // listbox opens with, for a query the input no longer holds. A request for no query is left to finish: its options
+    // are the ones the listbox opens with.
+    if (this.query !== '') {
+      this.dropRequest();
+    }
   }
 
   disconnected() {
+    this.dropRequest();
+  }
+
+  /** Drops the request that is waiting out the debounce, or is on its way, and clears up after it. */
+  private dropRequest() {
     const wasRequesting = Boolean(this.abortController);
     this.pending = false;
+    this.query = '';
     this.debouncedRequest.clear();
     this.abortController?.abort();
     this.abortController = undefined;
@@ -90,8 +104,10 @@ export default class AjaxSearch implements SearchVariant {
         if (value === '') {
           this.cachedOptions = options;
         }
-        await this.insertOptions(options);
+        // The request is answered: from here on there is none to drop, though the element is still catching up with its
+        // options. The listbox closing meanwhile would otherwise end it, and it would then end again below.
         this.abortController = undefined;
+        await this.insertOptions(options);
         this.emit('load');
 
         this.autocomplete.removeAttribute('loading');

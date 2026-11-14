@@ -28,6 +28,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Fixed an ajax `<awc-autocomplete>` showing the options for what the user had typed after its listbox closed and opened again, and requesting them once it had closed ([#451](https://github.com/Ambiki/impulse_view_components/pull/451))
 - Fixed `<awc-popover>` staying open, and `useFocusOut` not calling back, when a right click moves focus to a field outside ([#448](https://github.com/Ambiki/impulse_view_components/pull/448))
 - Fixed a required `<awc-autocomplete>` losing `required` on its input after a DOM morph, so that its form could be submitted empty ([#441](https://github.com/Ambiki/impulse_view_components/pull/441))
 - Fixed a multiple `<awc-autocomplete>` going by the selection it had before a DOM morph: it selected options whose tags were gone, and committing one deselected nothing ([#441](https://github.com/Ambiki/impulse_view_components/pull/441))
