@@ -104,8 +104,10 @@ export default class AjaxSearch implements SearchVariant {
         if (value === '') {
           this.cachedOptions = options;
         }
-        await this.insertOptions(options);
+        // The request is answered: from here on there is none to drop, though the element is still catching up with its
+        // options. The listbox closing meanwhile would otherwise end it, and it would then end again below.
         this.abortController = undefined;
+        await this.insertOptions(options);
         this.emit('load');
 
         this.autocomplete.removeAttribute('loading');

@@ -1436,6 +1436,25 @@ describe('AwcAutocompleteElement', () => {
       expect(events).to.eql(['loadend']);
     });
 
+    it('should emit load and loadend once each when it closes as the response puts its options in', async () => {
+      const el = await autocompleteFixture({ src: '/fruits' });
+      const stub = stubFetch();
+      pressInput(el);
+      await requested(stub);
+      await respondAndWait(el, stub, optionsHtml(FRUITS));
+      type(el, 'Ch');
+      await requested(stub, 2);
+      const events = recordAjaxEvents(el);
+      const observer = new MutationObserver(() => el.hide());
+      observer.observe(el.optionsContainer, { childList: true });
+
+      await respondAndWait(el, stub, optionsHtml([FRUITS[2]]));
+      observer.disconnect();
+      await aTimeout(0);
+
+      expect(events).to.eql(['load', 'loadend']);
+    });
+
     it('should leave `no-options` off when an empty response lands after it closed', async () => {
       const el = await autocompleteFixture({ src: '/fruits' });
       const stub = stubFetch();
