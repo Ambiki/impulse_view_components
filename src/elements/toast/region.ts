@@ -16,7 +16,7 @@ type PauseReason = 'hover' | 'focus' | 'window blur' | 'tab hidden';
 export interface ToastOptions {
   /** What kind of message the toast is. Defaults to `info`. */
   variant?: ToastVariant;
-  /** The toast's `id`. */
+  /** The toast's `id`. Without one, the toast takes one of its own as it shows. */
   id?: string;
   /** How long, in milliseconds, the toast shows; `Infinity` keeps it until it is dismissed. */
   duration?: number;
@@ -82,7 +82,7 @@ export default class AwcToastRegionElement extends ImpulseElement {
     on('focusout', this.localName, this.handleFocusout, { signal });
     // Follows a dialog as it opens, and once it closes. The move waits for the watch to finish, as moving the region
     // stops it.
-    this.stopWatchingDialogs = this.modalDialogs.watch(() => queueMicrotask(this.followTopmostModalDialog));
+    this.stopWatchingDialogs = this.modalDialogs.watch(() => queueMicrotask(this.handleDialogsChange));
     document.addEventListener('keydown', this.handleHotkey, { signal });
     window.addEventListener('blur', () => this.setPaused('window blur', true), { signal });
     window.addEventListener('focus', () => this.setPaused('window blur', false), { signal });
@@ -160,7 +160,7 @@ export default class AwcToastRegionElement extends ImpulseElement {
    * the other toasts' timers paused for a user who isn't going through them.
    * @internal
    */
-  moveFocusFrom(toast: AwcToastElement, { toNeighbour = true } = {}) {
+  moveFocusFrom(toast: AwcToastElement, { toNeighbour }: { toNeighbour: boolean }) {
     // The hiding toast among the open ones, to find its neighbours by.
     const open = this.toasts.filter((element) => element === toast || element.open);
     const index = open.indexOf(toast);
@@ -179,12 +179,9 @@ export default class AwcToastRegionElement extends ImpulseElement {
    * @internal
    */
   raise() {
-    if (!supportsPopover() || !this.matches(':popover-open')) return;
+    if (!supportsPopover()) return;
     const others = Array.from(document.querySelectorAll(':popover-open'));
-    if (!others.some((popover) => popover !== this && !this.contains(popover))) return;
-    // Hidden and shown in one go, focus in a toast stays where it is.
-    this.hidePopover();
-    this.showPopover();
+    if (others.some((popover) => popover !== this && !this.contains(popover))) this.showAgain();
   }
 
   /**
@@ -197,9 +194,30 @@ export default class AwcToastRegionElement extends ImpulseElement {
   }
 
   /**
-   * Moves the region into the topmost open modal dialog, or back to where the layout rendered it once none is open, and
-   * shows it in the top layer. A modal dialog makes everything outside it inert, toasts in the top layer above it too,
-   * so they couldn't be pressed or heard (ADR 0022).
+   * Shows the open region again, above whatever has entered the top layer since it showed. Not while one of its
+   * toasts has a popover open, which belongs above the region and would end up under it.
+   */
+  private showAgain() {
+    if (!supportsPopover() || !this.matches(':popover-open') || this.querySelector(':popover-open')) return;
+    // Hidden and shown in one go, focus in a toast stays where it is.
+    this.hidePopover();
+    this.showPopover();
+  }
+
+  /**
+   * Follows the dialogs once one has opened or closed. A region that stays in its dialog shows itself again: the
+   * dialog may have closed and opened again, and would then be above the region in the top layer.
+   */
+  private handleDialogsChange = () => {
+    const parent = this.parentElement;
+    this.followTopmostModalDialog();
+    if (this.parentElement === parent && parent?.matches('dialog:modal')) this.showAgain();
+  };
+
+  /**
+   * Moves the region into the topmost open modal dialog, or back to where the layout rendered it, or the app has moved
+   * it since, once none is open, and shows it in the top layer. A modal dialog makes everything outside it inert,
+   * toasts in the top layer above it too, so they couldn't be pressed or heard (ADR 0022).
    */
   private followTopmostModalDialog = () => {
     const target = this.modalDialogs.topmost() ?? this.layoutParent;

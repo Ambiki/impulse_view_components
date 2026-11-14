@@ -27,9 +27,9 @@ function animationsFinished(element: Element) {
   return Promise.all(element.getAnimations().map((animation) => animation.finished.catch(() => undefined)));
 }
 
-/** Whether `event` is the click of a pointer: one the keyboard or code makes has no presses to count. */
-function isPointerPress(event?: Event) {
-  return event instanceof MouseEvent && event.detail > 0;
+/** Whether `event` comes from the keyboard: a key, or the click it makes on a button, which has no presses to count. */
+function isFromKeyboard(event?: Event) {
+  return event instanceof KeyboardEvent || (event instanceof MouseEvent && event.detail === 0);
 }
 
 @registerElement('awc-toast')
@@ -126,7 +126,6 @@ export default class AwcToastElement extends OpenableElement {
       }
     }
     this.region?.raise();
-    this.pauseTimer();
     this.startOver();
   }
 
@@ -135,10 +134,7 @@ export default class AwcToastElement extends OpenableElement {
    * @private
    */
   durationChanged() {
-    if (!this.opened) return;
-    this.pauseTimer();
-    this.remaining = this.timeout;
-    this.resumeTimer();
+    if (this.opened) this.restartTimer();
   }
 
   /**
@@ -220,9 +216,10 @@ export default class AwcToastElement extends OpenableElement {
     this.pauseTimer();
     if (!this.isConnected) return;
     // Focus inside it moves on before it is removed: to the next toast from the keyboard, which is going through them,
-    // and back to where it was after a press, which only put it on the close button.
+    // and otherwise back to where it was. A press only put it on what was pressed, and code hides a toast whoever is
+    // in it.
     if (this.contains(document.activeElement)) {
-      this.region?.moveFocusFrom(this, { toNeighbour: !isPointerPress(event) });
+      this.region?.moveFocusFrom(this, { toNeighbour: isFromKeyboard(event) });
     }
     this.classList.remove(ENTERING_CLASS);
     this.classList.add(LEAVING_CLASS);
@@ -231,10 +228,16 @@ export default class AwcToastElement extends OpenableElement {
 
   /** Starts the timer from the toast's full duration, and has it announced. */
   private startOver() {
-    this.remaining = this.timeout;
-    this.resumeTimer();
+    this.restartTimer();
     const region = this.region;
     if (region) void whenInitialized(region).then(() => region.announce(this));
+  }
+
+  /** Starts the timer from the toast's full duration, whatever was left of it. */
+  private restartTimer() {
+    this.pauseTimer();
+    this.remaining = this.timeout;
+    this.resumeTimer();
   }
 
   private get region() {

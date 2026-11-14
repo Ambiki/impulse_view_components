@@ -516,6 +516,29 @@ describe('<awc-toast-region>', () => {
       menu.hidePopover();
     });
 
+    it('leaves a popover that one of its toasts opened above it', async () => {
+      const { menu } = await setup();
+      const template = await fixture<HTMLTemplateElement>(
+        `<template>${toastHtml(
+          'duration="Infinity"',
+          'Event deleted. <span id="options" popover="manual" style="position: fixed; inset: 0; width: 100vw; height: 100vh; margin: 0; padding: 0; border: 0">Options</span>',
+        )}</template>`,
+      );
+      const withOptions = (await showToast(template))!;
+      const options = withOptions.querySelector<HTMLElement>('#options')!;
+      menu.showPopover();
+      options.showPopover();
+
+      const toast = (await showToast('Copied', { duration: Infinity }))!;
+
+      // The toast's popover covers the screen, the new toast with it.
+      const rect = closeButton(toast).getBoundingClientRect();
+      const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      expect(hit === options).to.be.true;
+      options.hidePopover();
+      menu.hidePopover();
+    });
+
     it('keeps focus on a toast, and its timers paused, as it comes above the popover for a new one', async () => {
       const { region, menu } = await setup();
       const older = (await showToast('Saved', { duration: Infinity }))!;
@@ -680,8 +703,8 @@ describe('<awc-toast> timing', () => {
 
   it('starts its timer over with a duration set while it is showing', async () => {
     await regionFixture();
-    const kept = (await showToast('Saving…', { duration: 100 }))!;
     const hurried = (await showToast('Saved', { duration: Infinity }))!;
+    const kept = (await showToast('Saving…', { duration: 100 }))!;
 
     kept.duration = Infinity;
     hurried.duration = 100;
@@ -886,12 +909,11 @@ describe('<awc-toast-region> keyboard', () => {
     const { region, button, older } = await setup();
 
     // As Tab does, from the button to the close button of a toast.
-    older.querySelector<HTMLButtonElement>('.awc-toast-close-btn')!.focus();
+    closeButton(older).focus();
     await older.hide();
 
-    expect(document.activeElement === region.querySelector('#newer')).to.be.true;
-    await (region.querySelector('#newer') as AwcToastElement).hide();
     expect(document.activeElement === button).to.be.true;
+    expect(region.paused).to.be.false;
   });
 });
 
@@ -954,6 +976,21 @@ describe('<awc-toast-region> over modal dialogs', () => {
     expect(pressable(closeButton(toast))).to.be.true;
     first.dialog.close();
     second.dialog.close();
+  });
+
+  it('stays above the dialog it is in when that dialog closes and opens again in one task', async () => {
+    const { region, dialog } = await setup();
+    const toast = (await showToast('Copied', { duration: Infinity }))!;
+    dialog.dialog.showModal();
+    await moved();
+
+    dialog.dialog.close();
+    dialog.dialog.showModal();
+    await moved();
+
+    expect(region.parentElement === dialog.dialog).to.be.true;
+    expect(pressable(closeButton(toast))).to.be.true;
+    dialog.dialog.close();
   });
 
   it('leaves with its page while a dialog is open, without showing itself again', async () => {

@@ -180,6 +180,7 @@ sits in the page.
 
 - The region is a landmark named "Notifications (F8)". F8 moves focus to the newest toast, and F8 again moves it back.
 - Escape on a focused toast asks it to hide. Focus moves to the next toast, or back to where it was after the last.
+  A toast that hides any other way, such as by a press on its close button, returns focus to where it was.
 - Screen readers announce a danger toast assertively, and the others politely.
 - Each toast shows an icon for its variant, which screen readers skip. Say what happened in the message itself:
   "Couldn't save the goal", not "Error".
