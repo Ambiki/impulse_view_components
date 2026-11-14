@@ -6,7 +6,7 @@
  *
  * The selection is a date range: a day, a week, a month or a year. The value names it, written as the calendar writes
  * values, and so do `min`, `max` and the methods' arguments. A subclass decides its level, what a cell selects, which
- * cells are disabled, and what `commit` carries.
+ * cells it disables beyond the limits, and what `commit` carries.
  *
  * A calendar with levels above its base level, the one its value is a cell of, drills up to them through its heading,
  * in the same grid, and back down by choosing a cell (ADR 0017). The level shown is read from the grid's markup, like

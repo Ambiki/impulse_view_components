@@ -1,7 +1,8 @@
 module Impulse
   module Internal
     # The day level: a month's days, in six weeks, under a row of weekday headings. The date and week calendars show
-    # it. It is internal, and not part of the public API. A cell is named by its day, and a view by its month's first day.
+    # it. It is internal, and not part of the public API. A cell is named by its day, and a view by its month's first
+    # day.
     class DayLevel
       ISO_DATE = /\A\d{4}-\d{2}-\d{2}\z/
       # An ISO 8601 time, its date and time apart by a `T` or, as RFC 3339 allows, a space.

@@ -8,7 +8,7 @@ module Impulse
     #
     # The selection is a date range: a day, a week, a month or a year. The value names it, written as the calendar writes
     # values, and so do `min` and `max`. A subclass names its element and its level, and may change what a cell selects,
-    # which cells are disabled, and add a hint. A calendar renders its heading as the button that drills up to its
+    # disable cells of its own, and add a hint. A calendar renders its heading as the button that drills up to its
     # level's levels above (ADR 0017); the element alone renders the levels above.
     class CalendarGridComponent < ApplicationComponent
       # The years a calendar names, those with four digits, as `YYYY-MM-DD` and the element's values write them.
