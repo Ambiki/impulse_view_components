@@ -159,6 +159,7 @@
     "vitepress-plugin-llms": "^1.14.0"
   },
   "resolutions": {
+    "**/oxfmt/tinypool": "~2.1.2",
     "vitepress/vite": "^6.4.4"
   }
 }
