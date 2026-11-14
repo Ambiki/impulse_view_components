@@ -93,7 +93,8 @@ toast.variant;
 ### `duration`
 
 How long, in milliseconds, the toast shows; `Infinity` keeps it until it is dismissed. Without a `duration` attribute,
-a danger toast and one holding an action stay until dismissed, and the others hide after `5000`.
+a danger toast and one holding an action stay until dismissed, and the others hide after `5000`. Setting it while the
+toast is showing starts its timer over.
 
 ```js
 toast.duration;

@@ -652,6 +652,18 @@ describe('<awc-toast> timing', () => {
     expect(toast.isConnected).to.be.false;
   });
 
+  it('starts its timer over with a duration set while it is showing', async () => {
+    await regionFixture();
+    const kept = (await showToast('Saving…', { duration: 100 }))!;
+    const hurried = (await showToast('Saved', { duration: Infinity }))!;
+
+    kept.duration = Infinity;
+    hurried.duration = 100;
+    await aTimeout(300);
+
+    expect([kept.isConnected, hurried.isConnected]).to.deep.equal([true, false]);
+  });
+
   it('stays until dismissed with an infinite duration', async () => {
     await regionFixture();
 

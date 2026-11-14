@@ -127,6 +127,17 @@ export default class AwcToastElement extends OpenableElement {
   }
 
   /**
+   * Starts the timer over, from a duration set while the toast is showing.
+   * @private
+   */
+  durationChanged() {
+    if (!this.opened) return;
+    this.pauseTimer();
+    this.remaining = this.timeout;
+    this.resumeTimer();
+  }
+
+  /**
    * Requests to hide the toast on Escape. The Escape goes no further, so that a dialog the toast is in stays open.
    * @private
    */
