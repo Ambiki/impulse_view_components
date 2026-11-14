@@ -38,6 +38,8 @@
       spellcheck: false,
       autocapitalize: "none",
       disabled: @disabled,
+      role: "combobox",
+      aria: { haspopup: "listbox", autocomplete: "list", expanded: open?, controls: listbox_id },
       data: {
         target: "awc-autocomplete.input",
         action: "mousedown->awc-autocomplete#handleInputMousedown blur->awc-autocomplete#handleInputBlur keydown->awc-autocomplete#handleInputKeydown input->awc-autocomplete#handleInput"
@@ -56,7 +58,7 @@
     </div>
   <% end %>
 
-  <div role="listbox" class="awc-autocomplete-listbox dropdown-menu" tabindex="-1" data-target="awc-autocomplete.listbox">
+  <%= content_tag :div, id: listbox_id, role: "listbox", class: "awc-autocomplete-listbox dropdown-menu", tabindex: "-1", aria: { multiselectable: multiple? || nil }, data: { target: "awc-autocomplete.listbox" } do %>
     <div role="presentation" class="awc-autocomplete-options" data-target="awc-autocomplete.optionsContainer">
       <% unless ajax? %>
         <% options.each do |option| %>
@@ -80,5 +82,5 @@
         <%= error.presence || default_error %>
       </div>
     <% end %>
-  </div>
+  <% end %>
 <% end %>

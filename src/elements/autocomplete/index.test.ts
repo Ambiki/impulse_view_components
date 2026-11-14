@@ -80,13 +80,14 @@ function autocompleteHtml({
       <div class="awc-autocomplete-control" data-target="awc-autocomplete.control" data-trigger>
         ${selection}
         <input class="awc-autocomplete-input" type="text" autocomplete="off" value="${multiple ? '' : (singleSelection?.text ?? '')}"
+          role="combobox" aria-haspopup="listbox" aria-autocomplete="list" aria-expanded="${open}" aria-controls="fruit_listbox"
           data-target="awc-autocomplete.input"
           data-action="mousedown->awc-autocomplete#handleInputMousedown blur->awc-autocomplete#handleInputBlur keydown->awc-autocomplete#handleInputKeydown input->awc-autocomplete#handleInput">
         <div class="awc-autocomplete-end-adornment" data-trigger>
           <button type="button" data-action="click->awc-autocomplete#handleClear" data-target="awc-autocomplete.clearButton"></button>
         </div>
       </div>
-      <div role="listbox" tabindex="-1" data-target="awc-autocomplete.listbox">
+      <div id="fruit_listbox" role="listbox" tabindex="-1" ${multiple ? 'aria-multiselectable="true"' : ''} data-target="awc-autocomplete.listbox">
         <div role="presentation" data-target="awc-autocomplete.optionsContainer">${optionsHtml(options)}</div>
       </div>
     </awc-autocomplete>
@@ -1409,6 +1410,41 @@ describe('AwcAutocompleteElement', () => {
       expect(el.param).to.equal('q');
       expect(el.autoSize).to.equal(true);
       expect(el.autoSizePadding).to.equal(4);
+    });
+
+    it('should stay a combobox that controls its listbox through a morph', async () => {
+      const el = await autocompleteFixture({ multiple: true, options: FRUITS });
+      const { listbox } = el;
+
+      Idiomorph.morph(el, autocompleteHtml({ multiple: true, options: FRUITS }));
+
+      expect(el.listbox).to.equal(listbox);
+      expect(el.input.getAttribute('role')).to.equal('combobox');
+      expect(el.input.getAttribute('aria-expanded')).to.equal('false');
+      expect(el.input.getAttribute('aria-controls')).to.equal(listbox.id);
+      expect(listbox.getAttribute('aria-multiselectable')).to.equal('true');
+    });
+
+    it('should commit the option the user clicks after a morph', async () => {
+      const el = await autocompleteFixture({ options: FRUITS });
+      Idiomorph.morph(el, autocompleteHtml({ options: FRUITS }));
+      pressInput(el);
+
+      const { detail } = await commit(el, el.options[1]);
+
+      expect(detail.value).to.equal('2');
+      expect(el.value).to.equal('2');
+    });
+
+    it('should move the active option with the arrow keys after a morph', async () => {
+      const el = await autocompleteFixture({ options: FRUITS });
+      Idiomorph.morph(el, autocompleteHtml({ options: FRUITS }));
+      pressInput(el);
+
+      pressKey(el, 'ArrowDown');
+
+      expect(el.activeOption).to.equal(el.options[1]);
+      expect(el.input.getAttribute('aria-activedescendant')).to.equal(el.options[1].id);
     });
 
     it('should fall back to its defaults when a morph removes their attributes', async () => {
