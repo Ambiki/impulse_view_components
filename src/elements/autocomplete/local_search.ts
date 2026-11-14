@@ -1,28 +1,28 @@
 import type AwcAutocompleteElement from './index';
-import type { SearchVariant } from './index';
+import type { OptionsChangeCallback, SearchVariant } from './index';
 
+/** What the local search needs of the element: the options and groups on the page. */
+type LocalSearchHost = Pick<AwcAutocompleteElement, 'options' | 'groups'>;
+
+/** Options read from the page: it hides the ones the query doesn't match. */
 export default class LocalSearch implements SearchVariant {
-  readonly autocomplete: AwcAutocompleteElement;
+  /** Filtering is done as soon as it is asked for, so the options on show are never for an older query. */
+  readonly pending = false;
+  private readonly autocomplete: LocalSearchHost;
+  private readonly onOptionsChange: OptionsChangeCallback;
 
-  constructor(autocomplete: AwcAutocompleteElement) {
+  constructor(autocomplete: LocalSearchHost, onOptionsChange: OptionsChangeCallback) {
     this.autocomplete = autocomplete;
+    this.onOptionsChange = onOptionsChange;
   }
 
   search(value: string) {
     filterOptions(this.autocomplete.options, value);
-    const firstOption = this.autocomplete.visibleOptions[0];
-    if (firstOption) {
-      this.autocomplete.combobox.activate(firstOption);
-    } else {
-      // The active option may be one the query just hid, which Enter would otherwise commit.
-      this.autocomplete.combobox.deactivate();
-    }
-
-    this.autocomplete.checkIfListIsEmpty();
+    this.onOptionsChange();
   }
 
   start() {
-    this.autocomplete.checkIfListIsEmpty();
+    // Nothing to fetch: the options are on the page.
   }
 
   stop() {
