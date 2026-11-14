@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: accepted, superseded in part by ADR 0026
 ---
 
 # The autocomplete shows what its variants hold

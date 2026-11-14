@@ -1337,6 +1337,55 @@ describe('AwcAutocompleteElement', () => {
       expect(el.activeOption).to.equal(el.options[1]);
     });
 
+    it('should activate the first option of a response once the user has typed, whatever is selected', async () => {
+      const el = await autocompleteFixture({ src: '/fruits', selected: [FRUITS[1]] });
+      const stub = stubFetch();
+      pressInput(el);
+      await requested(stub);
+      await respondAndWait(el, stub, optionsHtml(FRUITS));
+      expect(el.activeOption).to.equal(el.options[1]);
+
+      type(el, 'a');
+      await requested(stub, 2);
+      await respondAndWait(el, stub, optionsHtml(FRUITS));
+
+      expect(el.activeOption).to.equal(el.options[0]);
+      expect(selectionOf(el)).to.eql(['false', 'true', 'false']);
+    });
+
+    it('should go on activating the first option once the typed text is deleted', async () => {
+      const el = await autocompleteFixture({ src: '/fruits', selected: [FRUITS[1]] });
+      const stub = stubFetch();
+      pressInput(el);
+      await requested(stub);
+      await respondAndWait(el, stub, optionsHtml(FRUITS));
+      type(el, 'a');
+      await requested(stub, 2);
+      await respondAndWait(el, stub, optionsHtml(FRUITS));
+
+      type(el, '');
+      await requested(stub, 3);
+      await respondAndWait(el, stub, optionsHtml(FRUITS));
+
+      expect(el.activeOption).to.equal(el.options[0]);
+    });
+
+    it('should activate the selected option again when it reopens after the user has typed', async () => {
+      const el = await autocompleteFixture({ src: '/fruits', selected: [FRUITS[1]] });
+      const stub = stubFetch();
+      pressInput(el);
+      await requested(stub);
+      await respondAndWait(el, stub, optionsHtml(FRUITS));
+      type(el, 'a');
+      await requested(stub, 2);
+      await respondAndWait(el, stub, optionsHtml(FRUITS));
+      await el.hide();
+
+      pressInput(el);
+
+      expect(el.activeOption).to.equal(el.options[1]);
+    });
+
     it('should leave `no-options` off when an empty response lands after it closed', async () => {
       const el = await autocompleteFixture({ src: '/fruits' });
       const stub = stubFetch();

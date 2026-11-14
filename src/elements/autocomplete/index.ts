@@ -155,6 +155,8 @@ export default class AwcAutocompleteElement<
   private searchVariant: SearchVariant;
   private floatingUI: UseFloatingUIType;
   private firstFocus = true;
+  /** Whether the user has typed since the listbox opened. From then on, the first match is the active option. */
+  private typed = false;
   private preventOutsideClickEvent = false;
 
   constructor() {
@@ -406,6 +408,7 @@ export default class AwcAutocompleteElement<
     const query = target.value.trim();
 
     this.requestShow();
+    this.typed = true;
     this.searchVariant.search(query);
     // A typed key already deactivates through the combobox, but a paste sends no keydown it handles.
     if (this.searchVariant.pending) {
@@ -509,6 +512,7 @@ export default class AwcAutocompleteElement<
 
   /** Shows the listbox. */
   protected openParts() {
+    this.typed = false;
     this.floatingUI.start();
     this.combobox.start();
     this.searchVariant.start();
@@ -582,10 +586,10 @@ export default class AwcAutocompleteElement<
       return;
     }
 
-    // After a query, the first match, whatever is selected. Otherwise the first selected option, or else the first
-    // option.
+    // Once the user has typed, the first match, whatever is selected. Until then the first selected option, or else
+    // the first option.
     const [firstOption] = this.visibleOptions;
-    const option = cause === 'filtered' ? firstOption : (this.selectedOptions[0] ?? firstOption);
+    const option = this.typed ? firstOption : (this.selectedOptions[0] ?? firstOption);
     if (option) {
       this.combobox.activate(option, { scroll: cause !== 'filtered' });
     } else {
