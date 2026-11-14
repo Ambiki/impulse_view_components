@@ -157,5 +157,8 @@
     "typescript": "^6.0.3",
     "vitepress": "^1.6.4",
     "vitepress-plugin-llms": "^1.14.0"
+  },
+  "resolutions": {
+    "vitepress/vite": "^6.4.4"
   }
 }
