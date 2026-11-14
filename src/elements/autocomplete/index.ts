@@ -150,14 +150,8 @@ export default class AwcAutocompleteElement<
   @targets() tagDismissButtons: HTMLButtonElement[];
   @targets() groups: HTMLElement[];
 
-  /**
-   * @private
-   */
-  combobox: Combobox;
-  /**
-   * @private
-   */
-  selectVariant: SelectVariant;
+  private combobox: Combobox;
+  private selectVariant: SelectVariant;
   private searchVariant: SearchVariant;
   private floatingUI: UseFloatingUIType;
   private firstFocus = true;
@@ -600,7 +594,7 @@ export default class AwcAutocompleteElement<
       this.combobox.deactivate();
     }
 
-    this.checkIfListIsEmpty();
+    this.toggleAttribute('no-options', this.visibleOptions.length === 0);
     if (cause === 'fetched') {
       return this.reposition();
     }
@@ -612,7 +606,7 @@ export default class AwcAutocompleteElement<
     if (inputText !== undefined) {
       this.input.value = inputText;
     }
-    this.toggleSelectedClass(this.value.length > 0);
+    this.classList.toggle('awc-autocomplete--selected', this.value.length > 0);
     this.syncInputRequired();
     // A new tag's dismiss button comes enabled from the template, and `disabledChanged` only runs when `disabled`
     // changes.
@@ -670,26 +664,11 @@ export default class AwcAutocompleteElement<
   }
 
   /**
-   * @private
-   */
-  checkIfListIsEmpty() {
-    this.toggleAttribute('no-options', this.visibleOptions.length === 0);
-  }
-
-  /**
    * Marks `option` as a selected option or not. The select variant decides which options are selected, and the
    * combobox knows nothing of it.
-   * @private
    */
-  markSelected(option: HTMLElement, selected: boolean) {
+  private markSelected(option: HTMLElement, selected: boolean) {
     option.setAttribute('aria-selected', String(selected));
-  }
-
-  /**
-   * @private
-   */
-  toggleSelectedClass(value: boolean) {
-    this.classList.toggle('awc-autocomplete--selected', value);
   }
 
   /**
@@ -737,10 +716,7 @@ export default class AwcAutocompleteElement<
     return this.closest('form');
   }
 
-  /**
-   * @private
-   */
-  get tags() {
+  private get tags() {
     return [...this.querySelectorAll<HTMLElement>('[data-behavior="tag"]')];
   }
 }
