@@ -648,6 +648,18 @@ describe('<awc-toast>', () => {
     expect(escapeReachedParent).to.be.false;
   });
 
+  it('stays in the region when a listener to `hidden` shows it again a microtask later', async () => {
+    const region = await regionFixture();
+    const toast = (await showToast('Saved', { id: 'saved' }))!;
+    toast.addEventListener('awc-toast:hidden', () => queueMicrotask(() => toast.show()), { once: true });
+
+    await toast.hide();
+    await nextFrame();
+
+    expect(toast.open).to.be.true;
+    expect(toast.parentElement === region).to.be.true;
+  });
+
   it('emits only `hidden` when `open` is removed', async () => {
     const region = await regionFixture();
     const toast = (await showToast('Saved', { id: 'saved' }))!;
