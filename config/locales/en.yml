@@ -30,6 +30,13 @@ en:
         month: "%B %Y"
         # Names the displayed decade, above a year calendar's grid. Rails interpolation, not strftime.
         decade: "%{start} – %{end}"
+    toast:
+      # Names each toast's close button.
+      close: Close notification
+      # Names the landmark toasts appear in, and the key that moves focus to the newest toast.
+      region: Notifications (%{hotkey})
+      # Names the landmark when the toast region has no hotkey.
+      region_without_hotkey: Notifications
     week_calendar:
       # Describes the grid to screen readers, who can't see a week highlight as they move through the days.
       hint: Choosing a day chooses its week.

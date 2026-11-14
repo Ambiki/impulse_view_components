@@ -1,0 +1,245 @@
+:where(:root) {
+  // How far the region keeps from the edge of the screen it is placed at, such as to clear a fixed navbar.
+  --awc-toast-region-inset: var(--awc-space-3);
+  --awc-toast-max-width: 400px;
+  --awc-toast-line-height: 20px;
+  --awc-toast-title-text: var(--awc-neutral-text-contrast);
+  --awc-toast-message-text: var(--awc-neutral-text);
+  --awc-toast-close-btn-bg-hover: rgb(0 23 66 / 0.08);
+
+  --awc-toast-info-bg: var(--awc-accent-bg);
+  --awc-toast-info-border: var(--awc-accent-border);
+  --awc-toast-info-icon-text: var(--awc-accent-solid);
+  --awc-toast-success-bg: var(--awc-success-bg);
+  --awc-toast-success-border: var(--awc-success-border);
+  --awc-toast-success-icon-text: var(--awc-success-solid);
+  --awc-toast-warning-bg: var(--awc-warning-bg);
+  --awc-toast-warning-border: var(--awc-warning-border);
+  --awc-toast-warning-icon-text: var(--awc-warning-solid);
+  --awc-toast-danger-bg: var(--awc-danger-bg);
+  --awc-toast-danger-border: var(--awc-danger-border);
+  --awc-toast-danger-icon-text: var(--awc-danger-solid);
+}
+
+// The region is a manual popover in the top layer, placed with `position: fixed`. Its toasts come in the order they
+// were shown, so the list runs away from the edge it is placed at: the newest toast is nearest it.
+.awc-toast-region {
+  position: fixed;
+  top: var(--awc-toast-region-inset);
+  right: auto;
+  bottom: auto;
+  left: 50%;
+  translate: -50% 0;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: stretch;
+  gap: var(--awc-space-2);
+  width: min(var(--awc-toast-max-width), calc(100vw - var(--awc-toast-region-inset) * 2));
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  overflow: visible;
+  // Only the toasts take presses: the space around them is the page's.
+  pointer-events: none;
+  font-family: var(--awc-font-family);
+  font-size: var(--awc-font-size-3);
+  font-weight: var(--awc-font-weight-regular);
+  line-height: var(--awc-line-height);
+  text-align: start;
+
+  &::backdrop {
+    display: none;
+  }
+
+  &[placement^='bottom'] {
+    top: auto;
+    bottom: var(--awc-toast-region-inset);
+    flex-direction: column;
+  }
+
+  &[placement$='start'] {
+    left: var(--awc-toast-region-inset);
+    translate: none;
+  }
+
+  &[placement$='end'] {
+    left: auto;
+    right: var(--awc-toast-region-inset);
+    translate: none;
+  }
+}
+
+@supports selector(:popover-open) {
+  .awc-toast-region:not(:popover-open) {
+    display: none;
+  }
+}
+
+// Browsers without the Popover API (before Chrome 114, Firefox 125 and Safari 17) keep the region in the page, above
+// Bootstrap's tooltips, as Bootstrap 5's `$zindex-toast` is.
+@supports not selector(:popover-open) {
+  .awc-toast-region {
+    z-index: 1090;
+  }
+}
+
+.awc-toast {
+  --awc-toast-bg: var(--awc-toast-info-bg);
+  --awc-toast-border: var(--awc-toast-info-border);
+  --awc-toast-icon-text: var(--awc-toast-info-icon-text);
+
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: 'icon body close';
+  align-items: start;
+  column-gap: var(--awc-space-2);
+  padding: 0.75rem var(--awc-space-2) 0.75rem var(--awc-space-3);
+  background-color: var(--awc-toast-bg);
+  border: 1px solid var(--awc-toast-border);
+  border-radius: var(--awc-radius-4);
+  box-shadow: var(--awc-shadow-3);
+  pointer-events: auto;
+  outline: none;
+
+  // Shown once the region has shown it, so that a toast rendered into the page doesn't flash before, and kept while it
+  // fades out.
+  &:not([open]):not(.awc-toast--leaving) {
+    display: none;
+  }
+}
+
+// A toast without a variant is info.
+@each $variant in success, warning, danger {
+  .awc-toast[variant='#{$variant}'] {
+    --awc-toast-bg: var(--awc-toast-#{$variant}-bg);
+    --awc-toast-border: var(--awc-toast-#{$variant}-border);
+    --awc-toast-icon-text: var(--awc-toast-#{$variant}-icon-text);
+  }
+}
+
+.awc-toast-icon {
+  grid-area: icon;
+  display: flex;
+  font-size: 1.125rem;
+  line-height: 1;
+  color: var(--awc-toast-icon-text);
+  // The icon and the close button sit on the first line of text: centred on a one-line toast, at the top of a longer
+  // one.
+  margin-top: calc((var(--awc-toast-line-height) - 1.125rem) / 2);
+
+  i {
+    display: none;
+  }
+}
+
+// The icon of the toast's variant; a toast without one is info.
+.awc-toast:not([variant]) .awc-toast-icon-info {
+  display: inline-flex;
+}
+
+@each $variant in info, success, warning, danger {
+  .awc-toast[variant='#{$variant}'] .awc-toast-icon-#{$variant} {
+    display: inline-flex;
+  }
+}
+
+.awc-toast-body {
+  grid-area: body;
+  min-width: 0;
+  line-height: var(--awc-toast-line-height);
+  overflow-wrap: anywhere;
+}
+
+.awc-toast-title {
+  color: var(--awc-toast-title-text);
+  font-weight: var(--awc-font-weight-medium);
+}
+
+.awc-toast-message {
+  color: var(--awc-toast-message-text);
+}
+
+.awc-toast-close-btn {
+  grid-area: close;
+  width: 28px;
+  height: 28px;
+  // As tall as the first line, overflowing it evenly, so that a one-line toast is no taller for it.
+  margin-block: calc((var(--awc-toast-line-height) - 28px) / 2);
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.125rem;
+  line-height: 1;
+  color: inherit;
+  background-color: transparent;
+  border-color: transparent;
+
+  &:hover {
+    background-color: var(--awc-toast-close-btn-bg-hover);
+  }
+
+  &:focus {
+    box-shadow: none;
+  }
+
+  i {
+    display: inline-flex;
+    font-style: normal;
+
+    &::before {
+      line-height: inherit;
+    }
+  }
+}
+
+// After the close button's `:focus`, which takes Bootstrap's ring off.
+.awc-toast:focus-visible,
+.awc-toast-close-btn:focus-visible {
+  // Forced colors drop the ring, and show this outline in its place.
+  outline: 2px solid transparent;
+  box-shadow: 0 0 0 var(--awc-focus-ring-width) var(--awc-focus-ring);
+}
+
+// Coming in from the edge the region is placed at, and fading out in place.
+@keyframes awc-toast-enter-top {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem) scale(0.98);
+  }
+}
+
+@keyframes awc-toast-enter-bottom {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem) scale(0.98);
+  }
+}
+
+.awc-toast--entering {
+  animation: awc-toast-enter-top 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.awc-toast-region[placement^='bottom'] .awc-toast--entering {
+  animation-name: awc-toast-enter-bottom;
+}
+
+.awc-toast--leaving {
+  opacity: 0;
+  transform: scale(0.98);
+  transition:
+    opacity 150ms ease-in,
+    transform 150ms ease-in;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .awc-toast--entering {
+    animation: none;
+  }
+
+  .awc-toast--leaving {
+    transition: none;
+  }
+}

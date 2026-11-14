@@ -7,11 +7,8 @@ import useOutsideClick from 'src/hooks/use_outside_click';
 import composedContains from 'src/internal/composed_contains';
 import { focusInto, focusIsInsideOrLost, keepFocusOn } from 'src/internal/focus';
 import OpenableElement from 'src/internal/openable_element';
+import supportsPopover from 'src/internal/supports_popover';
 import { stripCSSUnit } from '../../helpers/string';
-
-function supportsPopover() {
-  return typeof HTMLElement.prototype.showPopover === 'function';
-}
 
 @registerElement('awc-popover')
 export default class AwcPopoverElement extends OpenableElement {

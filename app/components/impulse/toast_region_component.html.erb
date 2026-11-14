@@ -1,0 +1,9 @@
+<%= render(Impulse::BaseRenderer.new(**@system_args)) do %>
+  <%# `showToast` fills in the title, or removes it without one. %>
+  <template data-target="awc-toast-region.template"><%= render(Impulse::ToastComponent.new) { |toast| toast.with_title { "" } } %></template>
+  <div class="sr-only" aria-live="polite" aria-atomic="true" data-target="awc-toast-region.politeAnnouncer"></div>
+  <div class="sr-only" aria-live="assertive" aria-atomic="true" data-target="awc-toast-region.assertiveAnnouncer"></div>
+  <% toasts.each do |toast| %>
+    <%= toast %>
+  <% end %>
+<% end %>

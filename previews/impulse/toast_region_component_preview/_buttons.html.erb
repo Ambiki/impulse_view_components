@@ -1,0 +1,7 @@
+<%# `showToast()` is the `/toast` import path's, which the demo bundle puts on `window`. %>
+<div class="d-flex flex-wrap" style="gap: 8px">
+  <button type="button" class="btn btn-outline-secondary btn-sm" onclick="showToast('Copied to clipboard', { variant: 'success', id: 'clipboard-toast' })">Copy link</button>
+  <button type="button" class="btn btn-outline-secondary btn-sm" onclick="showToast('Saving goal…', { id: 'save', duration: Infinity }); setTimeout(() => showToast('Goal saved', { id: 'save', variant: 'success' }), 1500)">Save</button>
+  <button type="button" class="btn btn-outline-secondary btn-sm" onclick="showToast('The server didn’t respond. Your changes are still in the form, so you can try again.', { variant: 'danger', title: 'Couldn’t save the goal' })">Save fails</button>
+  <button type="button" class="btn btn-outline-secondary btn-sm" onclick="showToast('You can’t create events before Nov 14, 2026, 8:00 AM.', { variant: 'warning' })">Before cutoff</button>
+</div>
