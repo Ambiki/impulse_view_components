@@ -786,6 +786,23 @@ describe('<awc-toast-region> over modal dialogs', () => {
     dialog.dialog.close();
   });
 
+  it('goes back to where the layout rendered it when the open dialog it is in is removed', async () => {
+    const { container, region, dialog } = await setup();
+    const toast = (await showToast('Copied', { id: 'copied', duration: Infinity }))!;
+    const events = recordEvents(container);
+    dialog.show();
+    await moved();
+
+    dialog.remove();
+    await moved();
+
+    expect(region.parentElement === container).to.be.true;
+    expect(region.matches(':popover-open')).to.be.true;
+    expect(toast.open).to.be.true;
+    expect(pressable(closeButton(toast))).to.be.true;
+    expect(events).to.deep.equal([]);
+  });
+
   it('keeps its toasts’ timers going as it moves', async () => {
     const { dialog } = await setup();
     const toast = (await showToast('Copied', { duration: 400 }))!;

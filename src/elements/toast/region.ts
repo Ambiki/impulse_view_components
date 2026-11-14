@@ -1,16 +1,9 @@
 import type AwcToastElement from './toast';
 import type { ToastVariant } from './toast';
-import {
-  ImpulseElement,
-  on,
-  property,
-  registerElement,
-  target,
-  connected as whenConnected,
-  whenInitialized,
-} from '@ambiki/impulse';
+import { ImpulseElement, on, property, registerElement, target, whenInitialized } from '@ambiki/impulse';
 import { keepFocusOn } from 'src/internal/focus';
 import LiveAnnouncer from 'src/internal/live_announcer';
+import ModalDialogStack from 'src/internal/modal_dialog_stack';
 import supportsPopover from 'src/internal/supports_popover';
 
 /** Where on the screen the region shows its toasts. */
@@ -66,8 +59,11 @@ export default class AwcToastRegionElement extends ImpulseElement {
   /** Where the layout rendered the region, for it to return to once no modal dialog is open. */
   private layoutParent: Element | null = null;
 
-  /** The open modal dialogs, in the order they opened: the last one is on top. */
-  private modalDialogs: HTMLDialogElement[] = [];
+  /** The open modal dialogs, the topmost of which the region moves into. */
+  private readonly modalDialogs = new ModalDialogStack();
+
+  /** Stops watching the dialogs open and close. */
+  private stopWatchingDialogs?: () => void;
 
   connected() {
     if (!this.layoutParent && !this.closest('dialog')) this.layoutParent = this.parentElement;
@@ -80,7 +76,9 @@ export default class AwcToastRegionElement extends ImpulseElement {
     on('pointerleave', this.localName, this.handlePointerleave, { capture: true, signal });
     on('focusin', this.localName, this.handleFocusin, { signal });
     on('focusout', this.localName, this.handleFocusout, { signal });
-    signal.addEventListener('abort', whenConnected('dialog[open]', this.handleDialogOpen));
+    // Follows a dialog as it opens, and once it closes. The move waits for the watch to finish, as moving the region
+    // stops it.
+    this.stopWatchingDialogs = this.modalDialogs.watch(() => queueMicrotask(this.followTopmostModalDialog));
     document.addEventListener('keydown', this.handleHotkey, { signal });
     window.addEventListener('blur', () => this.setPaused('window blur', true), { signal });
     window.addEventListener('focus', () => this.setPaused('window blur', false), { signal });
@@ -93,6 +91,9 @@ export default class AwcToastRegionElement extends ImpulseElement {
 
   disconnected() {
     this.listeners?.abort();
+    // Stopping the watch reports each dialog still open, so the region follows once more: removed with the dialog it
+    // was in, or from it, it goes back to where its toasts can show.
+    this.stopWatchingDialogs?.();
   }
 
   /**
@@ -181,19 +182,11 @@ export default class AwcToastRegionElement extends ImpulseElement {
    * so they couldn't be pressed or heard (ADR 0022).
    */
   private followTopmostModalDialog = () => {
-    this.modalDialogs = this.modalDialogs.filter((dialog) => dialog.matches(':modal'));
-    // An open one the region hasn't heard of yet opened before the ones it has.
-    for (const dialog of document.querySelectorAll('dialog')) this.recordModalDialog(dialog);
-    const target = this.modalDialogs[this.modalDialogs.length - 1] ?? this.layoutParent;
+    const target = this.modalDialogs.topmost() ?? this.layoutParent;
     // Moving closes a popover, and showing it again puts it above the dialog in the top layer.
     if (target && this.parentElement !== target) target.append(this);
     if (supportsPopover() && !this.matches(':popover-open')) this.showPopover();
   };
-
-  /** Records `dialog` as the topmost one when it is modal and newly open. */
-  private recordModalDialog(dialog: HTMLDialogElement) {
-    if (dialog.matches(':modal') && !this.modalDialogs.includes(dialog)) this.modalDialogs.push(dialog);
-  }
 
   /** Moves focus back to where it was before it moved into the region, or out of the region when that is gone. */
   private returnFocus() {
@@ -240,16 +233,6 @@ export default class AwcToastRegionElement extends ImpulseElement {
     if (duration !== undefined) toast.setAttribute('duration', String(duration));
     return toast;
   }
-
-  /**
-   * Follows a dialog as it opens, and once it closes. The move waits for the watcher to finish, as moving the region
-   * stops it, and with it this watch.
-   */
-  private handleDialogOpen = (dialog: HTMLDialogElement) => {
-    this.recordModalDialog(dialog);
-    queueMicrotask(this.followTopmostModalDialog);
-    return () => queueMicrotask(this.followTopmostModalDialog);
-  };
 
   // Only the region's own enter and leave count: a toast's leave, delegated to the region, isn't the pointer leaving it.
   private handlePointerenter = (event: PointerEvent) => {
