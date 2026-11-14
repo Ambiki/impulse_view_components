@@ -1,30 +1,40 @@
 import type { Cancelable } from 'src/internal/debounce';
 import type { AjaxEventName } from './events';
 import type AwcAutocompleteElement from './index';
-import type { SearchVariant } from './index';
+import type { OptionsChangeCallback, SearchVariant } from './index';
 import debounce from 'src/internal/debounce';
 import { AJAX_EVENT_INIT } from './events';
 
+/** What the ajax search needs of the element: where to fetch from, where the options go, and where to report it. */
+type AjaxSearchHost = Pick<
+  AwcAutocompleteElement,
+  'src' | 'param' | 'open' | 'optionsContainer' | 'emit' | 'setAttribute' | 'removeAttribute'
+>;
+
+/** Options fetched from the server: it replaces them with each response, and reports how its requests go. */
 export default class AjaxSearch implements SearchVariant {
-  readonly autocomplete: AwcAutocompleteElement;
+  /** Whether a query is waiting for its options, and no options have been put in since it was made. */
+  pending = false;
+  private readonly autocomplete: AjaxSearchHost;
+  private readonly onOptionsChange: OptionsChangeCallback;
   private abortController?: AbortController;
   private cachedOptions: string = '';
   // Held in its own field rather than assigned back over `makeRequest`, which would erase `Cancelable` from its type
   // and leave no way to cancel a request that is still waiting out the debounce.
   private readonly debouncedRequest: ((value: string) => void) & Cancelable;
 
-  constructor(autocomplete: AwcAutocompleteElement) {
+  constructor(autocomplete: AjaxSearchHost, onOptionsChange: OptionsChangeCallback) {
     this.autocomplete = autocomplete;
+    this.onOptionsChange = onOptionsChange;
     this.debouncedRequest = debounce((value: string) => this.makeRequest(value), 300);
   }
 
   search(value: string) {
     this.autocomplete.setAttribute('loading', '');
     this.autocomplete.removeAttribute('error');
-    // The options on show, and any still on their way, are for an older query until the ones for `value` arrive, so
-    // none of them may be active for a commit. A typed key already deactivates through the combobox, but a paste sends
-    // no keydown it handles. The controller stays, as the request's `loadstart` still waits for its `loadend`.
-    this.autocomplete.combobox.deactivate();
+    // The options on show, and any still on their way, are for an older query until the ones for `value` arrive. The
+    // controller stays, as the request's `loadstart` still waits for its `loadend`.
+    this.pending = true;
     this.abortController?.abort();
     this.debouncedRequest(value);
   }
@@ -43,6 +53,7 @@ export default class AjaxSearch implements SearchVariant {
 
   disconnected() {
     const wasRequesting = Boolean(this.abortController);
+    this.pending = false;
     this.debouncedRequest.clear();
     this.abortController?.abort();
     this.abortController = undefined;
@@ -94,6 +105,7 @@ export default class AjaxSearch implements SearchVariant {
       }
 
       this.abortController = undefined;
+      this.pending = false;
       // Closing clears `error`, so a request that fails after the listbox closed leaves it off.
       if (this.autocomplete.open) {
         this.autocomplete.setAttribute('error', '');
@@ -105,18 +117,9 @@ export default class AjaxSearch implements SearchVariant {
   }
 
   private async insertOptions(options: string) {
-    // The active option is about to be replaced, and the input mustn't point to an option that is gone.
-    this.autocomplete.combobox.deactivate();
+    this.pending = false;
     this.autocomplete.optionsContainer.innerHTML = options;
-    // The response can land after the listbox closed, which deselected and deactivated every option and cleared
-    // `no-options`. Opening it again does all three afresh.
-    if (!this.autocomplete.open) return;
-
-    this.autocomplete.checkIfListIsEmpty();
-    // Start the select variant to select the option(s).
-    this.autocomplete.selectVariant.start();
-    // Update the floating UI position after the listbox content has been updated.
-    await this.autocomplete.reposition();
+    await this.onOptionsChange();
   }
 
   private emit(name: AjaxEventName) {

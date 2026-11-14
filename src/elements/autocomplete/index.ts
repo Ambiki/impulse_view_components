@@ -61,8 +61,23 @@ export interface SelectVariant {
   set required(value: boolean);
 }
 
-/** The contract implemented by the local and ajax search variants. */
+/**
+ * Called by a search variant once the options on show have changed. The promise it may return settles when the
+ * element has caught up with them.
+ */
+export type OptionsChangeCallback = () => void | Promise<void>;
+
+/**
+ * The contract implemented by the local and ajax search variants: where the options come from. A variant changes the
+ * options and says so through the `OptionsChangeCallback` it is given. What the listbox then shows of them, such as
+ * the active option, is the element's to decide.
+ */
 export interface SearchVariant {
+  /**
+   * Whether a query is waiting for its options, so that the ones on show are for an older query and none of them may
+   * be active for a commit.
+   */
+  readonly pending: boolean;
   search: (value: string) => void | Promise<void>;
   start: () => void;
   stop: () => void;
@@ -188,7 +203,7 @@ export default class AwcAutocompleteElement<
     });
     this.selectVariant = this.newSelectVariant();
     this.selectVariant.connected();
-    this.searchVariant = this.src ? new AjaxSearch(this) : new LocalSearch(this);
+    this.searchVariant = this.newSearchVariant();
     this.selectVariant.required = this.required;
     super.connected();
   }
@@ -233,13 +248,13 @@ export default class AwcAutocompleteElement<
    * Called when the `src` attribute changes.
    * @private
    */
-  srcChanged(src: string) {
+  srcChanged() {
     // Clear the selected value without emitting any events to avoid invalid combinations.
     this.clear();
     // Release the outgoing variant before replacing it, so a request made against the previous source cannot land in
     // the listbox of the new one.
     this.searchVariant?.disconnected();
-    this.searchVariant = src ? new AjaxSearch(this) : new LocalSearch(this);
+    this.searchVariant = this.newSearchVariant();
   }
 
   /**
@@ -388,6 +403,10 @@ export default class AwcAutocompleteElement<
 
     this.requestShow();
     this.searchVariant.search(query);
+    // A typed key already deactivates through the combobox, but a paste sends no keydown it handles.
+    if (this.searchVariant.pending) {
+      this.combobox.deactivate();
+    }
   }
 
   /* eslint-disable jsdoc/check-param-names -- documents the arguments the rest tuples resolve to */
@@ -485,8 +504,8 @@ export default class AwcAutocompleteElement<
   protected openParts() {
     this.floatingUI.start();
     this.combobox.start();
-    this.selectVariant.start();
     this.searchVariant.start();
+    this.syncWithOptions('opened');
   }
 
   /** Hides the listbox. */
@@ -524,6 +543,52 @@ export default class AwcAutocompleteElement<
     }
 
     this.firstFocus = false;
+  }
+
+  /**
+   * Brings the listbox up to date with the options on show, once it has opened (`opened`), the user's query has
+   * filtered them (`filtered`) or the server's have replaced them (`fetched`).
+   */
+  private syncWithOptions(cause: 'opened' | 'filtered' | 'fetched'): void | Promise<void> {
+    // A response can land after the listbox closed, which deselected every option and cleared `no-options`. Opening
+    // it again does both afresh. The active option may be one the response replaced, though, which the input mustn't
+    // go on pointing to.
+    if (cause === 'fetched' && !this.open) {
+      this.combobox.deactivate();
+      return;
+    }
+
+    if (cause === 'filtered') {
+      // The first match, whatever is selected. Without one, the active option may be one the query just hid, which
+      // Enter would otherwise commit.
+      const [firstOption] = this.visibleOptions;
+      if (firstOption) {
+        this.combobox.activate(firstOption);
+      } else {
+        this.combobox.deactivate();
+      }
+    } else {
+      // The active option may have been replaced, and the input mustn't point to an option that is gone.
+      this.combobox.deactivate();
+      // Selects the selected options, and activates the first of them, or else the first option.
+      this.selectVariant.start();
+      // It opened on options that are for an older query, until the ones it is fetching arrive.
+      if (this.searchVariant.pending) {
+        this.combobox.deactivate();
+        return;
+      }
+    }
+
+    this.checkIfListIsEmpty();
+    if (cause === 'fetched') {
+      return this.reposition();
+    }
+  }
+
+  private newSearchVariant(): SearchVariant {
+    return this.src ?
+      new AjaxSearch(this, () => this.syncWithOptions('fetched')) :
+      new LocalSearch(this, () => this.syncWithOptions('filtered'));
   }
 
   private newSelectVariant(): SelectVariant {
