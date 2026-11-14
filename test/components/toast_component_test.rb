@@ -55,6 +55,14 @@ module Impulse
       assert_selector "awc-toast[duration='Infinity']"
     end
 
+    test "takes a duration of time in milliseconds" do
+      render_inline(Impulse::ToastComponent.new(duration: 8.seconds)) { "Message" }
+      assert_selector "awc-toast[duration='8000']"
+
+      render_inline(Impulse::ToastComponent.new(duration: 1.5.seconds)) { "Message" }
+      assert_selector "awc-toast[duration='1500']"
+    end
+
     test "renders a title above the message when given one" do
       render_inline(Impulse::ToastComponent.new) do |toast|
         toast.with_title { "You're offline" }

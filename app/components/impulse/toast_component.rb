@@ -19,8 +19,8 @@ module Impulse
 
     renders_one :title
 
-    # `duration:` is in milliseconds, and `nil` keeps the toast until it is dismissed. Without one, the element closes it
-    # after 5 seconds, unless it is a danger toast or holds an action.
+    # `duration:` is in milliseconds, or a duration of time such as `8.seconds`, and `nil` keeps the toast until it is
+    # dismissed. Without one, the element closes it after 5 seconds, unless it is a danger toast or holds an action.
     def initialize(variant: DEFAULT_VARIANT, duration: DEFAULT_DURATION, **system_args)
       variant = resolve_variant(variant)
       @system_args = system_args
@@ -41,9 +41,13 @@ module Impulse
       fetch_or_fallback(VARIANTS, VARIANT_ALIASES.fetch(variant, variant), DEFAULT_VARIANT)
     end
 
-    # The element's `duration` for the one given: `nil` keeps the toast until it is dismissed, as `Infinity` does there.
+    # The element's `duration` for the one given: `nil` keeps the toast until it is dismissed, as `Infinity` does there,
+    # and a duration of time, such as `8.seconds`, is its milliseconds rather than the seconds it prints as.
     def resolve_duration(duration)
-      duration.nil? ? Float::INFINITY : duration
+      return Float::INFINITY if duration.nil?
+      return duration.in_milliseconds.round if duration.is_a?(ActiveSupport::Duration)
+
+      duration
     end
   end
 end
