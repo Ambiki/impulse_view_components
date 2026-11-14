@@ -2,7 +2,9 @@ import { expect } from '@open-wc/testing';
 import { CalendarDate } from './calendar_date';
 import { YEAR_ENGLISH, YEAR_LEVEL } from './year_level';
 
+/** The calendar date `value` names, as `YYYY-MM-DD`. */
 const date = (value: string) => CalendarDate.parse(value)!;
+/** `cell` as `YYYY-MM-DD`, so that a failed assertion shows a date. */
 const written = (cell: CalendarDate | null) => cell?.toString() ?? null;
 
 /** The year `key` moves to from `year`, in the grid of the decade `displayed` is in: the 2020s by default. */
@@ -11,7 +13,7 @@ function move(key: string, year = 2026, displayed = 2026) {
   return YEAR_LEVEL.move(date(`${year}-01-01`), { key, shiftKey: false }, context)?.year ?? null;
 }
 
-describe('the year level', () => {
+describe('YEAR_LEVEL', () => {
   it('reads and writes a cell as `YYYY`, and a view as its decade\'s first year', () => {
     expect(written(YEAR_LEVEL.parse('2026'))).to.equal('2026-01-01');
     expect(YEAR_LEVEL.parse('999')).to.equal(null);
@@ -71,6 +73,19 @@ describe('the year level', () => {
     expect(move('Home', 2036, 2036)).to.equal(2035);
     expect(move('End', 2029, 2036)).to.equal(2031);
     expect(move('Home', 2040, 2036)).to.equal(2038);
+  });
+
+  it('moves by a decade with Shift as without it', () => {
+    const context = { firstDayOfWeek: 0, displayed: date('2026-01-01') };
+
+    expect(YEAR_LEVEL.move(date('2026-01-01'), { key: 'PageUp', shiftKey: true }, context)?.year).to.equal(2016);
+    expect(YEAR_LEVEL.move(date('2026-01-01'), { key: 'PageDown', shiftKey: true }, context)?.year).to.equal(2036);
+  });
+
+  it('names a decade with the pattern it is given', () => {
+    expect(YEAR_LEVEL.heading(date('2026-01-01'), { formats: { decade: 'de %{start} à %{end}' } })).to.equal(
+      'de 2020 à 2029',
+    );
   });
 
   it('names a decade by its first and last years, and a year by its number alone', () => {

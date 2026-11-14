@@ -3,10 +3,18 @@ import type { MonthLevelI18n } from './month_level';
 import type { YearLevelI18n } from './year_level';
 import { expect } from '@open-wc/testing';
 import { CalendarDate } from './calendar_date';
-import { canMoveView, canShowView, gridRows, headingText, isOutsideLimits, isPastFourDigitYears } from './calendar_grid';
+import {
+  canMoveView,
+  canShowView,
+  gridRows,
+  headingText,
+  isOutsideLimits,
+  isPastFourDigitYears,
+} from './calendar_grid';
 import { MONTH_ENGLISH, MONTH_LEVEL } from './month_level';
 import { YEAR_ENGLISH, YEAR_LEVEL } from './year_level';
 
+/** The calendar date `value` names, as `YYYY-MM-DD`. */
 const date = (value: string) => CalendarDate.parse(value)!;
 
 /** A month calendar's view of 2026, with November holding the tab stop, changed by `overrides`. */
@@ -95,6 +103,9 @@ describe('the calendar grid', () => {
       expect(november.textContent).to.equal('Nov');
       expect(november.getAttribute('aria-label')).to.equal('November 2026');
       expect(november.getAttribute('type')).to.equal('button');
+    });
+
+    it('names the displayed view as its level does', () => {
       expect(headingText(monthView())).to.equal('2026');
     });
 
@@ -103,7 +114,9 @@ describe('the calendar grid', () => {
     });
 
     it('marks today\'s cell', () => {
-      expect(cellsWhere(monthView(), (button) => button.getAttribute('aria-current') === 'date')).to.eql(['2026-05-01']);
+      const current = cellsWhere(monthView(), (button) => button.getAttribute('aria-current') === 'date');
+
+      expect(current).to.eql(['2026-05-01']);
     });
 
     it('selects every cell with a day of the selected range, so a week across two months selects both', () => {

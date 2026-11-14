@@ -2,8 +2,11 @@ import { expect } from '@open-wc/testing';
 import { CalendarDate } from './calendar_date';
 import { DAY_ENGLISH, DAY_LEVEL, weekdayRow } from './day_level';
 
+/** The calendar date `value` names, as `YYYY-MM-DD`. */
 const date = (value: string) => CalendarDate.parse(value)!;
+/** `cell` as `YYYY-MM-DD`, so that a failed assertion shows a date. */
 const written = (cell: CalendarDate | null) => cell?.toString() ?? null;
+/** What a move is reckoned in: the week's first day, and the displayed view. */
 const context = { firstDayOfWeek: 0, displayed: date('2026-11-01') };
 
 /** Where `key` moves to from Wednesday, November 18, 2026. */
@@ -11,7 +14,7 @@ function move(key: string, { shiftKey = false, firstDayOfWeek = 0 } = {}) {
   return written(DAY_LEVEL.move(date('2026-11-18'), { key, shiftKey }, { ...context, firstDayOfWeek }));
 }
 
-describe('the day level', () => {
+describe('DAY_LEVEL', () => {
   it('reads and writes a cell as `YYYY-MM-DD`, and a view as `YYYY-MM`', () => {
     expect(written(DAY_LEVEL.parse('2026-11-18'))).to.equal('2026-11-18');
     expect(DAY_LEVEL.parse('2026-11')).to.equal(null);
@@ -65,6 +68,42 @@ describe('the day level', () => {
     expect(move('PageUp', { shiftKey: true })).to.equal('2025-11-18');
     expect(move('PageDown', { shiftKey: true })).to.equal('2027-11-18');
     expect(move('Enter')).to.equal(null);
+  });
+
+  it('cuts a move by a month or a year to the length of the month it lands in', () => {
+    const from = (day: string, key: string, shiftKey = false) =>
+      written(DAY_LEVEL.move(date(day), { key, shiftKey }, context));
+
+    expect(from('2026-01-31', 'PageDown')).to.equal('2026-02-28');
+    expect(from('2026-03-31', 'PageUp')).to.equal('2026-02-28');
+    expect(from('2028-02-29', 'PageDown', true)).to.equal('2029-02-28');
+  });
+
+  it('names a month and a day with the names and patterns it is given', () => {
+    const french = {
+      ...DAY_ENGLISH,
+      monthNames: [
+        'janvier',
+        'février',
+        'mars',
+        'avril',
+        'mai',
+        'juin',
+        'juillet',
+        'août',
+        'septembre',
+        'octobre',
+        'novembre',
+        'décembre',
+      ],
+      dayNames: ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'],
+      abbrDayNames: ['dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam'],
+      formats: { monthHeading: '%B %Y', day: '%A %-d %B %Y' },
+    };
+
+    expect(DAY_LEVEL.heading(date('2026-11-18'), french)).to.equal('novembre 2026');
+    expect(DAY_LEVEL.label(date('2026-11-18'), french)).to.equal('mercredi 18 novembre 2026');
+    expect(weekdayRow(1, french).firstElementChild!.textContent).to.equal('lun');
   });
 
   it('names a month, a day\'s number and a day in full', () => {

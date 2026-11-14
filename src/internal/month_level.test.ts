@@ -2,8 +2,11 @@ import { expect } from '@open-wc/testing';
 import { CalendarDate } from './calendar_date';
 import { MONTH_ENGLISH, MONTH_LEVEL } from './month_level';
 
+/** The calendar date `value` names, as `YYYY-MM-DD`. */
 const date = (value: string) => CalendarDate.parse(value)!;
+/** `cell` as `YYYY-MM-DD`, so that a failed assertion shows a date. */
 const written = (cell: CalendarDate | null) => cell?.toString() ?? null;
+/** What a move is reckoned in: the week's first day, and the displayed view. */
 const context = { firstDayOfWeek: 0, displayed: date('2026-01-01') };
 
 /** Where `key` moves to from November 2026. */
@@ -11,7 +14,7 @@ function move(key: string, { shiftKey = false } = {}) {
   return written(MONTH_LEVEL.move(date('2026-11-01'), { key, shiftKey }, context));
 }
 
-describe('the month level', () => {
+describe('MONTH_LEVEL', () => {
   it('reads and writes a cell as `YYYY-MM`, and a view as `YYYY`', () => {
     expect(written(MONTH_LEVEL.parse('2026-11'))).to.equal('2026-11-01');
     expect(MONTH_LEVEL.parse('2026-13')).to.equal(null);
@@ -64,6 +67,43 @@ describe('the month level', () => {
     expect(move('PageDown')).to.equal('2027-11-01');
     expect(move('PageUp', { shiftKey: true })).to.equal('2025-11-01');
     expect(move('Enter')).to.equal(null);
+  });
+
+  it('names a month with the names and pattern it is given', () => {
+    const french = {
+      monthNames: [
+        'janvier',
+        'février',
+        'mars',
+        'avril',
+        'mai',
+        'juin',
+        'juillet',
+        'août',
+        'septembre',
+        'octobre',
+        'novembre',
+        'décembre',
+      ],
+      abbrMonthNames: [
+        'janv.',
+        'févr.',
+        'mars',
+        'avr.',
+        'mai',
+        'juin',
+        'juil.',
+        'août',
+        'sept.',
+        'oct.',
+        'nov.',
+        'déc.',
+      ],
+      formats: { month: '%B %Y' },
+    };
+
+    expect(MONTH_LEVEL.text(date('2026-11-01'), french)).to.equal('nov.');
+    expect(MONTH_LEVEL.label(date('2026-11-01'), french)).to.equal('novembre 2026');
   });
 
   it('names a year, a month in short and a month in full', () => {
