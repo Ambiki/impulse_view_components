@@ -15,9 +15,9 @@ export default {
   concurrentBrowsers: 3,
   testFramework: {
     config: {
-      // A real key press (`sendKeys`) goes to the browser and back, which takes far longer while three browsers run at
-      // once. On a busy machine, tests that press many keys ran past mocha's 2 seconds in Firefox, and the keys they
-      // hadn't pressed yet then landed in the test after them.
+      // A real key press (`sendKeys`) goes to the browser and back. While three browsers run at once, one press can
+      // take seconds in Firefox, so tests that press keys ran past mocha's 2 seconds there. A test that times out goes
+      // on pressing its keys, which then land in the test after it: the longer timeout makes that rare, not impossible.
       timeout: 10000,
     },
   },
