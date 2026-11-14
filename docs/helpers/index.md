@@ -39,8 +39,8 @@ const lock = scrollLock(element);
 lock.abort();
 ```
 
-Pass `abortSignal` to release the lock with a signal you already have.
+Pass `signal` to release the lock with a signal you already have.
 
 ```js
-scrollLock(element, { abortSignal: controller.signal });
+scrollLock(element, { signal: controller.signal });
 ```

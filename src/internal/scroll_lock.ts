@@ -6,11 +6,11 @@ let bodyStyles: { overflow: string; paddingRight: string } | null = null;
 /**
  * Hides the page's scroll bar by setting `overflow: hidden` on the `body` element, padding it by the scroll bar's
  * width so that the page doesn't shift. The page stays locked until every element that locked it is released, in any
- * order: by aborting the returned controller, or the signal passed as `abortSignal`.
+ * order: by aborting the returned controller, or the `signal` passed in.
  */
-export default function scrollLock(element: Element, { abortSignal }: { abortSignal?: AbortSignal } = {}) {
+export default function scrollLock(element: Element, { signal }: { signal?: AbortSignal } = {}) {
   const controller = new AbortController();
-  const signal = abortSignal || controller.signal;
+  const releaseSignal = signal || controller.signal;
 
   if (locks.size === 0) {
     const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
@@ -30,10 +30,10 @@ export default function scrollLock(element: Element, { abortSignal }: { abortSig
     document.body.style.paddingRight = bodyStyles.paddingRight;
     bodyStyles = null;
   };
-  if (signal.aborted) {
+  if (releaseSignal.aborted) {
     release();
   } else {
-    signal.addEventListener('abort', release, { once: true });
+    releaseSignal.addEventListener('abort', release, { once: true });
   }
 
   return controller;
