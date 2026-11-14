@@ -46,7 +46,7 @@ export default [
   },
   // The demo app's bundle, which Lookbook loads through Sprockets. The gem doesn't ship it.
   {
-    input: 'src/index.ts',
+    input: 'demo/app/javascript/impulse_view_components.js',
     output: [
       {
         file: 'demo/app/assets/builds/impulse_view_components.js',
