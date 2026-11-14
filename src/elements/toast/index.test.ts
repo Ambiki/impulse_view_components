@@ -531,6 +531,21 @@ describe('<awc-toast-region>', () => {
     });
   });
 
+  it('shows a toast a morph brings while another is showing, rather than making the one into the other', async () => {
+    const region = await regionFixture();
+    const saved = (await showToast('Saved', { duration: Infinity }))!;
+    const events = recordEvents(region);
+
+    Idiomorph.morph(region, regionHtml('', toastHtml('variant="danger"', 'Couldn’t email the parents.')));
+    await moved();
+
+    expect(region.toasts.map((toast) => [messageOf(toast), toast.open, toast.variant])).to.deep.equal([
+      ['Couldn’t email the parents.', true, 'danger'],
+    ]);
+    expect(saved.isConnected).to.be.false;
+    expect(events.map((event) => event.split(' ')[0])).to.deep.equal(['shown']);
+  });
+
   it('drops its toasts when the browser restores the page from its back-forward cache', async () => {
     const region = await regionFixture();
     await showToast('Couldn’t save', { variant: 'danger' });

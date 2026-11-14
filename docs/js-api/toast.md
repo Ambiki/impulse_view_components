@@ -22,7 +22,7 @@ const toast = await showToast('Saved', { variant: 'success' });
 | `variant`  | `'info'`, `'success'`, `'warning'` or `'danger'`. Defaults to `'info'`.                           |
 | `title`    | A title, shown above the message. A toast from a template takes it only if the template's has a title. |
 | `duration` | How long, in milliseconds, the toast shows. `Infinity` keeps it until it is dismissed.            |
-| `id`       | The toast's `id`.                                                                                 |
+| `id`       | The toast's `id`. Without one, the toast takes one of its own as it shows.                        |
 
 The options are exported as `ToastOptions`.
 

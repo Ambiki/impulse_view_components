@@ -1,5 +1,6 @@
 import type AwcToastRegionElement from './region';
 import { property, registerElement, whenInitialized } from '@ambiki/impulse';
+import uniqueId from 'src/helpers/unique_id';
 import OpenableElement from 'src/internal/openable_element';
 import { tabbable } from 'tabbable';
 
@@ -67,6 +68,9 @@ export default class AwcToastElement extends OpenableElement {
       this.remove();
       return;
     }
+    // A morph makes an element without an `id` into whatever new element follows, and a showing toast into the new
+    // toast, which has no `open` and so would hide as it arrived. With an `id` of its own, a toast is left alone.
+    if (!this.id) this.id = uniqueId();
     this.connectedRegion = this.region;
     super.connected();
     // A toast rendered into the region, or added to it, shows as it connects. One already shown that is leaving, and
