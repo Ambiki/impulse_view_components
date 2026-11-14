@@ -13,6 +13,14 @@ export default {
     reporters: ['text', 'lcov'],
   },
   concurrentBrowsers: 3,
+  testFramework: {
+    config: {
+      // A real key press (`sendKeys`) goes to the browser and back, which takes far longer while three browsers run at
+      // once. On a busy machine, tests that press many keys ran past mocha's 2 seconds in Firefox, and the keys they
+      // hadn't pressed yet then landed in the test after them.
+      timeout: 10000,
+    },
+  },
   nodeResolve: true,
   preserveSymlinks: true,
   browsers: [
