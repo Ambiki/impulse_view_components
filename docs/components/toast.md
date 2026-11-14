@@ -112,15 +112,31 @@ Render the toast in a `<template>`, and pass the template to `showToast`. The to
 showToast(document.getElementById('clipboard-toast'));
 ```
 
+### A toast for a promise
+
+`showToast.promise` shows a loading toast while a promise is pending, then says how it settled in the same toast: a
+success toast, which closes on its own, or a danger toast, which stays.
+
+```js
+showToast.promise(createEvent(), {
+  loading: 'Creating event…',
+  success: (event) => `${event.name} created.`,
+  error: (error) => `Could not create event: ${error.message}`,
+});
+```
+
 ### Updating a toast
 
 Showing a toast with the `id` of one already showing updates that one in place: its message, title, variant and
-duration change, its timer starts over, and it is announced again. It stays where it is among the other toasts.
+duration change, its timer starts over, and it is announced again. It stays where it is among the other toasts. Use it
+for what `showToast.promise` doesn't cover, such as more steps than pending and settled.
 
 ```js
-showToast('Deleting event…', { id: 'delete-event', duration: Infinity });
+showToast('Uploading 3 files…', { id: 'upload', duration: Infinity });
 // Later
-showToast('Event deleted', { id: 'delete-event', variant: 'success' });
+showToast('Uploading 2 files…', { id: 'upload', duration: Infinity });
+// Later
+showToast('Files uploaded', { id: 'upload', variant: 'success' });
 ```
 
 A toast from a template keeps the template toast's `id`, so showing it twice updates the first instead of adding a

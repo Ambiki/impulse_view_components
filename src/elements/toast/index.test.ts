@@ -138,6 +138,205 @@ describe('showToast content', () => {
   });
 });
 
+/** A promise and the functions that settle it, for a test to settle when it chooses. */
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (error: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+}
+
+/** Lets a promise settle and the toast it shows update. */
+async function settled() {
+  await nextFrame();
+  await nextFrame();
+}
+
+function messageOf(toast: AwcToastElement) {
+  return toast.querySelector('.awc-toast-message')!.textContent;
+}
+
+describe('showToast.promise', () => {
+  const steps = {
+    loading: 'Creating event…',
+    success: (event: { name: string }) => `${event.name} created.`,
+    error: 'Could not create event.',
+  };
+
+  it('shows a loading toast that stays, then the success message in its place', async () => {
+    const region = await regionFixture();
+    const events = recordEvents(region);
+    const { promise, resolve } = deferred<{ name: string }>();
+
+    showToast.promise(promise, steps);
+    await settled();
+    const [toast] = region.toasts;
+    expect([messageOf(toast), toast.variant, toast.duration]).to.deep.equal(['Creating event…', 'info', Infinity]);
+
+    resolve({ name: 'Event' });
+    await settled();
+
+    expect(region.toasts.length).to.equal(1);
+    expect(region.toasts[0] === toast).to.be.true;
+    expect([messageOf(toast), toast.variant, toast.hasAttribute('duration')]).to.deep.equal([
+      'Event created.',
+      'success',
+      false,
+    ]);
+    expect(events.map((event) => event.split(' ')[0])).to.deep.equal(['shown']);
+  });
+
+  it('shows the error in the loading toast’s place, as a danger toast', async () => {
+    const region = await regionFixture();
+    const events = recordEvents(region);
+    const { promise, reject } = deferred<{ name: string }>();
+
+    showToast.promise(promise, { ...steps, error: (error) => `Could not create event: ${(error as Error).message}` });
+    await settled();
+    reject(new Error('the server is down'));
+    await settled();
+
+    const [toast] = region.toasts;
+    expect(region.toasts.length).to.equal(1);
+    expect([messageOf(toast), toast.variant]).to.deep.equal(['Could not create event: the server is down', 'danger']);
+    expect(events.map((event) => event.split(' ')[0])).to.deep.equal(['shown']);
+  });
+
+  it('shows the outcome of a promise that has already settled', async () => {
+    const region = await regionFixture();
+
+    showToast.promise(Promise.resolve({ name: 'Event' }), steps);
+    await settled();
+
+    expect(region.toasts.map((toast) => messageOf(toast))).to.deep.equal(['Event created.']);
+  });
+
+  it('returns the promise it was given', async () => {
+    await regionFixture();
+    const promise = Promise.resolve({ name: 'Event' });
+
+    expect(showToast.promise(promise, steps) === promise).to.be.true;
+  });
+
+  it('gives each promise its own toast', async () => {
+    const region = await regionFixture();
+    const first = deferred<{ name: string }>();
+    const second = deferred<{ name: string }>();
+
+    showToast.promise(first.promise, steps);
+    showToast.promise(second.promise, steps);
+    await settled();
+    second.resolve({ name: 'Meeting' });
+    first.resolve({ name: 'Session' });
+    await settled();
+
+    expect(region.toasts.map((toast) => messageOf(toast))).to.deep.equal(['Session created.', 'Meeting created.']);
+  });
+
+  it('takes a title and an id for every step', async () => {
+    const region = await regionFixture();
+    const { promise, resolve } = deferred<{ name: string }>();
+
+    showToast.promise(promise, { ...steps, title: 'Calendar', id: 'create-event' });
+    await settled();
+    resolve({ name: 'Event' });
+    await settled();
+
+    const [toast] = region.toasts;
+    expect([toast.id, toast.querySelector('.awc-toast-title')!.textContent]).to.deep.equal(['create-event', 'Calendar']);
+  });
+
+  it('announces each step, and only the outcome of a promise that has already settled', async () => {
+    const region = await regionFixture();
+    const heard = announcers(region);
+    const { promise, resolve } = deferred<{ name: string }>();
+
+    showToast.promise(promise, steps);
+    await announced();
+    expect(heard()).to.deep.equal(['Creating event…', '']);
+    resolve({ name: 'Event' });
+    await settled();
+    await announced();
+    expect(heard()).to.deep.equal(['Event created.', '']);
+
+    await aTimeout(1100);
+    showToast.promise(Promise.reject(new Error('the server is down')), steps);
+    await announced();
+    expect(heard()).to.deep.equal(['', 'Could not create event.']);
+  });
+
+  it('updates one toast when called twice at once with the same id', async () => {
+    const region = await regionFixture();
+    const first = deferred<{ name: string }>();
+    const second = deferred<{ name: string }>();
+
+    showToast.promise(first.promise, { ...steps, id: 'create-event' });
+    showToast.promise(second.promise, { ...steps, id: 'create-event' });
+    await settled();
+    first.resolve({ name: 'Session' });
+    second.resolve({ name: 'Meeting' });
+    await settled();
+
+    expect(region.toasts.map((toast) => [toast.id, messageOf(toast)])).to.deep.equal([['create-event', 'Meeting created.']]);
+  });
+
+  it('removes the loading toast when its message function throws, and lets the error through', async () => {
+    const region = await regionFixture();
+    const errors: unknown[] = [];
+    const onUnhandled = (event: PromiseRejectionEvent) => {
+      event.preventDefault();
+      errors.push(event.reason);
+    };
+    window.addEventListener('unhandledrejection', onUnhandled);
+    try {
+      showToast.promise(Promise.resolve({ name: 'Event' }), {
+        ...steps,
+        success: () => {
+          throw new Error('a bug in the app');
+        },
+      });
+      await aTimeout(100);
+    } finally {
+      window.removeEventListener('unhandledrejection', onUnhandled);
+    }
+
+    expect(region.toasts.length).to.equal(0);
+    expect(errors.map((error) => (error as Error).message)).to.deep.equal(['a bug in the app']);
+  });
+
+  it('warns once and returns the promise when the page has no region', async () => {
+    const warn = console.warn;
+    const warnings: unknown[] = [];
+    console.warn = (...args: unknown[]) => warnings.push(args[0]);
+    const promise = Promise.resolve({ name: 'Event' });
+    try {
+      expect(showToast.promise(promise, steps) === promise).to.be.true;
+      await settled();
+    } finally {
+      console.warn = warn;
+    }
+    expect(warnings.length).to.equal(1);
+  });
+
+  it('leaves no rejection unhandled when its promise is ignored', async () => {
+    await regionFixture();
+    let unhandled = false;
+    const onUnhandled = () => (unhandled = true);
+    window.addEventListener('unhandledrejection', onUnhandled);
+    try {
+      showToast.promise(Promise.reject(new Error('the server is down')), steps);
+      await aTimeout(50);
+    } finally {
+      window.removeEventListener('unhandledrejection', onUnhandled);
+    }
+
+    expect(unhandled).to.be.false;
+  });
+});
+
 describe('<awc-toast-region>', () => {
   it('shows the toasts rendered into it as they connect, emitting `shown` for each', async () => {
     const container = await fixture<HTMLDivElement>('<div></div>');

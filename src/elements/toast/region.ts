@@ -51,8 +51,8 @@ export default class AwcToastRegionElement extends ImpulseElement {
   /** Where a danger toast's text goes to be heard at once. */
   @target() assertiveAnnouncer: HTMLElement;
 
-  /** The texts waiting to be written to each announcer, which are written together. */
-  private readonly pendingAnnouncements = new Map<HTMLElement, string[]>();
+  /** The toasts waiting to be heard through each announcer, with their text, which are written together. */
+  private readonly pendingAnnouncements = new Map<HTMLElement, Map<AwcToastElement, string>>();
 
   /** Each announcer's timeout for emptying it once its text has been heard. */
   private readonly announcementTimeouts = new Map<HTMLElement, ReturnType<typeof setTimeout>>();
@@ -122,10 +122,16 @@ export default class AwcToastRegionElement extends ImpulseElement {
   async showToast(content: string | HTMLTemplateElement, options: ToastOptions = {}): Promise<AwcToastElement> {
     this.followTopmostModalDialog();
     const toast = this.buildToast(content, options);
-    const showing = toast.id ? this.toasts.find((element) => element.id === toast.id && element.open) : undefined;
-    if (showing) {
-      showing.update(toast);
-      return showing;
+    const existing = toast.id ?
+      this.toasts.find((element) => element.id === toast.id && !element.classList.contains('awc-toast--leaving')) :
+      undefined;
+    if (existing) {
+      // One added just before may still be starting up, and shows once it has.
+      await whenInitialized(existing);
+      if (existing.isConnected && existing.open) {
+        existing.update(toast);
+        return existing;
+      }
     }
     this.append(toast);
     await whenInitialized(toast);
@@ -141,13 +147,16 @@ export default class AwcToastRegionElement extends ImpulseElement {
    */
   announce(toast: AwcToastElement) {
     const announcer = toast.variant === 'danger' ? this.assertiveAnnouncer : this.politeAnnouncer;
+    // A toast updated before it was heard is heard once, as it is now: a loading toast that has already failed isn't
+    // heard loading as well.
+    for (const batch of this.pendingAnnouncements.values()) batch.delete(toast);
     const pending = this.pendingAnnouncements.get(announcer);
     if (pending) {
-      pending.push(toast.announcement);
+      pending.set(toast, toast.announcement);
       return;
     }
-    const texts = [toast.announcement];
-    this.pendingAnnouncements.set(announcer, texts);
+    const batch = new Map([[toast, toast.announcement]]);
+    this.pendingAnnouncements.set(announcer, batch);
     clearTimeout(this.announcementTimeouts.get(announcer));
     announcer.replaceChildren();
     // Written a couple of frames later, so that screen readers hear a change even when the text is what they last
@@ -156,7 +165,7 @@ export default class AwcToastRegionElement extends ImpulseElement {
       requestAnimationFrame(() => {
         this.pendingAnnouncements.delete(announcer);
         announcer.replaceChildren(
-          ...texts.map((text) => Object.assign(document.createElement('div'), { textContent: text })),
+          ...Array.from(batch.values(), (text) => Object.assign(document.createElement('div'), { textContent: text })),
         );
         this.announcementTimeouts.set(
           announcer,

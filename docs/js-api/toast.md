@@ -26,6 +26,30 @@ const toast = await showToast('Saved', { variant: 'success' });
 
 The options are exported as `ToastOptions`.
 
+## `showToast.promise`
+
+Shows a toast while a promise is pending, which stays until it settles, then updates it in place: a success toast once
+the promise resolves, or a danger toast once it rejects. Returns the promise; a rejection the caller ignores isn't
+reported as unhandled.
+
+```js
+showToast.promise(createEvent(), {
+  loading: 'Creating event…',
+  success: (event) => `${event.name} created.`,
+  error: 'Could not create event.',
+});
+```
+
+| Option    | Description                                                                                      |
+| ------    | -------------                                                                                    |
+| `loading` | The message while the promise is pending.                                                        |
+| `success` | The message once it resolves, or a function of its value that returns one.                      |
+| `error`   | The message once it rejects, or a function of the reason that returns one.                      |
+| `title`   | A title, shown above the message at every step.                                                  |
+| `id`      | The toast's `id`. Without one, each call gets its own toast.                                     |
+
+The options are exported as `ToastPromiseOptions`.
+
 ## Region properties
 
 ### `placement`
