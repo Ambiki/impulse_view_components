@@ -124,6 +124,41 @@ module Impulse
       assert_selector "input[type='text'][id='custom-id']"
     end
 
+    test "renders the input as a combobox that controls the listbox" do
+      render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_id))
+
+      assert_selector "input[type='text'][role='combobox'][aria-haspopup='listbox'][aria-autocomplete='list']"
+      assert_selector "input[type='text'][aria-expanded='false'][aria-controls='user_fruit_id_listbox']"
+      assert_selector "[role='listbox'][id='user_fruit_id_listbox']", visible: false
+      refute_selector "[role='listbox'][aria-multiselectable]", visible: false
+    end
+
+    test "renders the input as expanded when open" do
+      render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_id, open: true))
+
+      assert_selector "input[type='text'][aria-expanded='true']"
+    end
+
+    test "says on the listbox that several options can be selected when multiple" do
+      render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_ids, multiple: true))
+
+      assert_selector "[role='listbox'][aria-multiselectable='true']", visible: false
+    end
+
+    test "listbox id follows the input id" do
+      render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_id, input_id: "custom-id"))
+
+      assert_selector "input[type='text'][aria-controls='custom-id_listbox']"
+      assert_selector "[role='listbox'][id='custom-id_listbox']", visible: false
+    end
+
+    test "listbox id follows the namespace and the index" do
+      render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_id, namespace: "foo", index: 3))
+
+      assert_selector "input[type='text'][id='foo_user_3_fruit_id'][aria-controls='foo_user_3_fruit_id_listbox']"
+      assert_selector "[role='listbox'][id='foo_user_3_fruit_id_listbox']", visible: false
+    end
+
     test "input name can be changed" do
       render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_id, name: "custom_name"))
 

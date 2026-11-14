@@ -112,8 +112,22 @@ module Impulse
       end
     end
 
+    # The id the input points to with `aria-controls`. It is built from the field, as the input's own id is, so that
+    # every render gives the same one: a DOM morph replaces an element whose id has changed, and the listbox the
+    # element holds would be gone.
+    def listbox_id
+      return "#{@input_id}_listbox" if @input_id
+
+      index = @index unless @index.equal?(NO_INDEX)
+      field_id(@object_name, @method_name, :listbox, index: index, namespace: @namespace)
+    end
+
     def multiple?
       !!@system_args[:multiple]
+    end
+
+    def open?
+      !!@system_args[:open]
     end
 
     def ajax?

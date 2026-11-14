@@ -26,6 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Fixed `<awc-autocomplete>` no longer being announced as a combobox, and no longer committing the option the user clicks, after a DOM morph ([#439](https://github.com/Ambiki/impulse_view_components/pull/439))
 - Fixed a multiple `<awc-autocomplete>` putting `aria-multiselectable` on its input, where it isn't allowed, and not on its listbox ([#438](https://github.com/Ambiki/impulse_view_components/pull/438))
 - Fixed `<awc-dialog>`, and `scrollLock`, leaving the page unable to scroll after two dialogs closed in the order they opened ([#435](https://github.com/Ambiki/impulse_view_components/pull/435))
 - Fixed `<awc-dialog>` closing when a press inside it is released on the backdrop. It closes only when the press and the release both land there ([#417](https://github.com/Ambiki/impulse_view_components/pull/417))
