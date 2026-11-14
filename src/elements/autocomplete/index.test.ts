@@ -76,7 +76,7 @@ function autocompleteHtml({
 
   return `
     <awc-autocomplete ${multiple ? 'multiple' : ''} ${open ? 'open' : ''} ${src ? `src="${src}"` : ''} ${attributes}
-      data-action="mousedown->awc-autocomplete#handleMousedown click->awc-autocomplete#handleClick combobox:commit->awc-autocomplete#handleCommit">
+      data-action="mousedown->awc-autocomplete#handleMousedown click->awc-autocomplete#handleClick">
       <div class="awc-autocomplete-control" data-target="awc-autocomplete.control" data-trigger>
         ${selection}
         <input class="awc-autocomplete-input" type="text" autocomplete="off" value="${multiple ? '' : (singleSelection?.text ?? '')}"
@@ -762,6 +762,15 @@ describe('AwcAutocompleteElement', () => {
         return { value: hiddenField.value, text: tag.querySelector('[data-behavior="text"]')!.textContent };
       });
     }
+
+    it('should say on the listbox, not the input, that several options can be selected', async () => {
+      const el = await autocompleteFixture({ multiple: true, options: FRUITS });
+      const single = await autocompleteFixture({ options: FRUITS });
+
+      expect(el.listbox.getAttribute('aria-multiselectable')).to.equal('true');
+      expect(el.input.hasAttribute('aria-multiselectable')).to.equal(false);
+      expect(single.listbox.hasAttribute('aria-multiselectable')).to.equal(false);
+    });
 
     it('should add a tag for each value, reading its text from the option', async () => {
       const el = await autocompleteFixture({ multiple: true, options: FRUITS });

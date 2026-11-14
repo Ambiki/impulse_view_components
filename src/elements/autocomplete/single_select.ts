@@ -16,13 +16,10 @@ export default class SingleSelect implements SelectVariant {
   }
 
   start() {
-    if (this.selectedOption) {
-      this.autocomplete.combobox.select(this.selectedOption);
-      this.autocomplete.combobox.activate(this.selectedOption, { scroll: true });
-    } else {
-      const firstOption = this.autocomplete.visibleOptions[0];
-      if (!firstOption) return;
-      this.autocomplete.combobox.activate(firstOption, { scroll: true });
+    this.markSelectedOption();
+    const option = this.selectedOption ?? this.autocomplete.visibleOptions[0];
+    if (option) {
+      this.autocomplete.combobox.activate(option, { scroll: true });
     }
   }
 
@@ -51,12 +48,7 @@ export default class SingleSelect implements SelectVariant {
     // Only while open: the options are all deselected while it is closed, and `start` selects the option on opening.
     if (!this.autocomplete.open) return;
 
-    const option = this.selectedOption;
-    if (option) {
-      this.autocomplete.combobox.select(option);
-    } else {
-      this.autocomplete.combobox.deselectAll();
-    }
+    this.markSelectedOption();
   }
 
   clear() {
@@ -78,6 +70,14 @@ export default class SingleSelect implements SelectVariant {
   // eslint-disable-next-line accessor-pairs
   set required(value: boolean) {
     this.autocomplete.input.required = value;
+  }
+
+  /** Leaves the option that has the value as the only selected option. */
+  private markSelectedOption() {
+    const selected = this.selectedOption;
+    for (const option of this.autocomplete.options) {
+      this.autocomplete.markSelected(option, option === selected);
+    }
   }
 
   private get selectedOption() {

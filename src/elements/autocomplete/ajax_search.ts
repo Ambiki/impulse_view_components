@@ -31,7 +31,7 @@ export default class AjaxSearch implements SearchVariant {
 
   start() {
     if (this.cachedOptions) {
-      this.insertOptions(this.cachedOptions, { cached: true });
+      this.insertOptions(this.cachedOptions);
     } else {
       this.search('');
     }
@@ -104,11 +104,8 @@ export default class AjaxSearch implements SearchVariant {
     }
   }
 
-  private async insertOptions(options: string, { cached = false } = {}) {
+  private async insertOptions(options: string) {
     this.autocomplete.optionsContainer.innerHTML = options;
-    if (!cached) {
-      this.autocomplete.combobox.initializeOptions();
-    }
     // The response can land after the listbox closed, which deselected and deactivated every option and cleared
     // `no-options`. Opening it again does all three afresh.
     if (!this.autocomplete.open) return;
