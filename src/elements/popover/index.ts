@@ -140,17 +140,13 @@ export default class AwcPopoverElement extends OpenableElement {
   }
 
   /**
-   * Hides the popover, and the popovers nested in it first. Emits `hidden` but no `hide`: use `requestHide` to let
-   * listeners prevent it.
+   * Hides the popovers nested in this one, as `hide` does first. A nested popover floats in the top layer on its own,
+   * so it would stay behind. Each one reports its own close.
    */
-  hide(event?: Event): Promise<void> {
-    // A nested popover floats in the top layer on its own, so it would stay behind. Each one reports its own close.
-    if (this.opened) {
-      for (const popover of this.nestedOpenPopovers) {
-        popover.hide();
-      }
+  protected hideNested() {
+    for (const popover of this.nestedOpenPopovers) {
+      popover.hide();
     }
-    return super.hide(event);
   }
 
   /**

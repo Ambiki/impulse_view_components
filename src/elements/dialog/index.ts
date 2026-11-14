@@ -42,15 +42,9 @@ export default class AwcDialogElement extends OpenableElement {
     this.pressedBackdrop = false;
   }
 
-  /**
-   * Hides the dialog element, and the dialog nested in it first. Emits `hidden` but no `hide`: use `requestHide` to let
-   * listeners prevent it.
-   */
-  hide(event?: Event): Promise<void> {
-    if (this.opened) {
-      this.nestedDialog?.hide();
-    }
-    return super.hide(event);
+  /** Hides the dialog nested in this one, as `hide` does first. */
+  protected hideNested() {
+    this.nestedDialog?.hide();
   }
 
   handleClick(event: MouseEvent) {

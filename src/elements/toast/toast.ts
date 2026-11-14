@@ -87,16 +87,11 @@ export default class AwcToastElement extends OpenableElement {
   }
 
   /**
-   * Hides the toast, and removes it from the region: a hidden toast is done with. Emits `hidden` but no `hide`: use
-   * `requestHide` to let listeners prevent it.
-   * @param event - What made the toast hide, if anything did.
+   * Removes the toast from the region once it has hidden, as `hide` does last: a hidden toast is done with. Shown again
+   * by a listener to `hidden`, or hidden while removed, it stays where it is.
    */
-  async hide(event?: Event): Promise<void> {
-    // Hiding sets `open`, which calls `hide` again: only the call that closed the toast removes it, once `hidden` is out.
-    const closing = this.opened;
-    await super.hide(event);
-    // Shown again while hiding, or hidden while removed, it stays where it is.
-    if (closing && !this.open && this.isConnected) this.remove();
+  protected afterHidden() {
+    if (!this.open && this.isConnected) this.remove();
   }
 
   /**

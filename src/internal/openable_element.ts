@@ -12,7 +12,8 @@
  *
  * A subclass declares `open` with `@property({ type: Boolean })`, since impulse reads only a class's own property
  * declarations. It implements `openParts` and `closeParts`, and calls `super.connected()` at the end of its own
- * `connected`, and `super.disconnected()` at the start of its own `disconnected`.
+ * `connected`, and `super.disconnected()` at the start of its own `disconnected`. It doesn't override `hide`: what
+ * closes with it goes in `hideNested`, and what follows its closing in `afterHidden`.
  */
 import { ImpulseElement, isInitialized } from '@ambiki/impulse';
 
@@ -97,6 +98,7 @@ export default abstract class OpenableElement extends ImpulseElement {
       this.open = false;
       return;
     }
+    this.hideNested();
     const closed = this.closeQuietly(event);
     // After closing, so that `openChanged` finds nothing left to do.
     this.open = false;
@@ -107,6 +109,7 @@ export default abstract class OpenableElement extends ImpulseElement {
     // Shown again before the hide finished, so there is no close left to report.
     if (!this._opened) {
       this.emit('hidden');
+      this.afterHidden();
     }
   }
 
@@ -130,6 +133,19 @@ export default abstract class OpenableElement extends ImpulseElement {
    * time, during which the element may be shown again.
    */
   protected abstract closeParts(event?: Event): void | Promise<void>;
+
+  /**
+   * Hides the elements nested in this one that can't stay open without it, such as the popovers in a popover. `hide`
+   * calls it before it closes the element's own parts, and only when the element is open: setting `open` calls `hide`
+   * again, which finds it closed. By default, there are none.
+   */
+  protected hideNested(): void {}
+
+  /**
+   * What follows from the element having closed, once `hidden` is out. `hide` doesn't call it when the element was
+   * shown again while it closed. By default, nothing.
+   */
+  protected afterHidden(): void {}
 
   /**
    * Makes the requests that showing the element depends on, once its own `show` wasn't prevented, and returns whether
