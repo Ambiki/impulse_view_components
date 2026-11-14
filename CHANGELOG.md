@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- `<awc-autocomplete>`'s `combobox`, `selectVariant`, `markSelected` and `tags` are private, and its `checkIfListIsEmpty` and `toggleSelectedClass` are removed. They were undocumented ([#444](https://github.com/Ambiki/impulse_view_components/pull/444))
 - `<awc-autocomplete>` is built on the package's own combobox, and `@ambiki/combobox` is no longer a dependency. Home and End move the caret in its input, where they moved to the first and last option ([#438](https://github.com/Ambiki/impulse_view_components/pull/438))
 - `impulse_view_components` depends on view_component `~> 4.24.0`, up from `~> 4.17.0` ([#430](https://github.com/Ambiki/impulse_view_components/pull/430))
 - **Breaking:** `Impulse::PopoverComponent` takes a required `title:`, and `with_header` and `with_body` on itself, as `Impulse::DialogComponent` does. `with_panel` and `header.with_title` are removed ([#416](https://github.com/Ambiki/impulse_view_components/pull/416))
