@@ -27,7 +27,7 @@ module Impulse
       @system_args[:tag] = :"awc-toast"
       @system_args[:tabindex] = -1
       @system_args[:variant] = variant unless variant == DEFAULT_VARIANT
-      @system_args[:duration] = duration.nil? ? Float::INFINITY : duration unless duration.equal?(DEFAULT_DURATION)
+      @system_args[:duration] = resolve_duration(duration) unless duration.equal?(DEFAULT_DURATION)
       @system_args[:class] = class_names(system_args[:class], "awc-toast")
       @system_args[:data] = merge_attributes(system_args[:data], action: "keydown->awc-toast#handleKeydown")
     end
@@ -39,6 +39,11 @@ module Impulse
     def resolve_variant(key)
       variant = key.to_sym if key.respond_to?(:to_sym)
       fetch_or_fallback(VARIANTS, VARIANT_ALIASES.fetch(variant, variant), DEFAULT_VARIANT)
+    end
+
+    # The element's `duration` for the one given: `nil` keeps the toast until it is dismissed, as `Infinity` does there.
+    def resolve_duration(duration)
+      duration.nil? ? Float::INFINITY : duration
     end
   end
 end
