@@ -117,6 +117,19 @@ async function recordUnhandledRejections(run: () => unknown) {
   return reasons;
 }
 
+/** Runs `run`, and returns the names of the errors left uncaught meanwhile. */
+async function recordUncaughtErrors(run: () => unknown) {
+  const names: string[] = [];
+  const onError = (event: ErrorEvent) => names.push(String(event.error?.name ?? event.message));
+  window.addEventListener('error', onError);
+  try {
+    await run();
+  } finally {
+    window.removeEventListener('error', onError);
+  }
+  return names;
+}
+
 function messageOf(toast: AwcToastElement) {
   return toast.querySelector('.awc-toast-message')!.textContent;
 }
@@ -784,6 +797,40 @@ describe('<awc-toast-region> over modal dialogs', () => {
     expect(region.parentElement === dialog.dialog).to.be.true;
     expect(pressable(toast.querySelector('.awc-toast-close-btn')!)).to.be.true;
     dialog.dialog.close();
+  });
+
+  it('leaves with its page while a dialog is open, without showing itself again', async () => {
+    const container = await fixture<HTMLDivElement>(`<div><dialog open></dialog><div id="page">${regionHtml()}</div></div>`);
+    const region = container.querySelector('awc-toast-region')!;
+    await whenInitialized(region);
+
+    const errors = await recordUncaughtErrors(async () => {
+      // As a page swap does: what the layout rendered the region in goes away, and the region with it.
+      container.querySelector('#page')!.remove();
+      await moved();
+    });
+
+    expect(errors).to.deep.equal([]);
+    expect(region.isConnected).to.be.false;
+  });
+
+  it('leaves with its page from inside an open modal dialog', async () => {
+    const container = await fixture<HTMLDivElement>(`<div><div id="page">${dialogHtml()}${regionHtml()}</div></div>`);
+    const region = container.querySelector('awc-toast-region')!;
+    const dialog = container.querySelector('awc-dialog')!;
+    await whenInitialized(region);
+    await whenInitialized(dialog);
+    dialog.show();
+    await moved();
+    expect(region.parentElement === dialog.dialog).to.be.true;
+
+    const errors = await recordUncaughtErrors(async () => {
+      container.querySelector('#page')!.remove();
+      await moved();
+    });
+
+    expect(errors).to.deep.equal([]);
+    expect(region.isConnected).to.be.false;
   });
 
   it('goes back to where the layout rendered it when the open dialog it is in is removed', async () => {

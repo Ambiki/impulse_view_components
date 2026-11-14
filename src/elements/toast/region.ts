@@ -183,9 +183,11 @@ export default class AwcToastRegionElement extends ImpulseElement {
    */
   private followTopmostModalDialog = () => {
     const target = this.modalDialogs.topmost() ?? this.layoutParent;
-    // Moving closes a popover, and showing it again puts it above the dialog in the top layer.
-    if (target && this.parentElement !== target) target.append(this);
-    if (supportsPopover() && !this.matches(':popover-open')) this.showPopover();
+    // Only into the page: a region that left with its page stays out of it.
+    if (target?.isConnected && this.parentElement !== target) target.append(this);
+    // Moving closes a popover, and showing it again puts it above the dialog in the top layer. Out of the page, there
+    // is nothing to show it in.
+    if (this.isConnected && supportsPopover() && !this.matches(':popover-open')) this.showPopover();
   };
 
   /** Moves focus back to where it was before it moved into the region, or out of the region when that is gone. */
