@@ -19,8 +19,8 @@ module Impulse
     end
 
     # A day is also disabled on a disabled day of the week.
-    def disabled?(date)
-      super || @disabled_days_of_week.include?(date.wday)
+    def also_disabled?(date)
+      @disabled_days_of_week.include?(date.wday)
     end
   end
 end

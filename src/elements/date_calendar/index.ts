@@ -59,13 +59,9 @@ export default class AwcDateCalendarElement extends CalendarGridElement<DayDrill
     this.refresh();
   }
 
-  /** A day is disabled before `min`, after `max`, or on a disabled day of the week. */
-  protected isDisabledCell(date: CalendarDate, min: CalendarDate | null, max: CalendarDate | null): boolean {
-    return (
-      (!!min && date.compare(min) < 0) ||
-      (!!max && date.compare(max) > 0) ||
-      this.disabledDaysOfWeek.includes(date.dayOfWeek)
-    );
+  /** A day is also disabled on a disabled day of the week. */
+  protected isAlsoDisabledCell(date: CalendarDate): boolean {
+    return this.disabledDaysOfWeek.includes(date.dayOfWeek);
   }
 
   protected commitDetail(range: DateRange): AwcDateCalendarCommitEvent {

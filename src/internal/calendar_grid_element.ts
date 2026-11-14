@@ -6,7 +6,7 @@
  *
  * The selection is a date range: a day, a week, a month or a year. The value names it, written as the calendar writes
  * values, and so do `min`, `max` and the methods' arguments. A subclass decides its level, what a cell selects, which
- * cells are disabled, and what `commit` carries.
+ * cells it disables beyond the limits, and what `commit` carries.
  *
  * A calendar with levels above its base level, the one its value is a cell of, drills up to them through its heading,
  * in the same grid, and back down by choosing a cell (ADR 0017). The level shown is read from the grid's markup, like
@@ -80,11 +80,12 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
   }
 
   /**
-   * Whether the user can move to `cell` but not commit it, given the earliest and latest allowed. By default, when none
-   * of the days it selects falls between them.
+   * Whether the calendar disables `cell`, one of its base level, for a reason of its own, whatever its limits allow.
+   * The grid already disables a cell with none of the days it selects between `min` and `max`, or within the four-digit
+   * years. By default, it doesn't.
    */
-  protected isDisabledCell(cell: CalendarDate, min: CalendarDate | null, max: CalendarDate | null): boolean {
-    return isOutsideLimits(this.rangeOf(cell), min, max);
+  protected isAlsoDisabledCell(_cell: CalendarDate): boolean {
+    return false;
   }
 
   /** The detail of `commit`, for the range the user committed. */
@@ -438,7 +439,7 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
       max,
       isDisabled: (date) => {
         if (isPastFourDigitYears(base ? this.rangeOf(date) : level.range(date))) return true;
-        if (base) return this.isDisabledCell(date, min, max);
+        if (base) return isOutsideLimits(this.rangeOf(date), min, max) || this.isAlsoDisabledCell(date);
         return !date.equals(back ?? null) && isOutsideLimits(level.range(date), min, max);
       },
       firstDayOfWeek: this.firstDayOfWeek ?? 0,

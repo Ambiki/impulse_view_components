@@ -2,13 +2,13 @@ module Impulse
   module Internal
     # The grid the calendars share, whatever their level shows: days for `DateCalendarComponent` and
     # `WeekCalendarComponent`, months for `MonthCalendarComponent`, years for `YearCalendarComponent` (ADR 0016). It is
-    # internal, and not part of the public API. It renders the first page, and the element renders the pages the user
+    # internal, and not part of the public API. It renders the first view, and the element renders the views the user
     # moves to (ADR 0014). The Rails settings a calendar uses are always rendered, so the element never falls back to the
     # browser's (ADR 0015).
     #
     # The selection is a date range: a day, a week, a month or a year. The value names it, written as the calendar writes
     # values, and so do `min` and `max`. A subclass names its element and its level, and may change what a cell selects,
-    # which cells are disabled, and add a hint. A calendar renders its heading as the button that drills up to its
+    # disable cells of its own, and add a hint. A calendar renders its heading as the button that drills up to its
     # level's levels above (ADR 0017); the element alone renders the levels above.
     class CalendarGridComponent < ApplicationComponent
       # The years a calendar names, those with four digits, as `YYYY-MM-DD` and the element's values write them.
@@ -33,9 +33,9 @@ module Impulse
         @min = to_limit(min, :min)
         @max = to_limit(max, :max)
         @today = level.cell_of(@time_zone.today)
-        # The value names the selection, and the calendar opens on its page, as the element's `resetView` does.
+        # The value names the selection, and the calendar opens on its view, as the element's `resetView` does.
         @value_cell = @selected&.begin
-        @displayed_page = level.page_of(@value_cell || @today)
+        @displayed_view = level.view_of(@value_cell || @today)
         # The cell holding the grid's one tab stop.
         @active_cell = @value_cell || @today
         id = self.class.generate_id
@@ -72,11 +72,16 @@ module Impulse
         level.range(cell)
       end
 
-      # A cell the user can move to but not commit. By default, one with none of the days it selects between `min` and
-      # `max`.
+      # A cell the user can move to but not commit: one with none of the days it selects between `min` and `max`, or
+      # within the four-digit years, or one the calendar disables for a reason of its own.
       def disabled?(cell)
         range = range_of(cell)
-        past_four_digit_years?(range) || range.end < earliest || range.begin > latest
+        past_four_digit_years?(range) || range.end < earliest || range.begin > latest || also_disabled?(cell)
+      end
+
+      # Whether the calendar disables `cell` for a reason of its own, whatever its limits allow. By default, it doesn't.
+      def also_disabled?(_cell)
+        false
       end
 
       # Whether any of `range`'s days falls outside the four-digit years, which are all a value names.
@@ -100,7 +105,7 @@ module Impulse
         @levels_above ||= level.levels_above
       end
 
-      # The names and patterns the element renders the pages the user moves to with: its level's, and, for a calendar
+      # The names and patterns the element renders the views the user moves to with: its level's, and, for a calendar
       # that drills up, those of the levels above too, and the page buttons' names on each, under `paging`.
       def i18n
         return level.i18n if levels_above.empty?
@@ -119,7 +124,7 @@ module Impulse
       # The heading's content: below the top level, a button that drills up, named by its text. The header listens
       # for its clicks, as the element replaces it on every drill.
       def heading_content
-        heading = level.heading(@displayed_page)
+        heading = level.heading(@displayed_view)
         return heading if levels_above.empty?
 
         tag.button(heading, type: "button", class: "btn btn-sm btn-light #{tag_name}-heading-button", "aria-describedby": drill_hint_id(levels_above.first), disabled: @disabled)
@@ -177,16 +182,16 @@ module Impulse
       end
 
       def outside?(cell)
-        level.compare_pages(cell, @displayed_page) != 0
+        level.compare_views(cell, @displayed_view) != 0
       end
 
-      # Paging stops at the pages holding `min` and `max`, and never goes further from them than the displayed page.
-      def previous_page_disabled?
-        level.compare_pages(@displayed_page, earliest) <= 0
+      # Paging stops at the views holding `min` and `max`, and never goes further from them than the displayed view.
+      def previous_view_disabled?
+        level.compare_views(@displayed_view, earliest) <= 0
       end
 
-      def next_page_disabled?
-        level.compare_pages(@displayed_page, latest) >= 0
+      def next_view_disabled?
+        level.compare_views(@displayed_view, latest) >= 0
       end
     end
   end

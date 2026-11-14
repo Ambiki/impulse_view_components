@@ -1,19 +1,19 @@
 module Impulse
   module Internal
     # The year level: a decade's years, and the year before and after it, three to a row. The year calendar shows it.
-    # It is internal, and not part of the public API. A cell is named by its year's first day, and a page by its
+    # It is internal, and not part of the public API. A cell is named by its year's first day, and a view by its
     # decade's.
     class YearLevel
       def cell
         "year"
       end
 
-      def page_attribute
+      def view_attribute
         "decade"
       end
 
-      def format_page(page)
-        page.year.to_s
+      def format_view(view)
+        view.year.to_s
       end
 
       # The January 1 of the year an `Integer` or a four-digit string names, or `nil` for anything else.
@@ -38,25 +38,25 @@ module Impulse
         cell..cell.end_of_year
       end
 
-      def page_of(date)
+      def view_of(date)
         Date.new(date.year.floor(-1), 1, 1)
       end
 
-      def compare_pages(a, b)
-        page_of(a) <=> page_of(b)
+      def compare_views(a, b)
+        view_of(a) <=> view_of(b)
       end
 
       # The decade's ten years, and the years before and after it, three to a row.
-      def rows(page)
-        ((page.year - 1)..(page.year + 10)).map { |year| Date.new(year, 1, 1) }.each_slice(3)
+      def rows(view)
+        ((view.year - 1)..(view.year + 10)).map { |year| Date.new(year, 1, 1) }.each_slice(3)
       end
 
       def weekdays
         nil
       end
 
-      def heading(page)
-        I18n.t("impulse.calendar.formats.decade", start: page.year, end: page.year + 9)
+      def heading(view)
+        I18n.t("impulse.calendar.formats.decade", start: view.year, end: view.year + 9)
       end
 
       def text(cell)
