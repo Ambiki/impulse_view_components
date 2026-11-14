@@ -1,66 +1,53 @@
-import type AwcAutocompleteElement from './index';
 import type { SelectVariant } from './index';
 
 const HIDDEN_FIELD = 'input[data-behavior="hidden-field"]';
 
-/**
- * A single select's selection. It is kept in one place only: the hidden field the form submits. The input's text, the
- * options' `aria-selected` and the element's selected class all follow from it.
- */
+/** A single select's selection. It is kept in one place only: the hidden field the form submits. */
 export default class SingleSelect implements SelectVariant {
-  readonly autocomplete: AwcAutocompleteElement;
+  /** It has its value, so there is nothing left to choose. */
+  readonly closesOnCommit = true;
+  private readonly root: HTMLElement;
   /** What `reset` restores: the value and text the element connected with. */
   private defaultValue = '';
   private defaultText = '';
 
-  constructor(autocomplete: AwcAutocompleteElement) {
-    this.autocomplete = autocomplete;
+  constructor(root: HTMLElement) {
+    this.root = root;
   }
 
   connected() {
     this.defaultValue = this.value;
-    this.defaultText = this.hiddenField.getAttribute('data-text') ?? '';
+    this.defaultText = this.inputText;
   }
 
   get value() {
     // An element made from code has no hidden field until its markup is added, and no value.
-    return this.autocomplete.querySelector<HTMLInputElement>(HIDDEN_FIELD)?.value ?? '';
+    return this.root.querySelector<HTMLInputElement>(HIDDEN_FIELD)?.value ?? '';
   }
 
-  start() {
-    this.markSelectedOption();
-    const option = this.selectedOption ?? this.autocomplete.visibleOptions[0];
-    if (option) {
-      this.autocomplete.combobox.activate(option, { scroll: true });
-    }
+  /** The input shows the selected option's text. */
+  get inputText() {
+    return this.hiddenField.dataset.text ?? '';
   }
 
-  stop() {
-    const { text } = this.hiddenField.dataset;
-    this.autocomplete.input.value = text ?? '';
+  /** The input holds the selection's text, so it has to be filled whenever the select is required. */
+  inputRequired(required: boolean) {
+    return required;
   }
 
-  reset() {
-    this.setValue(this.defaultValue, this.defaultText);
+  /** The first option that has the value: at most one option is selected. */
+  selectedOptions(options: HTMLElement[]) {
+    const selected = options.find((option) => option.getAttribute('value') === this.value);
+    return selected ? [selected] : [];
   }
 
-  select(option: HTMLElement) {
-    const value = option.getAttribute('value') ?? '';
-    const { text } = option.dataset;
-    this.setValue(value, text || '');
-    this.autocomplete.requestHide();
+  commit(option: HTMLElement) {
+    this.setValue(option.getAttribute('value') ?? '', option.dataset.text || '');
   }
 
   setValue(value: string, text: string) {
     this.hiddenField.value = value;
-    const trimmedText = text.trim();
-    this.hiddenField.setAttribute('data-text', trimmedText);
-    this.autocomplete.input.value = trimmedText;
-    this.autocomplete.toggleSelectedClass(!!value);
-    // Only while open: the options are all deselected while it is closed, and `start` selects the option on opening.
-    if (!this.autocomplete.open) return;
-
-    this.markSelectedOption();
+    this.hiddenField.setAttribute('data-text', text.trim());
   }
 
   clear() {
@@ -75,28 +62,15 @@ export default class SingleSelect implements SelectVariant {
     this.clear();
   }
 
+  reset() {
+    this.setValue(this.defaultValue, this.defaultText);
+  }
+
   isSelected(value: string) {
     return this.value === value;
   }
 
-  // eslint-disable-next-line accessor-pairs
-  set required(value: boolean) {
-    this.autocomplete.input.required = value;
-  }
-
-  /** Leaves the option that has the value as the only selected option. */
-  private markSelectedOption() {
-    const selected = this.selectedOption;
-    for (const option of this.autocomplete.options) {
-      this.autocomplete.markSelected(option, option === selected);
-    }
-  }
-
-  private get selectedOption() {
-    return this.autocomplete.options.find((o) => o.getAttribute('value') === this.value);
-  }
-
   private get hiddenField() {
-    return this.autocomplete.querySelector<HTMLInputElement>(HIDDEN_FIELD)!;
+    return this.root.querySelector<HTMLInputElement>(HIDDEN_FIELD)!;
   }
 }
