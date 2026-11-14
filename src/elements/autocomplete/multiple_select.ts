@@ -28,7 +28,7 @@ export default class MultipleSelect implements SelectVariant {
   }
 
   /** The values are in the tags, so the input only has to be filled while there is none. */
-  inputRequired(required: boolean) {
+  requiresInput(required: boolean) {
     return required && this.value.length === 0;
   }
 
@@ -90,9 +90,13 @@ export default class MultipleSelect implements SelectVariant {
     this.template.before(templateClone);
   }
 
-  /** Each tag's hidden field, in the order of the tags. The field outside the tags, which submits no value, isn't one. */
+  /**
+   * Each tag's hidden field, in the order of the tags. The field outside the tags, which submits no value, isn't one.
+   */
   private get hiddenFields() {
-    return [...this.root.querySelectorAll<HTMLInputElement>('[data-behavior="tag"] input[data-behavior="hidden-field"]')];
+    return [
+      ...this.root.querySelectorAll<HTMLInputElement>('[data-behavior="tag"] input[data-behavior="hidden-field"]'),
+    ];
   }
 
   private get template() {

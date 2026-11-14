@@ -4,7 +4,7 @@ const HIDDEN_FIELD = 'input[data-behavior="hidden-field"]';
 
 /** A single select's selection. It is kept in one place only: the hidden field the form submits. */
 export default class SingleSelect implements SelectVariant {
-  /** It has its value, so there is nothing left to choose. */
+  /** A single select has its value once an option is committed. */
   readonly closesOnCommit = true;
   private readonly root: HTMLElement;
   /** What `reset` restores: the value and text the element connected with. */
@@ -31,7 +31,7 @@ export default class SingleSelect implements SelectVariant {
   }
 
   /** The input holds the selection's text, so it has to be filled whenever the select is required. */
-  inputRequired(required: boolean) {
+  requiresInput(required: boolean) {
     return required;
   }
 

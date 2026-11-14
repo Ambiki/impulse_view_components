@@ -50,8 +50,8 @@ export interface SelectVariant {
   readonly closesOnCommit: boolean;
   /** The selection's text as the input shows it, or `undefined` when the input doesn't show the selection. */
   readonly inputText: string | undefined;
-  /** Whether the input is required, given whether the element is. */
-  inputRequired: (required: boolean) => boolean;
+  /** Whether the input has to be filled, given whether the element is required. */
+  requiresInput: (required: boolean) => boolean;
   /** Which of `options` are selected options. */
   selectedOptions: (options: HTMLElement[]) => HTMLElement[];
   /** Called once the element has connected, with its markup in place. */
@@ -243,9 +243,7 @@ export default class AwcAutocompleteElement<
       this.clearButton.disabled = value;
     }
 
-    for (const button of this.tagDismissButtons) {
-      button.disabled = value;
-    }
+    this.syncDismissButtons();
   }
 
   /**
@@ -432,7 +430,7 @@ export default class AwcAutocompleteElement<
     const option = this.options.find((o) => o.getAttribute('value') === value);
     const textValue = text || option?.getAttribute('data-text') || '';
     this.selectVariant.setValue(value, textValue);
-    this.selectionChanged();
+    this.syncWithSelection();
   }
 
   /**
@@ -446,7 +444,7 @@ export default class AwcAutocompleteElement<
     } else {
       this.selectVariant.clear();
     }
-    this.selectionChanged();
+    this.syncWithSelection();
   }
   /* eslint-enable jsdoc/check-param-names */
 
@@ -487,7 +485,7 @@ export default class AwcAutocompleteElement<
    */
   reset() {
     this.selectVariant.reset();
-    this.selectionChanged();
+    this.syncWithSelection();
   }
 
   /**
@@ -495,7 +493,7 @@ export default class AwcAutocompleteElement<
    */
   clear() {
     this.selectVariant.clear();
-    this.selectionChanged();
+    this.syncWithSelection();
   }
 
   /**
@@ -526,7 +524,7 @@ export default class AwcAutocompleteElement<
   /** Hides the listbox. */
   protected async closeParts() {
     this.combobox.stop();
-    // The options only say what is selected while the listbox is open: opening marks them.
+    // The options only say what is selected while the listbox is open.
     for (const option of this.options) {
       this.markSelected(option, false);
     }
@@ -541,7 +539,7 @@ export default class AwcAutocompleteElement<
   /** Selects or deselects the option the user committed, as the select variant decides, and reports it. */
   private commit(option: HTMLElement, event: KeyboardEvent | MouseEvent) {
     this.selectVariant.commit(option);
-    this.selectionChanged();
+    this.syncWithSelection();
     if (this.selectVariant.closesOnCommit) {
       this.requestHide();
     }
@@ -609,7 +607,7 @@ export default class AwcAutocompleteElement<
   }
 
   /** Brings what follows from the selection up to date with it, once the element has changed it. */
-  private selectionChanged() {
+  private syncWithSelection() {
     const { inputText } = this.selectVariant;
     if (inputText !== undefined) {
       this.input.value = inputText;
@@ -618,18 +616,22 @@ export default class AwcAutocompleteElement<
     this.syncInputRequired();
     // A new tag's dismiss button comes enabled from the template, and `disabledChanged` only runs when `disabled`
     // changes.
-    for (const button of this.tagDismissButtons) {
-      button.disabled = this.disabled;
-    }
+    this.syncDismissButtons();
     // The options only say what is selected while the listbox is open: opening marks them.
     if (this.open) {
       this.markSelectedOptions();
     }
   }
 
-  /** The input is the control a form validates, so it is required when the select variant says the selection needs it. */
+  private syncDismissButtons() {
+    for (const button of this.tagDismissButtons) {
+      button.disabled = this.disabled;
+    }
+  }
+
+  /** The input is the control a form validates, so it is the one that is required. */
   private syncInputRequired() {
-    this.input.required = this.selectVariant.inputRequired(this.required);
+    this.input.required = this.selectVariant.requiresInput(this.required);
   }
 
   private markSelectedOptions() {
