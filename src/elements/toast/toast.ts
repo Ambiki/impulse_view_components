@@ -15,6 +15,12 @@ const shownToasts = new WeakSet<AwcToastElement>();
 /** How long a toast shows for without a `duration` of its own, unless it is a danger toast or holds an action. */
 const DEFAULT_DURATION = 5000;
 
+/** On a toast while it comes in, which its stylesheet animates. */
+const ENTERING_CLASS = 'awc-toast--entering';
+
+/** On a toast while it fades out, hidden but not yet removed. A cached page's copy of one can hold it too. */
+const LEAVING_CLASS = 'awc-toast--leaving';
+
 /** Resolves once `element`'s running animations and transitions have finished, or been cancelled. */
 function animationsFinished(element: Element) {
   return Promise.all(element.getAnimations().map((animation) => animation.finished.catch(() => undefined)));
@@ -52,7 +58,7 @@ export default class AwcToastElement extends OpenableElement {
 
   connected() {
     const shown = shownToasts.has(this);
-    if (!shown && (this.open || this.classList.contains('awc-toast--leaving'))) {
+    if (!shown && (this.open || this.leaving)) {
       this.remove();
       return;
     }
@@ -116,6 +122,14 @@ export default class AwcToastElement extends OpenableElement {
   }
 
   /**
+   * Whether the toast is fading out: hidden, and about to leave the region.
+   * @internal
+   */
+  get leaving() {
+    return this.classList.contains(LEAVING_CLASS);
+  }
+
+  /**
    * What screen readers hear when the toast shows: its title, if it has one, then its message.
    * @internal
    */
@@ -157,14 +171,14 @@ export default class AwcToastElement extends OpenableElement {
   protected openParts({ initial }: { initial: boolean }) {
     shownToasts.add(this);
     // Shown again while it was leaving.
-    this.classList.remove('awc-toast--leaving');
+    this.classList.remove(LEAVING_CLASS);
     if (initial) {
       this.resumeTimer();
       return;
     }
     // Only as it shows: a toast moving with its region connects again, and shouldn't come in a second time.
-    this.classList.add('awc-toast--entering');
-    void animationsFinished(this).then(() => this.classList.remove('awc-toast--entering'));
+    this.classList.add(ENTERING_CLASS);
+    void animationsFinished(this).then(() => this.classList.remove(ENTERING_CLASS));
     this.startOver();
   }
 
@@ -174,8 +188,8 @@ export default class AwcToastElement extends OpenableElement {
     if (!this.isConnected) return;
     // Focus inside it moves on before it is removed.
     if (this.contains(document.activeElement)) this.region?.moveFocusFrom(this);
-    this.classList.remove('awc-toast--entering');
-    this.classList.add('awc-toast--leaving');
+    this.classList.remove(ENTERING_CLASS);
+    this.classList.add(LEAVING_CLASS);
     await animationsFinished(this);
   }
 

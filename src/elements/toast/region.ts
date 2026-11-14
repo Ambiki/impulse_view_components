@@ -122,7 +122,7 @@ export default class AwcToastRegionElement extends ImpulseElement {
     this.followTopmostModalDialog();
     const toast = this.buildToast(content, options);
     const existing = toast.id ?
-      this.toasts.find((element) => element.id === toast.id && !element.classList.contains('awc-toast--leaving')) :
+      this.toasts.find((element) => element.id === toast.id && !element.leaving) :
       undefined;
     if (existing) {
       // One added just before may still be starting up, and shows once it has.
@@ -155,11 +155,10 @@ export default class AwcToastRegionElement extends ImpulseElement {
    * @internal
    */
   moveFocusFrom(toast: AwcToastElement) {
-    const toasts = this.toasts;
-    const index = toasts.indexOf(toast);
-    const others = toasts.filter((element) => element !== toast && element.open);
-    const before = others.filter((element) => toasts.indexOf(element) < index);
-    const next = before[before.length - 1] ?? others.find((element) => toasts.indexOf(element) > index);
+    // The hiding toast among the open ones, to find its neighbours by.
+    const open = this.toasts.filter((element) => element === toast || element.open);
+    const index = open.indexOf(toast);
+    const next = open[index - 1] ?? open[index + 1];
     if (next) {
       next.focus();
     } else {
