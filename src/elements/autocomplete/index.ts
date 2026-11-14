@@ -36,7 +36,9 @@ type RemoveValueArgs<Mode extends SelectionMode> = Mode extends 'multiple' ? [va
 type SetValueTextArgs<Src extends Source> = Src extends 'ajax' ? [text: string] : [text?: string];
 
 /**
- * The contract implemented by the single and multiple select variants.
+ * The contract implemented by the single and multiple select variants: the selection mode. A variant keeps the
+ * selection, and answers what its mode decides. It changes nothing but its own hidden fields and tags: what the input,
+ * the options and the listbox show of the selection is the element's to bring up to date.
  *
  * Both variants implement every member, so a member added here has to be answered by both of them before the code
  * compiles — which is the point. There is no way for one variant to quietly lack an operation the other has.
@@ -44,11 +46,19 @@ type SetValueTextArgs<Src extends Source> = Src extends 'ajax' ? [text: string] 
 export interface SelectVariant {
   /** The selection, read from the hidden fields the form submits: a variant keeps it nowhere else. */
   readonly value: string | string[];
+  /** Whether a commit closes the listbox. */
+  readonly closesOnCommit: boolean;
+  /** The selection's text as the input shows it, or `undefined` when the input doesn't show the selection. */
+  readonly inputText: string | undefined;
+  /** Whether the input has to be filled, given whether the element is required. */
+  requiresInput: (required: boolean) => boolean;
+  /** Which of `options` are selected options. */
+  selectedOptions: (options: HTMLElement[]) => HTMLElement[];
+  /** Called once the element has connected, with its markup in place. */
   connected: () => void;
-  start: () => void;
-  stop: () => void;
   reset: () => void;
-  select: (option: HTMLElement) => void;
+  /** Selects the option the user committed, or deselects it when its mode lets a commit do that. */
+  commit: (option: HTMLElement) => void;
   setValue: (value: string, text: string) => void;
   clear: () => void;
   /**
@@ -58,7 +68,6 @@ export interface SelectVariant {
   removeValue: (value: string) => void;
   /** Whether `value` is part of the selection. */
   isSelected: (value: string) => boolean;
-  set required(value: boolean);
 }
 
 /**
@@ -204,7 +213,10 @@ export default class AwcAutocompleteElement<
     this.selectVariant = this.newSelectVariant();
     this.selectVariant.connected();
     this.searchVariant = this.newSearchVariant();
-    this.selectVariant.required = this.required;
+    if (this.multiple) {
+      this.listbox.setAttribute('aria-multiselectable', 'true');
+    }
+    this.syncInputRequired();
     super.connected();
   }
 
@@ -231,17 +243,15 @@ export default class AwcAutocompleteElement<
       this.clearButton.disabled = value;
     }
 
-    for (const button of this.tagDismissButtons) {
-      button.disabled = value;
-    }
+    this.syncDismissButtons();
   }
 
   /**
    * Called when the `required` attribute changes.
    * @private
    */
-  requiredChanged(value: boolean) {
-    this.selectVariant.required = value;
+  requiredChanged() {
+    this.syncInputRequired();
   }
 
   /**
@@ -420,6 +430,7 @@ export default class AwcAutocompleteElement<
     const option = this.options.find((o) => o.getAttribute('value') === value);
     const textValue = text || option?.getAttribute('data-text') || '';
     this.selectVariant.setValue(value, textValue);
+    this.syncWithSelection();
   }
 
   /**
@@ -430,10 +441,10 @@ export default class AwcAutocompleteElement<
     const [value] = args as [string?];
     if (value) {
       this.selectVariant.removeValue(value);
-      return;
+    } else {
+      this.selectVariant.clear();
     }
-
-    this.selectVariant.clear();
+    this.syncWithSelection();
   }
   /* eslint-enable jsdoc/check-param-names */
 
@@ -474,6 +485,7 @@ export default class AwcAutocompleteElement<
    */
   reset() {
     this.selectVariant.reset();
+    this.syncWithSelection();
   }
 
   /**
@@ -481,6 +493,7 @@ export default class AwcAutocompleteElement<
    */
   clear() {
     this.selectVariant.clear();
+    this.syncWithSelection();
   }
 
   /**
@@ -511,11 +524,12 @@ export default class AwcAutocompleteElement<
   /** Hides the listbox. */
   protected async closeParts() {
     this.combobox.stop();
-    // The options only say what is selected while the listbox is open: `selectVariant.start` marks them on opening.
+    // The options only say what is selected while the listbox is open.
     for (const option of this.options) {
       this.markSelected(option, false);
     }
-    this.selectVariant.stop();
+    // What the user typed to search goes.
+    this.input.value = this.selectVariant.inputText ?? '';
     this.searchVariant.stop();
     this.removeAttribute('no-options');
     this.removeAttribute('error');
@@ -524,7 +538,11 @@ export default class AwcAutocompleteElement<
 
   /** Selects or deselects the option the user committed, as the select variant decides, and reports it. */
   private commit(option: HTMLElement, event: KeyboardEvent | MouseEvent) {
-    this.selectVariant.select(option);
+    this.selectVariant.commit(option);
+    this.syncWithSelection();
+    if (this.selectVariant.closesOnCommit) {
+      this.requestHide();
+    }
     const detail = optionEventDetail(option);
     this.emitEvent('commit', { ...detail, selected: this.selectVariant.isSelected(detail.value) });
     // A click on an option reaches `handleClick`, which does this. A key press doesn't.
@@ -558,31 +576,73 @@ export default class AwcAutocompleteElement<
       return;
     }
 
-    if (cause === 'filtered') {
-      // The first match, whatever is selected. Without one, the active option may be one the query just hid, which
-      // Enter would otherwise commit.
-      const [firstOption] = this.visibleOptions;
-      if (firstOption) {
-        this.combobox.activate(firstOption);
-      } else {
-        this.combobox.deactivate();
-      }
-    } else {
-      // The active option may have been replaced, and the input mustn't point to an option that is gone.
+    // Filtering hides options: it changes neither what they are nor what is selected.
+    if (cause !== 'filtered') {
+      this.markSelectedOptions();
+    }
+
+    // It opened on options that are for an older query until the ones it is fetching arrive. None of them may be
+    // active for a commit, and they don't say whether the list is empty.
+    if (this.searchVariant.pending) {
       this.combobox.deactivate();
-      // Selects the selected options, and activates the first of them, or else the first option.
-      this.selectVariant.start();
-      // It opened on options that are for an older query, until the ones it is fetching arrive.
-      if (this.searchVariant.pending) {
-        this.combobox.deactivate();
-        return;
-      }
+      return;
+    }
+
+    // After a query, the first match, whatever is selected. Otherwise the first selected option, or else the first
+    // option.
+    const [firstOption] = this.visibleOptions;
+    const option = cause === 'filtered' ? firstOption : (this.selectedOptions[0] ?? firstOption);
+    if (option) {
+      this.combobox.activate(option, { scroll: cause !== 'filtered' });
+    } else {
+      // The active option may be one the query just hid, or one a response replaced. Enter would otherwise commit the
+      // one, and the input would point to the other, which is gone.
+      this.combobox.deactivate();
     }
 
     this.checkIfListIsEmpty();
     if (cause === 'fetched') {
       return this.reposition();
     }
+  }
+
+  /** Brings what follows from the selection up to date with it, once the element has changed it. */
+  private syncWithSelection() {
+    const { inputText } = this.selectVariant;
+    if (inputText !== undefined) {
+      this.input.value = inputText;
+    }
+    this.toggleSelectedClass(this.value.length > 0);
+    this.syncInputRequired();
+    // A new tag's dismiss button comes enabled from the template, and `disabledChanged` only runs when `disabled`
+    // changes.
+    this.syncDismissButtons();
+    // The options only say what is selected while the listbox is open: opening marks them.
+    if (this.open) {
+      this.markSelectedOptions();
+    }
+  }
+
+  private syncDismissButtons() {
+    for (const button of this.tagDismissButtons) {
+      button.disabled = this.disabled;
+    }
+  }
+
+  /** The input is the control a form validates, so it is the one that is required. */
+  private syncInputRequired() {
+    this.input.required = this.selectVariant.requiresInput(this.required);
+  }
+
+  private markSelectedOptions() {
+    const selected = new Set(this.selectedOptions);
+    for (const option of this.options) {
+      this.markSelected(option, selected.has(option));
+    }
+  }
+
+  private get selectedOptions() {
+    return this.selectVariant.selectedOptions(this.options);
   }
 
   private newSearchVariant(): SearchVariant {
@@ -617,7 +677,7 @@ export default class AwcAutocompleteElement<
   }
 
   /**
-   * Marks `option` as a selected option or not. The select variants decide which options are selected, and the
+   * Marks `option` as a selected option or not. The select variant decides which options are selected, and the
    * combobox knows nothing of it.
    * @private
    */
