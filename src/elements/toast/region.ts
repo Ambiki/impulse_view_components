@@ -56,7 +56,10 @@ export default class AwcToastRegionElement extends ImpulseElement {
 
   private listeners?: AbortController;
 
-  /** Where the layout rendered the region, for it to return to once no modal dialog is open. */
+  /**
+   * Where the layout rendered the region, or the app has moved it since, for it to return to once no modal dialog is
+   * open.
+   */
   private layoutParent: Element | null = null;
 
   /** The open modal dialogs, the topmost of which the region moves into. */
@@ -66,7 +69,8 @@ export default class AwcToastRegionElement extends ImpulseElement {
   private stopWatchingDialogs?: () => void;
 
   connected() {
-    if (!this.layoutParent && !this.closest('dialog')) this.layoutParent = this.parentElement;
+    // Anywhere but in a dialog, which the region moves into itself, is where the layout or the app put it.
+    if (!this.closest('dialog')) this.layoutParent = this.parentElement;
     this.followTopmostModalDialog();
 
     this.listeners = new AbortController();

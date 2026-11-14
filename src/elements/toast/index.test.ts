@@ -448,6 +448,24 @@ describe('<awc-toast-region>', () => {
     expect(events).to.deep.equal([]);
   });
 
+  it('stays where the app moves it, and shows its toasts there', async () => {
+    const container = await fixture<HTMLDivElement>(`<div><div id="old">${regionHtml()}</div><div id="new"></div></div>`);
+    const region = container.querySelector('awc-toast-region')!;
+    await whenInitialized(region);
+    const next = container.querySelector('#new')!;
+
+    next.append(region);
+    await moved();
+    expect(region.parentElement === next).to.be.true;
+
+    container.querySelector('#old')!.remove();
+    const toast = (await showToast('Saved', { duration: Infinity }))!;
+
+    expect(region.parentElement === next).to.be.true;
+    expect(toast.isConnected).to.be.true;
+    expect(region.matches(':popover-open')).to.be.true;
+  });
+
   it('drops its toasts when the browser restores the page from its back-forward cache', async () => {
     const region = await regionFixture();
     await showToast('Couldn’t save', { variant: 'danger' });
