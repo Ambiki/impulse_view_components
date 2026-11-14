@@ -36,6 +36,8 @@ export default antfu(
       'yaml/flow-mapping-curly-spacing': [2, 'always'],
       'yaml/quotes': ['error', { prefer: 'double' }],
       'antfu/if-newline': 'off',
+      // New in v10. Turned off to keep the code as it is: adopting it reflows every complex ternary and list.
+      'antfu/reasonable-newline': 'off',
     },
   },
   {
