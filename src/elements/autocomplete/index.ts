@@ -42,6 +42,8 @@ type SetValueTextArgs<Src extends Source> = Src extends 'ajax' ? [text: string] 
  * compiles — which is the point. There is no way for one variant to quietly lack an operation the other has.
  */
 export interface SelectVariant {
+  /** The selection, read from the hidden fields the form submits: a variant keeps it nowhere else. */
+  readonly value: string | string[];
   connected: () => void;
   start: () => void;
   stop: () => void;
@@ -184,7 +186,7 @@ export default class AwcAutocompleteElement<
       tabCommits: true,
       onCommit: (option, event) => this.commit(option, event),
     });
-    this.selectVariant = this.multiple ? new MultipleSelect(this) : new SingleSelect(this);
+    this.selectVariant = this.newSelectVariant();
     this.selectVariant.connected();
     this.searchVariant = this.src ? new AjaxSearch(this) : new LocalSearch(this);
     this.selectVariant.required = this.required;
@@ -524,6 +526,10 @@ export default class AwcAutocompleteElement<
     this.firstFocus = false;
   }
 
+  private newSelectVariant(): SelectVariant {
+    return this.multiple ? new MultipleSelect(this) : new SingleSelect(this);
+  }
+
   private removeLastTag(): HTMLElement | undefined {
     const lastTag = this.tags[this.tags.length - 1];
     if (!lastTag) return;
@@ -573,11 +579,9 @@ export default class AwcAutocompleteElement<
    * Returns the selected value.
    */
   get value(): AutocompleteValue<Mode> {
-    if (this.multiple) {
-      return this.tags.map((tag) => tag.getAttribute('value') ?? '') as AutocompleteValue<Mode>;
-    }
-    return (this.querySelector<HTMLInputElement>('input[data-behavior="hidden-field"]')?.value ??
-      '') as AutocompleteValue<Mode>;
+    // The markup holds the value before the element has connected, when it has no select variant yet.
+    const selectVariant = this.selectVariant ?? this.newSelectVariant();
+    return selectVariant.value as AutocompleteValue<Mode>;
   }
 
   /**

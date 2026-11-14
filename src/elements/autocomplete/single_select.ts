@@ -1,8 +1,13 @@
 import type AwcAutocompleteElement from './index';
 import type { SelectVariant } from './index';
 
+/**
+ * A single select's selection. It is kept in one place only: the hidden field the form submits. The input's text, the
+ * options' `aria-selected` and the element's selected class all follow from it.
+ */
 export default class SingleSelect implements SelectVariant {
   readonly autocomplete: AwcAutocompleteElement;
+  /** What `reset` restores: the selection the element connected with. */
   private defaultValue = '';
   private defaultText = '';
 
@@ -11,8 +16,12 @@ export default class SingleSelect implements SelectVariant {
   }
 
   connected() {
-    this.defaultValue = this.hiddenField.value;
+    this.defaultValue = this.value;
     this.defaultText = this.hiddenField.getAttribute('data-text') ?? '';
+  }
+
+  get value() {
+    return this.hiddenField.value;
   }
 
   start() {
@@ -64,7 +73,7 @@ export default class SingleSelect implements SelectVariant {
   }
 
   isSelected(value: string) {
-    return this.hiddenField.value === value;
+    return this.value === value;
   }
 
   // eslint-disable-next-line accessor-pairs
@@ -81,7 +90,7 @@ export default class SingleSelect implements SelectVariant {
   }
 
   private get selectedOption() {
-    return this.autocomplete.options.find((o) => o.getAttribute('value') === this.hiddenField.value);
+    return this.autocomplete.options.find((o) => o.getAttribute('value') === this.value);
   }
 
   private get hiddenField() {
