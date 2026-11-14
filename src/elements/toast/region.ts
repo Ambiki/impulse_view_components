@@ -10,6 +10,7 @@ import {
   whenInitialized,
 } from '@ambiki/impulse';
 import { keepFocusOn } from 'src/internal/focus';
+import LiveAnnouncer from 'src/internal/live_announcer';
 import supportsPopover from 'src/internal/supports_popover';
 
 /** Where on the screen the region shows its toasts. */
@@ -51,11 +52,8 @@ export default class AwcToastRegionElement extends ImpulseElement {
   /** Where a danger toast's text goes to be heard at once. */
   @target() assertiveAnnouncer: HTMLElement;
 
-  /** The toasts waiting to be heard through each announcer, with their text, which are written together. */
-  private readonly pendingAnnouncements = new Map<HTMLElement, Map<AwcToastElement, string>>();
-
-  /** Each announcer's timeout for emptying it once its text has been heard. */
-  private readonly announcementTimeouts = new Map<HTMLElement, ReturnType<typeof setTimeout>>();
+  /** Writes each toast's text into its announcer. */
+  private readonly liveAnnouncer = new LiveAnnouncer<AwcToastElement>();
 
   /** Where focus was before it moved into the region, by the hotkey or by Tab, for it to return to. */
   private returnFocusTo: HTMLElement | null = null;
@@ -147,32 +145,7 @@ export default class AwcToastRegionElement extends ImpulseElement {
    */
   announce(toast: AwcToastElement) {
     const announcer = toast.variant === 'danger' ? this.assertiveAnnouncer : this.politeAnnouncer;
-    // A toast updated before it was heard is heard once, as it is now: a loading toast that has already failed isn't
-    // heard loading as well.
-    for (const batch of this.pendingAnnouncements.values()) batch.delete(toast);
-    const pending = this.pendingAnnouncements.get(announcer);
-    if (pending) {
-      pending.set(toast, toast.announcement);
-      return;
-    }
-    const batch = new Map([[toast, toast.announcement]]);
-    this.pendingAnnouncements.set(announcer, batch);
-    clearTimeout(this.announcementTimeouts.get(announcer));
-    announcer.replaceChildren();
-    // Written a couple of frames later, so that screen readers hear a change even when the text is what they last
-    // heard, and so that NVDA in Firefox hears it at all.
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        this.pendingAnnouncements.delete(announcer);
-        announcer.replaceChildren(
-          ...Array.from(batch.values(), (text) => Object.assign(document.createElement('div'), { textContent: text })),
-        );
-        this.announcementTimeouts.set(
-          announcer,
-          setTimeout(() => announcer.replaceChildren(), 1000),
-        );
-      });
-    });
+    this.liveAnnouncer.announce(announcer, toast, toast.announcement);
   }
 
   /**
