@@ -1386,6 +1386,56 @@ describe('AwcAutocompleteElement', () => {
       expect(el.activeOption).to.equal(el.options[1]);
     });
 
+    it('should drop the request for what the user typed when it closes, and show the options it opens with', async () => {
+      const el = await autocompleteFixture({ src: '/fruits' });
+      const stub = stubFetch();
+      pressInput(el);
+      await requested(stub);
+      await respondAndWait(el, stub, optionsHtml(FRUITS));
+      type(el, 'Ch');
+      await requested(stub, 2);
+
+      await el.hide();
+      pressInput(el);
+      stub.respond(optionsHtml([FRUITS[2]]));
+      await aTimeout(0);
+
+      expect(stub.signal?.aborted).to.equal(true);
+      expect(el.hasAttribute('loading')).to.equal(false);
+      expect(valuesOf(el)).to.eql(['1', '2', '3']);
+    });
+
+    it('should not request what the user typed once it has closed', async () => {
+      const el = await autocompleteFixture({ src: '/fruits' });
+      const stub = stubFetch();
+      pressInput(el);
+      await requested(stub);
+      await respondAndWait(el, stub, optionsHtml(FRUITS));
+
+      type(el, 'Ch');
+      await el.hide();
+      // Longer than the debounce.
+      await aTimeout(400);
+
+      expect(stub.urls).to.have.length(1);
+      expect(el.hasAttribute('loading')).to.equal(false);
+    });
+
+    it('should emit loadend for the request it drops when it closes', async () => {
+      const el = await autocompleteFixture({ src: '/fruits' });
+      const stub = stubFetch();
+      pressInput(el);
+      await requested(stub);
+      await respondAndWait(el, stub, optionsHtml(FRUITS));
+      type(el, 'Ch');
+      await requested(stub, 2);
+      const events = recordAjaxEvents(el);
+
+      await el.hide();
+
+      expect(events).to.eql(['loadend']);
+    });
+
     it('should leave `no-options` off when an empty response lands after it closed', async () => {
       const el = await autocompleteFixture({ src: '/fruits' });
       const stub = stubFetch();
@@ -1432,7 +1482,8 @@ describe('AwcAutocompleteElement', () => {
       pressInput(el);
       await requested(stub);
       await respondAndWait(el, stub, optionsHtml(FRUITS));
-      type(el, 'Ch');
+      // The request for no query is left to finish once it has closed. One for typed text is dropped.
+      type(el, '');
       await requested(stub, 2);
       await el.hide();
       el.activate(el.options[0]);
