@@ -10,7 +10,8 @@
     ],
     "behavior": null,
     "role": null,
-    "popover": null
+    "popover": null,
+    "inside": "element awc-dialog"
   },
   {
     "tag": "button",
@@ -20,6 +21,7 @@
     ],
     "behavior": null,
     "role": null,
-    "popover": null
+    "popover": null,
+    "inside": "target awc-dialog.dialog"
   }
 ]

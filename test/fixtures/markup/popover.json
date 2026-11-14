@@ -7,7 +7,8 @@
     ],
     "behavior": null,
     "role": null,
-    "popover": null
+    "popover": null,
+    "inside": null
   },
   {
     "tag": "button",
@@ -17,7 +18,8 @@
     ],
     "behavior": null,
     "role": null,
-    "popover": null
+    "popover": null,
+    "inside": "element awc-popover"
   },
   {
     "tag": "div",
@@ -25,7 +27,8 @@
     "actions": [],
     "behavior": null,
     "role": "dialog",
-    "popover": "manual"
+    "popover": "manual",
+    "inside": "element awc-popover"
   },
   {
     "tag": "div",
@@ -33,7 +36,8 @@
     "actions": [],
     "behavior": null,
     "role": null,
-    "popover": null
+    "popover": null,
+    "inside": "target awc-popover.panel"
   },
   {
     "tag": "button",
@@ -43,6 +47,7 @@
     ],
     "behavior": null,
     "role": null,
-    "popover": null
+    "popover": null,
+    "inside": "target awc-popover.panel"
   }
 ]

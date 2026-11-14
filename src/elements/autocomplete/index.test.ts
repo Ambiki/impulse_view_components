@@ -248,19 +248,19 @@ describe('AwcAutocompleteElement', () => {
   });
 
   describe('the markup these tests write', () => {
-    it('has the targets, actions and roles the component renders for a single select', async () => {
+    it('should have the targets, actions and roles the component renders for a single select', async () => {
       const html = autocompleteHtml({ options: FRUITS, selected: [FRUITS[0]], required: true });
 
       expect(markupDifferences(html, await componentMarkup('autocomplete_single'))).to.eql([]);
     });
 
-    it('has the targets, actions and roles the component renders for a multiple select', async () => {
+    it('should have the targets, actions and roles the component renders for a multiple select', async () => {
       const html = autocompleteHtml({ multiple: true, options: FRUITS, selected: [FRUITS[0]] });
 
       expect(markupDifferences(html, await componentMarkup('autocomplete_multiple'))).to.eql([]);
     });
 
-    it('has the targets, actions and roles the component renders for an ajax select', async () => {
+    it('should have the targets, actions and roles the component renders for an ajax select', async () => {
       const html = autocompleteHtml({ src: '/fruits' });
 
       expect(markupDifferences(html, await componentMarkup('autocomplete_ajax'))).to.eql([]);

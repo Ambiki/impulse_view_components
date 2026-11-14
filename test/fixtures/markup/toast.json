@@ -7,7 +7,8 @@
     ],
     "behavior": null,
     "role": null,
-    "popover": null
+    "popover": null,
+    "inside": null
   },
   {
     "tag": "button",
@@ -17,6 +18,7 @@
     ],
     "behavior": null,
     "role": null,
-    "popover": null
+    "popover": null,
+    "inside": "element awc-toast"
   }
 ]

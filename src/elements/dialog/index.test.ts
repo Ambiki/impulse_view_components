@@ -7,8 +7,8 @@ import { componentMarkup, markupDifferences } from '../../internal/test_markup';
 import './index';
 
 /**
- * Mirrors the structure of `app/components/impulse/internal/modal_dialog_component.html.erb` and its header's close button. Only the
- * parts the element reads are reproduced here: the target and the actions.
+ * Mirrors the structure of `app/components/impulse/internal/modal_dialog_component.html.erb` and its header's close
+ * button. Only the parts the element reads are reproduced here: the target and the actions.
  */
 function dialogHtml(attributes = '', body = '') {
   return `
@@ -91,8 +91,10 @@ async function settle() {
 }
 
 describe('awc-dialog', () => {
-  it('is tested on markup with the targets, actions and roles the component renders', async () => {
-    expect(markupDifferences(dialogHtml(), await componentMarkup('dialog'))).to.eql([]);
+  describe('the markup these tests write', () => {
+    it('has the targets, actions and roles the component renders', async () => {
+      expect(markupDifferences(dialogHtml(), await componentMarkup('dialog'))).to.eql([]);
+    });
   });
 
   it('emits only the state events when shown and hidden from code', async () => {

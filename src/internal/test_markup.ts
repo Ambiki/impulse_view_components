@@ -12,6 +12,8 @@ export interface MarkedElement {
   behavior: string | null;
   role: string | null;
   popover: string | null;
+  /** What it is nested in: the nearest element around it with a target or a behavior, or that is a custom element. */
+  inside: string | null;
 }
 
 const MARKS = ['data-target', 'data-action', 'data-behavior', 'role', 'popover'];
@@ -29,22 +31,44 @@ export async function componentMarkup(name: string): Promise<MarkedElement[]> {
 export function markedElements(html: string): MarkedElement[] {
   const template = document.createElement('template');
   template.innerHTML = html;
-  return elementsIn(template.content)
-    .filter((element) => MARKS.some((mark) => element.hasAttribute(mark)))
-    .map((element) => ({
+  return elementsIn(template.content, [])
+    .filter(({ element }) => MARKS.some((mark) => element.hasAttribute(mark)))
+    .map(({ element, around }) => ({
       tag: element.localName,
       target: element.getAttribute('data-target'),
       actions: (element.getAttribute('data-action') ?? '').split(/\s+/).filter(Boolean).sort(),
       behavior: element.getAttribute('data-behavior'),
       role: element.getAttribute('role'),
       popover: element.getAttribute('popover'),
+      inside: around.map(nameOf).find(Boolean) ?? null,
     }));
 }
 
-function elementsIn(root: ParentNode): Element[] {
-  return [...root.querySelectorAll('*')].flatMap((element) =>
-    element instanceof HTMLTemplateElement ? [element, ...elementsIn(element.content)] : [element],
-  );
+/**
+ * Every element in `root`, each with the elements around it, nearest first. A template's content counts as inside the
+ * template, which the DOM keeps apart from it.
+ */
+function elementsIn(root: ParentNode, outside: Element[]): Array<{ element: Element; around: Element[] }> {
+  return [...root.querySelectorAll('*')].flatMap((element) => {
+    const around = [...ancestorsOf(element), ...outside];
+    const content = element instanceof HTMLTemplateElement ? elementsIn(element.content, [element, ...around]) : [];
+    return [{ element, around }, ...content];
+  });
+}
+
+function ancestorsOf(element: Element): Element[] {
+  const ancestors: Element[] = [];
+  for (let parent = element.parentElement; parent; parent = parent.parentElement) ancestors.push(parent);
+  return ancestors;
+}
+
+/** What an element is known by to the ones nested in it, or `null` for one they aren't said to be inside. */
+function nameOf(element: Element): string | null {
+  const target = element.getAttribute('data-target');
+  if (target) return `target ${target}`;
+  const behavior = element.getAttribute('data-behavior');
+  if (behavior) return `behavior ${behavior}`;
+  return element.localName.includes('-') ? `element ${element.localName}` : null;
 }
 
 /**
@@ -78,7 +102,7 @@ function byKey(elements: MarkedElement[]): Map<string, Set<string>> {
   const map = new Map<string, Set<string>>();
   for (const element of elements) {
     const key = keyOf(element);
-    map.set(key, (map.get(key) ?? new Set()).add(describe(element)));
+    map.set(key, (map.get(key) ?? new Set()).add(summarize(element)));
   }
   return map;
 }
@@ -90,11 +114,12 @@ function keyOf({ tag, target, behavior }: MarkedElement): string {
   return LOOSE;
 }
 
-function describe({ tag, actions, role, popover }: MarkedElement): string {
+function summarize({ tag, actions, role, popover, inside }: MarkedElement): string {
   const marks = [
     actions.length && `actions ${actions.join(' ')}`,
     role && `role ${role}`,
     popover && `popover ${popover}`,
+    inside && `inside ${inside}`,
   ];
   return [`<${tag}>`, ...marks.filter(Boolean)].join(' ');
 }

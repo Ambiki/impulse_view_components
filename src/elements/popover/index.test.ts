@@ -89,8 +89,10 @@ async function settle() {
 }
 
 describe('awc-popover', () => {
-  it('is tested on markup with the targets, actions and roles the component renders', async () => {
-    expect(markupDifferences(popoverHtml(), await componentMarkup('popover'))).to.eql([]);
+  describe('the markup these tests write', () => {
+    it('has the targets, actions and roles the component renders', async () => {
+      expect(markupDifferences(popoverHtml(), await componentMarkup('popover'))).to.eql([]);
+    });
   });
 
   it('moves the open panel when `placement` changes', async () => {

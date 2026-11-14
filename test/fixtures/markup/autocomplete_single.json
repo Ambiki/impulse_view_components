@@ -8,7 +8,8 @@
     ],
     "behavior": null,
     "role": null,
-    "popover": null
+    "popover": null,
+    "inside": null
   },
   {
     "tag": "div",
@@ -16,7 +17,8 @@
     "actions": [],
     "behavior": null,
     "role": null,
-    "popover": null
+    "popover": null,
+    "inside": "element awc-autocomplete"
   },
   {
     "tag": "input",
@@ -24,7 +26,8 @@
     "actions": [],
     "behavior": "hidden-field",
     "role": null,
-    "popover": null
+    "popover": null,
+    "inside": "target awc-autocomplete.control"
   },
   {
     "tag": "input",
@@ -37,7 +40,8 @@
     ],
     "behavior": null,
     "role": "combobox",
-    "popover": null
+    "popover": null,
+    "inside": "target awc-autocomplete.control"
   },
   {
     "tag": "button",
@@ -47,7 +51,8 @@
     ],
     "behavior": null,
     "role": null,
-    "popover": null
+    "popover": null,
+    "inside": "target awc-autocomplete.control"
   },
   {
     "tag": "div",
@@ -55,7 +60,8 @@
     "actions": [],
     "behavior": null,
     "role": "listbox",
-    "popover": null
+    "popover": null,
+    "inside": "element awc-autocomplete"
   },
   {
     "tag": "div",
@@ -63,7 +69,8 @@
     "actions": [],
     "behavior": null,
     "role": "presentation",
-    "popover": null
+    "popover": null,
+    "inside": "target awc-autocomplete.listbox"
   },
   {
     "tag": "div",
@@ -71,7 +78,8 @@
     "actions": [],
     "behavior": null,
     "role": "option",
-    "popover": null
+    "popover": null,
+    "inside": "target awc-autocomplete.optionsContainer"
   },
   {
     "tag": "div",
@@ -79,6 +87,7 @@
     "actions": [],
     "behavior": null,
     "role": "presentation",
-    "popover": null
+    "popover": null,
+    "inside": "target awc-autocomplete.listbox"
   }
 ]
