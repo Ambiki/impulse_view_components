@@ -166,6 +166,11 @@ function valuesOf(el: AwcAutocompleteElement) {
 // Assertions on the element check a boolean, such as `el.hasAttribute(name)`, rather than using
 // `expect(el).to.have.attribute(name)`, whose failure message serializes the element and hangs the browser.
 
+/** The tags of a multiple select, in order. */
+function tagElementsOf(el: AwcAutocompleteElement) {
+  return [...el.querySelectorAll<HTMLElement>('[data-behavior="tag"]')];
+}
+
 /** The `aria-selected` of each option, in order. */
 function selectionOf(el: AwcAutocompleteElement) {
   return el.options.map((option) => option.getAttribute('aria-selected'));
@@ -660,7 +665,7 @@ describe('AwcAutocompleteElement', () => {
       el.options[0].click();
       await nextFrame();
 
-      const tag = el.tags[0];
+      const [tag] = tagElementsOf(el);
       expect(tag).to.exist;
       const dismissButton = tag.querySelector('button')!;
       setTimeout(() => dismissButton.click());
@@ -763,7 +768,7 @@ describe('AwcAutocompleteElement', () => {
   describe('selection API in a multiple select', () => {
     /** The value and text of each tag, as the form submits the value and the user reads the text. */
     function tagsOf(el: AwcAutocompleteElement) {
-      return el.tags.map((tag) => {
+      return tagElementsOf(el).map((tag) => {
         const hiddenField = tag.querySelector<HTMLInputElement>('[data-behavior="hidden-field"]')!;
         return { value: hiddenField.value, text: tag.querySelector('[data-behavior="text"]')!.textContent };
       });
@@ -848,7 +853,7 @@ describe('AwcAutocompleteElement', () => {
       el.clear();
 
       expect(el.value).to.eql([]);
-      expect(el.tags).to.have.length(0);
+      expect(tagElementsOf(el)).to.have.length(0);
       expect(el.classList.contains('awc-autocomplete--selected')).to.equal(false);
     });
 
@@ -1035,7 +1040,7 @@ describe('AwcAutocompleteElement', () => {
   describe('disabled and required', () => {
     /** The dismiss button of each tag, read from the DOM so that the assertions don't rely on `tagDismissButtons`. */
     function dismissButtonsOf(el: AwcAutocompleteElement) {
-      return el.tags.map((tag) => tag.querySelector('button')!);
+      return tagElementsOf(el).map((tag) => tag.querySelector('button')!);
     }
 
     it('should disable its input and buttons when `disabled` changes', async () => {
