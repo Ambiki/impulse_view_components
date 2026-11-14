@@ -201,7 +201,7 @@ only ship what you use.`,
         collapsed: false,
         items: [
           {
-            text: 'cycle, debounce, scrollLock',
+            text: 'See all',
             link: '/helpers/',
           },
         ],
