@@ -1,0 +1,27 @@
+[
+  {
+    "tag": "dialog",
+    "target": "awc-dialog.dialog",
+    "actions": [
+      "cancel->awc-dialog#handleCancel",
+      "click->awc-dialog#handleClick",
+      "close->awc-dialog#handleClose",
+      "keydown->awc-dialog#handleKeydown"
+    ],
+    "behavior": null,
+    "role": null,
+    "popover": null,
+    "inside": "element awc-dialog"
+  },
+  {
+    "tag": "button",
+    "target": null,
+    "actions": [
+      "click->awc-dialog#requestHide"
+    ],
+    "behavior": null,
+    "role": null,
+    "popover": null,
+    "inside": "target awc-dialog.dialog"
+  }
+]

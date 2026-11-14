@@ -1,0 +1,60 @@
+[
+  {
+    "tag": "awc-toast-region",
+    "target": null,
+    "actions": [],
+    "behavior": null,
+    "role": "region",
+    "popover": "manual",
+    "inside": null
+  },
+  {
+    "tag": "template",
+    "target": "awc-toast-region.template",
+    "actions": [],
+    "behavior": null,
+    "role": null,
+    "popover": null,
+    "inside": "element awc-toast-region"
+  },
+  {
+    "tag": "awc-toast",
+    "target": null,
+    "actions": [
+      "keydown->awc-toast#handleKeydown"
+    ],
+    "behavior": null,
+    "role": null,
+    "popover": null,
+    "inside": "target awc-toast-region.template"
+  },
+  {
+    "tag": "button",
+    "target": null,
+    "actions": [
+      "click->awc-toast#requestHide"
+    ],
+    "behavior": null,
+    "role": null,
+    "popover": null,
+    "inside": "element awc-toast"
+  },
+  {
+    "tag": "div",
+    "target": "awc-toast-region.politeAnnouncer",
+    "actions": [],
+    "behavior": null,
+    "role": null,
+    "popover": null,
+    "inside": "element awc-toast-region"
+  },
+  {
+    "tag": "div",
+    "target": "awc-toast-region.assertiveAnnouncer",
+    "actions": [],
+    "behavior": null,
+    "role": null,
+    "popover": null,
+    "inside": "element awc-toast-region"
+  }
+]

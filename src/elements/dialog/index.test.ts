@@ -2,12 +2,13 @@ import type AwcDialogElement from './index';
 import { whenInitialized } from '@ambiki/impulse';
 import { expect, fixture, nextFrame } from '@open-wc/testing';
 import { Idiomorph } from 'idiomorph';
+import { componentMarkup, markupDifferences } from '../../internal/test_markup';
 // Registers `awc-dialog`. Kept separate from the type import above, which the bundler elides.
 import './index';
 
 /**
- * Mirrors the structure of `app/components/impulse/dialog_component.html.erb` and its header's close button. Only the
- * parts the element reads are reproduced here: the target and the actions.
+ * Mirrors the structure of `app/components/impulse/internal/modal_dialog_component.html.erb` and its header's close
+ * button. Only the parts the element reads are reproduced here: the target and the actions.
  */
 function dialogHtml(attributes = '', body = '') {
   return `
@@ -90,6 +91,12 @@ async function settle() {
 }
 
 describe('awc-dialog', () => {
+  describe('the markup these tests write', () => {
+    it('has the targets, actions and roles the component renders', async () => {
+      expect(markupDifferences(dialogHtml(), await componentMarkup('dialog'))).to.eql([]);
+    });
+  });
+
   it('emits only the state events when shown and hidden from code', async () => {
     const el = await dialogFixture();
     const events = recordEvents(el);

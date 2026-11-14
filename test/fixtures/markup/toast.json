@@ -1,0 +1,24 @@
+[
+  {
+    "tag": "awc-toast",
+    "target": null,
+    "actions": [
+      "keydown->awc-toast#handleKeydown"
+    ],
+    "behavior": null,
+    "role": null,
+    "popover": null,
+    "inside": null
+  },
+  {
+    "tag": "button",
+    "target": null,
+    "actions": [
+      "click->awc-toast#requestHide"
+    ],
+    "behavior": null,
+    "role": null,
+    "popover": null,
+    "inside": "element awc-toast"
+  }
+]

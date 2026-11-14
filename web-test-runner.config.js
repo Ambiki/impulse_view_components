@@ -9,7 +9,7 @@ export default {
   // Read by `yarn test:coverage`. Only Chromium reports coverage, so the report covers the Chromium run.
   coverageConfig: {
     include: ['src/**/*.ts'],
-    exclude: ['src/**/*.test.ts'],
+    exclude: ['src/**/*.test.ts', 'src/internal/test_markup.ts'],
     reporters: ['text', 'lcov'],
   },
   concurrentBrowsers: 3,

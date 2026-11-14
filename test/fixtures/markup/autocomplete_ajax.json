@@ -1,0 +1,111 @@
+[
+  {
+    "tag": "awc-autocomplete",
+    "target": null,
+    "actions": [
+      "click->awc-autocomplete#handleClick",
+      "mousedown->awc-autocomplete#handleMousedown"
+    ],
+    "behavior": null,
+    "role": null,
+    "popover": null,
+    "inside": null
+  },
+  {
+    "tag": "div",
+    "target": "awc-autocomplete.control",
+    "actions": [],
+    "behavior": null,
+    "role": null,
+    "popover": null,
+    "inside": "element awc-autocomplete"
+  },
+  {
+    "tag": "input",
+    "target": null,
+    "actions": [],
+    "behavior": "hidden-field",
+    "role": null,
+    "popover": null,
+    "inside": "target awc-autocomplete.control"
+  },
+  {
+    "tag": "input",
+    "target": "awc-autocomplete.input",
+    "actions": [
+      "blur->awc-autocomplete#handleInputBlur",
+      "input->awc-autocomplete#handleInput",
+      "keydown->awc-autocomplete#handleInputKeydown",
+      "mousedown->awc-autocomplete#handleInputMousedown"
+    ],
+    "behavior": null,
+    "role": "combobox",
+    "popover": null,
+    "inside": "target awc-autocomplete.control"
+  },
+  {
+    "tag": "button",
+    "target": "awc-autocomplete.clearButton",
+    "actions": [
+      "click->awc-autocomplete#handleClear"
+    ],
+    "behavior": null,
+    "role": null,
+    "popover": null,
+    "inside": "target awc-autocomplete.control"
+  },
+  {
+    "tag": "div",
+    "target": "awc-autocomplete.listbox",
+    "actions": [],
+    "behavior": null,
+    "role": "listbox",
+    "popover": null,
+    "inside": "element awc-autocomplete"
+  },
+  {
+    "tag": "div",
+    "target": "awc-autocomplete.optionsContainer",
+    "actions": [],
+    "behavior": null,
+    "role": "presentation",
+    "popover": null,
+    "inside": "target awc-autocomplete.listbox"
+  },
+  {
+    "tag": "div",
+    "target": null,
+    "actions": [],
+    "behavior": null,
+    "role": "presentation",
+    "popover": null,
+    "inside": "target awc-autocomplete.listbox"
+  },
+  {
+    "tag": "div",
+    "target": null,
+    "actions": [],
+    "behavior": null,
+    "role": "none",
+    "popover": null,
+    "inside": "target awc-autocomplete.listbox"
+  },
+  {
+    "tag": "div",
+    "target": null,
+    "actions": [],
+    "behavior": null,
+    "role": "presentation",
+    "popover": null,
+    "inside": "target awc-autocomplete.listbox"
+  },
+  {
+    "tag": "div",
+    "target": null,
+    "actions": [],
+    "behavior": null,
+    "role": "presentation",
+    "popover": null,
+    "inside": "target awc-autocomplete.listbox"
+  }
+]

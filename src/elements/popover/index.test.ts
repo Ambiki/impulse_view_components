@@ -2,6 +2,7 @@ import type AwcPopoverElement from './index';
 import { whenInitialized } from '@ambiki/impulse';
 import { expect, fixture, nextFrame, waitUntil } from '@open-wc/testing';
 import { Idiomorph } from 'idiomorph';
+import { componentMarkup, markupDifferences } from '../../internal/test_markup';
 // Registers `awc-popover`. Kept separate from the type import above, which the bundler elides.
 import './index';
 
@@ -88,6 +89,12 @@ async function settle() {
 }
 
 describe('awc-popover', () => {
+  describe('the markup these tests write', () => {
+    it('has the targets, actions and roles the component renders', async () => {
+      expect(markupDifferences(popoverHtml(), await componentMarkup('popover'))).to.eql([]);
+    });
+  });
+
   it('moves the open panel when `placement` changes', async () => {
     const el = await popoverFixture();
     el.show();
