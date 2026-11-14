@@ -7,20 +7,20 @@ status: accepted
 `<awc-autocomplete>` has two pairs of variants: a select variant, single or multiple, and a search variant, local or
 ajax. Each was handed the whole element and wrote to it. The select variants set the input's text, the selected class,
 the options' `aria-selected` and the active option. The search variants activated options, checked for an empty list
-and, for ajax, started the select variant. The element kept six members public for them, the active option was chosen
-in four modules, and the listbox only opened right when the select variant started before the search variant. We make
-the variants adapters. A select variant is the selection mode: it keeps the selection in its hidden fields and tags,
-and answers what its mode decides. A search variant is where the options come from. The element alone decides what the
-listbox shows of either: the selected options, the active option, the empty state and where the listbox sits. ADR 0024
-draws the same line between the combobox and the element.
+and, for ajax, started the select variant. The element kept five members public for them, four modules decided the
+active option, and the listbox only opened right when the select variant started before the search variant. We make
+each variant say what it holds, and nothing more. A select variant is the selection mode: it keeps the selection in its
+hidden fields and tags, and answers what its mode decides. A search variant is where the options come from. The element
+alone decides what the listbox shows of either: the selected options, the active option, the empty state and where the
+listbox sits. ADR 0024 draws the same line between the combobox and the element.
 
 ## Considered Options
 
 - **The same roles behind a typed interface**: the variants keep writing to the element, through a narrow type in
-  place of the whole element. Rejected: the six members would still exist, as an interface, and the active option and
-  the order the variants start in would stay spread out.
+  place of the whole element. Rejected: the members would still exist, as an interface, and the active option and the
+  order the variants start in would stay spread out.
 - **Fold the variants into the element**, branching on `multiple` and `src`. Rejected: single and multiple, and local
-  and ajax, are two real pairs of adapters, and one file would hold all four.
+  and ajax, each differ in earnest, and one file would hold all four.
 - **Mode rules as branches in the element**: `if (this.multiple)` where a commit closes the listbox, where the input
   takes its text and where it is required. Rejected: a mode's rules would be split between its variant and the element,
   and would follow the `multiple` attribute while the variant, chosen as the element connects, doesn't.
@@ -40,14 +40,15 @@ draws the same line between the combobox and the element.
   still waiting for its options. The ajax search still sets `loading` and `error`, and emits `loadstart`, `load`,
   `error` and `loadend`.
 - The element runs one sequence when the listbox opens, a query filters the options or a response replaces them: it
-  marks the selected options, picks the active option, says whether the list is empty and, after a response,
-  repositions the listbox. Nothing depends on the order the variants start in.
-- The active option is picked in one place, and the rule isn't uniform yet. It is the first selected option, or else
+  marks the selected options, activates one, says whether the list is empty and, after a response, repositions the
+  listbox. Nothing depends on the order the variants start in.
+- The element, not its select variants, writes the options' `aria-selected`, which supersedes that part of ADR 0024.
+- The active option is decided in one place, and the rule isn't uniform yet. It is the first selected option, or else
   the first option, when the listbox opens and when a response arrives, and the first match after a query filters
   options on the page. No option is active while a query waits for its options.
 - The element still handles a multiple select's tags itself: Backspace removes the last one, and a dismiss button its
   own.
-- `combobox`, `selectVariant`, `checkIfListIsEmpty`, `markSelected`, `toggleSelectedClass` and `tags` are private.
-  They were public, though undocumented.
-- The variants have no tests of their own. They are tested through the element, so that no test holds the seam
+- `combobox`, `selectVariant`, `markSelected` and `tags` are private, and `checkIfListIsEmpty` and
+  `toggleSelectedClass` are gone. All six were public, though undocumented, and only the element used `tags`.
+- The variants have no tests of their own. They are tested through the element, so that no test holds the line
   between them in place while it is new.

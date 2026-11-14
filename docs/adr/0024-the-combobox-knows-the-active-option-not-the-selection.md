@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: accepted, superseded in part by ADR 0025
 ---
 
 # The combobox knows the active option, not the selection
