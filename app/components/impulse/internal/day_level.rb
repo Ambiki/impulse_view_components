@@ -1,7 +1,7 @@
 module Impulse
   module Internal
     # The day level: a month's days, in six weeks, under a row of weekday headings. The date and week calendars show
-    # it. It is internal, and not part of the public API. A cell is named by its day, and a page by its month's first day.
+    # it. It is internal, and not part of the public API. A cell is named by its day, and a view by its month's first day.
     class DayLevel
       ISO_DATE = /\A\d{4}-\d{2}-\d{2}\z/
       # An ISO 8601 time, its date and time apart by a `T` or, as RFC 3339 allows, a space.
@@ -18,13 +18,13 @@ module Impulse
         "day"
       end
 
-      # The grid's data attribute naming the displayed page.
-      def page_attribute
+      # The grid's data attribute naming the displayed view.
+      def view_attribute
         "month"
       end
 
-      def format_page(page)
-        page.strftime("%Y-%m")
+      def format_view(view)
+        view.strftime("%Y-%m")
       end
 
       # The day an ISO 8601 string names: `YYYY-MM-DD`, or a time, read in `time_zone` without an offset. `nil` for
@@ -55,12 +55,12 @@ module Impulse
         cell..cell
       end
 
-      def page_of(date)
+      def view_of(date)
         date.beginning_of_month
       end
 
-      def compare_pages(a, b)
-        page_of(a) <=> page_of(b)
+      def compare_views(a, b)
+        view_of(a) <=> view_of(b)
       end
 
       # The first day of the week `date` falls in.
@@ -68,10 +68,10 @@ module Impulse
         date.beginning_of_week(Date::DAYS_INTO_WEEK.key(first_day_of_week))
       end
 
-      # The page's month as six weeks starting on the first day of the week, filled with days of the months before and
+      # The view's month as six weeks starting on the first day of the week, filled with days of the months before and
       # after, so the grid has the same height for every month.
-      def rows(page)
-        first = beginning_of_week(page)
+      def rows(view)
+        first = beginning_of_week(view)
         (first...(first + 42)).each_slice(7)
       end
 
@@ -80,8 +80,8 @@ module Impulse
         (0..6).map { |offset| (first_day_of_week + offset) % 7 }
       end
 
-      def heading(page)
-        I18n.l(page, format: month_heading_format)
+      def heading(view)
+        I18n.l(view, format: month_heading_format)
       end
 
       def text(cell)
