@@ -258,6 +258,17 @@ describe('showToast', () => {
     expect(toast.querySelector('.awc-toast-title')!.textContent).to.equal('You’re offline');
   });
 
+  it('says what is missing when a template holds no toast', async () => {
+    const region = await regionFixture();
+    const template = await fixture<HTMLTemplateElement>('<template><p>Copied to clipboard</p></template>');
+
+    let error: Error | undefined;
+    await showToast(template).catch((reason: Error) => (error = reason));
+
+    expect(error?.message).to.include('<awc-toast>');
+    expect(region.toasts.length).to.equal(0);
+  });
+
   it('warns and shows nothing when the page has no region', async () => {
     const warnings = await recordWarnings(async () => {
       expect(await showToast('Saved')).to.equal(null);

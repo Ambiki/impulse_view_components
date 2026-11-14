@@ -241,7 +241,12 @@ export default class AwcToastRegionElement extends ImpulseElement {
    */
   private buildToast(content: string | HTMLTemplateElement, { variant, id, duration, title }: ToastOptions) {
     const fromMessage = typeof content === 'string';
-    const source = (fromMessage ? this.template : content).content.querySelector('awc-toast')!;
+    const template: HTMLTemplateElement | undefined = fromMessage ? this.template : content;
+    const source = template?.content.querySelector('awc-toast');
+    if (!source) {
+      const holder = fromMessage ? 'the region’s template' : 'the template';
+      throw new TypeError(`showToast: ${holder} holds no <awc-toast> to build the toast from.`);
+    }
     const toast = source.cloneNode(true) as AwcToastElement;
     if (fromMessage) toast.querySelector('.awc-toast-message')!.textContent = content;
     const titleElement = toast.querySelector('.awc-toast-title');
