@@ -4,5 +4,5 @@
     "types": [],
     "declarationMap": false
   },
-  "exclude": ["src/**/*.test.ts"]
+  "exclude": ["src/**/*.test.ts", "src/internal/test_markup.ts"]
 }

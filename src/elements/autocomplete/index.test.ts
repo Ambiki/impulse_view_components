@@ -3,6 +3,7 @@ import type AwcAutocompleteElement from './index';
 import { whenInitialized } from '@ambiki/impulse';
 import { aTimeout, expect, fixture, nextFrame, oneEvent, waitUntil } from '@open-wc/testing';
 import { Idiomorph } from 'idiomorph';
+import { componentMarkup, markupDifferences } from '../../internal/test_markup';
 // Registers `awc-autocomplete`. Kept separate from the type import above, which the bundler elides.
 import './index';
 
@@ -244,6 +245,26 @@ describe('AwcAutocompleteElement', () => {
 
   afterEach(() => {
     window.fetch = originalFetch;
+  });
+
+  describe('the markup these tests write', () => {
+    it('has the targets, actions and roles the component renders for a single select', async () => {
+      const html = autocompleteHtml({ options: FRUITS, selected: [FRUITS[0]], required: true });
+
+      expect(markupDifferences(html, await componentMarkup('autocomplete_single'))).to.eql([]);
+    });
+
+    it('has the targets, actions and roles the component renders for a multiple select', async () => {
+      const html = autocompleteHtml({ multiple: true, options: FRUITS, selected: [FRUITS[0]] });
+
+      expect(markupDifferences(html, await componentMarkup('autocomplete_multiple'))).to.eql([]);
+    });
+
+    it('has the targets, actions and roles the component renders for an ajax select', async () => {
+      const html = autocompleteHtml({ src: '/fruits' });
+
+      expect(markupDifferences(html, await componentMarkup('autocomplete_ajax'))).to.eql([]);
+    });
   });
 
   describe('ajax source lifecycle', () => {

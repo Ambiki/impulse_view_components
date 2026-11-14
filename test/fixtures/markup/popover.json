@@ -1,0 +1,48 @@
+[
+  {
+    "tag": "awc-popover",
+    "target": null,
+    "actions": [
+      "keydown->awc-popover#handleKeydown"
+    ],
+    "behavior": null,
+    "role": null,
+    "popover": null
+  },
+  {
+    "tag": "button",
+    "target": "awc-popover.button",
+    "actions": [
+      "click->awc-popover#toggle"
+    ],
+    "behavior": null,
+    "role": null,
+    "popover": null
+  },
+  {
+    "tag": "div",
+    "target": "awc-popover.panel",
+    "actions": [],
+    "behavior": null,
+    "role": "dialog",
+    "popover": "manual"
+  },
+  {
+    "tag": "div",
+    "target": "awc-popover.arrow",
+    "actions": [],
+    "behavior": null,
+    "role": null,
+    "popover": null
+  },
+  {
+    "tag": "button",
+    "target": null,
+    "actions": [
+      "click->awc-popover#requestHide"
+    ],
+    "behavior": null,
+    "role": null,
+    "popover": null
+  }
+]

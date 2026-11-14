@@ -1,0 +1,54 @@
+[
+  {
+    "tag": "awc-toast-region",
+    "target": null,
+    "actions": [],
+    "behavior": null,
+    "role": "region",
+    "popover": "manual"
+  },
+  {
+    "tag": "template",
+    "target": "awc-toast-region.template",
+    "actions": [],
+    "behavior": null,
+    "role": null,
+    "popover": null
+  },
+  {
+    "tag": "awc-toast",
+    "target": null,
+    "actions": [
+      "keydown->awc-toast#handleKeydown"
+    ],
+    "behavior": null,
+    "role": null,
+    "popover": null
+  },
+  {
+    "tag": "button",
+    "target": null,
+    "actions": [
+      "click->awc-toast#requestHide"
+    ],
+    "behavior": null,
+    "role": null,
+    "popover": null
+  },
+  {
+    "tag": "div",
+    "target": "awc-toast-region.politeAnnouncer",
+    "actions": [],
+    "behavior": null,
+    "role": null,
+    "popover": null
+  },
+  {
+    "tag": "div",
+    "target": "awc-toast-region.assertiveAnnouncer",
+    "actions": [],
+    "behavior": null,
+    "role": null,
+    "popover": null
+  }
+]

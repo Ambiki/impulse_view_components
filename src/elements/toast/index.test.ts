@@ -3,6 +3,7 @@ import type AwcToastElement from './toast';
 import { whenInitialized } from '@ambiki/impulse';
 import { aTimeout, expect, fixture, nextFrame } from '@open-wc/testing';
 import { Idiomorph } from 'idiomorph';
+import { componentMarkup, markupDifferences } from '../../internal/test_markup';
 // Registers both elements. Kept separate from the type imports above, which the bundler elides.
 import { showToast } from './index';
 // Registers `awc-dialog`, which the region moves into while it is open.
@@ -156,7 +157,7 @@ function press(key: string) {
   target.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
 }
 
-/** Mirrors `app/components/impulse/dialog_component.html.erb`: the parts `<awc-dialog>` reads. */
+/** Mirrors `app/components/impulse/internal/modal_dialog_component.html.erb`: the parts `<awc-dialog>` reads. */
 function dialogHtml(body = '') {
   return `
     <awc-dialog>
@@ -182,6 +183,16 @@ function pressable(element: Element) {
 async function withLeavingTransition(ms: number) {
   return fixture<HTMLStyleElement>(`<style>.awc-toast--leaving { opacity: 0; transition: opacity ${ms}ms linear; }</style>`);
 }
+
+describe('the markup these tests write', () => {
+  it('has the actions the component renders for a toast', async () => {
+    expect(markupDifferences(toastHtml('', 'Saved', 'Changes'), await componentMarkup('toast'))).to.eql([]);
+  });
+
+  it('has the targets, actions and roles the component renders for the region', async () => {
+    expect(markupDifferences(regionHtml(), await componentMarkup('toast_region'))).to.eql([]);
+  });
+});
 
 describe('showToast', () => {
   it('shows a toast built from the region’s template, emitting `shown`', async () => {

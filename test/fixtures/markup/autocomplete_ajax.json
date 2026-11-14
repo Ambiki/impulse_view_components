@@ -1,0 +1,84 @@
+[
+  {
+    "tag": "awc-autocomplete",
+    "target": null,
+    "actions": [
+      "click->awc-autocomplete#handleClick",
+      "mousedown->awc-autocomplete#handleMousedown"
+    ],
+    "behavior": null,
+    "role": null,
+    "popover": null
+  },
+  {
+    "tag": "div",
+    "target": "awc-autocomplete.control",
+    "actions": [],
+    "behavior": null,
+    "role": null,
+    "popover": null
+  },
+  {
+    "tag": "input",
+    "target": null,
+    "actions": [],
+    "behavior": "hidden-field",
+    "role": null,
+    "popover": null
+  },
+  {
+    "tag": "input",
+    "target": "awc-autocomplete.input",
+    "actions": [
+      "blur->awc-autocomplete#handleInputBlur",
+      "input->awc-autocomplete#handleInput",
+      "keydown->awc-autocomplete#handleInputKeydown",
+      "mousedown->awc-autocomplete#handleInputMousedown"
+    ],
+    "behavior": null,
+    "role": "combobox",
+    "popover": null
+  },
+  {
+    "tag": "button",
+    "target": "awc-autocomplete.clearButton",
+    "actions": [
+      "click->awc-autocomplete#handleClear"
+    ],
+    "behavior": null,
+    "role": null,
+    "popover": null
+  },
+  {
+    "tag": "div",
+    "target": "awc-autocomplete.listbox",
+    "actions": [],
+    "behavior": null,
+    "role": "listbox",
+    "popover": null
+  },
+  {
+    "tag": "div",
+    "target": "awc-autocomplete.optionsContainer",
+    "actions": [],
+    "behavior": null,
+    "role": "presentation",
+    "popover": null
+  },
+  {
+    "tag": "div",
+    "target": null,
+    "actions": [],
+    "behavior": null,
+    "role": "presentation",
+    "popover": null
+  },
+  {
+    "tag": "div",
+    "target": null,
+    "actions": [],
+    "behavior": null,
+    "role": "none",
+    "popover": null
+  }
+]
