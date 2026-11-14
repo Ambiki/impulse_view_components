@@ -67,7 +67,7 @@ describe('scrollLock', () => {
 
   it('releases the lock when the signal it is given aborts', () => {
     const controller = new AbortController();
-    scrollLock(document.createElement('div'), { abortSignal: controller.signal });
+    scrollLock(document.createElement('div'), { signal: controller.signal });
 
     controller.abort();
 
