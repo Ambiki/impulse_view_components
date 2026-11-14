@@ -15,7 +15,7 @@ gem "rake", "~> 13.0"
 gem "railties", rails_version
 gem "sprockets"
 gem "sprockets-rails"
-gem "sqlite3", "~> 2.9"
+gem "sqlite3", "~> 2.10"
 
 group :development, :test do
   gem "rspec", "~> 3.0"
