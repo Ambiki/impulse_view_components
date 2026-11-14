@@ -1371,6 +1371,23 @@ describe('AwcAutocompleteElement', () => {
       expect(el.activeOption).to.equal(null);
       expect(selectionOf(el)).to.eql(['false', 'false', 'false']);
     });
+
+    it('should leave no option active when a response replaces the option activated while it was closed', async () => {
+      const el = await autocompleteFixture({ src: '/fruits' });
+      const stub = stubFetch();
+      pressInput(el);
+      await requested(stub);
+      await respondAndWait(el, stub, optionsHtml(FRUITS));
+      type(el, 'Ch');
+      await requested(stub, 2);
+      await el.hide();
+      el.activate(el.options[0]);
+
+      await respondAndWait(el, stub, optionsHtml([FRUITS[2]]));
+
+      expect(el.input.hasAttribute('aria-activedescendant')).to.equal(false);
+      expect(el.activeOption).to.equal(null);
+    });
   });
 
   describe('element API', () => {

@@ -403,8 +403,7 @@ export default class AwcAutocompleteElement<
 
     this.requestShow();
     this.searchVariant.search(query);
-    // The options on show are for an older query until the ones for this one arrive, so none of them may be active
-    // for a commit. A typed key already deactivates through the combobox, but a paste sends no keydown it handles.
+    // A typed key already deactivates through the combobox, but a paste sends no keydown it handles.
     if (this.searchVariant.pending) {
       this.combobox.deactivate();
     }
@@ -506,7 +505,7 @@ export default class AwcAutocompleteElement<
     this.floatingUI.start();
     this.combobox.start();
     this.searchVariant.start();
-    this.optionsChanged('opened');
+    this.syncWithOptions('opened');
   }
 
   /** Hides the listbox. */
@@ -550,10 +549,14 @@ export default class AwcAutocompleteElement<
    * Brings the listbox up to date with the options on show, once it has opened (`opened`), the user's query has
    * filtered them (`filtered`) or the server's have replaced them (`fetched`).
    */
-  private optionsChanged(cause: 'opened' | 'filtered' | 'fetched'): void | Promise<void> {
-    // A response can land after the listbox closed, which deselected and deactivated every option and cleared
-    // `no-options`. Opening it again does all three afresh.
-    if (cause === 'fetched' && !this.open) return;
+  private syncWithOptions(cause: 'opened' | 'filtered' | 'fetched'): void | Promise<void> {
+    // A response can land after the listbox closed, which deselected every option and cleared `no-options`. Opening
+    // it again does both afresh. The active option may be one the response replaced, though, which the input mustn't
+    // go on pointing to.
+    if (cause === 'fetched' && !this.open) {
+      this.combobox.deactivate();
+      return;
+    }
 
     if (cause === 'filtered') {
       // The first match, whatever is selected. Without one, the active option may be one the query just hid, which
@@ -584,8 +587,8 @@ export default class AwcAutocompleteElement<
 
   private newSearchVariant(): SearchVariant {
     return this.src ?
-      new AjaxSearch(this, () => this.optionsChanged('fetched')) :
-      new LocalSearch(this, () => this.optionsChanged('filtered'));
+      new AjaxSearch(this, () => this.syncWithOptions('fetched')) :
+      new LocalSearch(this, () => this.syncWithOptions('filtered'));
   }
 
   private newSelectVariant(): SelectVariant {

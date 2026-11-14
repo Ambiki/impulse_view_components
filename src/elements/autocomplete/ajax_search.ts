@@ -13,7 +13,7 @@ type AjaxSearchHost = Pick<
 
 /** Options fetched from the server: it replaces them with each response, and reports how its requests go. */
 export default class AjaxSearch implements SearchVariant {
-  /** Whether a query is waiting for its options, so that the ones on show are for an older query. */
+  /** Whether a query is waiting for its options, and no options have been put in since it was made. */
   pending = false;
   private readonly autocomplete: AjaxSearchHost;
   private readonly onOptionsChange: OptionsChangeCallback;
