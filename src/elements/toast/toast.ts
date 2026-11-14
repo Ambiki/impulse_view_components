@@ -106,6 +106,7 @@ export default class AwcToastElement extends OpenableElement {
     }
     const body = source.querySelector('.awc-toast-body');
     if (body) this.querySelector('.awc-toast-body')?.replaceWith(body);
+    this.region?.raise();
     this.pauseTimer();
     this.startOver();
   }
@@ -176,6 +177,8 @@ export default class AwcToastElement extends OpenableElement {
       this.resumeTimer();
       return;
     }
+    // Before the toast comes in, as showing the region again would end that.
+    this.region?.raise();
     // Only as it shows: a toast moving with its region connects again, and shouldn't come in a second time.
     this.classList.add(ENTERING_CLASS);
     void animationsFinished(this).then(() => this.classList.remove(ENTERING_CLASS));

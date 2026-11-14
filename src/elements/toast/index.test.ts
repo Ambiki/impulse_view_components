@@ -466,6 +466,44 @@ describe('<awc-toast-region>', () => {
     expect(region.matches(':popover-open')).to.be.true;
   });
 
+  describe('under a popover opened since it showed', () => {
+    async function setup() {
+      const container = await fixture<HTMLDivElement>(
+        `<div>
+          ${regionHtml('style="position: fixed; inset: 16px auto auto 16px; margin: 0; width: 300px"')}
+          <div id="menu" popover="manual" style="position: fixed; inset: 0; width: 100vw; height: 100vh; margin: 0; padding: 0; border: 0">Menu</div>
+        </div>`,
+      );
+      const region = container.querySelector('awc-toast-region')!;
+      await whenInitialized(region);
+      return { region, menu: container.querySelector<HTMLElement>('#menu')! };
+    }
+
+    it('shows a new toast above the popover, where it can be pressed', async () => {
+      const { menu } = await setup();
+      menu.showPopover();
+
+      const toast = (await showToast('Saved', { duration: Infinity }))!;
+
+      expect(pressable(closeButton(toast))).to.be.true;
+      menu.hidePopover();
+    });
+
+    it('keeps focus on a toast, and its timers paused, as it comes above the popover for a new one', async () => {
+      const { region, menu } = await setup();
+      const older = (await showToast('Saved', { duration: Infinity }))!;
+      older.focus();
+      menu.showPopover();
+
+      await showToast('Copied', { duration: Infinity });
+      await moved();
+
+      expect(document.activeElement === older).to.be.true;
+      expect(region.paused).to.be.true;
+      menu.hidePopover();
+    });
+  });
+
   it('drops its toasts when the browser restores the page from its back-forward cache', async () => {
     const region = await regionFixture();
     await showToast('Couldn’t save', { variant: 'danger' });

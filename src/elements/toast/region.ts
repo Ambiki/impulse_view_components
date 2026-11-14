@@ -172,6 +172,21 @@ export default class AwcToastRegionElement extends ImpulseElement {
   }
 
   /**
+   * Shows the region again while another popover is open, for a toast that shows or changes: the popover may have
+   * opened since the region showed, and would be above it in the top layer, over its toasts. Nothing says which of the
+   * two is on top.
+   * @internal
+   */
+  raise() {
+    if (!supportsPopover() || !this.matches(':popover-open')) return;
+    const others = Array.from(document.querySelectorAll(':popover-open'));
+    if (!others.some((popover) => popover !== this && !this.contains(popover))) return;
+    // Hidden and shown in one go, focus in a toast stays where it is.
+    this.hidePopover();
+    this.showPopover();
+  }
+
+  /**
    * Pauses the timers for focus in the region, or carries on with them, by where focus is now. A move or a removal
    * drops focus without the `focusout` the region would otherwise hear.
    * @internal
