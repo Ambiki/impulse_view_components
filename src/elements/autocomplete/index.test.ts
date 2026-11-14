@@ -15,10 +15,11 @@ interface FixtureOptions {
   src?: string;
   multiple?: boolean;
   open?: boolean;
+  required?: boolean;
   options?: FixtureOption[];
   /** What the server rendered as selected: at most one option for a single select, a tag each for a multiple select. */
   selected?: FixtureOption[];
-  /** Further attributes for the element, such as `required` or `param="term"`. */
+  /** Further attributes for the element, such as `param="term"`. */
   attributes?: string;
 }
 
@@ -57,6 +58,7 @@ function autocompleteHtml({
   src,
   multiple = false,
   open = false,
+  required = false,
   options = [],
   selected = [],
   attributes = '',
@@ -74,12 +76,15 @@ function autocompleteHtml({
        </template>` :
     `<input type="hidden" data-behavior="hidden-field" value="${singleSelection?.value ?? ''}" data-text="${singleSelection?.text ?? ''}">`;
 
+  // As the component renders it: a multiple select's input is required only while nothing is selected.
+  const inputRequired = required && !(multiple && selected.length > 0);
+
   return `
-    <awc-autocomplete ${multiple ? 'multiple' : ''} ${open ? 'open' : ''} ${src ? `src="${src}"` : ''} ${attributes}
+    <awc-autocomplete ${multiple ? 'multiple' : ''} ${open ? 'open' : ''} ${required ? 'required' : ''} ${src ? `src="${src}"` : ''} ${attributes}
       data-action="mousedown->awc-autocomplete#handleMousedown click->awc-autocomplete#handleClick">
       <div class="awc-autocomplete-control" data-target="awc-autocomplete.control" data-trigger>
         ${selection}
-        <input id="fruit" class="awc-autocomplete-input" type="text" autocomplete="off" value="${multiple ? '' : (singleSelection?.text ?? '')}"
+        <input id="fruit" class="awc-autocomplete-input" type="text" autocomplete="off" value="${multiple ? '' : (singleSelection?.text ?? '')}" ${inputRequired ? 'required' : ''}
           role="combobox" aria-haspopup="listbox" aria-autocomplete="list" aria-expanded="${open}" aria-controls="fruit_listbox"
           data-target="awc-autocomplete.input"
           data-action="mousedown->awc-autocomplete#handleInputMousedown blur->awc-autocomplete#handleInputBlur keydown->awc-autocomplete#handleInputKeydown input->awc-autocomplete#handleInput">
@@ -858,7 +863,7 @@ describe('AwcAutocompleteElement', () => {
     });
 
     it('should require the input only while no value is selected', async () => {
-      const el = await autocompleteFixture({ multiple: true, options: FRUITS, attributes: 'required' });
+      const el = await autocompleteFixture({ multiple: true, options: FRUITS, required: true });
       expect(el.input.required).to.equal(true);
 
       el.setValue('1');
@@ -1504,6 +1509,32 @@ describe('AwcAutocompleteElement', () => {
 
       expect(detail.selected).to.equal(false);
       expect(el.value).to.eql([]);
+    });
+
+    it('should keep its input required through a morph', async () => {
+      const el = await autocompleteFixture({ options: FRUITS, required: true });
+
+      Idiomorph.morph(el, autocompleteHtml({ options: FRUITS, required: true }));
+
+      expect(el.input.required).to.equal(true);
+    });
+
+    it('should require its input again once a morph renders a multiple select without its selection', async () => {
+      const el = await autocompleteFixture({ multiple: true, options: FRUITS, required: true, selected: [FRUITS[0]] });
+      expect(el.input.required).to.equal(false);
+
+      Idiomorph.morph(el, autocompleteHtml({ multiple: true, options: FRUITS, required: true }));
+
+      expect(el.input.required).to.equal(true);
+    });
+
+    it('should leave its input optional once a morph renders a multiple select with a selection', async () => {
+      const el = await autocompleteFixture({ multiple: true, options: FRUITS, required: true });
+      expect(el.input.required).to.equal(true);
+
+      Idiomorph.morph(el, autocompleteHtml({ multiple: true, options: FRUITS, required: true, selected: [FRUITS[0]] }));
+
+      expect(el.input.required).to.equal(false);
     });
 
     it('should fall back to its defaults when a morph removes their attributes', async () => {

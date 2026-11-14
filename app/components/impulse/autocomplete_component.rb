@@ -126,6 +126,16 @@ module Impulse
       !!@system_args[:multiple]
     end
 
+    def required?
+      !!@system_args[:required]
+    end
+
+    # Whether the input is required, as the element sets it: a multiple select's input only while nothing is selected,
+    # since its values are in its tags. It is rendered so that a DOM morph doesn't take it off the input.
+    def input_required?
+      required? && !(multiple? && selection.present?)
+    end
+
     def open?
       !!@system_args[:open]
     end
