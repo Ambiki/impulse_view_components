@@ -55,8 +55,8 @@ function targets(calls: Array<{ target: HTMLElement }>) {
 }
 
 /** Starts a press on `element`. A browser moves focus between this and the click, which the tests do with `focus()`. */
-function pressDown(element: Element) {
-  element.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, composed: true }));
+function pressDown(element: Element, init: PointerEventInit = {}) {
+  element.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, composed: true, ...init }));
 }
 
 /** Finishes a press on `element` with its click, which comes after the focus the press moved. */
@@ -226,6 +226,43 @@ describe('useFocusOut', () => {
 
     expect(targets(calls)).to.eql(['field']);
     expect(pressed).to.eql(['label']);
+  });
+
+  it('calls back when a press outside with another button moves focus, as a right click on a field does', async () => {
+    const { host, inside, field } = await focusOutFixture();
+    const calls = listen(host, [host]);
+    const pressed = listenForOutsideClicks(host, [host]);
+    inside.focus();
+
+    // No click follows, so `useOutsideClick` never hears of the press.
+    pressDown(field, { button: 2 });
+    field.focus();
+    field.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, composed: true }));
+
+    expect(targets(calls)).to.eql(['field']);
+    expect(pressed).to.eql([]);
+  });
+
+  it('forgets a press outside that opens the context menu, which ends in no click', async () => {
+    const { host, outside, outsideText } = await focusOutFixture();
+    const calls = listen(host, [host]);
+    pressDown(outsideText);
+    outsideText.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, composed: true }));
+
+    outside.focus();
+
+    expect(targets(calls)).to.eql(['outside']);
+  });
+
+  it('forgets a press outside that starts a drag, which ends in no click', async () => {
+    const { host, outside, outsideText } = await focusOutFixture();
+    const calls = listen(host, [host]);
+    pressDown(outsideText);
+    outsideText.dispatchEvent(new DragEvent('dragstart', { bubbles: true, composed: true }));
+
+    outside.focus();
+
+    expect(targets(calls)).to.eql(['outside']);
   });
 
   it('forgets a press outside once its click has been handled', async () => {
