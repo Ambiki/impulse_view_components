@@ -112,6 +112,32 @@ module Impulse
       end
     end
 
+    test "requires the input when required" do
+      render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_id, required: true, selected: Option.new(value: "apple", text: "Apple")))
+
+      assert_selector "awc-autocomplete[required]"
+      assert_selector "input[type='text'][required]"
+    end
+
+    test "leaves the input optional when not required" do
+      render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_id))
+
+      refute_selector "input[type='text'][required]"
+    end
+
+    test "requires a multiple select's input while nothing is selected" do
+      render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_ids, multiple: true, required: true))
+
+      assert_selector "input[type='text'][required]"
+    end
+
+    test "leaves a multiple select's input optional once a value is selected" do
+      render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_ids, multiple: true, required: true, selected: [Option.new(value: "apple", text: "Apple")]))
+
+      assert_selector "awc-autocomplete[required]"
+      refute_selector "input[type='text'][required]"
+    end
+
     test "input placeholder" do
       render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_id, placeholder: "Select a fruit"))
 

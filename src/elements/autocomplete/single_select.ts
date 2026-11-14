@@ -1,8 +1,15 @@
 import type AwcAutocompleteElement from './index';
 import type { SelectVariant } from './index';
 
+const HIDDEN_FIELD = 'input[data-behavior="hidden-field"]';
+
+/**
+ * A single select's selection. It is kept in one place only: the hidden field the form submits. The input's text, the
+ * options' `aria-selected` and the element's selected class all follow from it.
+ */
 export default class SingleSelect implements SelectVariant {
   readonly autocomplete: AwcAutocompleteElement;
+  /** What `reset` restores: the value and text the element connected with. */
   private defaultValue = '';
   private defaultText = '';
 
@@ -11,8 +18,13 @@ export default class SingleSelect implements SelectVariant {
   }
 
   connected() {
-    this.defaultValue = this.hiddenField.value;
+    this.defaultValue = this.value;
     this.defaultText = this.hiddenField.getAttribute('data-text') ?? '';
+  }
+
+  get value() {
+    // An element made from code has no hidden field until its markup is added, and no value.
+    return this.autocomplete.querySelector<HTMLInputElement>(HIDDEN_FIELD)?.value ?? '';
   }
 
   start() {
@@ -64,7 +76,7 @@ export default class SingleSelect implements SelectVariant {
   }
 
   isSelected(value: string) {
-    return this.hiddenField.value === value;
+    return this.value === value;
   }
 
   // eslint-disable-next-line accessor-pairs
@@ -81,10 +93,10 @@ export default class SingleSelect implements SelectVariant {
   }
 
   private get selectedOption() {
-    return this.autocomplete.options.find((o) => o.getAttribute('value') === this.hiddenField.value);
+    return this.autocomplete.options.find((o) => o.getAttribute('value') === this.value);
   }
 
   private get hiddenField() {
-    return this.autocomplete.querySelector<HTMLInputElement>('input[data-behavior="hidden-field"]')!;
+    return this.autocomplete.querySelector<HTMLInputElement>(HIDDEN_FIELD)!;
   }
 }

@@ -38,6 +38,7 @@
       spellcheck: false,
       autocapitalize: "none",
       disabled: @disabled,
+      required: input_required?,
       role: "combobox",
       aria: { haspopup: "listbox", autocomplete: "list", expanded: open?, controls: listbox_id },
       data: {

@@ -1,30 +1,33 @@
 import type AwcAutocompleteElement from './index';
 import type { SelectVariant } from './index';
 
-interface TDefaultSelectedValue { value: string; text: string }
+interface SelectedValue { value: string; text: string }
 
+/**
+ * A multiple select's selection. It is kept in one place only: the hidden fields the form submits, one in each tag,
+ * so the tags a DOM morph renders are the selection. The options' `aria-selected`, the element's selected class and
+ * whether its input is required are brought up to date with them each time the element changes the selection.
+ */
 export default class MultipleSelect implements SelectVariant {
   readonly autocomplete: AwcAutocompleteElement;
-  private selectedValues = new Set<string>();
-  private defaultSelectedValues: Array<TDefaultSelectedValue> = [];
+  /** What `reset` restores: the selection the element connected with. */
+  private defaultSelection: SelectedValue[] = [];
 
   constructor(autocomplete: AwcAutocompleteElement) {
     this.autocomplete = autocomplete;
   }
 
   connected() {
-    this.defaultSelectedValues = this.tags.reduce<Array<TDefaultSelectedValue>>((array, tag) => {
-      const hiddenField = tag.querySelector<HTMLInputElement>('[data-behavior="hidden-field"]')!;
-      const value = hiddenField.value;
-      this.selectedValues.add(value);
-      array.push({ value, text: hiddenField.getAttribute('data-text') || '' });
-      return array;
-    }, []);
+    this.defaultSelection = this.hiddenFields.map((field) => ({ value: field.value, text: field.dataset.text ?? '' }));
     this.autocomplete.listbox.setAttribute('aria-multiselectable', 'true');
   }
 
+  get value() {
+    return this.hiddenFields.map((field) => field.value);
+  }
+
   start() {
-    this.selectOrDeselectOptions();
+    this.markSelectedOptions();
     if (this.firstActivableOption) {
       this.autocomplete.combobox.activate(this.firstActivableOption, { scroll: true });
     }
@@ -36,7 +39,7 @@ export default class MultipleSelect implements SelectVariant {
 
   reset() {
     this.clear();
-    this.defaultSelectedValues.forEach(({ value, text }) => this.setValue(value, text));
+    this.defaultSelection.forEach(({ value, text }) => this.setValue(value, text));
   }
 
   select(option: HTMLElement) {
@@ -44,7 +47,7 @@ export default class MultipleSelect implements SelectVariant {
     const { text } = option.dataset;
     if (!value) return;
 
-    if (this.selectedValues.has(value)) {
+    if (this.isSelected(value)) {
       this.removeValue(value);
     } else {
       this.setValue(value, text || '');
@@ -52,56 +55,55 @@ export default class MultipleSelect implements SelectVariant {
   }
 
   setValue(value: string, text: string) {
-    if (this.selectedValues.has(value)) return;
-    this.selectedValues.add(value);
+    if (this.isSelected(value)) return;
     this.insertTag(value, text.trim());
-    this.toggleSelectedClass();
-    this.required = this.autocomplete.required;
-    // Only select the option if autocomplete is open, otherwise leave it as it is because aria-selected will be
-    // "false" when the autocomplete is hidden.
-    if (!this.autocomplete.open) return;
-
-    const option = this.autocomplete.options.find(this.findByValue(value));
-    if (option) {
-      this.autocomplete.markSelected(option, true);
-    }
+    this.syncWithSelection();
   }
 
   clear() {
-    this.selectedValues.forEach((value) => this.removeValue(value));
+    this.value.forEach((value) => this.removeValue(value));
   }
 
   removeValue(value: string) {
-    if (!this.selectedValues.has(value)) return;
-    this.selectedValues.delete(value);
-    this.removeTag(value);
-    this.toggleSelectedClass();
-    this.required = this.autocomplete.required;
-    const option = this.autocomplete.options.find(this.findByValue(value));
-    if (option) {
-      this.autocomplete.markSelected(option, false);
-    }
+    const hiddenField = this.hiddenFields.find((field) => field.value === value);
+    if (!hiddenField) return;
+    hiddenField.closest('[data-behavior="tag"]')!.remove();
+    this.syncWithSelection();
   }
 
   isSelected(value: string) {
-    return this.selectedValues.has(value);
+    return this.value.includes(value);
   }
 
   // eslint-disable-next-line accessor-pairs
   set required(value: boolean) {
-    if (!value || (value && this.selectedValues.size > 0)) {
-      this.autocomplete.input.required = false;
-      return;
-    }
-
-    this.autocomplete.input.required = true;
+    this.autocomplete.input.required = value && this.value.length === 0;
   }
 
-  private selectOrDeselectOptions() {
-    for (const option of this.autocomplete.options) {
-      const value = option.getAttribute('value');
-      this.autocomplete.markSelected(option, Boolean(value && this.selectedValues.has(value)));
+  /** Brings what follows from the selection up to date with it. */
+  private syncWithSelection() {
+    this.autocomplete.toggleSelectedClass(this.value.length > 0);
+    this.required = this.autocomplete.required;
+    // The options only say what is selected while the listbox is open: `start` marks them on opening.
+    if (this.autocomplete.open) {
+      this.markSelectedOptions();
     }
+  }
+
+  private markSelectedOptions() {
+    const selected = new Set(this.selectedOptions);
+    for (const option of this.autocomplete.options) {
+      this.autocomplete.markSelected(option, selected.has(option));
+    }
+  }
+
+  /** The options whose value is selected. An option without a value is never one, as it can't be committed. */
+  private get selectedOptions() {
+    const values = new Set(this.value);
+    return this.autocomplete.options.filter((option) => {
+      const value = option.getAttribute('value');
+      return !!value && values.has(value);
+    });
   }
 
   private insertTag(value: string, text: string): void {
@@ -123,28 +125,17 @@ export default class MultipleSelect implements SelectVariant {
     }
   }
 
-  private removeTag(value: string) {
-    const tag = this.tags.find(this.findByValue(value));
-    tag?.remove();
-  }
-
-  private findByValue = (value: string) => {
-    return (target: HTMLElement) => {
-      return target.getAttribute('value') === value;
-    };
-  };
-
-  private toggleSelectedClass() {
-    this.autocomplete.toggleSelectedClass(!!this.selectedValues.size);
-  }
-
   private get firstActivableOption() {
-    const selectedOption = this.autocomplete.options.find((o) => this.selectedValues.has(o.getAttribute('value')!));
-    return selectedOption || this.autocomplete.visibleOptions[0];
+    return this.selectedOptions[0] || this.autocomplete.visibleOptions[0];
   }
 
-  private get tags() {
-    return this.autocomplete.tags;
+  /** Each tag's hidden field, in the order of the tags. The field outside the tags, which submits no value, isn't one. */
+  private get hiddenFields() {
+    return [
+      ...this.autocomplete.querySelectorAll<HTMLInputElement>(
+        '[data-behavior="tag"] input[data-behavior="hidden-field"]',
+      ),
+    ];
   }
 
   private get template() {
