@@ -105,6 +105,16 @@ describe('OpenableElement', () => {
     expect(el.log).to.eql(['hideNested', 'closeParts', 'hidden', 'afterHidden']);
   });
 
+  it('does nothing when shown while open', async () => {
+    const el = await openableFixture('open');
+    el.log = [];
+
+    el.show();
+    el.requestShow();
+
+    expect(el.log).to.eql([]);
+  });
+
   it('does nothing when hidden while closed', async () => {
     const el = await openableFixture();
 

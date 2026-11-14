@@ -89,7 +89,8 @@ export default abstract class OpenableElement extends ImpulseElement {
   }
 
   /**
-   * Hides the element. Emits `hidden` but no `hide`: use `requestHide` to let listeners prevent it.
+   * Hides the element, and first the elements nested in it that can't stay open without it. Emits `hidden` but no
+   * `hide`: use `requestHide` to let listeners prevent it.
    * @param event - What made the element hide, if anything did.
    */
   async hide(event?: Event): Promise<void> {

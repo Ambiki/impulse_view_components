@@ -87,11 +87,14 @@ export default class AwcToastElement extends OpenableElement {
   }
 
   /**
-   * Removes the toast from the region once it has hidden, as `hide` does last: a hidden toast is done with. Shown again
-   * by a listener to `hidden`, or hidden while removed, it stays where it is.
+   * Removes the toast from the region once it has hidden, as `hide` does last: a hidden toast is done with. It waits a
+   * microtask, so that a listener to `hidden` still finds the toast in its region, and can show it again. Shown again,
+   * or hidden while removed, it stays where it is.
    */
   protected afterHidden() {
-    if (!this.open && this.isConnected) this.remove();
+    queueMicrotask(() => {
+      if (!this.open && this.isConnected) this.remove();
+    });
   }
 
   /**
