@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- An ajax `<awc-autocomplete>` activates the first option of a response once the user has typed, as a local one does. It activated the selected option when the response had it ([#446](https://github.com/Ambiki/impulse_view_components/pull/446))
 - `<awc-autocomplete>`'s `combobox`, `selectVariant`, `markSelected` and `tags` are private, and its `checkIfListIsEmpty` and `toggleSelectedClass` are removed. They were undocumented ([#444](https://github.com/Ambiki/impulse_view_components/pull/444))
 - `<awc-autocomplete>` is built on the package's own combobox, and `@ambiki/combobox` is no longer a dependency. Home and End move the caret in its input, where they moved to the first and last option ([#438](https://github.com/Ambiki/impulse_view_components/pull/438))
 - `impulse_view_components` depends on view_component `~> 4.24.0`, up from `~> 4.17.0` ([#430](https://github.com/Ambiki/impulse_view_components/pull/430))
