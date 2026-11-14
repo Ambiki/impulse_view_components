@@ -45,7 +45,7 @@ export default class AwcToastRegionElement extends ImpulseElement {
   /** Where a danger toast's text goes to be heard at once. */
   @target() assertiveAnnouncer: HTMLElement;
 
-  /** Writes each toast's text into its announcer. */
+  /** Writes each toast's text into the announcer it is heard through. */
   private readonly liveAnnouncer = new LiveAnnouncer<AwcToastElement>();
 
   /** Where focus was before it moved into the region, by the hotkey or by Tab, for it to return to. */
@@ -94,6 +94,7 @@ export default class AwcToastRegionElement extends ImpulseElement {
     // Stopping the watch reports each dialog still open, so the region follows once more: removed with the dialog it
     // was in, or from it, it goes back to where its toasts can show.
     this.stopWatchingDialogs?.();
+    this.stopWatchingDialogs = undefined;
   }
 
   /**
