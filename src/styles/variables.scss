@@ -20,6 +20,7 @@
   --awc-green-7: #88d3b0; // green-light-300
   --awc-green-8: #60c496; // green-light-400
   --awc-green-9: #38b57c; // green-light-500
+  --awc-green-11: #026842; // green-dark-500
 
   --awc-red-3: #f2d0cd; // red-100
   --awc-red-6: #e6a19a; // red-200
@@ -32,6 +33,8 @@
   --awc-yellow-7: #f7d18d; // yellow-300
   --awc-yellow-8: #f4c167; // yellow-400
   --awc-yellow-9: #f1b241; // yellow-500
+  // Darker than the palette's yellows go, none of which shows on yellow-3 (WCAG 1.4.11).
+  --awc-yellow-11: #946200;
 
   --awc-blue-3: #d4daec; // blue-dark-100
   --awc-blue-6: #a9b6d9; // blue-dark-200
@@ -102,12 +105,14 @@
   --awc-success-border: var(--awc-green-7);
   --awc-success-border-hover: var(--awc-green-8);
   --awc-success-solid: var(--awc-green-9);
+  --awc-success-text: var(--awc-green-11);
 
   --awc-warning-bg: var(--awc-yellow-3);
   --awc-warning-line: var(--awc-yellow-6);
   --awc-warning-border: var(--awc-yellow-7);
   --awc-warning-border-hover: var(--awc-yellow-8);
   --awc-warning-solid: var(--awc-yellow-9);
+  --awc-warning-text: var(--awc-yellow-11);
 
   --awc-danger-bg: var(--awc-red-3);
   --awc-danger-line: var(--awc-red-6);

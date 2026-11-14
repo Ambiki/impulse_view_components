@@ -7,18 +7,20 @@
   --awc-toast-message-text: var(--awc-neutral-text);
   --awc-toast-close-btn-bg-hover: rgb(0 23 66 / 0.08);
 
+  // Each icon is its variant's text colour: the only sign of the variant besides colour, it has to show on the
+  // variant's background (WCAG 1.4.11).
   --awc-toast-info-bg: var(--awc-accent-bg);
   --awc-toast-info-border: var(--awc-accent-border);
-  --awc-toast-info-icon-text: var(--awc-accent-solid);
+  --awc-toast-info-icon-text: var(--awc-accent-text);
   --awc-toast-success-bg: var(--awc-success-bg);
   --awc-toast-success-border: var(--awc-success-border);
-  --awc-toast-success-icon-text: var(--awc-success-solid);
+  --awc-toast-success-icon-text: var(--awc-success-text);
   --awc-toast-warning-bg: var(--awc-warning-bg);
   --awc-toast-warning-border: var(--awc-warning-border);
-  --awc-toast-warning-icon-text: var(--awc-warning-solid);
+  --awc-toast-warning-icon-text: var(--awc-warning-text);
   --awc-toast-danger-bg: var(--awc-danger-bg);
   --awc-toast-danger-border: var(--awc-danger-border);
-  --awc-toast-danger-icon-text: var(--awc-danger-solid);
+  --awc-toast-danger-icon-text: var(--awc-danger-text);
 }
 
 // The region is a manual popover in the top layer, placed with `position: fixed`. Its toasts come in the order they
