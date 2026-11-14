@@ -23,9 +23,9 @@ export default class ModalDialogStack {
   }
 
   /**
-   * Records the dialogs as they open, and calls `onChange` as one opens and as one closes. Returns a function that
-   * stops watching. Stopping calls `onChange` once more for each dialog still open, as it does when one closes: the
-   * watch won't be there to report it.
+   * Records the dialogs as they open, and calls `onChange` as one opens, as one closes, and once one that closed has
+   * opened again. Returns a function that stops watching. Stopping calls `onChange` once more for each dialog still
+   * open, as it does when one closes: the watch won't be there to report it.
    */
   watch(onChange: () => void) {
     const stopWatching = connected('dialog[open]', (dialog: HTMLDialogElement) => {
@@ -41,9 +41,9 @@ export default class ModalDialogStack {
       'dialog',
       (event) => {
         const dialog = event.currentTarget as HTMLDialogElement;
-        if (!dialog.matches(':modal')) return;
-        this.dialogs = this.dialogs.filter((other) => other !== dialog);
-        this.dialogs.push(dialog);
+        // Its own `close`, not that of a dialog nested in it.
+        if (event.target !== dialog || !dialog.matches(':modal')) return;
+        this.record(dialog, { again: true });
         onChange();
       },
       { capture: true },
@@ -54,8 +54,10 @@ export default class ModalDialogStack {
     };
   }
 
-  /** Records `dialog` as the topmost one when it is modal and newly open. */
-  private record(dialog: HTMLDialogElement) {
-    if (dialog.matches(':modal') && !this.dialogs.includes(dialog)) this.dialogs.push(dialog);
+  /** Records `dialog` as the topmost one when it is modal and newly open, or open `again`. */
+  private record(dialog: HTMLDialogElement, { again = false } = {}) {
+    if (!dialog.matches(':modal')) return;
+    if (again) this.dialogs = this.dialogs.filter((other) => other !== dialog);
+    if (!this.dialogs.includes(dialog)) this.dialogs.push(dialog);
   }
 }

@@ -74,6 +74,30 @@ describe('ModalDialogStack', () => {
     stop();
   });
 
+  it('keeps its order when a dialog nested in a lower one closes', async () => {
+    const container = await fixture<HTMLDivElement>(
+      '<div><dialog id="lower"><dialog id="nested"></dialog></dialog><dialog id="upper"></dialog></div>',
+    );
+    const [lower, nested, upper] = ['#lower', '#nested', '#upper'].map(
+      (selector) => container.querySelector<HTMLDialogElement>(selector)!,
+    );
+    const stack = new ModalDialogStack();
+    const stop = stack.watch(() => {});
+    lower.showModal();
+    await heard();
+    nested.show();
+    upper.showModal();
+    await heard();
+
+    nested.close();
+    await heard();
+
+    expect(stack.topmost() === upper).to.be.true;
+    upper.close();
+    lower.close();
+    stop();
+  });
+
   it('tells its watcher as a dialog opens and as it closes, until it is stopped', async () => {
     const { stack, first } = await setup();
     let changes = 0;
