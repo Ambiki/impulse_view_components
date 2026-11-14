@@ -2,6 +2,7 @@
   // How far the region keeps from the edge of the screen it is placed at, such as to clear a fixed navbar.
   --awc-toast-region-inset: var(--awc-space-3);
   --awc-toast-max-width: 400px;
+  --awc-toast-line-height: 20px;
   --awc-toast-title-text: var(--awc-neutral-text-contrast);
   --awc-toast-message-text: var(--awc-neutral-text);
   --awc-toast-close-btn-bg-hover: rgb(0 23 66 / 0.08);
@@ -89,10 +90,6 @@
   --awc-toast-border: var(--awc-toast-info-border);
   --awc-toast-icon-text: var(--awc-toast-info-icon-text);
 
-  // The icon and the close button sit on the first line of text: centred on a one-line toast, at the top of a longer
-  // one.
-  --awc-toast-first-line: calc(var(--awc-line-height) * var(--awc-font-size-3));
-
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   grid-template-areas: 'icon body close';
@@ -128,7 +125,9 @@
   font-size: 1.125rem;
   line-height: 1;
   color: var(--awc-toast-icon-text);
-  margin-top: calc((var(--awc-toast-first-line) - 1.125rem) / 2);
+  // The icon and the close button sit on the first line of text: centred on a one-line toast, at the top of a longer
+  // one.
+  margin-top: calc((var(--awc-toast-line-height) - 1.125rem) / 2);
 
   i {
     display: none;
@@ -149,6 +148,7 @@
 .awc-toast-body {
   grid-area: body;
   min-width: 0;
+  line-height: var(--awc-toast-line-height);
   overflow-wrap: anywhere;
 }
 
@@ -165,7 +165,8 @@
   grid-area: close;
   width: 28px;
   height: 28px;
-  margin-top: calc((var(--awc-toast-first-line) - 28px) / 2);
+  // As tall as the first line, overflowing it evenly, so that a one-line toast is no taller for it.
+  margin-block: calc((var(--awc-toast-line-height) - 28px) / 2);
   padding: 0;
   display: inline-flex;
   align-items: center;
