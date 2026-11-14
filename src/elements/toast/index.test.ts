@@ -64,6 +64,112 @@ function recordEvents(element: HTMLElement) {
   return events;
 }
 
+/** A promise and the functions that settle it, for a test to settle when it chooses. */
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (error: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+}
+
+async function frames(count: number) {
+  for (let frame = 0; frame < count; frame++) await nextFrame();
+}
+
+/** Lets a promise settle and the toast it shows update. */
+const settled = () => frames(2);
+
+/** Waits for the announcers, which take a toast's text two frames after it shows, so that it is heard as a change. */
+const announced = () => frames(3);
+
+/** Waits for the region to hear a dialog open or close, and to move. */
+const moved = () => frames(2);
+
+/** Runs `run` with `console.warn` recorded rather than printed, and returns what each warning said first. */
+async function recordWarnings(run: () => unknown) {
+  const warn = console.warn;
+  const warnings: unknown[] = [];
+  console.warn = (...args: unknown[]) => warnings.push(args[0]);
+  try {
+    await run();
+  } finally {
+    console.warn = warn;
+  }
+  return warnings;
+}
+
+/** Runs `run`, and returns the reasons of the rejections left unhandled meanwhile, which it keeps from the runner. */
+async function recordUnhandledRejections(run: () => unknown) {
+  const reasons: unknown[] = [];
+  const onUnhandled = (event: PromiseRejectionEvent) => {
+    event.preventDefault();
+    reasons.push(event.reason);
+  };
+  window.addEventListener('unhandledrejection', onUnhandled);
+  try {
+    await run();
+  } finally {
+    window.removeEventListener('unhandledrejection', onUnhandled);
+  }
+  return reasons;
+}
+
+function messageOf(toast: AwcToastElement) {
+  return toast.querySelector('.awc-toast-message')!.textContent;
+}
+
+/** Makes `document.hidden` read `hidden`, as switching tabs does, and tells the page. */
+function setTabHidden(hidden: boolean) {
+  if (hidden) {
+    Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
+  } else {
+    delete (document as { hidden?: boolean }).hidden;
+  }
+  document.dispatchEvent(new Event('visibilitychange'));
+}
+
+function announcers(region: AwcToastRegionElement) {
+  const polite = region.querySelector('[aria-live="polite"]')!;
+  const assertive = region.querySelector('[aria-live="assertive"]')!;
+  return () => [polite.textContent, assertive.textContent];
+}
+
+/** Presses `key` on whatever has focus, as a keyboard does. */
+function press(key: string) {
+  const target = document.activeElement ?? document.body;
+  target.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
+}
+
+/** Mirrors `app/components/impulse/dialog_component.html.erb`: the parts `<awc-dialog>` reads. */
+function dialogHtml(body = '') {
+  return `
+    <awc-dialog>
+      <dialog
+        data-target="awc-dialog.dialog"
+        data-action="click->awc-dialog#handleClick keydown->awc-dialog#handleKeydown cancel->awc-dialog#handleCancel close->awc-dialog#handleClose"
+      >
+        <p>Share goal</p>
+        ${body}
+      </dialog>
+    </awc-dialog>
+  `;
+}
+
+/** Whether a press at the centre of `element` lands on it: false while a modal dialog leaves it inert. */
+function pressable(element: Element) {
+  const rect = element.getBoundingClientRect();
+  const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+  return !!hit && element.contains(hit);
+}
+
+/** Gives leaving toasts a fade, as the stylesheet does, so that a hide takes `ms` to finish. */
+async function withLeavingTransition(ms: number) {
+  return fixture<HTMLStyleElement>(`<style>.awc-toast--leaving { opacity: 0; transition: opacity ${ms}ms linear; }</style>`);
+}
+
 describe('showToast', () => {
   it('shows a toast built from the region’s template, emitting `shown`', async () => {
     const region = await regionFixture();
@@ -78,9 +184,7 @@ describe('showToast', () => {
     expect(events).to.deep.equal(['shown saved']);
     expect(region.matches(':popover-open')).to.be.true;
   });
-});
 
-describe('showToast content', () => {
   it('updates the showing toast with the same id in place, starting its timer over, and emits nothing', async () => {
     const region = await regionFixture();
     const deleting = (await showToast('Deleting event…', { id: 'delete', duration: Infinity }))!;
@@ -126,38 +230,13 @@ describe('showToast content', () => {
   });
 
   it('warns and shows nothing when the page has no region', async () => {
-    const warn = console.warn;
-    const warnings: unknown[] = [];
-    console.warn = (...args: unknown[]) => warnings.push(args[0]);
-    try {
+    const warnings = await recordWarnings(async () => {
       expect(await showToast('Saved')).to.equal(null);
-    } finally {
-      console.warn = warn;
-    }
+    });
+
     expect(warnings).to.have.length(1);
   });
 });
-
-/** A promise and the functions that settle it, for a test to settle when it chooses. */
-function deferred<T>() {
-  let resolve!: (value: T) => void;
-  let reject!: (error: unknown) => void;
-  const promise = new Promise<T>((res, rej) => {
-    resolve = res;
-    reject = rej;
-  });
-  return { promise, resolve, reject };
-}
-
-/** Lets a promise settle and the toast it shows update. */
-async function settled() {
-  await nextFrame();
-  await nextFrame();
-}
-
-function messageOf(toast: AwcToastElement) {
-  return toast.querySelector('.awc-toast-message')!.textContent;
-}
 
 describe('showToast.promise', () => {
   const steps = {
@@ -285,13 +364,8 @@ describe('showToast.promise', () => {
 
   it('removes the loading toast when its message function throws, and lets the error through', async () => {
     const region = await regionFixture();
-    const errors: unknown[] = [];
-    const onUnhandled = (event: PromiseRejectionEvent) => {
-      event.preventDefault();
-      errors.push(event.reason);
-    };
-    window.addEventListener('unhandledrejection', onUnhandled);
-    try {
+
+    const errors = await recordUnhandledRejections(async () => {
       showToast.promise(Promise.resolve({ name: 'Event' }), {
         ...steps,
         success: () => {
@@ -299,41 +373,32 @@ describe('showToast.promise', () => {
         },
       });
       await aTimeout(100);
-    } finally {
-      window.removeEventListener('unhandledrejection', onUnhandled);
-    }
+    });
 
     expect(region.toasts.length).to.equal(0);
     expect(errors.map((error) => (error as Error).message)).to.deep.equal(['a bug in the app']);
   });
 
   it('warns once and returns the promise when the page has no region', async () => {
-    const warn = console.warn;
-    const warnings: unknown[] = [];
-    console.warn = (...args: unknown[]) => warnings.push(args[0]);
     const promise = Promise.resolve({ name: 'Event' });
-    try {
+
+    const warnings = await recordWarnings(async () => {
       expect(showToast.promise(promise, steps) === promise).to.be.true;
       await settled();
-    } finally {
-      console.warn = warn;
-    }
+    });
+
     expect(warnings.length).to.equal(1);
   });
 
   it('leaves no rejection unhandled when its promise is ignored', async () => {
     await regionFixture();
-    let unhandled = false;
-    const onUnhandled = () => (unhandled = true);
-    window.addEventListener('unhandledrejection', onUnhandled);
-    try {
+
+    const unhandled = await recordUnhandledRejections(async () => {
       showToast.promise(Promise.reject(new Error('the server is down')), steps);
       await aTimeout(50);
-    } finally {
-      window.removeEventListener('unhandledrejection', onUnhandled);
-    }
+    });
 
-    expect(unhandled).to.be.false;
+    expect(unhandled).to.deep.equal([]);
   });
 });
 
@@ -363,6 +428,30 @@ describe('<awc-toast-region>', () => {
     const events = recordEvents(container);
 
     container.innerHTML = snapshot;
+    await whenInitialized(container.querySelector('awc-toast-region')!);
+    await nextFrame();
+
+    expect(container.querySelectorAll('awc-toast').length).to.equal(0);
+    expect(events).to.deep.equal([]);
+  });
+
+  it('drops its toasts when the browser restores the page from its back-forward cache', async () => {
+    const region = await regionFixture();
+    await showToast('Couldn’t save', { variant: 'danger' });
+    const events = recordEvents(region);
+
+    window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
+
+    expect(region.toasts.length).to.equal(0);
+    expect(events).to.deep.equal([]);
+  });
+
+  it('drops a toast copied from a cached page while it was leaving', async () => {
+    const container = await fixture<HTMLDivElement>('<div></div>');
+    const events = recordEvents(container);
+
+    const leaving = toastHtml('id="saved"', 'Saved.').replace('class="awc-toast"', 'class="awc-toast awc-toast--leaving"');
+    container.innerHTML = regionHtml('', leaving);
     await whenInitialized(container.querySelector('awc-toast-region')!);
     await nextFrame();
 
@@ -424,6 +513,18 @@ describe('<awc-toast>', () => {
     expect(events).to.deep.equal(['hide saved', 'hidden saved']);
     expect(escapeReachedParent).to.be.false;
   });
+
+  it('emits only `hidden` when `open` is removed', async () => {
+    const region = await regionFixture();
+    const toast = (await showToast('Saved', { id: 'saved' }))!;
+    const events = recordEvents(region);
+
+    toast.open = false;
+    await nextFrame();
+
+    expect(events).to.deep.equal(['hidden saved']);
+    expect(toast.isConnected).to.be.false;
+  });
 });
 
 describe('<awc-toast> timing', () => {
@@ -477,16 +578,6 @@ describe('<awc-toast> timing', () => {
   });
 });
 
-/** Makes `document.hidden` read `hidden`, as switching tabs does, and tells the page. */
-function setTabHidden(hidden: boolean) {
-  if (hidden) {
-    Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
-  } else {
-    delete (document as { hidden?: boolean }).hidden;
-  }
-  document.dispatchEvent(new Event('visibilitychange'));
-}
-
 describe('<awc-toast-region> pausing', () => {
   const causes: Array<[string, (region: AwcToastRegionElement) => void, (region: AwcToastRegionElement) => void]> = [
     [
@@ -521,22 +612,7 @@ describe('<awc-toast-region> pausing', () => {
       expect([first.isConnected, second.isConnected]).to.deep.equal([false, false]);
     });
   }
-});
 
-/** Waits for the announcers, which take a toast's text two frames after it shows, so that it is heard as a change. */
-async function announced() {
-  await nextFrame();
-  await nextFrame();
-  await nextFrame();
-}
-
-function announcers(region: AwcToastRegionElement) {
-  const polite = region.querySelector('[aria-live="polite"]')!;
-  const assertive = region.querySelector('[aria-live="assertive"]')!;
-  return () => [polite.textContent, assertive.textContent];
-}
-
-describe('<awc-toast-region> hover', () => {
   it('stays paused while the pointer leaves a toast for the space between toasts', async () => {
     const region = await regionFixture();
     const toast = (await showToast('Saved', { duration: Infinity }))!;
@@ -546,6 +622,18 @@ describe('<awc-toast-region> hover', () => {
 
     expect(region.paused).to.be.true;
     region.dispatchEvent(new PointerEvent('pointerleave'));
+    expect(region.paused).to.be.false;
+  });
+
+  it('carries on with the timers when a focused toast is removed', async () => {
+    const region = await regionFixture();
+    const toast = (await showToast('Saved', { duration: Infinity }))!;
+    toast.focus();
+    expect(region.paused).to.be.true;
+
+    toast.remove();
+    await nextFrame();
+
     expect(region.paused).to.be.false;
   });
 });
@@ -582,13 +670,18 @@ describe('<awc-toast-region> announcements', () => {
 
     expect(announcers(region)()).to.deep.equal(['', '']);
   });
-});
 
-/** Presses `key` on whatever has focus, as a keyboard does. */
-function press(key: string) {
-  const target = document.activeElement ?? document.body;
-  target.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
-}
+  it('announces every toast shown at once', async () => {
+    const region = await regionFixture();
+
+    await showToast('Goal created.');
+    await showToast('Parents emailed.');
+    await announced();
+
+    expect(region.querySelector('[aria-live="polite"]')!.textContent).to.include('Goal created.');
+    expect(region.querySelector('[aria-live="polite"]')!.textContent).to.include('Parents emailed.');
+  });
+});
 
 describe('<awc-toast-region> keyboard', () => {
   async function setup(attributes = '') {
@@ -653,34 +746,6 @@ describe('<awc-toast-region> keyboard', () => {
   });
 });
 
-/** Mirrors `app/components/impulse/dialog_component.html.erb`: the parts `<awc-dialog>` reads. */
-function dialogHtml(body = '') {
-  return `
-    <awc-dialog>
-      <dialog
-        data-target="awc-dialog.dialog"
-        data-action="click->awc-dialog#handleClick keydown->awc-dialog#handleKeydown cancel->awc-dialog#handleCancel close->awc-dialog#handleClose"
-      >
-        <p>Share goal</p>
-        ${body}
-      </dialog>
-    </awc-dialog>
-  `;
-}
-
-/** Whether a press at the centre of `element` lands on it: false while a modal dialog leaves it inert. */
-function pressable(element: Element) {
-  const rect = element.getBoundingClientRect();
-  const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
-  return !!hit && element.contains(hit);
-}
-
-/** Waits for the region to hear a dialog open or close, and to move. */
-async function moved() {
-  await nextFrame();
-  await nextFrame();
-}
-
 describe('<awc-toast-region> over modal dialogs', () => {
   async function setup() {
     const container = await fixture<HTMLDivElement>(`<div>${dialogHtml()}${regionHtml()}</div>`);
@@ -732,53 +797,6 @@ describe('<awc-toast-region> over modal dialogs', () => {
     expect(toast.isConnected).to.be.false;
     await dialog.hide();
   });
-});
-
-describe('defaults', () => {
-  it('keeps the region’s defaults through a morph to markup without them', async () => {
-    const region = await regionFixture();
-
-    Idiomorph.morph(region, regionHtml());
-
-    expect([region.hotkey, region.placement]).to.deep.equal(['F8', 'top-center']);
-  });
-
-  it('falls back to the region’s defaults when a morph removes their attributes', async () => {
-    const region = await regionFixture('hotkey="F9" placement="bottom-end"');
-
-    Idiomorph.morph(region, regionHtml());
-
-    expect([region.hotkey, region.placement]).to.deep.equal(['F8', 'top-center']);
-  });
-
-  it('falls back to the toast’s defaults when a morph removes their attributes', async () => {
-    const region = await regionFixture('', toastHtml('id="saved" variant="success" duration="Infinity"', 'Saved.'));
-    const toast = region.querySelector('awc-toast')!;
-    await whenInitialized(toast);
-
-    Idiomorph.morph(toast, toastHtml('id="saved" open', 'Saved.'));
-
-    expect([toast.variant, toast.duration]).to.deep.equal(['info', 5000]);
-  });
-});
-
-/** Gives leaving toasts a fade, as the stylesheet does, so that a hide takes `ms` to finish. */
-async function withLeavingTransition(ms: number) {
-  return fixture<HTMLStyleElement>(`<style>.awc-toast--leaving { opacity: 0; transition: opacity ${ms}ms linear; }</style>`);
-}
-
-describe('regressions', () => {
-  it('emits only `hidden` when `open` is removed', async () => {
-    const region = await regionFixture();
-    const toast = (await showToast('Saved', { id: 'saved' }))!;
-    const events = recordEvents(region);
-
-    toast.open = false;
-    await nextFrame();
-
-    expect(events).to.deep.equal(['hidden saved']);
-    expect(toast.isConnected).to.be.false;
-  });
 
   it('doesn’t show a hiding toast again when it moves with its region', async () => {
     await withLeavingTransition(300);
@@ -817,51 +835,32 @@ describe('regressions', () => {
     expect(region.parentElement === second.dialog).to.be.true;
     await second.hide();
   });
+});
 
-  it('announces every toast shown at once', async () => {
+describe('defaults', () => {
+  it('keeps the region’s defaults through a morph to markup without them', async () => {
     const region = await regionFixture();
 
-    await showToast('Goal created.');
-    await showToast('Parents emailed.');
-    await announced();
+    Idiomorph.morph(region, regionHtml());
 
-    expect(region.querySelector('[aria-live="polite"]')!.textContent).to.include('Goal created.');
-    expect(region.querySelector('[aria-live="polite"]')!.textContent).to.include('Parents emailed.');
+    expect([region.hotkey, region.placement]).to.deep.equal(['F8', 'top-center']);
   });
 
-  it('carries on with the timers when a focused toast is removed', async () => {
-    const region = await regionFixture();
-    const toast = (await showToast('Saved', { duration: Infinity }))!;
-    toast.focus();
-    expect(region.paused).to.be.true;
+  it('falls back to the region’s defaults when a morph removes their attributes', async () => {
+    const region = await regionFixture('hotkey="F9" placement="bottom-end"');
 
-    toast.remove();
-    await nextFrame();
+    Idiomorph.morph(region, regionHtml());
 
-    expect(region.paused).to.be.false;
+    expect([region.hotkey, region.placement]).to.deep.equal(['F8', 'top-center']);
   });
 
-  it('drops its toasts when the browser restores the page from its back-forward cache', async () => {
-    const region = await regionFixture();
-    await showToast('Couldn’t save', { variant: 'danger' });
-    const events = recordEvents(region);
+  it('falls back to the toast’s defaults when a morph removes their attributes', async () => {
+    const region = await regionFixture('', toastHtml('id="saved" variant="success" duration="Infinity"', 'Saved.'));
+    const toast = region.querySelector('awc-toast')!;
+    await whenInitialized(toast);
 
-    window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
+    Idiomorph.morph(toast, toastHtml('id="saved" open', 'Saved.'));
 
-    expect(region.toasts.length).to.equal(0);
-    expect(events).to.deep.equal([]);
-  });
-
-  it('drops a toast copied from a cached page while it was leaving', async () => {
-    const container = await fixture<HTMLDivElement>('<div></div>');
-    const events = recordEvents(container);
-
-    const leaving = toastHtml('id="saved"', 'Saved.').replace('class="awc-toast"', 'class="awc-toast awc-toast--leaving"');
-    container.innerHTML = regionHtml('', leaving);
-    await whenInitialized(container.querySelector('awc-toast-region')!);
-    await nextFrame();
-
-    expect(container.querySelectorAll('awc-toast').length).to.equal(0);
-    expect(events).to.deep.equal([]);
+    expect([toast.variant, toast.duration]).to.deep.equal(['info', 5000]);
   });
 });
