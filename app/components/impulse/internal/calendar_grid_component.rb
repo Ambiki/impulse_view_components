@@ -72,11 +72,16 @@ module Impulse
         level.range(cell)
       end
 
-      # A cell the user can move to but not commit. By default, one with none of the days it selects between `min` and
-      # `max`.
+      # A cell the user can move to but not commit: one with none of the days it selects between `min` and `max`, or
+      # within the four-digit years, or one the calendar disables for a reason of its own.
       def disabled?(cell)
         range = range_of(cell)
-        past_four_digit_years?(range) || range.end < earliest || range.begin > latest
+        past_four_digit_years?(range) || range.end < earliest || range.begin > latest || also_disabled?(cell)
+      end
+
+      # Whether the calendar disables `cell` for a reason of its own, whatever its limits allow. By default, it doesn't.
+      def also_disabled?(_cell)
+        false
       end
 
       # Whether any of `range`'s days falls outside the four-digit years, which are all a value names.

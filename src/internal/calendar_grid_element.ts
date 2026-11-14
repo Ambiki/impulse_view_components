@@ -80,11 +80,12 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
   }
 
   /**
-   * Whether the user can move to `cell` but not commit it, given the earliest and latest allowed. By default, when none
-   * of the days it selects falls between them.
+   * Whether the calendar disables `cell`, one of its base level, for a reason of its own, whatever its limits allow.
+   * The grid already disables a cell with none of the days it selects between `min` and `max`, or within the four-digit
+   * years. By default, it doesn't.
    */
-  protected isDisabledCell(cell: CalendarDate, min: CalendarDate | null, max: CalendarDate | null): boolean {
-    return isOutsideLimits(this.rangeOf(cell), min, max);
+  protected isAlsoDisabledCell(_cell: CalendarDate): boolean {
+    return false;
   }
 
   /** The detail of `commit`, for the range the user committed. */
@@ -438,7 +439,7 @@ export default abstract class CalendarGridElement<I> extends ImpulseElement {
       max,
       isDisabled: (date) => {
         if (isPastFourDigitYears(base ? this.rangeOf(date) : level.range(date))) return true;
-        if (base) return this.isDisabledCell(date, min, max);
+        if (base) return isOutsideLimits(this.rangeOf(date), min, max) || this.isAlsoDisabledCell(date);
         return !date.equals(back ?? null) && isOutsideLimits(level.range(date), min, max);
       },
       firstDayOfWeek: this.firstDayOfWeek ?? 0,
