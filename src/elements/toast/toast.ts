@@ -110,7 +110,17 @@ export default class AwcToastElement extends OpenableElement {
       }
     }
     const body = source.querySelector('.awc-toast-body');
-    if (body) this.querySelector('.awc-toast-body')?.replaceWith(body);
+    const replaced = this.querySelector('.awc-toast-body');
+    if (body && replaced) {
+      const hadFocus = replaced.contains(document.activeElement);
+      replaced.replaceWith(body);
+      // What had focus is gone, without a `focusout` in some browsers: focus stays in the toast, and the region pauses
+      // by where it is now.
+      if (hadFocus) {
+        this.focus({ preventScroll: true });
+        this.region?.syncFocusPause();
+      }
+    }
     this.region?.raise();
     this.pauseTimer();
     this.startOver();

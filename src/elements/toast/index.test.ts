@@ -233,6 +233,22 @@ describe('showToast', () => {
     expect(region.toasts.length).to.equal(1);
   });
 
+  it('keeps focus in the toast it updates, when what had focus there is replaced', async () => {
+    const region = await regionFixture();
+    const template = await fixture<HTMLTemplateElement>(
+      `<template>${toastHtml('id="upload" duration="Infinity"', 'Uploading… <button type="button">Cancel</button>')}</template>`,
+    );
+    const toast = (await showToast(template))!;
+    toast.querySelector<HTMLButtonElement>('.awc-toast-message button')!.focus();
+
+    await showToast(template);
+
+    expect(document.activeElement === toast).to.be.true;
+    expect(region.paused).to.be.true;
+    toast.blur();
+    expect(region.paused).to.be.false;
+  });
+
   it('gives a toast the title it is given', async () => {
     await regionFixture();
 
