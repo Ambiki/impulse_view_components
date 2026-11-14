@@ -20,18 +20,23 @@ export default function useFocusOut(element: ImpulseElement, { boundaries, callb
   const isInside = (node: Node) => boundaries.some((boundary) => boundary?.contains(node));
 
   // What the latest press outside landed on, until its click has been handled. A press inside doesn't count: a button
-  // there may move focus out itself, such as by opening a dialog elsewhere.
+  // there may move focus out itself, such as by opening a dialog elsewhere. Neither does a press with a button other
+  // than the primary one, which ends in no click for `useOutsideClick` to hear of.
   let pressedOutside: Node | null = null;
   document.addEventListener(
     'pointerdown',
     (event) => {
       const target = event.target as Node;
-      pressedOutside = isInside(target) ? null : target;
+      pressedOutside = event.button > 0 || isInside(target) ? null : target;
     },
     { capture: true, signal },
   );
-  document.addEventListener('click', () => setTimeout(() => (pressedOutside = null)), { capture: true, signal });
-  document.addEventListener('keydown', () => (pressedOutside = null), { capture: true, signal });
+  const forgetPress = () => (pressedOutside = null);
+  document.addEventListener('click', () => setTimeout(forgetPress), { capture: true, signal });
+  document.addEventListener('keydown', forgetPress, { capture: true, signal });
+  // A press that opens the context menu, such as ctrl+click on macOS, or that starts a drag ends in no click either.
+  document.addEventListener('contextmenu', forgetPress, { capture: true, signal });
+  document.addEventListener('dragstart', forgetPress, { capture: true, signal });
 
   document.addEventListener(
     'focusin',

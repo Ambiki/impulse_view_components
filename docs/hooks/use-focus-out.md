@@ -71,6 +71,8 @@ useFocusOut(element, options);
   such as when the focused element is removed.
 - Focus moved by a press outside, to the element pressed or the focusable element around it, doesn't count. That press
   is left to `useOutsideClick`.
+- A press outside that `useOutsideClick` doesn't hear of does count: one with a button other than the primary one, such
+  as a right click on a field.
 - A press outside that moves focus somewhere else, such as on a `<label>` that focuses its field, counts as well. Both
   callbacks run for it, so make them safe to run twice.
 - Focus moved by a press inside does count, such as a button in the popover that opens a dialog elsewhere on the page.

@@ -567,6 +567,24 @@ describe('awc-popover', () => {
       expect(events).to.eql(['hide']);
     });
 
+    it('requests to hide when a press outside with another button moves focus, as a right click does', async () => {
+      const el = await popoverFixture({ content: '<button type="button">Inside</button>' });
+      const outside = document.createElement('input');
+      el.after(outside);
+      el.show();
+      const events = recordEvents(el);
+
+      // No click follows, so the outside click never hears of the press.
+      outside.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 2 }));
+      outside.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, button: 2 }));
+      outside.focus();
+      outside.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true }));
+      await settle();
+
+      expect(el.open).to.equal(false);
+      expect(events).to.eql(['hide', 'hidden']);
+    });
+
     it('keeps focus where it is, and stays open, when it connects open', async () => {
       const container = await fixture<HTMLElement>('<div><input></div>');
       const input = container.querySelector('input')!;
