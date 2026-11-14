@@ -1,17 +1,17 @@
 import type AwcAutocompleteElement from './index';
 import type { SelectVariant } from './index';
 
-interface Selected { value: string; text: string }
+interface SelectedValue { value: string; text: string }
 
 /**
- * A multiple select's selection. It is kept in one place only: the hidden fields the form submits, one in each tag.
- * The options' `aria-selected`, the element's selected class and whether its input is required all follow from them,
- * so the selection a DOM morph renders is the selection.
+ * A multiple select's selection. It is kept in one place only: the hidden fields the form submits, one in each tag,
+ * so the tags a DOM morph renders are the selection. The options' `aria-selected`, the element's selected class and
+ * whether its input is required are brought up to date with them each time the element changes the selection.
  */
 export default class MultipleSelect implements SelectVariant {
   readonly autocomplete: AwcAutocompleteElement;
   /** What `reset` restores: the selection the element connected with. */
-  private defaultSelection: Selected[] = [];
+  private defaultSelection: SelectedValue[] = [];
 
   constructor(autocomplete: AwcAutocompleteElement) {
     this.autocomplete = autocomplete;
@@ -57,7 +57,7 @@ export default class MultipleSelect implements SelectVariant {
   setValue(value: string, text: string) {
     if (this.isSelected(value)) return;
     this.insertTag(value, text.trim());
-    this.selectionChanged();
+    this.syncWithSelection();
   }
 
   clear() {
@@ -68,7 +68,7 @@ export default class MultipleSelect implements SelectVariant {
     const hiddenField = this.hiddenFields.find((field) => field.value === value);
     if (!hiddenField) return;
     hiddenField.closest('[data-behavior="tag"]')!.remove();
-    this.selectionChanged();
+    this.syncWithSelection();
   }
 
   isSelected(value: string) {
@@ -81,7 +81,7 @@ export default class MultipleSelect implements SelectVariant {
   }
 
   /** Brings what follows from the selection up to date with it. */
-  private selectionChanged() {
+  private syncWithSelection() {
     this.autocomplete.toggleSelectedClass(this.value.length > 0);
     this.required = this.autocomplete.required;
     // The options only say what is selected while the listbox is open: `start` marks them on opening.
@@ -91,10 +91,19 @@ export default class MultipleSelect implements SelectVariant {
   }
 
   private markSelectedOptions() {
-    const selected = new Set(this.value);
+    const selected = new Set(this.selectedOptions);
     for (const option of this.autocomplete.options) {
-      this.autocomplete.markSelected(option, selected.has(option.getAttribute('value') ?? ''));
+      this.autocomplete.markSelected(option, selected.has(option));
     }
+  }
+
+  /** The options whose value is selected. An option without a value is never one, as it can't be committed. */
+  private get selectedOptions() {
+    const values = new Set(this.value);
+    return this.autocomplete.options.filter((option) => {
+      const value = option.getAttribute('value');
+      return !!value && values.has(value);
+    });
   }
 
   private insertTag(value: string, text: string): void {
@@ -117,9 +126,7 @@ export default class MultipleSelect implements SelectVariant {
   }
 
   private get firstActivableOption() {
-    const selected = new Set(this.value);
-    const selectedOption = this.autocomplete.options.find((o) => selected.has(o.getAttribute('value') ?? ''));
-    return selectedOption || this.autocomplete.visibleOptions[0];
+    return this.selectedOptions[0] || this.autocomplete.visibleOptions[0];
   }
 
   /** Each tag's hidden field, in the order of the tags. The field outside the tags, which submits no value, isn't one. */

@@ -801,6 +801,15 @@ describe('AwcAutocompleteElement', () => {
       expect(el.options[1].getAttribute('aria-selected')).to.equal('true');
     });
 
+    it('should leave an option without a value unselected', async () => {
+      const el = await autocompleteFixture({ multiple: true, options: [{ value: '', text: 'None' }, ...FRUITS] });
+      el.setValue('', 'None');
+
+      el.show();
+
+      expect(selectionOf(el)).to.eql(['false', 'false', 'false', 'false']);
+    });
+
     it('should remove only the given value', async () => {
       const el = await autocompleteFixture({ multiple: true, options: FRUITS, selected: [FRUITS[0], FRUITS[1]] });
 
@@ -1375,7 +1384,14 @@ describe('AwcAutocompleteElement', () => {
       const el = container.querySelector('awc-autocomplete')!;
 
       expect(el.value).to.eql(['1', '2']);
+      // It is still initializing, which the fixture's teardown would otherwise interrupt.
       await whenInitialized(el);
+    });
+
+    it('should report an empty value while it has no markup', () => {
+      const el = document.createElement('awc-autocomplete');
+
+      expect(el.value).to.equal('');
     });
 
     it('should move focus out of its input with `blur`', async () => {
@@ -1457,7 +1473,7 @@ describe('AwcAutocompleteElement', () => {
       expect(el.input.getAttribute('aria-activedescendant')).to.equal(el.options[1].id);
     });
 
-    it('should select an option again once a morph has removed the tag the user added for it', async () => {
+    it('should select an option again once a morph has removed the tag added for it', async () => {
       const el = await autocompleteFixture({ multiple: true, options: FRUITS });
       el.setValue('1');
       Idiomorph.morph(el, autocompleteHtml({ multiple: true, options: FRUITS }));

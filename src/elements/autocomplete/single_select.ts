@@ -1,13 +1,15 @@
 import type AwcAutocompleteElement from './index';
 import type { SelectVariant } from './index';
 
+const HIDDEN_FIELD = 'input[data-behavior="hidden-field"]';
+
 /**
  * A single select's selection. It is kept in one place only: the hidden field the form submits. The input's text, the
  * options' `aria-selected` and the element's selected class all follow from it.
  */
 export default class SingleSelect implements SelectVariant {
   readonly autocomplete: AwcAutocompleteElement;
-  /** What `reset` restores: the selection the element connected with. */
+  /** What `reset` restores: the value and text the element connected with. */
   private defaultValue = '';
   private defaultText = '';
 
@@ -21,7 +23,8 @@ export default class SingleSelect implements SelectVariant {
   }
 
   get value() {
-    return this.hiddenField.value;
+    // An element made from code has no hidden field until its markup is added, and no value.
+    return this.autocomplete.querySelector<HTMLInputElement>(HIDDEN_FIELD)?.value ?? '';
   }
 
   start() {
@@ -94,6 +97,6 @@ export default class SingleSelect implements SelectVariant {
   }
 
   private get hiddenField() {
-    return this.autocomplete.querySelector<HTMLInputElement>('input[data-behavior="hidden-field"]')!;
+    return this.autocomplete.querySelector<HTMLInputElement>(HIDDEN_FIELD)!;
   }
 }
