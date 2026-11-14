@@ -9,7 +9,7 @@ status: accepted
 field, have an active option and a commit but no selected option: a commit inserts text, or follows a link. The
 autocomplete didn't trust the package's selection either. Its value lives in its hidden fields, and it marked the
 options again each time the listbox opened. We replace the package with our own combobox, `src/internal/combobox.ts`,
-that knows only the active option and the commit. Selection, values, filtering and whether the list is showing belong to
+that knows only the active option and the commit. Selection, values, filtering and whether the list is open belong to
 the element built on it.
 
 The combobox takes an input and a list. Between `start()` and `stop()` it moves the active option with the arrow keys
@@ -25,20 +25,25 @@ and the pointer, and calls `onCommit(option, event)` when the user commits one. 
 - **A commit event instead of a callback.** Rejected: the combobox isn't an element, so its event would travel through
   the element's own markup and out of it, and reach a combobox it is nested in.
 - **A base element class**, as `OpenableElement` is. Rejected: the autocomplete already extends that one, and a list
-  that is always showing, such as a command palette's, has no open state to share.
+  that never closes, such as a command palette's, has no open state to share.
 - **Export it from `/helpers` now.** Rejected: it would freeze an API only one element has used. It can be exported
   once a second element is built on it.
 
 ## Consequences
 
-- The select variants are the only code that writes `aria-selected`, and the multiple select puts
+- The autocomplete, not the combobox, writes `aria-selected`: its select variants mark the options when the listbox
+  opens and when the value changes, and it clears them when the listbox closes. The multiple select puts
   `aria-multiselectable` on the listbox.
-- A keyboard commit no longer clicks the option, so click listeners on an option hear only real clicks.
+- A keyboard commit no longer clicks the option, so click listeners on an option hear only real clicks. The
+  autocomplete still selects its input's text after one, as its own click handler did.
 - Home and End move the caret in the input, as the APG asks of an editable combobox, and leave no option active. They
   used to move to the first and last option.
 - Enter with no active option is left to the input: it submits the form, or breaks the line in a `<textarea>`. The
   autocomplete still keeps Enter from submitting its form while it is open.
 - Tab commits only when the element asks for it with `tabCommits`, as the autocomplete does.
+- A key held with any modifier is left to the input, and so is a key that belongs to an input method. Ctrl used to
+  pass on a Mac, and Enter used to commit while composing.
+- The input keeps `aria-controls` while the list is closed. It used to lose it.
 - The combobox never activates an option on its own. The element chooses the active option when its list opens and
   when its options change.
 - A disabled option can be active but can't be committed, as before.

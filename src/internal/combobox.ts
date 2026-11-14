@@ -2,7 +2,7 @@
  * The part of a combobox every element built on one shares: an input that keeps focus while the user moves an active
  * option through a list and commits it. See docs/adr/0024-the-combobox-knows-the-active-option-not-the-selection.md.
  *
- * It knows nothing of selection, values, filtering or whether the list is showing. The element decides what a commit
+ * It knows nothing of selection, values, filtering or whether the list is open. The element decides what a commit
  * does, which option is active once the list opens or its options change, and when to `start` and `stop`.
  */
 import uniqueId from './unique_id';
@@ -18,7 +18,8 @@ export interface ComboboxOptions {
   onCommit: (option: HTMLElement, event: KeyboardEvent | MouseEvent) => void;
 }
 
-const OPTION = '[role="option"]';
+const OPTION_SELECTOR = '[role="option"]';
+const ACTIVE_OPTION_SELECTOR = `${OPTION_SELECTOR}[data-active]`;
 
 export default class Combobox {
   readonly input: HTMLElement;
@@ -43,7 +44,7 @@ export default class Combobox {
   }
 
   /**
-   * Call it when the list shows: the keyboard and the pointer move the active option and commit it from here on.
+   * Call it when the list opens: the keyboard and the pointer move the active option and commit it from here on.
    */
   start() {
     if (this.listeners) return;
@@ -58,7 +59,7 @@ export default class Combobox {
   }
 
   /**
-   * Call it when the list hides: no option stays active, and the keys go back to the input.
+   * Call it when the list closes: no option stays active, and the keys go back to the input.
    */
   stop() {
     this.listeners?.abort();
@@ -101,22 +102,22 @@ export default class Combobox {
 
   /** Every option in the list. */
   get options() {
-    return [...this.list.querySelectorAll<HTMLElement>(OPTION)];
+    return [...this.list.querySelectorAll<HTMLElement>(OPTION_SELECTOR)];
   }
 
   /** The active option, if there is one. */
   get activeOption() {
-    return this.list.querySelector<HTMLElement>(`${OPTION}[data-active]`);
+    return this.list.querySelector<HTMLElement>(ACTIVE_OPTION_SELECTOR);
   }
 
   private get activeOptions() {
-    return this.list.querySelectorAll<HTMLElement>(`${OPTION}[data-active]`);
+    return this.list.querySelectorAll<HTMLElement>(ACTIVE_OPTION_SELECTOR);
   }
 
   private handleKeydown = (event: KeyboardEvent) => {
     // A key held with a modifier is the input's or the element's: Shift+Tab moves focus back, Alt+ArrowDown opens the
-    // list. Enter while composing accepts the input method's candidate.
-    if (event.isComposing || event.shiftKey || event.altKey || event.ctrlKey || event.metaKey) return;
+    // list.
+    if (isComposing(event) || event.shiftKey || event.altKey || event.ctrlKey || event.metaKey) return;
 
     switch (event.key) {
       case 'ArrowDown':
@@ -186,7 +187,7 @@ export default class Combobox {
 
   private optionOf(target: EventTarget | null) {
     if (!(target instanceof Element)) return null;
-    const option = target.closest<HTMLElement>(OPTION);
+    const option = target.closest<HTMLElement>(OPTION_SELECTOR);
     return option && this.list.contains(option) ? option : null;
   }
 }
@@ -195,6 +196,14 @@ export default class Combobox {
 function consume(event: KeyboardEvent) {
   event.preventDefault();
   event.stopPropagation();
+}
+
+/**
+ * Whether the key belongs to an input method, such as the Enter that accepts its candidate. Safari sends that Enter
+ * once the composition has ended, when only its `keyCode` of 229 still says so.
+ */
+function isComposing(event: KeyboardEvent) {
+  return event.isComposing || event.keyCode === 229;
 }
 
 /** A disabled option can be active, but can't be committed. */

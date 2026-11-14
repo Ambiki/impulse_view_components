@@ -105,6 +105,8 @@ export default class AjaxSearch implements SearchVariant {
   }
 
   private async insertOptions(options: string) {
+    // The active option is about to be replaced, and the input mustn't point to an option that is gone.
+    this.autocomplete.combobox.deactivate();
     this.autocomplete.optionsContainer.innerHTML = options;
     // The response can land after the listbox closed, which deselected and deactivated every option and cleared
     // `no-options`. Opening it again does all three afresh.

@@ -182,7 +182,7 @@ export default class AwcAutocompleteElement<
       input: this.input,
       list: this.listbox,
       tabCommits: true,
-      onCommit: (option) => this.commit(option),
+      onCommit: (option, event) => this.commit(option, event),
     });
     this.selectVariant = this.multiple ? new MultipleSelect(this) : new SingleSelect(this);
     this.selectVariant.connected();
@@ -278,11 +278,7 @@ export default class AwcAutocompleteElement<
       this.requestShow();
     }
 
-    if (this.firstFocus && this.input.value) {
-      this.input.select();
-    }
-
-    this.firstFocus = false;
+    this.selectTextOnFirstFocus();
   }
 
   /**
@@ -506,10 +502,26 @@ export default class AwcAutocompleteElement<
   }
 
   /** Selects or deselects the option the user committed, as the select variant decides, and reports it. */
-  private commit(option: HTMLElement) {
+  private commit(option: HTMLElement, event: KeyboardEvent | MouseEvent) {
     this.selectVariant.select(option);
     const detail = optionEventDetail(option);
     this.emitEvent('commit', { ...detail, selected: this.selectVariant.isSelected(detail.value) });
+    // A click on an option reaches `handleClick`, which does this. A key press doesn't.
+    if (event instanceof KeyboardEvent) {
+      this.selectTextOnFirstFocus();
+    }
+  }
+
+  /**
+   * Selects the input's text the first time the user acts on the element since it took focus, so that typing replaces
+   * the text.
+   */
+  private selectTextOnFirstFocus() {
+    if (this.firstFocus && this.input.value) {
+      this.input.select();
+    }
+
+    this.firstFocus = false;
   }
 
   private removeLastTag(): HTMLElement | undefined {

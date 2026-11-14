@@ -71,7 +71,7 @@ describe('Combobox', () => {
       expect(input.getAttribute('aria-controls')).to.equal('fruits');
     });
 
-    it('should say the list is expanded only between `start` and `stop`', async () => {
+    it('should set `aria-expanded` only between `start` and `stop`', async () => {
       const { combobox, input } = await comboboxFixture();
 
       combobox.start();
@@ -260,6 +260,16 @@ describe('Combobox', () => {
       combobox.activate(banana);
 
       expect(pressKey(input, 'Enter', { isComposing: true }).defaultPrevented).to.equal(false);
+      expect(commits).to.eql([]);
+    });
+
+    it('should leave alone the Enter that Safari sends as a composition ends', async () => {
+      const { combobox, input, commits, banana } = await comboboxFixture();
+      combobox.start();
+      combobox.activate(banana);
+
+      // Safari sends it after `compositionend`, so `isComposing` is already `false`.
+      expect(pressKey(input, 'Enter', { keyCode: 229 }).defaultPrevented).to.equal(false);
       expect(commits).to.eql([]);
     });
 
