@@ -2,6 +2,7 @@ import type { Boundary } from './use_outside_click';
 import { ImpulseElement, registerElement, whenInitialized } from '@ambiki/impulse';
 import { aTimeout, expect, fixture, html } from '@open-wc/testing';
 import useFocusOut from './use_focus_out';
+import useOutsideClick from './use_outside_click';
 
 /** The smallest element the hook can be attached to: it only needs the impulse lifecycle. */
 @registerElement('focus-out-host')
@@ -56,6 +57,19 @@ function targets(calls: Array<{ target: HTMLElement }>) {
 /** Starts a press on `element`. A browser moves focus between this and the click, which the tests do with `focus()`. */
 function pressDown(element: Element) {
   element.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, composed: true }));
+}
+
+/** Finishes a press on `element` with its click, which comes after the focus the press moved. */
+function click(element: Element) {
+  element.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, composed: true }));
+  element.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
+}
+
+/** Attaches `useOutsideClick` to `host` as well, and records what each call to its callback landed on. */
+function listenForOutsideClicks(host: FocusOutHost, boundaries: Boundary[]) {
+  const pressed: Array<string | undefined> = [];
+  useOutsideClick(host, { boundaries, callback: (_event, target) => pressed.push(target.dataset.name) });
+  return pressed;
 }
 
 /** Appends an element with an open shadow root to `parent`, named `shadow-host`, and returns the input in that root. */
@@ -130,7 +144,7 @@ describe('useFocusOut', () => {
     expect(targets(calls)).to.eql([]);
   });
 
-  it('leaves the focus a press outside moves to what it landed on to `useOutsideClick`', async () => {
+  it('skips focus moved by a press outside to the element pressed', async () => {
     const { host, inside, outside } = await focusOutFixture();
     const calls = listen(host, [host]);
     inside.focus();
@@ -141,7 +155,7 @@ describe('useFocusOut', () => {
     expect(targets(calls)).to.eql([]);
   });
 
-  it('leaves the focus a press outside moves to the focusable element around what it landed on', async () => {
+  it('skips focus moved by a press outside to the focusable element around the element pressed', async () => {
     const { host, inside, outside, outsideText } = await focusOutFixture();
     const calls = listen(host, [host]);
     inside.focus();
@@ -150,17 +164,6 @@ describe('useFocusOut', () => {
     outside.focus();
 
     expect(targets(calls)).to.eql([]);
-  });
-
-  it('calls back when a press outside moves focus somewhere else, as a label does to its field', async () => {
-    const { host, inside, label, field } = await focusOutFixture();
-    const calls = listen(host, [host]);
-    inside.focus();
-
-    pressDown(label);
-    field.focus();
-
-    expect(targets(calls)).to.eql(['field']);
   });
 
   it('calls back when a press inside moves focus out, as a button that opens something elsewhere does', async () => {
@@ -183,11 +186,54 @@ describe('useFocusOut', () => {
     expect(targets(calls)).to.eql(['container']);
   });
 
+  it('skips focus that the click of a press outside moves to the element pressed', async () => {
+    const { host, inside, outside } = await focusOutFixture();
+    const calls = listen(host, [host]);
+    inside.focus();
+    // As an element does that keeps a press from moving focus, and takes focus once it is clicked.
+    outside.addEventListener('click', () => outside.focus(), { once: true });
+
+    pressDown(outside);
+    click(outside);
+
+    expect(targets(calls)).to.eql([]);
+  });
+
+  it('leaves a press outside to `useOutsideClick`, so that the two hooks call back once between them', async () => {
+    const { host, inside, outside } = await focusOutFixture();
+    const calls = listen(host, [host]);
+    const pressed = listenForOutsideClicks(host, [host]);
+    inside.focus();
+
+    pressDown(outside);
+    outside.focus();
+    click(outside);
+
+    expect(targets(calls)).to.eql([]);
+    expect(pressed).to.eql(['outside']);
+  });
+
+  it('calls back, as `useOutsideClick` does, when a press outside moves focus elsewhere, as on a label', async () => {
+    const { host, inside, label, field } = await focusOutFixture();
+    const calls = listen(host, [host]);
+    const pressed = listenForOutsideClicks(host, [host]);
+    inside.focus();
+
+    pressDown(label);
+    click(label);
+    // A label moves focus to its field once it is clicked.
+    field.focus();
+
+    expect(targets(calls)).to.eql(['field']);
+    expect(pressed).to.eql(['label']);
+  });
+
   it('forgets a press outside once its click has been handled', async () => {
     const { host, outside } = await focusOutFixture();
     const calls = listen(host, [host]);
     pressDown(outside);
-    outside.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
+    click(outside);
+    // The hook forgets the press once the click's own handlers have run.
     await aTimeout(0);
 
     outside.focus();
@@ -228,10 +274,9 @@ describe('useFocusOut', () => {
     expect(targets(calls)).to.eql(['shadow-host']);
   });
 
-  it('takes a boundary inside a shadow root for its shadow host, which is outside it', async () => {
+  it('does not support a boundary inside a shadow root, which it takes for its shadow host', async () => {
     const { container, host } = await focusOutFixture();
     const input = appendShadowInput(container);
-    // Not supported: focus moving into the boundary is seen as a move to the shadow host around it.
     const calls = listen(host, [input]);
 
     input.focus();
