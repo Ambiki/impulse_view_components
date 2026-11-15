@@ -1,5 +1,6 @@
 import type { UseFloatingUIType } from 'src/hooks/use_floating_ui';
 import type { AutocompleteEventArgs, AutocompleteEventMap, AutocompleteEventName } from './events';
+import type { AutocompleteOptionData } from './option_template';
 import { property, registerElement, target, targets } from '@ambiki/impulse';
 import useFloatingUI from 'src/hooks/use_floating_ui';
 import useOutsideClick from 'src/hooks/use_outside_click';
@@ -8,11 +9,13 @@ import { isLooselyFocusable } from 'src/internal/focus';
 import OpenableElement from 'src/internal/openable_element';
 import AjaxSearch from './ajax_search';
 import { optionEventDetail } from './events';
-import LocalSearch from './local_search';
+import LocalSearch, { filterOptions } from './local_search';
 import MultipleSelect from './multiple_select';
+import { buildOption } from './option_template';
 import SingleSelect from './single_select';
 
 export type { AwcAutocompleteCommitEvent, AwcAutocompleteRemoveEvent } from './events';
+export type { AutocompleteOptionData } from './option_template';
 
 /** Whether multiple values can be selected. */
 export type SelectionMode = 'single' | 'multiple';
@@ -34,6 +37,9 @@ type RemoveValueArgs<Mode extends SelectionMode> = Mode extends 'multiple' ? [va
 
 /** Resolves the `setValue` text argument: required for an ajax source, optional otherwise. */
 type SetValueTextArgs<Src extends Source> = Src extends 'ajax' ? [text: string] : [text?: string];
+
+/** Resolves the arguments of the methods that set options from code: none fit an ajax source, whose responses bring them. */
+type LocalOnlyArgs<Src extends Source, Args extends unknown[]> = Src extends 'ajax' ? never : Args;
 
 /**
  * The contract implemented by the single and multiple select variants: the selection mode. A variant keeps the
@@ -68,6 +74,12 @@ export interface SelectVariant {
   removeValue: (value: string) => void;
   /** Whether `value` is part of the selection. */
   isSelected: (value: string) => boolean;
+  /**
+   * Brings the selection in line with `options`: a value that none of them has is deselected, and one they still have
+   * takes the text of the first option that has it. Nothing is selected in place of a value that goes, where a native
+   * single `<select>` would select its first option: the element can have no value.
+   */
+  followOptions: (options: HTMLElement[]) => void;
 }
 
 /**
@@ -443,6 +455,30 @@ export default class AwcAutocompleteElement<
     }
     this.syncWithSelection();
   }
+
+  /**
+   * Replaces the options with `options`. A value no option offers any longer is deselected, and one an option still
+   * offers takes its text. Not for an ajax select, whose responses bring its options.
+   * @param options - The options, each with its value and text, and optionally its description and whether it is disabled.
+   */
+  setOptions(...args: LocalOnlyArgs<Src, [options: AutocompleteOptionData[]]>) {
+    const [options] = args as [AutocompleteOptionData[]];
+    const template = this.optionTemplate;
+    this.optionsContainer.replaceChildren(...options.map((option) => buildOption(template, option)));
+    this.selectVariant.followOptions(this.options);
+    this.syncWithSelection({ keepInput: this.open && this.typed });
+    this.syncWithOptionsFromCode('set');
+  }
+
+  /**
+   * Adds `option` after the other options. Not for an ajax select, whose responses bring its options.
+   * @param option - The option, with its value and text, and optionally its description and whether it is disabled.
+   */
+  addOption(...args: LocalOnlyArgs<Src, [option: AutocompleteOptionData]>) {
+    const [option] = args as [AutocompleteOptionData];
+    this.optionsContainer.append(buildOption(this.optionTemplate, option));
+    this.syncWithOptionsFromCode('added');
+  }
   /* eslint-enable jsdoc/check-param-names */
 
   /**
@@ -478,10 +514,15 @@ export default class AwcAutocompleteElement<
   }
 
   /**
-   * Resets the value to the default value.
+   * Resets the value to the default value. In a local select, only the values an option still offers.
    */
   reset() {
     this.selectVariant.reset();
+    // A default goes with the option that offered it, as a native option's `defaultSelected` does. An ajax select's
+    // options are only the ones the last response brought.
+    if (!this.ajax) {
+      this.selectVariant.followOptions(this.options);
+    }
     this.syncWithSelection();
   }
 
@@ -562,10 +603,24 @@ export default class AwcAutocompleteElement<
   }
 
   /**
-   * Brings the listbox up to date with the options on show, once it has opened (`opened`), the user's query has
-   * filtered them (`filtered`) or the server's have replaced them (`fetched`).
+   * Brings an open listbox up to date with the options set from code (`set`) or added from code (`added`). What the user
+   * typed filters them, as it does the options the page holds.
    */
-  private syncWithOptions(cause: 'opened' | 'filtered' | 'fetched'): void | Promise<void> {
+  private syncWithOptionsFromCode(cause: 'set' | 'added') {
+    if (!this.open) return;
+
+    if (this.typed) {
+      filterOptions(this.options, this.input.value.trim());
+    }
+    this.syncWithOptions(cause);
+  }
+
+  /**
+   * Brings the listbox up to date with the options on show, once it has opened (`opened`), the user's query has
+   * filtered them (`filtered`), the server's have replaced them (`fetched`), or code has set them (`set`) or added one
+   * (`added`).
+   */
+  private syncWithOptions(cause: 'opened' | 'filtered' | 'fetched' | 'set' | 'added'): void | Promise<void> {
     // A response can land after the listbox closed, which deselected every option and cleared `no-options`. Opening
     // it again does both afresh. The active option may be one the response replaced, though, which the input mustn't
     // go on pointing to.
@@ -587,11 +642,13 @@ export default class AwcAutocompleteElement<
     }
 
     // Once the user has typed, the first match, whatever is selected. Until then the first selected option, or else
-    // the first option.
+    // the first option. An option added from code leaves the active option where the user moved it.
     const [firstOption] = this.visibleOptions;
-    const option = this.typed ? firstOption : (this.selectedOptions[0] ?? firstOption);
+    const option =
+      (cause === 'added' ? this.activeOption : null) ??
+      (this.typed ? firstOption : (this.selectedOptions[0] ?? firstOption));
     if (option) {
-      this.combobox.activate(option, { scroll: cause !== 'filtered' });
+      this.combobox.activate(option, { scroll: cause !== 'filtered' && cause !== 'added' });
     } else {
       // The active option may be one the query just hid, or one a response replaced. Enter would otherwise commit the
       // one, and the input would point to the other, which is gone.
@@ -604,10 +661,13 @@ export default class AwcAutocompleteElement<
     }
   }
 
-  /** Brings what follows from the selection up to date with it, once the element has changed it. */
-  private syncWithSelection() {
+  /**
+   * Brings what follows from the selection up to date with it, once the element has changed it. With `keepInput`, the
+   * input goes on holding what the user typed, and shows the selection once the listbox closes.
+   */
+  private syncWithSelection({ keepInput = false } = {}) {
     const { inputText } = this.selectVariant;
-    if (inputText !== undefined) {
+    if (inputText !== undefined && !keepInput) {
       this.input.value = inputText;
     }
     this.classList.toggle('awc-autocomplete--selected', this.value.length > 0);
@@ -722,6 +782,22 @@ export default class AwcAutocompleteElement<
 
   private get tags() {
     return [...this.querySelectorAll<HTMLElement>('[data-behavior="tag"]')];
+  }
+
+  /**
+   * The option the component renders for options set from code. Only a local select has one: an ajax select's options
+   * are the ones its responses bring.
+   */
+  private get optionTemplate() {
+    if (this.ajax) {
+      throw new TypeError('awc-autocomplete: an ajax select fetches its options from `src`, so they can\'t be set from code.');
+    }
+
+    const template = this.querySelector<HTMLTemplateElement>('template[data-behavior="option-template"]');
+    if (!template) {
+      throw new TypeError('awc-autocomplete: no <template data-behavior="option-template"> to build the options from.');
+    }
+    return template;
   }
 }
 

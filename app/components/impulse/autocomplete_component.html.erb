@@ -68,6 +68,12 @@
       <% end %>
     </div>
 
+    <% unless ajax? %>
+      <template data-behavior="option-template">
+        <%= render(Impulse::Autocomplete::OptionComponent.new(value: "", text: "", description: "")) %>
+      </template>
+    <% end %>
+
     <% if ajax? %>
       <div role="presentation" class="awc-autocomplete-spinner">
         <%= render(Impulse::SpinnerComponent.new(role: :none)) %>

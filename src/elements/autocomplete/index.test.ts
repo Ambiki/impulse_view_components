@@ -1,5 +1,6 @@
 import type { AutocompleteEventName } from './events';
 import type AwcAutocompleteElement from './index';
+import type { AjaxAutocompleteElement } from './index';
 import { whenInitialized } from '@ambiki/impulse';
 import { aTimeout, expect, fixture, nextFrame, oneEvent, waitUntil } from '@open-wc/testing';
 import { Idiomorph } from 'idiomorph';
@@ -35,10 +36,20 @@ function optionsHtml(options: FixtureOption[]) {
   return options
     .map(
       ({ value, text }) =>
-        `<div role="option" id="option-${value}" tabindex="-1" value="${value}" data-text="${text}" aria-selected="false">${text}</div>`,
+        `<div role="option" id="option-${value}" tabindex="-1" value="${value}" data-text="${text}" aria-selected="false" aria-labelledby="option-${value}-text"><span id="option-${value}-text" data-behavior="option-text">${text}</span></div>`,
     )
     .join('');
 }
+
+/** Mirrors the option template in `app/components/impulse/autocomplete_component.html.erb`, which local selects render. */
+const OPTION_TEMPLATE_HTML = `
+  <template data-behavior="option-template">
+    <div role="option" id="option-template" class="awc-autocomplete-option" tabindex="-1" value="" data-text="" aria-selected="false" aria-labelledby="option-template-text" aria-disabled="false">
+      <span id="option-template-text" data-behavior="option-text"></span>
+      <span data-behavior="option-description"></span>
+    </div>
+  </template>
+`;
 
 /** A tag the server rendered for a value that was already selected. */
 function persistedTagHtml({ value, text }: FixtureOption) {
@@ -95,6 +106,7 @@ function autocompleteHtml({
       </div>
       <div id="fruit_listbox" role="listbox" tabindex="-1" ${multiple ? 'aria-multiselectable="true"' : ''} data-target="awc-autocomplete.listbox">
         <div role="presentation" data-target="awc-autocomplete.optionsContainer">${optionsHtml(options)}</div>
+        ${src ? '' : OPTION_TEMPLATE_HTML}
       </div>
     </awc-autocomplete>
   `;
@@ -909,6 +921,227 @@ describe('AwcAutocompleteElement', () => {
       el.reset();
 
       expect(events).to.eql([]);
+    });
+  });
+
+  describe('setting options from code', () => {
+    const VEGETABLES = [
+      { value: 'c', text: 'Carrot' },
+      { value: 'p', text: 'Pea' },
+    ];
+
+    it('should replace the options with ones built from the option template', async () => {
+      const el = await autocompleteFixture({ options: FRUITS });
+
+      el.setOptions(VEGETABLES);
+
+      expect(valuesOf(el)).to.eql(['c', 'p']);
+      expect(el.options.map((option) => option.getAttribute('data-text'))).to.eql(['Carrot', 'Pea']);
+      expect(el.options.map((option) => option.textContent!.trim())).to.eql(['Carrot', 'Pea']);
+      expect(el.options.every((option) => option.getAttribute('role') === 'option')).to.equal(true);
+    });
+
+    it('should show an option\'s description, and drop the description element of one that has none', async () => {
+      const el = await autocompleteFixture({ options: FRUITS });
+
+      el.setOptions([{ value: 'c', text: 'Carrot', description: 'Orange' }, { value: 'p', text: 'Pea' }]);
+
+      const [carrot, pea] = el.options;
+      expect(carrot.querySelector('[data-behavior="option-description"]')?.textContent).to.equal('Orange');
+      expect(pea.querySelector('[data-behavior="option-description"]')).to.equal(null);
+    });
+
+    it('should set a disabled option the user can\'t commit', async () => {
+      const el = await autocompleteFixture({ options: FRUITS });
+      el.setOptions([{ value: 'c', text: 'Carrot', disabled: true }, { value: 'p', text: 'Pea' }]);
+      pressInput(el);
+
+      el.options[0].click();
+
+      expect(el.value).to.equal('');
+      expect(el.options.map((option) => option.getAttribute('aria-disabled'))).to.eql(['true', 'false']);
+    });
+
+    it('should label each option by its own text', async () => {
+      const el = await autocompleteFixture({ options: FRUITS });
+
+      el.setOptions(VEGETABLES);
+
+      const labels = el.options.map((option) => document.getElementById(option.getAttribute('aria-labelledby')!));
+      expect(labels.map((label) => label?.textContent)).to.eql(['Carrot', 'Pea']);
+      const ids = el.options.map((option) => option.id).filter(Boolean);
+      expect(new Set(ids).size).to.equal(ids.length);
+    });
+
+    it('should keep a single select\'s value that is still offered, with the text of its new option', async () => {
+      const el = await autocompleteFixture({ options: FRUITS, selected: [FRUITS[0]] });
+
+      el.setOptions([{ value: '1', text: 'Red apple' }, { value: '3', text: 'Cherry' }]);
+
+      expect(el.value).to.equal('1');
+      expect(el.input.value).to.equal('Red apple');
+    });
+
+    it('should deselect a single select\'s value that is no longer offered, and select nothing in its place', async () => {
+      const el = await autocompleteFixture({ options: FRUITS, selected: [FRUITS[0]] });
+
+      el.setOptions(VEGETABLES);
+
+      expect(el.value).to.equal('');
+      expect(el.input.value).to.equal('');
+      expect(el.classList.contains('awc-autocomplete--selected')).to.equal(false);
+    });
+
+    it('should keep a multiple select\'s tags that are still offered, with their new text, and drop the rest', async () => {
+      const el = await autocompleteFixture({ multiple: true, options: FRUITS, selected: [FRUITS[0], FRUITS[1]] });
+
+      el.setOptions([{ value: '2', text: 'Ripe banana' }, { value: '3', text: 'Cherry' }]);
+
+      expect(el.value).to.eql(['2']);
+      const [tag] = tagElementsOf(el);
+      expect(tag.querySelector('[data-behavior="text"]')!.textContent).to.equal('Ripe banana');
+      expect(tag.getAttribute('data-text')).to.equal('Ripe banana');
+      expect(tag.querySelector<HTMLInputElement>('[data-behavior="hidden-field"]')!.dataset.text).to.equal('Ripe banana');
+    });
+
+    it('should emit no events, even when it deselects a value', async () => {
+      const el = await autocompleteFixture({ multiple: true, options: FRUITS, selected: [FRUITS[0]] });
+      el.show();
+      const events = recordEvents(el, [...OPEN_CLOSE_EVENTS, ...VALUE_EVENTS]);
+
+      el.setOptions(VEGETABLES);
+      el.addOption({ value: '4', text: 'Date' });
+
+      expect(events).to.eql([]);
+    });
+
+    it('should filter the new options by what the user typed while open, and activate the first match', async () => {
+      const el = await autocompleteFixture({ options: FRUITS, selected: [FRUITS[0]] });
+      pressInput(el);
+      type(el, 'pe');
+
+      el.setOptions([...VEGETABLES, { value: 'pp', text: 'Pepper' }]);
+
+      expect(el.input.value).to.equal('pe');
+      expect(el.visibleOptions.map((option) => option.getAttribute('value'))).to.eql(['p', 'pp']);
+      expect(el.activeOption?.getAttribute('value')).to.equal('p');
+    });
+
+    it('should mark the selected option among the new options while open, and activate it', async () => {
+      const el = await autocompleteFixture({ options: FRUITS, selected: [FRUITS[2]] });
+      pressInput(el);
+
+      el.setOptions([{ value: '1', text: 'Apple' }, { value: '3', text: 'Cherry' }]);
+
+      expect(selectionOf(el)).to.eql(['false', 'true']);
+      expect(el.activeOption?.getAttribute('value')).to.equal('3');
+    });
+
+    it('should say there are no options once it is given none while open', async () => {
+      const el = await autocompleteFixture({ options: FRUITS });
+      pressInput(el);
+
+      el.setOptions([]);
+
+      expect(el.hasAttribute('no-options')).to.equal(true);
+      expect(el.activeOption).to.equal(null);
+    });
+
+    it('should add an option after the others with `addOption`, leaving the selection alone', async () => {
+      const el = await autocompleteFixture({ options: FRUITS, selected: [FRUITS[0]] });
+
+      el.addOption({ value: '4', text: 'Date', description: 'Sweet' });
+
+      expect(valuesOf(el)).to.eql(['1', '2', '3', '4']);
+      expect(el.options[3].querySelector('[data-behavior="option-description"]')?.textContent).to.equal('Sweet');
+      expect(el.value).to.equal('1');
+      expect(el.input.value).to.equal('Apple');
+    });
+
+    it('should keep the active option while open, and filter the added option by what the user typed', async () => {
+      const el = await autocompleteFixture({ options: FRUITS });
+      pressInput(el);
+      type(el, 'a');
+      pressKey(el, 'ArrowDown');
+      expect(el.activeOption?.getAttribute('value')).to.equal('2');
+
+      el.addOption({ value: '4', text: 'Date' });
+      el.addOption({ value: '5', text: 'Fig' });
+
+      expect(el.visibleOptions.map((option) => option.getAttribute('value'))).to.eql(['1', '2', '4']);
+      expect(el.activeOption?.getAttribute('value')).to.equal('2');
+    });
+
+    it('should activate the added option while open when it is the first to match', async () => {
+      const el = await autocompleteFixture({ options: FRUITS });
+      pressInput(el);
+      type(el, 'z');
+
+      el.addOption({ value: '4', text: 'Zucchini' });
+
+      expect(el.hasAttribute('no-options')).to.equal(false);
+      expect(el.activeOption?.getAttribute('value')).to.equal('4');
+    });
+
+    it('should keep options that share a value, the first of them standing for the value', async () => {
+      const el = await autocompleteFixture({ options: FRUITS, selected: [FRUITS[0]] });
+
+      el.setOptions([{ value: '1', text: 'Green apple' }, { value: '1', text: 'Red apple' }]);
+      pressInput(el);
+
+      expect(valuesOf(el)).to.eql(['1', '1']);
+      expect(el.input.value).to.equal('Green apple');
+      expect(selectionOf(el)).to.eql(['true', 'false']);
+    });
+
+    it('should refuse options from code in an ajax select, whose responses replace them', async () => {
+      const el = (await autocompleteFixture({ src: '/fruits' })) as AjaxAutocompleteElement;
+
+      // @ts-expect-error An ajax select's type takes no options either.
+      expect(() => el.setOptions(VEGETABLES)).to.throw(/ajax/);
+      // @ts-expect-error An ajax select's type takes no options either.
+      expect(() => el.addOption(VEGETABLES[0])).to.throw(/ajax/);
+    });
+
+    it('should name the option template when its markup has none', async () => {
+      const el = await autocompleteFixture({ options: FRUITS });
+      el.querySelector('template[data-behavior="option-template"]')!.remove();
+
+      expect(() => el.setOptions(VEGETABLES)).to.throw(/option-template/);
+      expect(() => el.addOption(VEGETABLES[0])).to.throw(/option-template/);
+      expect(valuesOf(el)).to.eql(['1', '2', '3']);
+    });
+
+    it('should reset to the value it connected with only while an option still offers it', async () => {
+      const el = await autocompleteFixture({ options: FRUITS, selected: [FRUITS[0]] });
+      el.setOptions(VEGETABLES);
+      el.setValue('c');
+
+      el.reset();
+
+      expect(el.value).to.equal('');
+      expect(el.input.value).to.equal('');
+    });
+
+    it('should leave a single select that has no value without one, though an option has an empty value', async () => {
+      const el = await autocompleteFixture({ options: FRUITS });
+
+      el.setOptions([{ value: '', text: 'None' }, ...VEGETABLES]);
+      el.reset();
+
+      expect(el.value).to.equal('');
+      expect(el.input.value).to.equal('');
+    });
+
+    it('should reset to the value it connected with, in the text of the option that offers it now', async () => {
+      const el = await autocompleteFixture({ multiple: true, options: FRUITS, selected: [FRUITS[0], FRUITS[1]] });
+      el.setOptions([{ value: '1', text: 'Red apple' }]);
+      el.clear();
+
+      el.reset();
+
+      expect(el.value).to.eql(['1']);
+      expect(tagElementsOf(el)[0].querySelector('[data-behavior="text"]')!.textContent).to.equal('Red apple');
     });
   });
 

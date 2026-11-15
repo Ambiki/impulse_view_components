@@ -167,11 +167,11 @@
     "inside": "target awc-autocomplete.optionsContainer"
   },
   {
-    "tag": "div",
+    "tag": "span",
     "target": null,
     "actions": [],
-    "behavior": null,
-    "role": "option",
+    "behavior": "option-text",
+    "role": null,
     "popover": null,
     "inside": "target awc-autocomplete.optionsContainer"
   },
@@ -183,6 +183,69 @@
     "role": "option",
     "popover": null,
     "inside": "target awc-autocomplete.optionsContainer"
+  },
+  {
+    "tag": "span",
+    "target": null,
+    "actions": [],
+    "behavior": "option-text",
+    "role": null,
+    "popover": null,
+    "inside": "target awc-autocomplete.optionsContainer"
+  },
+  {
+    "tag": "div",
+    "target": null,
+    "actions": [],
+    "behavior": null,
+    "role": "option",
+    "popover": null,
+    "inside": "target awc-autocomplete.optionsContainer"
+  },
+  {
+    "tag": "span",
+    "target": null,
+    "actions": [],
+    "behavior": "option-text",
+    "role": null,
+    "popover": null,
+    "inside": "target awc-autocomplete.optionsContainer"
+  },
+  {
+    "tag": "template",
+    "target": null,
+    "actions": [],
+    "behavior": "option-template",
+    "role": null,
+    "popover": null,
+    "inside": "target awc-autocomplete.listbox"
+  },
+  {
+    "tag": "div",
+    "target": null,
+    "actions": [],
+    "behavior": null,
+    "role": "option",
+    "popover": null,
+    "inside": "behavior option-template"
+  },
+  {
+    "tag": "span",
+    "target": null,
+    "actions": [],
+    "behavior": "option-text",
+    "role": null,
+    "popover": null,
+    "inside": "behavior option-template"
+  },
+  {
+    "tag": "span",
+    "target": null,
+    "actions": [],
+    "behavior": "option-description",
+    "role": null,
+    "popover": null,
+    "inside": "behavior option-template"
   },
   {
     "tag": "div",

@@ -65,7 +65,8 @@ An option whose value is part of the element's value.
 _Avoid_: Chosen option, checked option
 
 **Deselect**:
-Taking an option's value out of the element's value, by committing it again in a multiple select or by removing its tag.
+Taking an option's value out of the element's value, by committing it again in a multiple select or by removing its tag,
+or because no option offers it any longer once the app sets the options from code.
 _Avoid_: Unselect
 
 **Ajax**:
@@ -73,7 +74,8 @@ Options fetched from the server rather than read from the page. An ajax select i
 _Avoid_: Remote, async, server-side
 
 **Local**:
-Options read from the page rather than fetched. The counterpart of ajax.
+Options read from the page rather than fetched, whether the server rendered them or the app set them from code. The
+counterpart of ajax. Only a local select's options can be set from code.
 _Avoid_: Static, inline, client-side
 
 ### Clipboard

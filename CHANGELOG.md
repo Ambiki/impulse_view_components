@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- `setOptions` and `addOption` on a local `<awc-autocomplete>`, which build options from an option template its component renders ([#459](https://github.com/Ambiki/impulse_view_components/pull/459))
 - `cycle`, `debounce` and `scrollLock` from `@ambiki/impulse-view-components/helpers` ([#435](https://github.com/Ambiki/impulse_view_components/pull/435))
 - `Impulse::ToastRegionComponent`, `Impulse::ToastComponent`, `showToast()` and `showToast.promise()` from `@ambiki/impulse-view-components/toast`: short messages in one region per page, which moves into an open modal dialog so its toasts stay usable ([#421](https://github.com/Ambiki/impulse_view_components/pull/421))
 - `Impulse::AjaxSelectComponent` takes its default error from the `impulse.autocomplete.error` translation ([#420](https://github.com/Ambiki/impulse_view_components/pull/420))
@@ -18,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- A local `<awc-autocomplete>` resets only to the values an option offers ([#459](https://github.com/Ambiki/impulse_view_components/pull/459))
 - An ajax `<awc-autocomplete>` activates the first option of a response once the user has typed, as a local one does. It activated the selected option when the response had it ([#446](https://github.com/Ambiki/impulse_view_components/pull/446))
 - `<awc-autocomplete>`'s `combobox`, `selectVariant`, `markSelected` and `tags` are private, and its `checkIfListIsEmpty` and `toggleSelectedClass` are removed. They were undocumented ([#444](https://github.com/Ambiki/impulse_view_components/pull/444))
 - `<awc-autocomplete>` is built on the package's own combobox, and `@ambiki/combobox` is no longer a dependency. Home and End move the caret in its input, where they moved to the first and last option ([#438](https://github.com/Ambiki/impulse_view_components/pull/438))
