@@ -1,6 +1,6 @@
 import type { UseFloatingUIType } from 'src/hooks/use_floating_ui';
 import type { AutocompleteEventArgs, AutocompleteEventMap, AutocompleteEventName } from './events';
-import type { AutocompleteOptionData } from './option_template';
+import type { AutocompleteGroupData, AutocompleteOptionData } from './option_template';
 import { property, registerElement, target, targets } from '@ambiki/impulse';
 import useFloatingUI from 'src/hooks/use_floating_ui';
 import useOutsideClick from 'src/hooks/use_outside_click';
@@ -11,11 +11,11 @@ import AjaxSearch from './ajax_search';
 import { optionEventDetail } from './events';
 import LocalSearch, { filterOptions } from './local_search';
 import MultipleSelect from './multiple_select';
-import { buildOption } from './option_template';
+import { buildGroup, buildOption, isGroupData } from './option_template';
 import SingleSelect from './single_select';
 
 export type { AwcAutocompleteCommitEvent, AwcAutocompleteRemoveEvent } from './events';
-export type { AutocompleteOptionData } from './option_template';
+export type { AutocompleteGroupData, AutocompleteOptionData } from './option_template';
 
 /** Whether multiple values can be selected. */
 export type SelectionMode = 'single' | 'multiple';
@@ -459,12 +459,19 @@ export default class AwcAutocompleteElement<
   /**
    * Replaces the options with `options`. A value no option offers any longer is deselected, and one an option still
    * offers takes its text. Not for an ajax select, whose responses bring its options.
-   * @param options - The options, each with its value and text, and optionally its description and whether it is disabled.
+   * @param options - The options, each with its value and text, and optionally its description and whether it is
+   * disabled, and the groups of options, each with its title and options.
    */
-  setOptions(...args: LocalOnlyArgs<Src, [options: AutocompleteOptionData[]]>) {
-    const [options] = args as [AutocompleteOptionData[]];
+  setOptions(...args: LocalOnlyArgs<Src, [options: Array<AutocompleteOptionData | AutocompleteGroupData>]>) {
+    const [options] = args as [Array<AutocompleteOptionData | AutocompleteGroupData>];
     const template = this.optionTemplate;
-    this.optionsContainer.replaceChildren(...options.map((option) => buildOption(template, option)));
+    const elements = options.flatMap((data) => {
+      if (!isGroupData(data)) return [buildOption(template, data)];
+      // The component renders no group without options either.
+      if (data.options.length === 0) return [];
+      return [buildGroup(this.groupTemplate, data, data.options.map((option) => buildOption(template, option)))];
+    });
+    this.optionsContainer.replaceChildren(...elements);
     this.selectVariant.followOptions(this.options);
     this.syncWithSelection({ keepInput: this.open && this.typed });
     this.syncWithOptionsFromCode('set');
@@ -796,6 +803,15 @@ export default class AwcAutocompleteElement<
     const template = this.querySelector<HTMLTemplateElement>('template[data-behavior="option-template"]');
     if (!template) {
       throw new TypeError('awc-autocomplete: no <template data-behavior="option-template"> to build the options from.');
+    }
+    return template;
+  }
+
+  /** The group the component renders for groups set from code. */
+  private get groupTemplate() {
+    const template = this.querySelector<HTMLTemplateElement>('template[data-behavior="group-template"]');
+    if (!template) {
+      throw new TypeError('awc-autocomplete: no <template data-behavior="group-template"> to build the groups from.');
     }
     return template;
   }

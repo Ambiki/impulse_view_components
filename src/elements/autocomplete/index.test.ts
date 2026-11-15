@@ -41,12 +41,23 @@ function optionsHtml(options: FixtureOption[]) {
     .join('');
 }
 
-/** Mirrors the option template in `app/components/impulse/autocomplete_component.html.erb`, which local selects render. */
+/**
+ * Mirrors the option and group templates in `app/components/impulse/autocomplete_component.html.erb`, which local
+ * selects render. A group renders only with an option in it.
+ */
 const OPTION_TEMPLATE_HTML = `
   <template data-behavior="option-template">
     <div role="option" id="option-template" class="awc-autocomplete-option" tabindex="-1" value="" data-text="" aria-selected="false" aria-labelledby="option-template-text" aria-disabled="false">
       <span id="option-template-text" data-behavior="option-text"></span>
       <span data-behavior="option-description"></span>
+    </div>
+  </template>
+  <template data-behavior="group-template">
+    <div role="group" aria-labelledby="group-template-title" data-text="" data-target="awc-autocomplete.groups">
+      <div id="group-template-title" data-behavior="group-title"></div>
+      <div role="option" id="group-template-option" tabindex="-1" value="" data-text="" aria-selected="false" aria-labelledby="group-template-option-text">
+        <span id="group-template-option-text" data-behavior="option-text"></span>
+      </div>
     </div>
   </template>
 `;
@@ -971,6 +982,52 @@ describe('AwcAutocompleteElement', () => {
       expect(labels.map((label) => label?.textContent)).to.eql(['Carrot', 'Pea']);
       const ids = el.options.map((option) => option.id).filter(Boolean);
       expect(new Set(ids).size).to.equal(ids.length);
+    });
+
+    it('should build groups, each labelled by its title and holding its options, among the options', async () => {
+      const el = await autocompleteFixture({ options: FRUITS });
+
+      el.setOptions([
+        { title: 'Roots', options: [VEGETABLES[0]] },
+        { value: 'x', text: 'Other' },
+        { title: 'Legumes', options: [VEGETABLES[1]] },
+      ]);
+
+      expect(valuesOf(el)).to.eql(['c', 'x', 'p']);
+      expect(el.groups.map((group) => group.getAttribute('data-text'))).to.eql(['Roots', 'Legumes']);
+      const labels = el.groups.map((group) => document.getElementById(group.getAttribute('aria-labelledby')!));
+      expect(labels.map((label) => label?.textContent)).to.eql(['Roots', 'Legumes']);
+      const grouped = el.groups.map((group) => [...group.querySelectorAll('[role="option"]')]);
+      expect(grouped.map((options) => options.map((option) => option.getAttribute('value')))).to.eql([['c'], ['p']]);
+    });
+
+    it('should leave out a group that has no options, as the component does', async () => {
+      const el = await autocompleteFixture({ options: FRUITS });
+
+      el.setOptions([{ title: 'Roots', options: [] }, ...VEGETABLES]);
+
+      expect(el.groups).to.eql([]);
+      expect(valuesOf(el)).to.eql(['c', 'p']);
+    });
+
+    it('should hide a group none of whose options match what the user typed while open', async () => {
+      const el = await autocompleteFixture({ options: FRUITS });
+      pressInput(el);
+      type(el, 'pe');
+
+      el.setOptions([{ title: 'Roots', options: [VEGETABLES[0]] }, { title: 'Legumes', options: [VEGETABLES[1]] }]);
+
+      expect(el.groups.map((group) => group.hidden)).to.eql([true, false]);
+      expect(el.activeOption?.getAttribute('value')).to.equal('p');
+    });
+
+    it('should name the group template when its markup has none and a group is set', async () => {
+      const el = await autocompleteFixture({ options: FRUITS });
+      el.querySelector('template[data-behavior="group-template"]')!.remove();
+
+      el.setOptions(VEGETABLES);
+      expect(() => el.setOptions([{ title: 'Roots', options: [VEGETABLES[0]] }])).to.throw(/group-template/);
+      expect(valuesOf(el)).to.eql(['c', 'p']);
     });
 
     it('should keep a single select\'s value that is still offered, with the text of its new option', async () => {

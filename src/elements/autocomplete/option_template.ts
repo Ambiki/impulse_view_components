@@ -8,6 +8,17 @@ export interface AutocompleteOptionData {
   disabled?: boolean;
 }
 
+/** A group of options set from code, as `setOptions` takes it. Groups don't nest. */
+export interface AutocompleteGroupData {
+  title: string;
+  options: AutocompleteOptionData[];
+}
+
+/** Whether `data` is a group rather than an option. */
+export function isGroupData(data: AutocompleteOptionData | AutocompleteGroupData): data is AutocompleteGroupData {
+  return 'options' in data;
+}
+
 /**
  * Builds an option from `template`, the option `Impulse::AutocompleteComponent` renders for a local select, filled in
  * with `data`. The option's markup is the component's: only what `data` says is written here.
@@ -40,4 +51,25 @@ export function buildOption(
     descriptionElement.remove();
   }
   return option;
+}
+
+/**
+ * Builds a group from `template`, the group `Impulse::AutocompleteComponent` renders for a local select, titled `title`
+ * and holding `options`.
+ */
+export function buildGroup(template: HTMLTemplateElement, { title }: AutocompleteGroupData, options: HTMLElement[]) {
+  const fragment = template.content.cloneNode(true) as DocumentFragment;
+  const group = fragment.querySelector<HTMLElement>('[role="group"]')!;
+  // The component renders a group only with an option in it, which isn't one of these.
+  for (const option of group.querySelectorAll('[role="option"]')) {
+    option.remove();
+  }
+
+  const titleElement = group.querySelector('[data-behavior="group-title"]')!;
+  titleElement.id = uniqueId();
+  titleElement.textContent = title;
+  group.setAttribute('aria-labelledby', titleElement.id);
+  group.setAttribute('data-text', title);
+  group.append(...options);
+  return group;
 }

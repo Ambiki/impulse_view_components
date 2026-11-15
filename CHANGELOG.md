@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- `setOptions` and `addOption` on a local `<awc-autocomplete>`, which build options from an option template its component renders ([#459](https://github.com/Ambiki/impulse_view_components/pull/459))
+- `setOptions` and `addOption` on a local `<awc-autocomplete>`, which build options and groups from templates its component renders ([#459](https://github.com/Ambiki/impulse_view_components/pull/459))
 - `cycle`, `debounce` and `scrollLock` from `@ambiki/impulse-view-components/helpers` ([#435](https://github.com/Ambiki/impulse_view_components/pull/435))
 - `Impulse::ToastRegionComponent`, `Impulse::ToastComponent`, `showToast()` and `showToast.promise()` from `@ambiki/impulse-view-components/toast`: short messages in one region per page, which moves into an open modal dialog so its toasts stay usable ([#421](https://github.com/Ambiki/impulse_view_components/pull/421))
 - `Impulse::AjaxSelectComponent` takes its default error from the `impulse.autocomplete.error` translation ([#420](https://github.com/Ambiki/impulse_view_components/pull/420))

@@ -226,14 +226,16 @@ The `value` argument is required for a multiple select and is not used by a sing
 
 ### `setOptions`
 
-Replaces the options. Each takes a `value` and a `text`, and optionally a `description` and `disabled`. A selected
-value that no option offers any longer is deselected, with nothing selected in its place, and one that an option still
-offers takes that option's text. Not for an ajax select, whose options come from the server.
+Replaces the options. Each takes a `value` and a `text`, and optionally a `description` and `disabled`. A group takes
+a `title` and its `options`, and sits among the options; groups don't nest. A selected value that no option offers any
+longer is deselected, with nothing selected in its place, and one that an option still offers takes that option's text.
+Not for an ajax select, whose options come from the server.
 
 ```js
 autocomplete.setOptions([
   { value: 'apple', text: 'Apple' },
   { value: 'kiwi', text: 'Kiwi', description: 'Out of season', disabled: true },
+  { title: 'Berries', options: [{ value: 'cherry', text: 'Cherry' }] },
 ]);
 ```
 

@@ -8,8 +8,9 @@ An app could only change a local select's options by writing into `optionsContai
 the option markup by hand: its classes, its text and description, its check icon and its ids. The main app does this in
 six places. We add `setOptions` and `addOption`, which take data, `{ value, text, description?, disabled? }`, and build
 each option from a `<template>` that `AutocompleteComponent` renders in every local select, holding an
-`OptionComponent`. The option's markup stays in one language, Ruby, as a multiple select's tags already do with their
-tag template (#172).
+`OptionComponent`. `setOptions` takes groups too, `{ title, options }`, built from a second template holding a
+`GroupComponent`. The markup stays in one language, Ruby, as a multiple select's tags already do with their tag template
+(#172).
 
 ## Considered Options
 
@@ -31,6 +32,8 @@ tag template (#172).
   finds the text and the description by their `data-behavior`, which every option now renders. It gives the text a new
   id, so `aria-labelledby` points to the copy, and drops the template's id from the option, which the combobox gives one
   when it first activates it.
+- The group template holds one blank option, as `GroupComponent` renders nothing without options. The element drops it
+  from each group it builds, and leaves out a group given no options, as the component does.
 - Options set from code are local options. A DOM morph puts the server's options back.
 - The selection follows the options set from code: a value no option offers any longer is deselected, and one an
   option still offers takes its text. Nothing is selected in place of a value that goes, where a native single
