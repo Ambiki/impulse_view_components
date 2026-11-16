@@ -57,13 +57,15 @@ module Impulse
 
       click_on "Toggle popover"
 
-      header = page.evaluate_script("document.querySelector('.popover-header').getBoundingClientRect().toJSON()")
-      title = page.evaluate_script("document.querySelector('.awc-popover-title').getBoundingClientRect().toJSON()")
-      button = page.evaluate_script("document.querySelector('.awc-popover-close-btn').getBoundingClientRect().toJSON()")
+      # Offsets, unlike client rects, ignore the transform the panel animates in with.
+      header = find(".popover-header")
+      title = find(".awc-popover-title")
+      button = find(".awc-popover-close-btn")
 
-      assert_operator title["height"], :>, button["height"], "the title wraps"
-      assert_equal title["top"], button["top"]
-      assert_operator button["bottom"], :<=, header["bottom"]
+      assert_operator title["offsetHeight"].to_i, :>, button["offsetHeight"].to_i, "the title wraps"
+      assert_equal title["offsetTop"].to_i, button["offsetTop"].to_i
+      assert_operator button["offsetTop"].to_i + button["offsetHeight"].to_i, :<=,
+        header["offsetTop"].to_i + header["offsetHeight"].to_i
     end
 
     test "outlines the close button on keyboard focus, which forced colors show without its focus ring" do
