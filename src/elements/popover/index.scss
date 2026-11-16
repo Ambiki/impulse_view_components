@@ -1,6 +1,7 @@
 :where(:root) {
   --awc-popover-max-width: 20rem;
   --awc-popover-header-bg: var(--awc-panel);
+  --awc-popover-header-text: var(--awc-neutral-text-contrast);
 }
 
 .awc-popover {
@@ -65,22 +66,26 @@
     display: flex;
     align-items: flex-start;
     gap: var(--awc-space-2);
+    color: var(--awc-popover-header-text);
     background-color: var(--awc-popover-header-bg);
     border-top-left-radius: calc(var(--awc-radius-4) - 1px);
     border-top-right-radius: calc(var(--awc-radius-4) - 1px);
   }
 }
 
-// Fills the header, beside its block and the close button, in the header's font rather than a heading's. The margin
-// beats an app's `!important` heading margins.
+// Fills the header, beside its block and the close button, in its own font rather than an app's heading font. The
+// margin beats an app's `!important` heading margins. A line and its padding are as tall as the close button, so a
+// title on one line sits level with it.
 .awc-popover-title {
   flex: 1 1 0%;
   min-width: 0;
   margin: 0 !important;
-  font-family: inherit;
-  font-size: inherit;
-  font-weight: inherit;
-  line-height: inherit;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  font-family: var(--awc-font-family);
+  font-size: var(--awc-font-size-3);
+  font-weight: var(--awc-font-weight-medium);
+  line-height: 20px;
   letter-spacing: inherit;
   color: inherit;
 }
