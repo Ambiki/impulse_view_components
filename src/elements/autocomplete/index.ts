@@ -483,14 +483,18 @@ export default class AwcAutocompleteElement<
   }
 
   /**
-   * Adds `option` after the other options. Not for an ajax select, whose responses bring its options.
+   * Adds `option` after the other options, and returns the option it built, as `new Option()` returns one. Not for an
+   * ajax select, whose responses bring its options.
    * @param option - The option, with its value and text, and optionally its description and whether it is disabled.
+   * @returns The option element it added.
    */
-  addOption(...args: LocalOnlyArgs<Src, [option: AutocompleteOptionData]>) {
-    const [option] = args as [AutocompleteOptionData];
+  addOption(...args: LocalOnlyArgs<Src, [option: AutocompleteOptionData]>): HTMLElement {
+    const [data] = args as [AutocompleteOptionData];
     this.assertLocal();
-    this.optionsContainer.append(buildOption(this.optionTemplate, option));
+    const option = buildOption(this.optionTemplate, data);
+    this.optionsContainer.append(option);
     this.syncWithOptionsFromCode('added');
+    return option;
   }
   /* eslint-enable jsdoc/check-param-names */
 

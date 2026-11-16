@@ -241,10 +241,11 @@ autocomplete.setOptions([
 
 ### `addOption`
 
-Adds an option after the others. It takes what each option of `setOptions` does. Not for an ajax select.
+Adds an option after the others, and returns it. It takes what each option of `setOptions` does. Not for an ajax
+select.
 
 ```js
-autocomplete.addOption({ value: 'mango', text: 'Mango' });
+const option = autocomplete.addOption({ value: 'mango', text: 'Mango' });
 ```
 
 ### `activate`

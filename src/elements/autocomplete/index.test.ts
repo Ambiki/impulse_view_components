@@ -1115,6 +1115,14 @@ describe('AwcAutocompleteElement', () => {
       expect(el.input.value).to.equal('Apple');
     });
 
+    it('should return the option it adds, for the app to add its own attributes to', async () => {
+      const el = await autocompleteFixture({ options: FRUITS });
+
+      const option = el.addOption({ value: '4', text: 'Date' });
+
+      expect(option === el.options[3]).to.equal(true);
+    });
+
     it('should keep the active option while open, and filter the added option by what the user typed', async () => {
       const el = await autocompleteFixture({ options: FRUITS });
       pressInput(el);
