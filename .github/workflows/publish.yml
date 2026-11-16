@@ -12,6 +12,8 @@ jobs:
   check_version:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    outputs:
+      newest: ${{ steps.newest.outputs.newest }}
     steps:
       - uses: actions/checkout@v4
       # Both packages ship under the tag's version, so a tag that doesn't match both files publishes nothing.
@@ -23,6 +25,14 @@ jobs:
           if [ "$npm_version" != "$tag" ] || [ "$gem_version" != "$tag" ]; then
             echo "::error::Tag $GITHUB_REF_NAME doesn't match package.json ($npm_version) and version.rb ($gem_version)"
             exit 1
+          fi
+      # A prerelease, or a patch to an older minor tagged on its own branch, isn't the newest stable release.
+      - name: Check the tag is the newest stable release
+        id: newest
+        run: |
+          stable_tags=$(git ls-remote --tags --refs origin | sed -n 's|.*refs/tags/\(v[0-9][^-]*\)$|\1|p')
+          if [ "$(echo "$stable_tags" | sort -V | tail -n 1)" = "$GITHUB_REF_NAME" ]; then
+            echo "newest=true" >> "$GITHUB_OUTPUT"
           fi
 
   # A patch release can be tagged on a branch other than main, where CI hasn't run.
@@ -74,3 +84,13 @@ jobs:
           else
             npm publish --tag "${prerelease%%.*}"
           fi
+
+  # The docs follow the newest stable release.
+  deploy_docs:
+    needs: [check_version, publish_gem, publish_npm]
+    if: ${{ needs.check_version.outputs.newest == 'true' }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/docs.yml
