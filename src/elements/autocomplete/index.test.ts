@@ -741,6 +741,31 @@ describe('AwcAutocompleteElement', () => {
       expect(el.input.value).to.equal('Fig');
     });
 
+    it('should report the selected value with its text as the selection', async () => {
+      const el = await autocompleteFixture({ options: FRUITS, selected: [FRUITS[0]] });
+
+      expect(el.selection).to.eql({ value: '1', text: 'Apple' });
+    });
+
+    it('should report the committed text as the selection, not what the user types', async () => {
+      const el = await autocompleteFixture({ options: FRUITS });
+      el.show();
+      await commit(el, el.options[1]);
+
+      type(el, 'Ch');
+
+      expect(el.selection).to.eql({ value: '2', text: 'Banana' });
+    });
+
+    it('should report no selection while it has no value, though an option with an empty value has text', async () => {
+      const el = await autocompleteFixture({ options: [{ value: '', text: 'None' }, ...FRUITS] });
+      expect(el.selection).to.equal(null);
+
+      el.setValue('');
+
+      expect(el.selection).to.equal(null);
+    });
+
     it('should select the option when a value is set while open', async () => {
       const el = await autocompleteFixture({ options: FRUITS, selected: [FRUITS[0]] });
       el.show();
@@ -836,6 +861,22 @@ describe('AwcAutocompleteElement', () => {
       expect(el.value).to.eql(['1', '9']);
       expect(tagsOf(el)).to.eql([{ value: '1', text: 'Apple' }, { value: '9', text: 'Fig' }]);
       expect(el.classList.contains('awc-autocomplete--selected')).to.equal(true);
+    });
+
+    it('should report each selected value with its text as the selection, in the order of `value`', async () => {
+      const el = await autocompleteFixture({ multiple: true, options: FRUITS, selected: [FRUITS[1], FRUITS[0]] });
+      el.setValue('9', 'Fig');
+
+      expect(el.value).to.eql(['2', '1', '9']);
+      expect(el.selection).to.eql([
+        { value: '2', text: 'Banana' },
+        { value: '1', text: 'Apple' },
+        { value: '9', text: 'Fig' },
+      ]);
+
+      el.clear();
+
+      expect(el.selection).to.eql([]);
     });
 
     it('should not add a second tag for a value that is already selected', async () => {
@@ -1037,6 +1078,7 @@ describe('AwcAutocompleteElement', () => {
 
       expect(el.value).to.equal('1');
       expect(el.input.value).to.equal('Red apple');
+      expect(el.selection).to.eql({ value: '1', text: 'Red apple' });
     });
 
     it('should deselect a single select\'s value that is no longer offered, and select nothing in its place', async () => {
@@ -1055,6 +1097,7 @@ describe('AwcAutocompleteElement', () => {
       el.setOptions([{ value: '2', text: 'Ripe banana' }, { value: '3', text: 'Cherry' }]);
 
       expect(el.value).to.eql(['2']);
+      expect(el.selection).to.eql([{ value: '2', text: 'Ripe banana' }]);
       const [tag] = tagElementsOf(el);
       expect(tag.querySelector('[data-behavior="text"]')!.textContent).to.equal('Ripe banana');
       expect(tag.getAttribute('data-text')).to.equal('Ripe banana');
@@ -1507,6 +1550,15 @@ describe('AwcAutocompleteElement', () => {
       return events;
     }
 
+    it('should report the selection with its text before it has fetched any options', async () => {
+      const el = await autocompleteFixture({ src: '/fruits', selected: [FRUITS[0]] });
+      expect(el.selection).to.eql({ value: '1', text: 'Apple' });
+
+      el.setValue('9', 'Fig');
+
+      expect(el.selection).to.eql({ value: '9', text: 'Fig' });
+    });
+
     it('should request what is typed under `param`, keeping the query string of `src`', async () => {
       const el = await autocompleteFixture({ src: '/fruits?scope=all', attributes: 'param="term"' });
       const stub = stubFetch();
@@ -1871,21 +1923,23 @@ describe('AwcAutocompleteElement', () => {
       expect(el.ajax).to.equal(true);
     });
 
-    it('should report the value its markup holds before it has initialized', async () => {
+    it('should report the value and the selection its markup holds before it has initialized', async () => {
       const container = await fixture<HTMLElement>('<div></div>');
 
       container.innerHTML = autocompleteHtml({ multiple: true, options: FRUITS, selected: [FRUITS[0], FRUITS[1]] });
       const el = container.querySelector('awc-autocomplete')!;
 
       expect(el.value).to.eql(['1', '2']);
+      expect(el.selection).to.eql([{ value: '1', text: 'Apple' }, { value: '2', text: 'Banana' }]);
       // It is still initializing, which the fixture's teardown would otherwise interrupt.
       await whenInitialized(el);
     });
 
-    it('should report an empty value while it has no markup', () => {
+    it('should report an empty value and no selection while it has no markup', () => {
       const el = document.createElement('awc-autocomplete');
 
       expect(el.value).to.equal('');
+      expect(el.selection).to.equal(null);
     });
 
     it('should move focus out of its input with `blur`', async () => {

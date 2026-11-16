@@ -6,8 +6,8 @@ const autocomplete = document.querySelector('awc-autocomplete');
 
 ## TypeScript
 
-The selection mode (single vs. multiple) determines the type of `value` and the arguments
-`removeValue` accepts, and the source (local vs. ajax) determines whether `setValue` requires
+The selection mode (single vs. multiple) determines the type of `value` and `selection` and the
+arguments `removeValue` accepts, and the source (local vs. ajax) determines whether `setValue` requires
 the `text` argument and whether `setOptions` and `addOption` take any. TypeScript resolves these
 automatically when you narrow on the `multiple` and `ajax` properties:
 
@@ -16,9 +16,11 @@ const autocomplete = document.querySelector('awc-autocomplete')!;
 
 if (autocomplete.multiple) {
   autocomplete.value; // string[]
+  autocomplete.selection; // { value, text }[]
   autocomplete.removeValue('1'); // value argument is required
 } else {
   autocomplete.value; // string
+  autocomplete.selection; // { value, text } | null
   autocomplete.removeValue(); // no argument
 }
 
@@ -100,6 +102,22 @@ autocomplete.value;
 // Single select
 autocomplete.value;
 // => '1'
+```
+
+### `selection`
+
+Each selected value with its text. For a single select this is one `{ value, text }`, or `null` when nothing is
+selected; for a multiple select it is an array in the order of `value`. The text is the committed one, not what the
+user is typing.
+
+```js
+// Multiple select
+autocomplete.selection;
+// => [{ value: '1', text: 'Apple' }, { value: '2', text: 'Banana' }]
+
+// Single select
+autocomplete.selection;
+// => { value: '1', text: 'Apple' }
 ```
 
 ### `multiple`

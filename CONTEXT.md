@@ -64,6 +64,11 @@ _Avoid_: Pick, choose, submit
 An option whose value is part of the element's value.
 _Avoid_: Chosen option, checked option
 
+**Selection**:
+The values an element holds, each with the text it shows for it. A value keeps its text where no option offers it,
+as in an ajax select that hasn't searched.
+_Avoid_: Pick, chosen values, selected items
+
 **Deselect**:
 Taking an option's value out of the element's value, by committing it again in a multiple select or by removing its tag,
 or because no option offers it any longer once the app sets the options from code.
