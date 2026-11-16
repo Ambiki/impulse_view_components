@@ -70,6 +70,18 @@ export default class SingleSelect implements SelectVariant {
     return this.value === value;
   }
 
+  followOptions(options: HTMLElement[]) {
+    // No value is no selection, whatever text an option with an empty value has.
+    if (!this.value) return;
+
+    const [option] = this.selectedOptions(options);
+    if (option) {
+      this.setValue(this.value, option.dataset.text || '');
+    } else {
+      this.clear();
+    }
+  }
+
   private get hiddenField() {
     return this.root.querySelector<HTMLInputElement>(HIDDEN_FIELD)!;
   }

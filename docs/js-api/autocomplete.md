@@ -8,8 +8,8 @@ const autocomplete = document.querySelector('awc-autocomplete');
 
 The selection mode (single vs. multiple) determines the type of `value` and the arguments
 `removeValue` accepts, and the source (local vs. ajax) determines whether `setValue` requires
-the `text` argument. TypeScript resolves these automatically when you narrow on the `multiple` and
-`ajax` properties:
+the `text` argument and whether `setOptions` and `addOption` take any. TypeScript resolves these
+automatically when you narrow on the `multiple` and `ajax` properties:
 
 ```ts
 const autocomplete = document.querySelector('awc-autocomplete')!;
@@ -24,8 +24,10 @@ if (autocomplete.multiple) {
 
 if (autocomplete.ajax) {
   autocomplete.setValue('1', 'One'); // text is required
+  autocomplete.setOptions([{ value: '1', text: 'One' }]); // ✗ type error
 } else {
   autocomplete.setValue('1'); // text is optional
+  autocomplete.setOptions([{ value: '1', text: 'One' }]);
 }
 ```
 
@@ -222,6 +224,30 @@ The `value` argument is required for a multiple select and is not used by a sing
 `removeValue()` is called). TypeScript enforces this when the mode is known — see [TypeScript](#typescript).
 :::
 
+### `setOptions`
+
+Replaces the options. Each takes a `value` and a `text`, and optionally a `description` and `disabled`. A group takes
+a `title` and its `options`, and sits among the options; groups don't nest. A selected value that no option offers any
+longer is deselected, with nothing selected in its place, and one that an option still offers takes that option's text.
+Not for an ajax select, whose options come from the server.
+
+```js
+autocomplete.setOptions([
+  { value: 'apple', text: 'Apple' },
+  { value: 'kiwi', text: 'Kiwi', description: 'Out of season', disabled: true },
+  { title: 'Berries', options: [{ value: 'cherry', text: 'Cherry' }] },
+]);
+```
+
+### `addOption`
+
+Adds an option after the others, and returns it. It takes what each option of `setOptions` does. Not for an ajax
+select.
+
+```js
+const option = autocomplete.addOption({ value: 'mango', text: 'Mango' });
+```
+
 ### `activate`
 
 Activates an option by setting the `data-active` attribute, and scrolls it into view. Pass `{ scroll: false }` to
@@ -250,7 +276,8 @@ autocomplete.clear();
 
 ### `reset`
 
-Resets the autocomplete value to its initial state.
+Resets the autocomplete value to its initial state. In a local select, only the values an option still offers come
+back.
 
 ```js
 autocomplete.reset();
@@ -294,7 +321,8 @@ Like the other events, `show` and `hide` bubble. A listener on an element that c
 their `show` and `hide` too, so check `event.target` before preventing one.
 
 Like `input` and `change`, `commit`, `clear`, `remove` and `reset` fire after the value has changed, and only when the
-user changed it or the form reset: `setValue`, `removeValue`, `clear` and `reset` called from code emit nothing.
+user changed it or the form reset: `setValue`, `removeValue`, `clear`, `reset`, `setOptions` and `addOption` called from
+code emit nothing.
 
 `commit` reports the option's state after the commit in `event.detail.selected`: `true` when the commit selected it,
 `false` when it deselected it in a multiple select.

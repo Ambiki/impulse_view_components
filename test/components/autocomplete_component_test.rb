@@ -191,6 +191,37 @@ module Impulse
       assert_selector "[data-behavior='hidden-field'][name='custom_name']", visible: false
     end
 
+    test "renders an option template for the options set from code" do
+      render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_id))
+
+      assert_selector "[role='listbox'] > template[data-behavior='option-template']", visible: :all
+      # HTML4 parsing keeps a template's content as its children, where the page's HTML5 parser hides it.
+      template = Nokogiri::HTML4.fragment(rendered_content).at_css("template[data-behavior='option-template']")
+      option = template.at_css("> [role='option']")
+      assert_equal "", option["value"]
+      assert_equal "", option["data-text"]
+      assert_equal 1, option.css("[data-behavior='option-text']").size
+      assert_equal 1, option.css("[data-behavior='option-description']").size
+    end
+
+    test "renders a group template for the groups set from code" do
+      render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_id))
+
+      assert_selector "[role='listbox'] > template[data-behavior='group-template']", visible: :all
+      # HTML4 parsing keeps a template's content as its children, where the page's HTML5 parser hides it.
+      template = Nokogiri::HTML4.fragment(rendered_content).at_css("template[data-behavior='group-template']")
+      group = template.at_css("> [role='group']")
+      assert_equal "", group["data-text"]
+      assert_equal 1, group.css("[data-behavior='group-title']").size
+    end
+
+    test "renders no option or group template for an ajax select" do
+      render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_id, src: "/fruits"))
+
+      refute_selector "template[data-behavior='option-template']", visible: :all
+      refute_selector "template[data-behavior='group-template']", visible: :all
+    end
+
     test "grouped options" do
       render_inline(Impulse::AutocompleteComponent.new(:user, :fruit_id)) do |c|
         c.with_group(title: "My group") do |g|

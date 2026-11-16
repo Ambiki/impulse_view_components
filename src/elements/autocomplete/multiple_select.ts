@@ -76,17 +76,25 @@ export default class MultipleSelect implements SelectVariant {
     return this.value.includes(value);
   }
 
+  followOptions(options: HTMLElement[]) {
+    for (const hiddenField of this.hiddenFields) {
+      const tag = hiddenField.closest<HTMLElement>('[data-behavior="tag"]')!;
+      const option = options.find((each) => each.getAttribute('value') === hiddenField.value);
+      if (!option) {
+        tag.remove();
+        continue;
+      }
+
+      writeTagText(tag, (option.dataset.text || '').trim());
+    }
+  }
+
   private insertTag(value: string, text: string): void {
     const templateClone = this.template.content.cloneNode(true) as HTMLElement;
     const tagField = templateClone.querySelector<HTMLElement>('[data-behavior="tag"]')!;
-    const tagText = templateClone.querySelector<HTMLElement>('[data-behavior="text"]')!;
-    const tagHiddenField = templateClone.querySelector<HTMLInputElement>('[data-behavior="hidden-field"]')!;
     tagField.setAttribute('value', value);
-    tagField.setAttribute('data-text', text);
-    // eslint-disable-next-line unicorn/prefer-dom-node-text-content
-    tagText.innerText = text;
-    tagHiddenField.value = value;
-    tagHiddenField.setAttribute('data-text', text);
+    tagField.querySelector<HTMLInputElement>('[data-behavior="hidden-field"]')!.value = value;
+    writeTagText(tagField, text);
     this.template.before(templateClone);
   }
 
@@ -102,4 +110,12 @@ export default class MultipleSelect implements SelectVariant {
   private get template() {
     return this.root.querySelector<HTMLTemplateElement>('[data-behavior="tag-template"]')!;
   }
+}
+
+/** Writes `text` everywhere `tag` holds it: its own `data-text`, the text it shows and its hidden field's `data-text`. */
+function writeTagText(tag: HTMLElement, text: string) {
+  tag.setAttribute('data-text', text);
+  // eslint-disable-next-line unicorn/prefer-dom-node-text-content
+  tag.querySelector<HTMLElement>('[data-behavior="text"]')!.innerText = text;
+  tag.querySelector('[data-behavior="hidden-field"]')!.setAttribute('data-text', text);
 }

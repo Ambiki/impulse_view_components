@@ -82,11 +82,11 @@
     "inside": "target awc-autocomplete.optionsContainer"
   },
   {
-    "tag": "div",
+    "tag": "span",
     "target": null,
     "actions": [],
-    "behavior": null,
-    "role": "option",
+    "behavior": "option-text",
+    "role": null,
     "popover": null,
     "inside": "target awc-autocomplete.optionsContainer"
   },
@@ -98,6 +98,114 @@
     "role": "option",
     "popover": null,
     "inside": "target awc-autocomplete.optionsContainer"
+  },
+  {
+    "tag": "span",
+    "target": null,
+    "actions": [],
+    "behavior": "option-text",
+    "role": null,
+    "popover": null,
+    "inside": "target awc-autocomplete.optionsContainer"
+  },
+  {
+    "tag": "div",
+    "target": null,
+    "actions": [],
+    "behavior": null,
+    "role": "option",
+    "popover": null,
+    "inside": "target awc-autocomplete.optionsContainer"
+  },
+  {
+    "tag": "span",
+    "target": null,
+    "actions": [],
+    "behavior": "option-text",
+    "role": null,
+    "popover": null,
+    "inside": "target awc-autocomplete.optionsContainer"
+  },
+  {
+    "tag": "template",
+    "target": null,
+    "actions": [],
+    "behavior": "option-template",
+    "role": null,
+    "popover": null,
+    "inside": "target awc-autocomplete.listbox"
+  },
+  {
+    "tag": "div",
+    "target": null,
+    "actions": [],
+    "behavior": null,
+    "role": "option",
+    "popover": null,
+    "inside": "behavior option-template"
+  },
+  {
+    "tag": "span",
+    "target": null,
+    "actions": [],
+    "behavior": "option-text",
+    "role": null,
+    "popover": null,
+    "inside": "behavior option-template"
+  },
+  {
+    "tag": "span",
+    "target": null,
+    "actions": [],
+    "behavior": "option-description",
+    "role": null,
+    "popover": null,
+    "inside": "behavior option-template"
+  },
+  {
+    "tag": "template",
+    "target": null,
+    "actions": [],
+    "behavior": "group-template",
+    "role": null,
+    "popover": null,
+    "inside": "target awc-autocomplete.listbox"
+  },
+  {
+    "tag": "div",
+    "target": "awc-autocomplete.groups",
+    "actions": [],
+    "behavior": null,
+    "role": "group",
+    "popover": null,
+    "inside": "behavior group-template"
+  },
+  {
+    "tag": "div",
+    "target": null,
+    "actions": [],
+    "behavior": "group-title",
+    "role": null,
+    "popover": null,
+    "inside": "target awc-autocomplete.groups"
+  },
+  {
+    "tag": "div",
+    "target": null,
+    "actions": [],
+    "behavior": null,
+    "role": "option",
+    "popover": null,
+    "inside": "target awc-autocomplete.groups"
+  },
+  {
+    "tag": "span",
+    "target": null,
+    "actions": [],
+    "behavior": "option-text",
+    "role": null,
+    "popover": null,
+    "inside": "target awc-autocomplete.groups"
   },
   {
     "tag": "div",

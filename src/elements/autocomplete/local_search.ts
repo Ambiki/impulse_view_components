@@ -44,7 +44,7 @@ export default class LocalSearch implements SearchVariant {
   }
 }
 
-function filterOptions(options: HTMLElement[], query: string) {
+export function filterOptions(options: HTMLElement[], query: string) {
   const normalizedQuery = query.toLowerCase();
   // Tracks whether each group has at least one visible option. We accumulate this in a single
   // pass instead of re-querying every group's options per option (which was O(n × group size)).

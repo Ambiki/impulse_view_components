@@ -68,6 +68,16 @@
       <% end %>
     </div>
 
+    <% unless ajax? %>
+      <template data-behavior="option-template">
+        <%= render(Impulse::Autocomplete::OptionComponent.new(value: "", text: "", description: "")) %>
+      </template>
+      <%# A group renders only with an option in it. The element drops it from each group it builds. %>
+      <template data-behavior="group-template">
+        <%= render(Impulse::Autocomplete::GroupComponent.new(title: "")) { |group| group.with_option(value: "", text: "") } %>
+      </template>
+    <% end %>
+
     <% if ajax? %>
       <div role="presentation" class="awc-autocomplete-spinner">
         <%= render(Impulse::SpinnerComponent.new(role: :none)) %>
