@@ -1,0 +1,50 @@
+name: Docs
+
+on:
+  # The publish workflow deploys the docs once the newest stable release is out.
+  workflow_call:
+  # Deploys the docs from the ref picked in the Actions tab.
+  workflow_dispatch:
+
+# Pages deploys one site at a time. A deployment in progress finishes, and only the newest one waiting runs after it.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # VitePress dates a page's "Last updated" from its last commit.
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .tool-versions
+          cache: yarn
+      - name: Build
+        run: |
+          yarn install --frozen-lockfile
+          yarn docs:build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/.vitepress/dist
+
+  # Needs the repository's Pages to deploy from GitHub Actions, and the github-pages environment to allow the ref.
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
