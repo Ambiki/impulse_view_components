@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed `<awc-popover>`'s close button dropping into the body when the title fills its first line ([#465](https://github.com/Ambiki/impulse_view_components/pull/465))
+
 ## [0.11.0] - 2026-11-16
 
 ### Added
