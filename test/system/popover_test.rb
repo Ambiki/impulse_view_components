@@ -52,6 +52,20 @@ module Impulse
       assert_equal 8, header_end - button_end
     end
 
+    test "keeps the close button on the title's first line when the title fills it" do
+      visit_preview(:default, title: "Source: Private pay, Commercial insurance and Medicaid waiver programs")
+
+      click_on "Toggle popover"
+
+      header = page.evaluate_script("document.querySelector('.popover-header').getBoundingClientRect().toJSON()")
+      title = page.evaluate_script("document.querySelector('.awc-popover-title').getBoundingClientRect().toJSON()")
+      button = page.evaluate_script("document.querySelector('.awc-popover-close-btn').getBoundingClientRect().toJSON()")
+
+      assert_operator title["height"], :>, button["height"], "the title wraps"
+      assert_equal title["top"], button["top"]
+      assert_operator button["bottom"], :<=, header["bottom"]
+    end
+
     test "outlines the close button on keyboard focus, which forced colors show without its focus ring" do
       visit_preview(:default)
 
