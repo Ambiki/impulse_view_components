@@ -1,7 +1,7 @@
 <%= render(Impulse::PopoverComponent.new(title: "Delete")) do |c| %>
   <% c.with_trigger(class: "btn btn-primary") { "Toggle popover" } %>
   <% c.with_header(class: "align-items-center") do %>
-    <button type="button" class="btn btn-sm ml-auto" aria-label="Edit"><i class="bi bi-pencil" aria-hidden="true"></i></button>
+    <button type="button" class="btn btn-sm" aria-label="Edit"><i class="bi bi-pencil" aria-hidden="true"></i></button>
     <button type="button" class="btn btn-sm" aria-label="Share"><i class="bi bi-people" aria-hidden="true"></i></button>
   <% end %>
   <% c.with_body do %>

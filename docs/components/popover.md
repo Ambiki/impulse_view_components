@@ -37,7 +37,7 @@ The header renders its block between the title and the close button.
 <%= render(Impulse::PopoverComponent.new(title: "Activity feed")) do |c| %>
   <% c.with_trigger { "Open feed" } %>
   <% c.with_header(class: "align-items-center") do %>
-    <button type="button" class="btn btn-link btn-sm ml-auto">Mark all as read</button>
+    <button type="button" class="btn btn-link btn-sm">Mark all as read</button>
   <% end %>
   <% c.with_body { "Body" } %>
 <% end %>
