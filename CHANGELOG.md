@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- `<awc-popover>`'s title is medium weight, `--awc-font-size-3` on a 20px line, and no longer takes the header's font. The header's text color comes from `--awc-popover-header-text` ([#468](https://github.com/Ambiki/impulse_view_components/pull/468))
+
 ## [0.11.1] - 2026-11-16
 
 ### Fixed
