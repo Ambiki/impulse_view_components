@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-11-16
+
 ### Added
 
 - `selection` on `<awc-autocomplete>`, which gives each selected value with its text ([#463](https://github.com/Ambiki/impulse_view_components/pull/463))
@@ -14,9 +16,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `Impulse::ToastRegionComponent`, `Impulse::ToastComponent`, `showToast()` and `showToast.promise()` from `@ambiki/impulse-view-components/toast`: short messages in one region per page, which moves into an open modal dialog so its toasts stay usable ([#421](https://github.com/Ambiki/impulse_view_components/pull/421))
 - `Impulse::AjaxSelectComponent` takes its default error from the `impulse.autocomplete.error` translation ([#420](https://github.com/Ambiki/impulse_view_components/pull/420))
 - `Impulse::SelectComponent` and `AjaxSelectComponent` take their default blankslate from the `impulse.autocomplete.blankslate` translation, and `TimeZoneSelectComponent` from `impulse.time_zone_select.blankslate` ([#419](https://github.com/Ambiki/impulse_view_components/pull/419))
-- `disabled:` on `Impulse::DateCalendarComponent`, `WeekCalendarComponent`, `MonthCalendarComponent` and `YearCalendarComponent`, and `disabled` on their elements: a disabled calendar can't be focused or used, as a native disabled control, and dims by `--awc-*-calendar-opacity-disabled` ([#418](https://github.com/Ambiki/impulse_view_components/pull/418))
 - `Impulse::SheetComponent`, a modal dialog pinned to the right edge of the screen and filling its height, built on `<awc-dialog>` ([#414](https://github.com/Ambiki/impulse_view_components/pull/414))
 - `Impulse::DialogComponent`'s `with_header` slot renders its block between the title and the close button, and hides them with `visually_hide_title:` and `hide_close_button:` ([#410](https://github.com/Ambiki/impulse_view_components/pull/410))
+- `Impulse::MonthCalendarComponent` and `<awc-month-calendar>`, a grid of a year's months for choosing one, whose heading drills up to years ([#386](https://github.com/Ambiki/impulse_view_components/pull/386))
+- `Impulse::YearCalendarComponent` and `<awc-year-calendar>`, a grid of years for choosing one, a decade at a time ([#380](https://github.com/Ambiki/impulse_view_components/pull/380))
+- `Impulse::WeekCalendarComponent` and `<awc-week-calendar>`, the date calendar's grid for choosing a week, committed as its first and last days ([#378](https://github.com/Ambiki/impulse_view_components/pull/378))
+- `Impulse::DateCalendarComponent` and `<awc-date-calendar>`, a grid of a month's days for choosing one, to show inline or in a popover ([#377](https://github.com/Ambiki/impulse_view_components/pull/377))
 
 ### Changed
 
@@ -45,10 +50,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- `Impulse::MonthCalendarComponent` and `<awc-month-calendar>`, a grid of a year's months for choosing one, whose heading drills up to years ([#386](https://github.com/Ambiki/impulse_view_components/pull/386))
-- `Impulse::YearCalendarComponent` and `<awc-year-calendar>`, a grid of years for choosing one, a decade at a time ([#380](https://github.com/Ambiki/impulse_view_components/pull/380))
-- `Impulse::WeekCalendarComponent` and `<awc-week-calendar>`, the date calendar's grid for choosing a week, committed as its first and last days ([#378](https://github.com/Ambiki/impulse_view_components/pull/378))
-- `Impulse::DateCalendarComponent` and `<awc-date-calendar>`, a grid of a month's days for choosing one, to show inline or in a popover ([#377](https://github.com/Ambiki/impulse_view_components/pull/377))
 - `--awc-` design tokens on `:where(:root)`, which an app overrides from any selector: scales such as `--awc-gray-6`, aliases such as `--awc-neutral-line`, and component tokens such as `--awc-popover-max-width` ([#382](https://github.com/Ambiki/impulse_view_components/pull/382))
 
 ### Changed
@@ -333,7 +334,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Everything!
 
-[unreleased]: https://github.com/Ambiki/impulse_view_components/compare/v0.10.0...HEAD
+[unreleased]: https://github.com/Ambiki/impulse_view_components/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/Ambiki/impulse_view_components/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/Ambiki/impulse_view_components/compare/v0.9.1...v0.10.0
 [0.9.1]: https://github.com/Ambiki/impulse_view_components/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/Ambiki/impulse_view_components/compare/v0.8.0...v0.9.0
