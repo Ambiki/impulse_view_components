@@ -531,8 +531,8 @@ export default class AwcAutocompleteElement<
    */
   reset() {
     this.selectVariant.reset();
-    // A default goes with the option that offered it, as a native option's `defaultSelected` does. An ajax select's
-    // options are only the ones the last response brought.
+    // A default comes back while an option offers its value. An ajax select's options are only the ones the last
+    // response brought.
     if (!this.ajax) {
       this.selectVariant.followOptions(this.options);
     }
