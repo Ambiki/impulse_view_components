@@ -16,8 +16,13 @@
     <%= javascript_include_tag "impulse_view_components", "data-turbo-track": "reload", defer: true %>
 
     <style>
+      /* Panels such as the popover reset their font to the token, so the page sets its font there. */
+      :root {
+        --awc-font-family: 'Roboto', sans-serif;
+      }
+
       body {
-        font-family: 'Roboto', sans-serif;
+        font-family: var(--awc-font-family);
         color: var(--awc-neutral-text-contrast);
         font-size: 0.875rem;
       }
