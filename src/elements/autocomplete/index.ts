@@ -32,6 +32,17 @@ type IsAjax<Src extends Source> = Src extends 'ajax' ? true : false;
 /** Resolves the `value` type based on the selection mode. */
 export type AutocompleteValue<Mode extends SelectionMode> = Mode extends 'multiple' ? string[] : string;
 
+/** A selected value, with the text the element shows for it. */
+export interface AutocompleteSelectedValue {
+  value: string;
+  text: string;
+}
+
+/** Resolves the `selection` type based on the selection mode: `null` is a single select with nothing selected. */
+export type AutocompleteSelection<Mode extends SelectionMode> = Mode extends 'multiple' ?
+  AutocompleteSelectedValue[] :
+  AutocompleteSelectedValue | null;
+
 /** Resolves the `removeValue` arguments: required for multi-select, none for single-select. */
 type RemoveValueArgs<Mode extends SelectionMode> = Mode extends 'multiple' ? [value: string] : [];
 
@@ -50,8 +61,10 @@ type LocalOnlyArgs<Src extends Source, Args extends unknown[]> = Src extends 'aj
  * compiles — which is the point. There is no way for one variant to quietly lack an operation the other has.
  */
 export interface SelectVariant {
-  /** The selection, read from the hidden fields the form submits: a variant keeps it nowhere else. */
+  /** The selection's values, read from the hidden fields the form submits: a variant keeps it nowhere else. */
   readonly value: string | string[];
+  /** Each selected value with its text, read from the same hidden fields as `value`. */
+  readonly selection: AutocompleteSelectedValue | AutocompleteSelectedValue[] | null;
   /** Whether a commit closes the listbox. */
   readonly closesOnCommit: boolean;
   /** The selection's text as the input shows it, or `undefined` when the input doesn't show the selection. */
@@ -765,9 +778,22 @@ export default class AwcAutocompleteElement<
    * Returns the selected value.
    */
   get value(): AutocompleteValue<Mode> {
-    // The markup holds the value before the element has connected, when it has no select variant yet.
-    const selectVariant = this.selectVariant ?? this.newSelectVariant();
-    return selectVariant.value as AutocompleteValue<Mode>;
+    return this.currentSelectVariant.value as AutocompleteValue<Mode>;
+  }
+
+  /**
+   * Returns each selected value with its text.
+   */
+  get selection(): AutocompleteSelection<Mode> {
+    return this.currentSelectVariant.selection as AutocompleteSelection<Mode>;
+  }
+
+  /**
+   * The select variant. The markup holds the selection before the element has connected, when it has no select variant
+   * yet, so a new one reads it from there.
+   */
+  private get currentSelectVariant() {
+    return this.selectVariant ?? this.newSelectVariant();
   }
 
   /**

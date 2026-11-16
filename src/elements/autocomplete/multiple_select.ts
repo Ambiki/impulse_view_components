@@ -1,6 +1,4 @@
-import type { SelectVariant } from './index';
-
-interface SelectedValue { value: string; text: string }
+import type { AutocompleteSelectedValue, SelectVariant } from './index';
 
 /**
  * A multiple select's selection. It is kept in one place only: the hidden fields the form submits, one in each tag,
@@ -13,18 +11,22 @@ export default class MultipleSelect implements SelectVariant {
   readonly inputText = undefined;
   private readonly root: HTMLElement;
   /** What `reset` restores: the selection the element connected with. */
-  private defaultSelection: SelectedValue[] = [];
+  private defaultSelection: AutocompleteSelectedValue[] = [];
 
   constructor(root: HTMLElement) {
     this.root = root;
   }
 
   connected() {
-    this.defaultSelection = this.hiddenFields.map((field) => ({ value: field.value, text: field.dataset.text ?? '' }));
+    this.defaultSelection = this.selection;
   }
 
   get value() {
     return this.hiddenFields.map((field) => field.value);
+  }
+
+  get selection() {
+    return this.hiddenFields.map((field) => ({ value: field.value, text: field.dataset.text ?? '' }));
   }
 
   /** The values are in the tags, so the input only has to be filled while there is none. */
