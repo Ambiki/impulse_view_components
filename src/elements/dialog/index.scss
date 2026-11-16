@@ -119,9 +119,10 @@
   padding-right: var(--awc-space-3);
 }
 
+// A line and its padding are as tall as the close button, so a title on one line sits level with it.
 .awc-dialog-title-container {
   flex: 1 1 0%;
-  padding: var(--awc-space-2) 0;
+  padding: 6px 0;
 }
 
 .awc-dialog-title {
