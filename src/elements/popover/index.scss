@@ -62,16 +62,20 @@
 
   // The panel shows its overflow for the arrow, so the header's corners follow the panel's, inside its border.
   .popover-header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--awc-space-2);
     background-color: var(--awc-popover-header-bg);
     border-top-left-radius: calc(var(--awc-radius-4) - 1px);
     border-top-right-radius: calc(var(--awc-radius-4) - 1px);
   }
 }
 
-// Inline, so that the close button floats on its line, and in the header's font rather than a heading's. The margin
-// beats an app's `!important` heading margins, which a flex header would apply.
+// Fills the header, beside its block and the close button, in the header's font rather than a heading's. The margin
+// beats an app's `!important` heading margins.
 .awc-popover-title {
-  display: inline;
+  flex: 1 1 0%;
+  min-width: 0;
   margin: 0 !important;
   font-family: inherit;
   font-size: inherit;
@@ -83,9 +87,9 @@
 
 /** TODO: extract IconButtonComponent */
 .awc-popover-close-btn {
-  // The header is only a flex container when the app makes it one, so the button floats to its end otherwise.
-  float: right;
   flex-shrink: 0;
+  // Keeps it at the end of the header when the title is hidden, as nothing else in the header grows then.
+  margin-left: auto;
   // As far from the header's end as from its top and bottom.
   margin-right: calc(var(--awc-space-1) * -1);
   padding: 0;
