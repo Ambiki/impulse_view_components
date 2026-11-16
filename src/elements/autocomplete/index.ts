@@ -468,6 +468,7 @@ export default class AwcAutocompleteElement<
    */
   setOptions(...args: LocalOnlyArgs<Src, [options: Array<AutocompleteOptionData | AutocompleteGroupData>]>) {
     const [options] = args as [Array<AutocompleteOptionData | AutocompleteGroupData>];
+    this.assertLocal();
     const template = this.optionTemplate;
     const elements = options.flatMap((data) => {
       if (!isGroupData(data)) return [buildOption(template, data)];
@@ -487,6 +488,7 @@ export default class AwcAutocompleteElement<
    */
   addOption(...args: LocalOnlyArgs<Src, [option: AutocompleteOptionData]>) {
     const [option] = args as [AutocompleteOptionData];
+    this.assertLocal();
     this.optionsContainer.append(buildOption(this.optionTemplate, option));
     this.syncWithOptionsFromCode('added');
   }
@@ -795,15 +797,15 @@ export default class AwcAutocompleteElement<
     return [...this.querySelectorAll<HTMLElement>('[data-behavior="tag"]')];
   }
 
-  /**
-   * The option the component renders for options set from code. Only a local select has one: an ajax select's options
-   * are the ones its responses bring.
-   */
-  private get optionTemplate() {
+  /** Refuses options from code in an ajax select, whose responses bring its options. */
+  private assertLocal() {
     if (this.ajax) {
       throw new TypeError('awc-autocomplete: an ajax select fetches its options from `src`, so they can\'t be set from code.');
     }
+  }
 
+  /** The option the component renders for options set from code. Only a local select renders one. */
+  private get optionTemplate() {
     const template = this.querySelector<HTMLTemplateElement>('template[data-behavior="option-template"]');
     if (!template) {
       throw new TypeError('awc-autocomplete: no <template data-behavior="option-template"> to build the options from.');
