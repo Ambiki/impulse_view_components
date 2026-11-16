@@ -1,6 +1,6 @@
 import type { AutocompleteEventName } from './events';
 import type AwcAutocompleteElement from './index';
-import type { AjaxAutocompleteElement } from './index';
+import type { AjaxAutocompleteElement, LocalAutocompleteElement } from './index';
 import { whenInitialized } from '@ambiki/impulse';
 import { aTimeout, expect, fixture, nextFrame, oneEvent, waitUntil } from '@open-wc/testing';
 import { Idiomorph } from 'idiomorph';
@@ -1178,6 +1178,35 @@ describe('AwcAutocompleteElement', () => {
 
       expect(el.value).to.equal('');
       expect(el.input.value).to.equal('');
+    });
+
+    it('should show no text in its input once its form resets to no value', async () => {
+      const form = await fixture<HTMLFormElement>(
+        `<form>${autocompleteHtml({ options: FRUITS, selected: [FRUITS[1]] })}</form>`,
+      );
+      const el = form.querySelector<LocalAutocompleteElement>('awc-autocomplete')!;
+      await whenInitialized(el);
+      el.setOptions([{ value: 'h', text: 'hello' }]);
+
+      form.reset();
+
+      expect(el.value).to.equal('');
+      expect(el.input.value).to.equal('');
+    });
+
+    it('should show the text of the option that offers its value now once its form resets', async () => {
+      const form = await fixture<HTMLFormElement>(
+        `<form>${autocompleteHtml({ options: FRUITS, selected: [FRUITS[0]] })}</form>`,
+      );
+      const el = form.querySelector<LocalAutocompleteElement>('awc-autocomplete')!;
+      await whenInitialized(el);
+      el.setOptions([{ value: '1', text: 'Red apple' }]);
+      el.clear();
+
+      form.reset();
+
+      expect(el.value).to.equal('1');
+      expect(el.input.value).to.equal('Red apple');
     });
 
     it('should leave a single select that has no value without one, though an option has an empty value', async () => {

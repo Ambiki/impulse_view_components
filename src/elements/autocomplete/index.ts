@@ -383,6 +383,10 @@ export default class AwcAutocompleteElement<
    */
   handleFormReset() {
     this.reset();
+    // The form resets its controls once this event has been handled, and puts back the text the input was rendered
+    // with. That is the text of the value the element rendered, which a local select doesn't reset to once no option
+    // offers it, or reset to in that text once its option has another.
+    this.input.defaultValue = this.selectVariant.inputText ?? '';
     // Direct, not a request: the form may have been reset from code, and the value is already gone.
     this.hide();
     this.emitEvent('reset');
