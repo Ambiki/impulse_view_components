@@ -642,8 +642,9 @@ export default class AwcAutocompleteElement<
       return;
     }
 
-    // Filtering hides options: it changes neither what they are nor what is selected.
-    if (cause !== 'filtered') {
+    // Filtering hides options: it changes neither what they are nor what is selected. Options set from code are marked
+    // already, once the selection has followed them.
+    if (cause !== 'filtered' && cause !== 'set') {
       this.markSelectedOptions();
     }
 
