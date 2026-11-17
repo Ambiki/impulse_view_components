@@ -111,4 +111,4 @@ Pass an element, never `null`. It has no timeout by default, so a mistyped tag n
 ## Before finishing
 
 - `yarn lint` and `yarn typecheck`.
-- `yarn web-test-runner <file>` for the elements you changed, in Chromium, Firefox and WebKit.
+- `yarn vitest run <file>` for the elements you changed, in Chromium, Firefox and WebKit.

@@ -1,5 +1,5 @@
-import { ImpulseElement, registerElement, whenInitialized } from '@ambiki/impulse';
-import { expect, fixture, html } from '@open-wc/testing';
+import { ImpulseElement, registerElement } from '@ambiki/impulse';
+import { fixture, whenSettled } from '@ambiki/impulse/testing';
 import onDisconnect from './on_disconnect';
 
 /**
@@ -23,16 +23,15 @@ class OnDisconnectHost extends ImpulseElement {
 
 /** A host inside a container that has a `<section>` to move it into. */
 async function hostFixture() {
-  const container = await fixture<HTMLElement>(html`<div><on-disconnect-host></on-disconnect-host><section></section></div>`);
+  const container = await fixture<HTMLElement>(`<div><on-disconnect-host></on-disconnect-host><section></section></div>`);
   const host = container.querySelector<OnDisconnectHost>('on-disconnect-host')!;
-  await whenInitialized(host);
   return { container, host, section: container.querySelector('section')! };
 }
 
 /** Moves `host` into `destination`, and waits for it to connect there. */
 async function move(host: OnDisconnectHost, destination: HTMLElement) {
   destination.append(host);
-  await whenInitialized(host);
+  await whenSettled();
 }
 
 describe('onDisconnect', () => {

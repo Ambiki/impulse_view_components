@@ -3,6 +3,8 @@
 /.yardoc
 /_yardoc/
 /coverage/
+# Vitest's screenshots of failed browser tests
+/.vitest/
 /doc/
 /spec/reports/
 /tmp/

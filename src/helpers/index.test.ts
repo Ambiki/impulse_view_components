@@ -1,4 +1,3 @@
-import { aTimeout, expect } from '@open-wc/testing';
 import { cycle, debounce, scrollLock } from './index';
 
 describe('cycle', () => {
@@ -21,7 +20,15 @@ describe('cycle', () => {
 });
 
 describe('debounce', () => {
-  it('calls the function once the calls have stopped for `wait`, with the last arguments and `this`', async () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('calls the function once the calls have stopped for `wait`, with the last arguments and `this`', () => {
     const calls: Array<[unknown, string]> = [];
     const target = {
       save: debounce(function (this: unknown, value: string) {
@@ -31,20 +38,20 @@ describe('debounce', () => {
 
     target.save('a');
     target.save('b');
-    await aTimeout(20);
+    vi.advanceTimersByTime(20);
     expect(calls).to.deep.equal([]);
-    await aTimeout(60);
+    vi.advanceTimersByTime(60);
 
     expect(calls).to.deep.equal([[target, 'b']]);
   });
 
-  it('drops the pending call on `clear`', async () => {
+  it('drops the pending call on `clear`', () => {
     let called = false;
     const save = debounce(() => (called = true), 20);
 
     save();
     save.clear();
-    await aTimeout(40);
+    vi.advanceTimersByTime(40);
 
     expect(called).to.be.false;
   });

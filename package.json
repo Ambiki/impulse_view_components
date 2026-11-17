@@ -120,10 +120,10 @@
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
-    "test": "web-test-runner",
-    "test:coverage": "web-test-runner --coverage",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage --project chromium",
     "test:exports": "node scripts/check-exports.mjs",
-    "test:watch": "yarn test --watch",
+    "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
@@ -134,17 +134,14 @@
     "tabbable": "^6.4.0"
   },
   "devDependencies": {
-    "@ambiki/impulse": "^2.0.0",
+    "@ambiki/impulse": "^2.2.0-rc.1",
     "@antfu/eslint-config": "^10.0.0",
-    "@open-wc/testing": "^5.0.0",
     "@rollup/plugin-commonjs": "^29.0.3",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-typescript": "^12.3.0",
-    "@types/mocha": "^10.0.10",
-    "@web/dev-server-esbuild": "^2.0.0",
+    "@vitest/browser-playwright": "^5.1.0",
+    "@vitest/coverage-v8": "^5.1.0",
     "@web/rollup-plugin-copy": "^1.0.0",
-    "@web/test-runner": "^1.0.0",
-    "@web/test-runner-playwright": "^1.0.0",
     "autoprefixer": "^10.6.1",
     "bootstrap": "4.6",
     "concurrently": "^10.0.6",
@@ -153,13 +150,15 @@
     "eslint-plugin-format": "^2.0.1",
     "globby": "^16.2.4",
     "idiomorph": "^0.8.0",
+    "playwright": "1.65.1",
     "postcss": "^8.5.31",
     "postcss-cli": "^12.0.0",
     "rollup": "^4.64.10",
     "sass": "^1.105.2",
     "typescript": "^6.0.3",
     "vitepress": "^1.6.4",
-    "vitepress-plugin-llms": "^1.14.0"
+    "vitepress-plugin-llms": "^1.14.0",
+    "vitest": "^5.1.0"
   },
   "resolutions": {
     "**/oxfmt/tinypool": "~2.1.2",

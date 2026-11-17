@@ -1,5 +1,5 @@
 import type { ComboboxOptions } from './combobox';
-import { expect, fixture, html } from '@open-wc/testing';
+import { fixture } from '@ambiki/impulse/testing';
 import Combobox from './combobox';
 
 interface Commit {
@@ -9,7 +9,7 @@ interface Commit {
 
 /** An input and a list of four options, the third disabled, with a combobox on them that records its commits. */
 async function comboboxFixture(options: Partial<ComboboxOptions> = {}) {
-  const container = await fixture<HTMLElement>(html`
+  const container = await fixture<HTMLElement>(`
     <div>
       <input type="text">
       <ul>
@@ -62,7 +62,7 @@ describe('Combobox', () => {
     });
 
     it('should keep the id the list already has', async () => {
-      const container = await fixture<HTMLElement>(html`<div><input><ul id="fruits"></ul></div>`);
+      const container = await fixture<HTMLElement>(`<div><input><ul id="fruits"></ul></div>`);
       const input = container.querySelector('input')!;
 
       // eslint-disable-next-line no-new

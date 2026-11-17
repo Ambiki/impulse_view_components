@@ -1,10 +1,15 @@
-import { expect, fixture, nextFrame } from '@open-wc/testing';
+import { fixture, recordEvents, whenSettled } from '@ambiki/impulse/testing';
 import ModalDialogStack from './modal_dialog_stack';
 
-/** Waits for a watch to hear a dialog open or close. */
-async function heard() {
-  await nextFrame();
-  await nextFrame();
+/**
+ * Closes `dialog`, and waits for a watch to hear it: Impulse's report that `[open]` went, and the `close` event the
+ * browser dispatches later.
+ */
+async function close(dialog: HTMLDialogElement) {
+  const closed = recordEvents(dialog, ['close'], { self: true });
+  dialog.close();
+  await closed.waitFor('close');
+  await whenSettled();
 }
 
 describe('ModalDialogStack', () => {
@@ -40,13 +45,12 @@ describe('ModalDialogStack', () => {
     const stop = stack.watch(() => {});
 
     second.showModal();
-    await heard();
+    await whenSettled();
     first.showModal();
-    await heard();
+    await whenSettled();
     expect(stack.topmost() === first).to.be.true;
 
-    first.close();
-    await heard();
+    await close(first);
     expect(stack.topmost() === second).to.be.true;
 
     second.close();
@@ -58,14 +62,16 @@ describe('ModalDialogStack', () => {
     let changes = 0;
     const stop = stack.watch(() => changes++);
     first.showModal();
-    await heard();
+    await whenSettled();
     second.showModal();
-    await heard();
+    await whenSettled();
     const before = changes;
+    const closed = recordEvents(first, ['close'], { self: true });
 
     first.close();
     first.showModal();
-    await heard();
+    await closed.waitFor('close');
+    await whenSettled();
 
     expect(stack.topmost() === first).to.be.true;
     expect(changes).to.be.greaterThan(before);
@@ -84,13 +90,12 @@ describe('ModalDialogStack', () => {
     const stack = new ModalDialogStack();
     const stop = stack.watch(() => {});
     lower.showModal();
-    await heard();
+    await whenSettled();
     nested.show();
     upper.showModal();
-    await heard();
+    await whenSettled();
 
-    nested.close();
-    await heard();
+    await close(nested);
 
     expect(stack.topmost() === upper).to.be.true;
     upper.close();
@@ -104,16 +109,15 @@ describe('ModalDialogStack', () => {
     const stop = stack.watch(() => changes++);
 
     first.showModal();
-    await heard();
+    await whenSettled();
     expect(changes).to.equal(1);
 
-    first.close();
-    await heard();
+    await close(first);
     expect(changes).to.equal(2);
 
     stop();
     first.showModal();
-    await heard();
+    await whenSettled();
     expect(changes).to.equal(2);
     first.close();
   });
@@ -123,7 +127,7 @@ describe('ModalDialogStack', () => {
     let changes = 0;
     const stop = stack.watch(() => changes++);
     first.showModal();
-    await heard();
+    await whenSettled();
 
     stop();
 
