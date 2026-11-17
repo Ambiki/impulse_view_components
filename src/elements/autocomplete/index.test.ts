@@ -5,7 +5,7 @@ import type { AjaxAutocompleteElement, LocalAutocompleteElement } from './index'
 import { fixture, recordEvents, whenSettled } from '@ambiki/impulse/testing';
 import { Idiomorph } from 'idiomorph';
 import { componentMarkup, markupDifferences } from '../../internal/test_markup';
-import { nextFrame, sleep } from '../../internal/test_waits';
+import { nextFrame, nextFrames, sleep } from '../../internal/test_waits';
 // Registers `awc-autocomplete`. Kept separate from the type import above, which the bundler elides.
 import './index';
 
@@ -221,8 +221,8 @@ function selectionOf(el: AwcAutocompleteElement) {
  * Waits for the positioning observers' callbacks to have run, so that only the change under test can reposition.
  * Two frames are enough today; five leaves a margin.
  */
-async function drainObservers() {
-  for (let i = 0; i < 5; i++) await nextFrame();
+function drainObservers() {
+  return nextFrames(5);
 }
 
 const OPEN_CLOSE_EVENTS = [
@@ -294,7 +294,6 @@ describe('AwcAutocompleteElement', () => {
 
   afterEach(() => {
     window.fetch = originalFetch;
-    vi.useRealTimers();
   });
 
   describe('the markup these tests write', () => {
@@ -555,6 +554,7 @@ describe('AwcAutocompleteElement', () => {
       preventNext(el, 'hide');
 
       el.input.dispatchEvent(new FocusEvent('blur'));
+      await nextFrame(); // A later request from the same action would come by then.
 
       expect(el.open).to.equal(true);
       expect(events.types).to.eql(['awc-autocomplete:hide']);
@@ -567,6 +567,7 @@ describe('AwcAutocompleteElement', () => {
       preventNext(el, 'hide');
 
       el.options[0].click();
+      await nextFrame(); // A later request from the same action would come by then.
 
       expect(el.value).to.equal('1');
       expect(el.open).to.equal(true);
@@ -580,6 +581,7 @@ describe('AwcAutocompleteElement', () => {
       preventNext(el, 'hide');
 
       el.clearButton!.click();
+      await nextFrame(); // A later request from the same action would come by then.
 
       expect(el.open).to.equal(true);
       expect(events.types).to.eql(['awc-autocomplete:hide', 'awc-autocomplete:clear']);
@@ -1408,6 +1410,7 @@ describe('AwcAutocompleteElement', () => {
       el.show();
 
       press(el.listbox);
+      await nextFrame(); // A hide the press started would have come by then.
 
       expect(el.open).to.equal(true);
     });

@@ -1,6 +1,6 @@
 import type { Boundary } from './use_outside_click';
 import { ImpulseElement, registerElement } from '@ambiki/impulse';
-import { fixture } from '@ambiki/impulse/testing';
+import { fixture, recordEvents } from '@ambiki/impulse/testing';
 import { sleep } from '../internal/test_waits';
 import useFocusOut from './use_focus_out';
 import useOutsideClick from './use_outside_click';
@@ -84,13 +84,12 @@ describe('useFocusOut', () => {
     const { host, inside, outside } = await focusOutFixture();
     const calls = listen(host, [host]);
     inside.focus();
-    let focusin: Event | undefined;
-    outside.addEventListener('focusin', (event) => (focusin = event), { once: true });
+    const focusins = recordEvents(outside, ['focusin'], { self: true });
 
     outside.focus();
 
     expect(targets(calls)).to.eql(['outside']);
-    expect(calls[0].event === focusin, 'calls back with the focusin event').to.equal(true);
+    expect(calls[0].event === focusins.events[0], 'calls back with the focusin event').to.equal(true);
   });
 
   it('calls back for a move outside when focus was not inside a boundary before', async () => {

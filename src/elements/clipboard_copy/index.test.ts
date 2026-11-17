@@ -433,10 +433,6 @@ describe('awc-clipboard-copy', () => {
   });
 
   describe('feedback state', () => {
-    afterEach(() => {
-      vi.useRealTimers();
-    });
-
     it('is copied for 2000ms by default after a copy', async () => {
       stubClipboard();
       const el = await clipboardCopyFixture('value="Hello"');

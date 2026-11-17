@@ -16,10 +16,6 @@ describe('LiveAnnouncer', () => {
     vi.useFakeTimers();
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   async function setup() {
     const container = await fixture<HTMLDivElement>(
       '<div><div id="polite" aria-live="polite"></div><div id="assertive" aria-live="assertive"></div></div>',

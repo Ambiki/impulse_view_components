@@ -2,7 +2,8 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "types": [],
-    "declarationMap": false
+    "declarationMap": false,
+    "skipLibCheck": false
   },
   "exclude": ["src/**/*.test.ts", "src/internal/test_*.ts"]
 }

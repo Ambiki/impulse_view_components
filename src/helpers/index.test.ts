@@ -24,10 +24,6 @@ describe('debounce', () => {
     vi.useFakeTimers();
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   it('calls the function once the calls have stopped for `wait`, with the last arguments and `this`', () => {
     const calls: Array<[unknown, string]> = [];
     const target = {

@@ -12,6 +12,15 @@ async function close(dialog: HTMLDialogElement) {
   await whenSettled();
 }
 
+/** Closes `dialog` and shows it modally again in one task, and waits for a watch to hear it, as `close` does. */
+async function closeAndReopen(dialog: HTMLDialogElement) {
+  const closed = recordEvents(dialog, ['close'], { self: true });
+  dialog.close();
+  dialog.showModal();
+  await closed.waitFor('close');
+  await whenSettled();
+}
+
 describe('ModalDialogStack', () => {
   async function setup() {
     const container = await fixture<HTMLDivElement>('<div><dialog id="first"></dialog><dialog id="second"></dialog></div>');
@@ -66,12 +75,8 @@ describe('ModalDialogStack', () => {
     second.showModal();
     await whenSettled();
     const before = changes;
-    const closed = recordEvents(first, ['close'], { self: true });
 
-    first.close();
-    first.showModal();
-    await closed.waitFor('close');
-    await whenSettled();
+    await closeAndReopen(first);
 
     expect(stack.topmost() === first).to.be.true;
     expect(changes).to.be.greaterThan(before);

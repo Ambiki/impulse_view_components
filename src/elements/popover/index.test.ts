@@ -2,7 +2,7 @@ import type AwcPopoverElement from './index';
 import { fixture, recordEvents, whenSettled } from '@ambiki/impulse/testing';
 import { Idiomorph } from 'idiomorph';
 import { componentMarkup, markupDifferences } from '../../internal/test_markup';
-import { nextFrame } from '../../internal/test_waits';
+import { nextFrames } from '../../internal/test_waits';
 // Registers `awc-popover`. Kept separate from the type import above, which the bundler elides.
 import './index';
 
@@ -78,9 +78,8 @@ function clickOutside() {
  * Gives the browser two frames, for what ends on a frame that no test can await, such as a `hide` that nothing returns,
  * which closes on the next frame. Only where nothing comes to wait for: each call says what it gives the time to.
  */
-async function twoFrames() {
-  await nextFrame();
-  await nextFrame();
+function twoFrames() {
+  return nextFrames(2);
 }
 
 describe('awc-popover', () => {
@@ -133,6 +132,7 @@ describe('awc-popover', () => {
       preventNext(el, 'show');
 
       el.button.click();
+      await twoFrames(); // A later request from the same action would come by then.
 
       expect(el.open).to.equal(false);
       expect(isPopoverOpen(el.panel)).to.equal(false);
@@ -158,6 +158,7 @@ describe('awc-popover', () => {
       preventNext(el, 'hide');
 
       el.button.click();
+      await twoFrames(); // A later request from the same action would come by then.
 
       expect(el.open).to.equal(true);
       expect(isPopoverOpen(el.panel)).to.equal(true);
@@ -294,6 +295,7 @@ describe('awc-popover', () => {
       preventNext(other, 'hide');
 
       el.button.click();
+      await twoFrames(); // A later request from the same action would come by then.
 
       expect(other.open).to.equal(true);
       expect(el.open).to.equal(false);
@@ -337,6 +339,7 @@ describe('awc-popover', () => {
       preventNext(el, 'show');
 
       press(el.button);
+      await twoFrames(); // A later request from the same action would come by then.
 
       expect(other.open).to.equal(true);
       expect(el.open).to.equal(false);
@@ -533,6 +536,7 @@ describe('awc-popover', () => {
 
       el.querySelector<HTMLButtonElement>('.b')!.focus();
       el.button.focus();
+      await twoFrames(); // A hide the focus move started would have come by then.
 
       expect(el.open).to.equal(true);
       expect(events.types).to.eql([]);
@@ -551,6 +555,7 @@ describe('awc-popover', () => {
       outside.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
       outside.focus();
       outside.click();
+      await twoFrames(); // A later request from the same action would come by then.
 
       expect(el.open).to.equal(true);
       expect(events.types).to.eql(['awc-popover:hide']);
@@ -764,6 +769,7 @@ describe('awc-popover', () => {
 
       parent.panel.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
       await parent.requestHide();
+      await twoFrames(); // A request of the parent's, made once the nested one answered, would come later.
 
       expect(nested.open).to.equal(true);
       expect(parent.open).to.equal(true);
@@ -853,6 +859,7 @@ describe('awc-popover', () => {
 
       press(parent.button);
       await events.waitFor('nested', 'awc-popover:hide');
+      await twoFrames(); // A request of the parent's, made once the nested one answered, would come later.
 
       expect(deepest.open).to.equal(false);
       expect(nested.open).to.equal(true);

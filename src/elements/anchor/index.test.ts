@@ -1,7 +1,7 @@
 import type AwcAnchorElement from './index';
 import { fixture, whenSettled } from '@ambiki/impulse/testing';
 import { Idiomorph } from 'idiomorph';
-import { nextFrame } from '../../internal/test_waits';
+import { nextFrames } from '../../internal/test_waits';
 // Registers `awc-anchor`. Kept separate from the type import above, which the bundler elides.
 import './index';
 
@@ -71,9 +71,8 @@ function countRepositions(floating: AwcAnchorElement) {
  * Gives a stop, which resolves on a frame no test can await, and a reposition `autoUpdate` starts on its own, which
  * nothing announces, two frames to land.
  */
-async function letAutoUpdateRun() {
-  await nextFrame();
-  await nextFrame();
+function letAutoUpdateRun() {
+  return nextFrames(2);
 }
 
 describe('awc-anchor', () => {

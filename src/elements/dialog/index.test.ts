@@ -2,7 +2,7 @@ import type AwcDialogElement from './index';
 import { fixture, recordEvents, whenSettled } from '@ambiki/impulse/testing';
 import { Idiomorph } from 'idiomorph';
 import { componentMarkup, markupDifferences } from '../../internal/test_markup';
-import { nextFrame } from '../../internal/test_waits';
+import { nextFrames } from '../../internal/test_waits';
 // Registers `awc-dialog`. Kept separate from the type import above, which the bundler elides.
 import './index';
 
@@ -87,9 +87,8 @@ function recordClose(el: AwcDialogElement) {
 /**
  * Gives a `close` event the time to arrive, for a test where none should. No event comes either way to wait on instead.
  */
-async function noCloseEvent() {
-  await nextFrame();
-  await nextFrame();
+function noCloseEvent() {
+  return nextFrames(2);
 }
 
 describe('awc-dialog', () => {
@@ -102,13 +101,14 @@ describe('awc-dialog', () => {
   it('emits only the state events when shown and hidden from code', async () => {
     const el = await dialogFixture();
     const events = record(el);
+    const closed = recordClose(el);
     preventNext(el, 'show');
     preventNext(el, 'hide');
 
     el.show();
     expect(el.dialog.open).to.equal(true);
     el.hide();
-    await events.waitFor('awc-dialog:hidden');
+    await closed.waitFor('close');
 
     expect(el.open).to.equal(false);
     expect(events.types).to.eql(['awc-dialog:shown', 'awc-dialog:hidden']);
@@ -117,6 +117,7 @@ describe('awc-dialog', () => {
   it('opens modally and closes when `open` changes, emitting only the state events', async () => {
     const el = await dialogFixture();
     const events = record(el);
+    const closed = recordClose(el);
     preventNext(el, 'show');
     preventNext(el, 'hide');
 
@@ -124,7 +125,7 @@ describe('awc-dialog', () => {
     expect(el.dialog.matches(':modal')).to.equal(true);
 
     el.removeAttribute('open');
-    await events.waitFor('awc-dialog:hidden');
+    await closed.waitFor('close');
 
     expect(el.dialog.open).to.equal(false);
     expect(events.types).to.eql(['awc-dialog:shown', 'awc-dialog:hidden']);
@@ -162,13 +163,14 @@ describe('awc-dialog', () => {
     const el = await dialogFixture();
     el.requestShow();
     const events = record(el);
+    const closed = recordClose(el);
     preventNext(el, 'hide');
 
     el.querySelector<HTMLButtonElement>('.close')!.click();
     expect(el.dialog.open).to.equal(true);
 
     el.querySelector<HTMLButtonElement>('.close')!.click();
-    await events.waitFor('awc-dialog:hidden');
+    await closed.waitFor('close');
 
     expect(el.open).to.equal(false);
     expect(el.dialog.open).to.equal(false);
@@ -179,13 +181,14 @@ describe('awc-dialog', () => {
     const el = await dialogFixture();
     el.show();
     const events = record(el);
+    const closed = recordClose(el);
     preventNext(el, 'hide');
 
     press(onBackdrop(el));
     expect(el.dialog.open).to.equal(true);
 
     press(onBackdrop(el));
-    await events.waitFor('awc-dialog:hidden');
+    await closed.waitFor('close');
 
     expect(el.open).to.equal(false);
     expect(events.types).to.eql(['awc-dialog:hide', 'awc-dialog:hide', 'awc-dialog:hidden']);
@@ -232,6 +235,7 @@ describe('awc-dialog', () => {
     const el = await dialogFixture();
     el.show();
     const events = record(el);
+    const closed = recordClose(el);
     preventNext(el, 'hide');
 
     const refused = cancel(el);
@@ -239,7 +243,7 @@ describe('awc-dialog', () => {
     expect(el.dialog.open).to.equal(true);
 
     cancel(el);
-    await events.waitFor('awc-dialog:hidden');
+    await closed.waitFor('close');
 
     expect(el.open).to.equal(false);
     expect(events.types).to.eql(['awc-dialog:hide', 'awc-dialog:hide', 'awc-dialog:hidden']);
@@ -259,10 +263,11 @@ describe('awc-dialog', () => {
     const el = await dialogFixture();
     el.show();
     const events = record(el);
+    const closed = recordClose(el);
 
     el.hide();
     el.show();
-    await events.waitFor('awc-dialog:hidden');
+    await closed.waitFor('close');
 
     expect(el.open).to.equal(true);
     expect(el.dialog.open).to.equal(true);
@@ -372,10 +377,12 @@ describe('awc-dialog', () => {
     inner.show();
     const outerEvents = record(outer);
     const innerEvents = record(inner);
+    const outerClosed = recordClose(outer);
+    const innerClosed = recordClose(inner);
 
     outer.removeAttribute('open');
-    await innerEvents.waitFor('awc-dialog:hidden');
-    await outerEvents.waitFor('awc-dialog:hidden');
+    await innerClosed.waitFor('close');
+    await outerClosed.waitFor('close');
 
     expect(inner.open).to.equal(false);
     expect(inner.dialog.open).to.equal(false);

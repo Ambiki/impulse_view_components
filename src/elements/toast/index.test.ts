@@ -3,7 +3,7 @@ import type AwcToastElement from './toast';
 import { fixture, recordEvents, whenSettled } from '@ambiki/impulse/testing';
 import { Idiomorph } from 'idiomorph';
 import { componentMarkup, markupDifferences } from '../../internal/test_markup';
-import { nextFrame, sleep } from '../../internal/test_waits';
+import { nextFrame, nextFrames, sleep } from '../../internal/test_waits';
 // Registers both elements. Kept separate from the type imports above, which the bundler elides.
 import { showToast } from './index';
 // Registers `awc-dialog`, which the region moves into while it is open.
@@ -77,8 +77,8 @@ function deferred<T>() {
  * Waits for the announcers, which take a toast's text two frames after it shows, so that it is heard as a change.
  * Nothing marks the write, so this waits the frames out.
  */
-async function announced() {
-  for (let frame = 0; frame < 3; frame++) await nextFrame();
+function announced() {
+  return nextFrames(3);
 }
 
 /** Runs `run` with `console.warn` recorded rather than printed, and returns what each warning said first. */
@@ -174,15 +174,22 @@ function pressable(element: Element) {
   return !!hit && element.contains(hit);
 }
 
+/**
+ * Closes `dialog` and shows it modally again in one task, and waits for the region to hear of it: from the dialog's
+ * `close`, which the browser dispatches in a later task.
+ */
+async function closeAndReopen(dialog: HTMLDialogElement) {
+  const closed = recordEvents(dialog, ['close'], { self: true });
+  dialog.close();
+  dialog.showModal();
+  await closed.waitFor('close');
+  await whenSettled();
+}
+
 /** Gives leaving toasts a fade, as the stylesheet does, so that a hide takes `ms` to finish. */
 async function withLeavingTransition(ms: number) {
   return fixture<HTMLStyleElement>(`<style>.awc-toast--leaving { opacity: 0; transition: opacity ${ms}ms linear; }</style>`);
 }
-
-// Back to real time after a test that faked it. Impulse's helpers keep to real time whatever a test fakes.
-afterEach(() => {
-  vi.useRealTimers();
-});
 
 describe('the markup these tests write', () => {
   it('has the actions the component renders for a toast', async () => {
@@ -386,21 +393,21 @@ describe('showToast.promise', () => {
     const heard = announcers(region);
     const { promise, resolve } = deferred<{ name: string }>();
     // The announcers write two frames after a toast shows, and empty a second after that.
-    const announced = async () => {
+    const announcedOnFakeTime = async () => {
       await whenSettled();
       await vi.advanceTimersByTimeAsync(50);
     };
 
     showToast.promise(promise, steps);
-    await announced();
+    await announcedOnFakeTime();
     expect(heard()).to.deep.equal(['Creating event…', '']);
     resolve({ name: 'Event' });
-    await announced();
+    await announcedOnFakeTime();
     expect(heard()).to.deep.equal(['Event created.', '']);
 
     await vi.advanceTimersByTimeAsync(1000);
     showToast.promise(Promise.reject(new Error('the server is down')), steps);
-    await announced();
+    await announcedOnFakeTime();
     expect(heard()).to.deep.equal(['', 'Could not create event.']);
   });
 
@@ -630,6 +637,7 @@ describe('<awc-toast>', () => {
     preventNext(region, 'hide');
 
     closeButton(toast).click();
+    await nextFrame(); // A later request from the same action would come by then.
 
     expect(log(events)).to.deep.equal(['hide saved']);
     expect(toast.open).to.be.true;
@@ -998,13 +1006,8 @@ describe('<awc-toast-region> over modal dialogs', () => {
     await whenSettled();
     second.dialog.showModal();
     await whenSettled();
-    const closed = recordEvents(first.dialog, ['close'], { self: true });
 
-    first.dialog.close();
-    first.dialog.showModal();
-    // The region hears of it from the dialog's `close`, which the browser dispatches in a later task.
-    await closed.waitFor('close');
-    await whenSettled();
+    await closeAndReopen(first.dialog);
 
     expect(region.parentElement === first.dialog).to.be.true;
     expect(pressable(closeButton(toast))).to.be.true;
@@ -1017,13 +1020,8 @@ describe('<awc-toast-region> over modal dialogs', () => {
     const toast = (await showToast('Copied', { duration: Infinity }))!;
     dialog.dialog.showModal();
     await whenSettled();
-    const closed = recordEvents(dialog.dialog, ['close'], { self: true });
 
-    dialog.dialog.close();
-    dialog.dialog.showModal();
-    // The region hears of it from the dialog's `close`, which the browser dispatches in a later task.
-    await closed.waitFor('close');
-    await whenSettled();
+    await closeAndReopen(dialog.dialog);
 
     expect(region.parentElement === dialog.dialog).to.be.true;
     expect(pressable(closeButton(toast))).to.be.true;

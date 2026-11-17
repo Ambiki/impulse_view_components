@@ -497,6 +497,8 @@ describe('awc-date-calendar', () => {
         // A real click at its centre. `force` skips the checks that wait for a disabled button to be enabled.
         await userEvent.click(target, { force: true });
       }
+      // The real pointer would stay over the heading for the tests after this one.
+      await userEvent.hover(document.documentElement, { position: { x: 0, y: 0 } });
 
       expect(el.grid.dataset.month).to.equal('2026-11');
       expect(el.heading.textContent).to.equal('November 2026');
@@ -789,11 +791,7 @@ describe('awc-date-calendar', () => {
     it('selects no day and shows today\'s month, without emitting, as setting an empty value does', async () => {
       const el = await dateCalendarFixture({ value: '2020-01-15', timeZone: 'Asia/Dubai' });
       const todayThere = today('Asia/Dubai').toString();
-      // `clear` is no event of the element's: it is recorded to show none is emitted under that name either.
-      const events = recordEvents<{ 'awc-date-calendar:commit': Event; 'awc-date-calendar:clear': Event }>(
-        el,
-        ['awc-date-calendar:commit', 'awc-date-calendar:clear'],
-      );
+      const events = recordEvents(el, ['awc-date-calendar:commit']);
 
       el.clear();
 

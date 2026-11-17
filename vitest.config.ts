@@ -9,6 +9,7 @@ export default defineConfig({
   },
   test: {
     include: ['src/**/*.test.ts'],
+    setupFiles: ['src/internal/test_setup.ts'],
     // `@ambiki/impulse/testing` registers `cleanup()` with a global `afterEach`.
     globals: true,
     browser: {

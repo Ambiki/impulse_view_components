@@ -1,7 +1,7 @@
 import type { Middleware, Placement } from '@floating-ui/dom';
 import { ImpulseElement, registerElement } from '@ambiki/impulse';
 import { fixture } from '@ambiki/impulse/testing';
-import { nextFrame } from '../internal/test_waits';
+import { nextFrames } from '../internal/test_waits';
 import useFloatingUI from './use_floating_ui';
 
 /**
@@ -63,9 +63,8 @@ function moveAnchor(anchor: HTMLElement, position: { left?: string; top?: string
  * Gives a reposition that a lingering `autoUpdate` would start, which nothing announces, two frames to land. Only for a
  * test that expects none.
  */
-async function letAutoUpdateRun() {
-  await nextFrame();
-  await nextFrame();
+function letAutoUpdateRun() {
+  return nextFrames(2);
 }
 
 /** Moves the floating element 7px along the x axis. */
