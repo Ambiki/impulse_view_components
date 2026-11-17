@@ -1,9 +1,7 @@
 import type AwcMonthCalendarElement from './index';
-import type { AwcMonthCalendarCommitEvent } from './index';
-import { whenInitialized } from '@ambiki/impulse';
-import { expect, fixture } from '@open-wc/testing';
-import { sendKeys } from '@web/test-runner-commands';
+import { fixture, recordEvents } from '@ambiki/impulse/testing';
 import { Idiomorph } from 'idiomorph';
+import { userEvent } from 'vitest/browser';
 import { CalendarDate, today } from '../../internal/calendar_date';
 import { canMoveView, gridRows, headingText } from '../../internal/calendar_grid';
 import { MONTH_ENGLISH, MONTH_LEVEL } from '../../internal/month_level';
@@ -70,10 +68,8 @@ function monthCalendarHtml(options: CalendarOptions = {}) {
   </awc-month-calendar>`;
 }
 
-async function monthCalendarFixture(options?: CalendarOptions) {
-  const el = await fixture<AwcMonthCalendarElement>(monthCalendarHtml(options));
-  await whenInitialized(el);
-  return el;
+function monthCalendarFixture(options?: CalendarOptions) {
+  return fixture<AwcMonthCalendarElement>(monthCalendarHtml(options));
 }
 
 /** The button of the month `value` names, as `YYYY-MM`, in the grid shown. */
@@ -99,23 +95,17 @@ function focusedCell() {
   return (document.activeElement as HTMLElement | null)?.dataset.date ?? null;
 }
 
-let recording: AbortController | undefined;
-
-/** Records the details of the `commit` events, in the order they reach the document. */
+/** Records the `commit` events, in the order they reach the document. */
 function recordCommits() {
-  recording = new AbortController();
-  const details: AwcMonthCalendarCommitEvent[] = [];
-  document.addEventListener(
-    'awc-month-calendar:commit',
-    (event) => details.push((event as CustomEvent<AwcMonthCalendarCommitEvent>).detail),
-    { signal: recording.signal },
-  );
-  return details;
+  return recordEvents(document, ['awc-month-calendar:commit']);
+}
+
+/** The details of the recorded `commit` events. */
+function details(commits: ReturnType<typeof recordCommits>) {
+  return commits.events.map((event) => event.detail);
 }
 
 describe('awc-month-calendar', () => {
-  afterEach(() => recording?.abort());
-
   describe('committing a month', () => {
     it('makes it the value, and emits commit with it', async () => {
       const el = await monthCalendarFixture({ value: '2026-11' });
@@ -125,7 +115,7 @@ describe('awc-month-calendar', () => {
 
       expect(el.value).to.equal('2026-03');
       expect(selectedCell(el)).to.equal('2026-03-01');
-      expect(commits).to.eql([{ value: '2026-03' }]);
+      expect(details(commits)).to.eql([{ value: '2026-03' }]);
     });
 
     it('emits nothing for the month already selected', async () => {
@@ -134,7 +124,7 @@ describe('awc-month-calendar', () => {
 
       month(el, '2026-11').click();
 
-      expect(commits).to.eql([]);
+      expect(details(commits)).to.eql([]);
     });
 
     it('names each month by its abbreviation, and by its month and year to screen readers', async () => {
@@ -169,7 +159,7 @@ describe('awc-month-calendar', () => {
       expect(el.grid.getAttribute('aria-disabled')).to.equal('true');
       expect(el.querySelectorAll('button:enabled')).to.have.length(0);
       expect(el.value).to.equal('2026-11');
-      expect(commits).to.eql([]);
+      expect(details(commits)).to.eql([]);
     });
   });
 
@@ -179,20 +169,20 @@ describe('awc-month-calendar', () => {
       month(el, '2026-11').focus();
 
       // October, November and December share a row.
-      await sendKeys({ press: 'Home' });
+      await userEvent.keyboard('{Home}');
       expect(focusedCell()).to.equal('2026-10-01');
-      await sendKeys({ press: 'End' });
+      await userEvent.keyboard('{End}');
       expect(focusedCell()).to.equal('2026-12-01');
-      await sendKeys({ press: 'ArrowUp' });
+      await userEvent.keyboard('{ArrowUp}');
       expect(focusedCell()).to.equal('2026-09-01');
-      await sendKeys({ press: 'ArrowLeft' });
+      await userEvent.keyboard('{ArrowLeft}');
       expect(focusedCell()).to.equal('2026-08-01');
-      await sendKeys({ press: 'ArrowDown' });
+      await userEvent.keyboard('{ArrowDown}');
       expect(focusedCell()).to.equal('2026-11-01');
-      await sendKeys({ press: 'PageDown' });
+      await userEvent.keyboard('{PageDown}');
       expect(focusedCell()).to.equal('2027-11-01');
       expect(el.heading.textContent).to.equal('2027');
-      await sendKeys({ press: 'Shift+PageUp' });
+      await userEvent.keyboard('{Shift>}{PageUp}{/Shift}');
       expect(focusedCell()).to.equal('2026-11-01');
     });
 
@@ -200,11 +190,11 @@ describe('awc-month-calendar', () => {
       const el = await monthCalendarFixture({ value: '2026-12' });
 
       month(el, '2026-12').focus();
-      await sendKeys({ press: 'ArrowRight' });
+      await userEvent.keyboard('{ArrowRight}');
       expect(focusedCell()).to.equal('2027-01-01');
       expect(el.grid.dataset.year).to.equal('2027');
 
-      await sendKeys({ press: 'ArrowUp' });
+      await userEvent.keyboard('{ArrowUp}');
       expect(focusedCell()).to.equal('2026-10-01');
       expect(el.grid.dataset.year).to.equal('2026');
     });
@@ -214,11 +204,11 @@ describe('awc-month-calendar', () => {
       const commits = recordCommits();
 
       month(el, '2026-05').focus();
-      await sendKeys({ press: 'Enter' });
-      await sendKeys({ press: 'ArrowRight' });
-      await sendKeys({ press: ' ' });
+      await userEvent.keyboard('{Enter}');
+      await userEvent.keyboard('{ArrowRight}');
+      await userEvent.keyboard(' ');
 
-      expect(commits).to.eql([{ value: '2026-05' }, { value: '2026-06' }]);
+      expect(details(commits)).to.eql([{ value: '2026-05' }, { value: '2026-06' }]);
     });
   });
 
@@ -232,7 +222,7 @@ describe('awc-month-calendar', () => {
       expect(month(el, '2026-11').hasAttribute('aria-disabled')).to.equal(false);
       expect(month(el, '2026-12').getAttribute('aria-disabled')).to.equal('true');
       month(el, '2026-12').click();
-      expect(commits).to.eql([]);
+      expect(details(commits)).to.eql([]);
 
       el.previousView();
       el.nextView();
@@ -269,7 +259,7 @@ describe('awc-month-calendar', () => {
       expect(focusedCell()).to.equal('2027-01-01');
       expect(el.previousButton.getAttribute('aria-label')).to.equal('Previous decade');
       expect(el.nextButton.getAttribute('aria-label')).to.equal('Next decade');
-      expect(commits).to.eql([]);
+      expect(details(commits)).to.eql([]);
     });
 
     it('stops at the top level, whose heading is its text', async () => {
@@ -295,8 +285,8 @@ describe('awc-month-calendar', () => {
       const el = await monthCalendarFixture({ value: '2026-11' });
 
       drillUp(el);
-      await sendKeys({ press: 'ArrowRight' });
-      await sendKeys({ press: 'PageDown' });
+      await userEvent.keyboard('{ArrowRight}');
+      await userEvent.keyboard('{PageDown}');
 
       expect(focusedCell()).to.equal('2037-01-01');
       expect(el.grid.dataset.decade).to.equal('2030');
@@ -333,7 +323,7 @@ describe('awc-month-calendar', () => {
       expect(month(el, '2024-11').tabIndex).to.equal(0);
       expect(el.previousButton.getAttribute('aria-label')).to.equal('Previous year');
       expect(el.value).to.equal('2026-11');
-      expect(commits).to.eql([]);
+      expect(details(commits)).to.eql([]);
     });
 
     it('leaves the months as they were when the user chooses the year they drilled up from', async () => {
@@ -341,7 +331,7 @@ describe('awc-month-calendar', () => {
       el.goToDate('2026-05');
 
       drillUp(el);
-      await sendKeys({ press: 'Enter' });
+      await userEvent.keyboard('{Enter}');
 
       expect(el.grid.dataset.year).to.equal('2026');
       expect(focusedCell()).to.equal('2026-05-01');
@@ -365,7 +355,7 @@ describe('awc-month-calendar', () => {
       el.goToDate('2026-03');
 
       drillUp(el);
-      await sendKeys({ press: 'Enter' });
+      await userEvent.keyboard('{Enter}');
 
       expect(focusedCell()).to.equal('2026-03-01');
     });
@@ -423,7 +413,7 @@ describe('awc-month-calendar', () => {
       el.clear();
       Idiomorph.morph(el, monthCalendarHtml({ value: '2012-06' }));
 
-      expect(commits).to.eql([]);
+      expect(details(commits)).to.eql([]);
       expect(el.value).to.equal('2012-06');
       expect(el.grid.dataset.year).to.equal('2012');
       expect(selectedCell(el)).to.equal('2012-06-01');

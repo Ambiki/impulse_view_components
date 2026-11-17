@@ -1,11 +1,10 @@
-import { aTimeout, expect, fixture, nextFrame } from '@open-wc/testing';
+import { fixture } from '@ambiki/impulse/testing';
 import LiveAnnouncer from './live_announcer';
 
-/** Waits for the announcer to write, which it does two frames after it is asked to. */
-async function written() {
-  await nextFrame();
-  await nextFrame();
-  await nextFrame();
+/** Moves on to when the announcer writes, which it does two frames after it is asked to. */
+function written() {
+  vi.advanceTimersToNextFrame();
+  vi.advanceTimersToNextFrame();
 }
 
 function texts(liveRegion: HTMLElement) {
@@ -13,6 +12,10 @@ function texts(liveRegion: HTMLElement) {
 }
 
 describe('LiveAnnouncer', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
   async function setup() {
     const container = await fixture<HTMLDivElement>(
       '<div><div id="polite" aria-live="polite"></div><div id="assertive" aria-live="assertive"></div></div>',
@@ -27,7 +30,7 @@ describe('LiveAnnouncer', () => {
 
     announcer.announce(polite, {}, 'Saved');
     expect(texts(polite)).to.deep.equal([]);
-    await written();
+    written();
 
     expect(texts(polite)).to.deep.equal(['Saved']);
   });
@@ -38,7 +41,7 @@ describe('LiveAnnouncer', () => {
     announcer.announce(polite, {}, 'Goal created.');
     announcer.announce(assertive, {}, 'Couldn’t email the parents.');
     announcer.announce(polite, {}, 'Copied.');
-    await written();
+    written();
 
     expect(texts(polite)).to.deep.equal(['Goal created.', 'Copied.']);
     expect(texts(assertive)).to.deep.equal(['Couldn’t email the parents.']);
@@ -50,13 +53,13 @@ describe('LiveAnnouncer', () => {
 
     announcer.announce(polite, upload, 'Uploading…');
     announcer.announce(polite, upload, 'Uploaded.');
-    await written();
+    written();
     expect(texts(polite)).to.deep.equal(['Uploaded.']);
 
     const save = {};
     announcer.announce(polite, save, 'Saving…');
     announcer.announce(assertive, save, 'Couldn’t save.');
-    await written();
+    written();
     expect(texts(polite)).to.deep.equal([]);
     expect(texts(assertive)).to.deep.equal(['Couldn’t save.']);
   });
@@ -64,14 +67,14 @@ describe('LiveAnnouncer', () => {
   it('replaces what the live region last said, and empties it once that has been heard', async () => {
     const { announcer, polite } = await setup();
     announcer.announce(polite, {}, 'Saved');
-    await written();
+    written();
 
     announcer.announce(polite, {}, 'Copied');
     expect(texts(polite)).to.deep.equal([]);
-    await written();
+    written();
     expect(texts(polite)).to.deep.equal(['Copied']);
 
-    await aTimeout(1100);
+    vi.advanceTimersByTime(1100);
     expect(texts(polite)).to.deep.equal([]);
   });
 });

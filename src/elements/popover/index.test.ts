@@ -1,8 +1,8 @@
 import type AwcPopoverElement from './index';
-import { whenInitialized } from '@ambiki/impulse';
-import { expect, fixture, nextFrame, waitUntil } from '@open-wc/testing';
+import { fixture, recordEvents, whenSettled } from '@ambiki/impulse/testing';
 import { Idiomorph } from 'idiomorph';
 import { componentMarkup, markupDifferences } from '../../internal/test_markup';
+import { nextFrames } from '../../internal/test_waits';
 // Registers `awc-popover`. Kept separate from the type import above, which the bundler elides.
 import './index';
 
@@ -29,13 +29,11 @@ function popoverHtml({ attributes = '', content = '' } = {}) {
   `;
 }
 
-async function popoverFixture(options: Parameters<typeof popoverHtml>[0] = {}) {
-  const el = await fixture<AwcPopoverElement>(popoverHtml(options));
-  await whenInitialized(el);
-  return el;
+function popoverFixture(options: Parameters<typeof popoverHtml>[0] = {}) {
+  return fixture<AwcPopoverElement>(popoverHtml(options));
 }
 
-const EVENTS = ['show', 'shown', 'hide', 'hidden'] as const;
+const EVENTS = ['awc-popover:show', 'awc-popover:shown', 'awc-popover:hide', 'awc-popover:hidden'] as const;
 
 /**
  * Whether `element` has focus. Compared here rather than with `expect(document.activeElement).to.equal(element)`, whose
@@ -50,15 +48,9 @@ function isPopoverOpen(panel: HTMLElement) {
   return panel.matches(':popover-open');
 }
 
-/** Records, in order, the `awc-popover:*` open and close events `el` dispatches. */
-function recordEvents(el: AwcPopoverElement) {
-  const events: string[] = [];
-  for (const name of EVENTS) {
-    el.addEventListener(`awc-popover:${name}`, (event) => {
-      if (event.target === el) events.push(name);
-    });
-  }
-  return events;
+/** Records, in order, the open and close events `el` dispatches itself. */
+function record(el: AwcPopoverElement) {
+  return recordEvents(el, EVENTS, { self: true });
 }
 
 /** Prevents the next `awc-popover:<name>` event `el` dispatches, leaving alone those bubbling from popovers nested in it. */
@@ -82,10 +74,12 @@ function clickOutside() {
   press(document.body);
 }
 
-/** Waits long enough for a rejection from a `hide` that nothing awaits to be reported as `unhandledrejection`. */
-async function settle() {
-  await nextFrame();
-  await nextFrame();
+/**
+ * Gives the browser two frames, for what ends on a frame that no test can await, such as a `hide` that nothing returns,
+ * which closes on the next frame. Only where nothing comes to wait for: each call says what it gives the time to.
+ */
+function twoFrames() {
+  return nextFrames(2);
 }
 
 describe('awc-popover', () => {
@@ -98,11 +92,11 @@ describe('awc-popover', () => {
   it('moves the open panel when `placement` changes', async () => {
     const el = await popoverFixture();
     el.show();
-    await waitUntil(() => el.panel.getAttribute('x-placement') === 'bottom', 'did not position the panel');
+    await vi.waitFor(() => expect(el.panel.getAttribute('x-placement'), 'did not position the panel').to.equal('bottom'));
 
     el.placement = 'top';
 
-    await waitUntil(() => el.panel.getAttribute('x-placement') === 'top', 'did not move the panel');
+    await vi.waitFor(() => expect(el.panel.getAttribute('x-placement'), 'did not move the panel').to.equal('top'));
     // Above the trigger, 8px away: 100 - 8 - 40.
     expect(el.panel.style.top).to.equal('52px');
   });
@@ -110,7 +104,7 @@ describe('awc-popover', () => {
   it('closes cleanly when removed while open', async () => {
     const el = await popoverFixture();
     el.show();
-    await waitUntil(() => el.panel.getAttribute('x-placement') === 'bottom', 'did not position the panel');
+    await vi.waitFor(() => expect(el.panel.getAttribute('x-placement'), 'did not position the panel').to.equal('bottom'));
     const { button, panel } = el;
     const rejections: unknown[] = [];
     const onRejection = (event: PromiseRejectionEvent) => {
@@ -121,7 +115,7 @@ describe('awc-popover', () => {
 
     try {
       el.remove();
-      await settle();
+      await twoFrames(); // The hide that removal starts, which nothing returns, and a rejection from it.
     } finally {
       window.removeEventListener('unhandledrejection', onRejection);
     }
@@ -134,79 +128,77 @@ describe('awc-popover', () => {
   describe('events', () => {
     it('stays closed when `show` is prevented', async () => {
       const el = await popoverFixture();
-      const events = recordEvents(el);
+      const events = record(el);
       preventNext(el, 'show');
 
       el.button.click();
-      await settle();
+      await twoFrames(); // A later request from the same action would come by then.
 
       expect(el.open).to.equal(false);
       expect(isPopoverOpen(el.panel)).to.equal(false);
-      expect(events).to.eql(['show']);
+      expect(events.types).to.eql(['awc-popover:show']);
     });
 
     it('emits the request and state events when its trigger is clicked', async () => {
       const el = await popoverFixture();
-      const events = recordEvents(el);
+      const events = record(el);
 
       el.button.click();
       el.button.click();
-      await settle();
+      await events.waitFor('awc-popover:hidden');
 
       expect(el.open).to.equal(false);
-      expect(events).to.eql(['show', 'shown', 'hide', 'hidden']);
+      expect(events.types).to.eql(['awc-popover:show', 'awc-popover:shown', 'awc-popover:hide', 'awc-popover:hidden']);
     });
 
     it('stays open when `hide` is prevented', async () => {
       const el = await popoverFixture();
       el.show();
-      const events = recordEvents(el);
+      const events = record(el);
       preventNext(el, 'hide');
 
       el.button.click();
-      await settle();
+      await twoFrames(); // A later request from the same action would come by then.
 
       expect(el.open).to.equal(true);
       expect(isPopoverOpen(el.panel)).to.equal(true);
-      expect(events).to.eql(['hide']);
+      expect(events.types).to.eql(['awc-popover:hide']);
     });
 
     it('requests to hide on an outside click', async () => {
       const el = await popoverFixture();
       el.show();
-      const events = recordEvents(el);
+      const events = record(el);
       preventNext(el, 'hide');
 
       clickOutside();
-      await settle();
       expect(el.open).to.equal(true);
 
       clickOutside();
-      await settle();
+      await events.waitFor('awc-popover:hidden');
       expect(el.open).to.equal(false);
-      expect(events).to.eql(['hide', 'hide', 'hidden']);
+      expect(events.types).to.eql(['awc-popover:hide', 'awc-popover:hide', 'awc-popover:hidden']);
     });
 
     it('requests to hide on Escape', async () => {
       const el = await popoverFixture();
       el.show();
-      const events = recordEvents(el);
+      const events = record(el);
       const escape = () => el.panel.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
       preventNext(el, 'hide');
 
       escape();
-      await settle();
       expect(el.open).to.equal(true);
 
       escape();
-      await settle();
+      await events.waitFor('awc-popover:hidden');
       expect(el.open).to.equal(false);
-      expect(events).to.eql(['hide', 'hide', 'hidden']);
+      expect(events.types).to.eql(['awc-popover:hide', 'awc-popover:hide', 'awc-popover:hidden']);
     });
 
     it('emits only the state events when shown and hidden from code', async () => {
       const el = await popoverFixture();
-      const events = recordEvents(el);
+      const events = record(el);
       preventNext(el, 'show');
       preventNext(el, 'hide');
 
@@ -214,12 +206,12 @@ describe('awc-popover', () => {
       await el.hide();
 
       expect(el.open).to.equal(false);
-      expect(events).to.eql(['shown', 'hidden']);
+      expect(events.types).to.eql(['awc-popover:shown', 'awc-popover:hidden']);
     });
 
     it('opens and closes when `open` changes, emitting only the state events', async () => {
       const el = await popoverFixture();
-      const events = recordEvents(el);
+      const events = record(el);
       preventNext(el, 'show');
       preventNext(el, 'hide');
 
@@ -228,28 +220,27 @@ describe('awc-popover', () => {
       expect(el.button.getAttribute('aria-expanded')).to.equal('true');
 
       el.removeAttribute('open');
-      await settle();
+      await events.waitFor('awc-popover:hidden');
 
       expect(isPopoverOpen(el.panel)).to.equal(false);
       expect(el.button.getAttribute('aria-expanded')).to.equal('false');
-      expect(events).to.eql(['shown', 'hidden']);
+      expect(events.types).to.eql(['awc-popover:shown', 'awc-popover:hidden']);
     });
 
     it('hides the popovers nested in it first, each emitting only `hidden`', async () => {
       const outer = await popoverFixture({ content: popoverHtml({ content: '<button type="button">Inside</button>' }) });
       const inner = outer.querySelector<AwcPopoverElement>('awc-popover')!;
-      await whenInitialized(inner);
       outer.show();
       inner.show();
-      const outerEvents = recordEvents(outer);
-      const innerEvents = recordEvents(inner);
+      const outerEvents = record(outer);
+      const innerEvents = record(inner);
 
       await outer.hide();
-      await settle();
+      await innerEvents.waitFor('awc-popover:hidden');
 
       expect(isPopoverOpen(inner.panel)).to.equal(false);
-      expect(innerEvents).to.eql(['hidden']);
-      expect(outerEvents).to.eql(['hidden']);
+      expect(innerEvents.types).to.eql(['awc-popover:hidden']);
+      expect(outerEvents.types).to.eql(['awc-popover:hidden']);
       expect(isFocused(outer.button)).to.equal(true);
     });
 
@@ -257,17 +248,17 @@ describe('awc-popover', () => {
       const outer = await popoverFixture({ content: popoverHtml({ content: '<button type="button">Inside</button>' }) });
       const inner = outer.querySelector<AwcPopoverElement>('awc-popover')!;
       const el = await popoverFixture();
-      await whenInitialized(inner);
       outer.show();
       inner.show();
-      const outerEvents = recordEvents(outer);
-      const innerEvents = recordEvents(inner);
+      const outerEvents = record(outer);
+      const innerEvents = record(inner);
 
       el.show();
-      await settle();
+      await innerEvents.waitFor('awc-popover:hidden');
+      await outerEvents.waitFor('awc-popover:hidden');
 
-      expect(innerEvents).to.eql(['hidden']);
-      expect(outerEvents).to.eql(['hidden']);
+      expect(innerEvents.types).to.eql(['awc-popover:hidden']);
+      expect(outerEvents.types).to.eql(['awc-popover:hidden']);
       expect(el.open).to.equal(true);
     });
 
@@ -275,126 +266,123 @@ describe('awc-popover', () => {
       const other = await popoverFixture();
       const el = await popoverFixture();
       other.show();
-      const otherEvents = recordEvents(other);
+      const otherEvents = record(other);
 
       el.setAttribute('open', '');
-      await settle();
+      await otherEvents.waitFor('awc-popover:hidden');
 
       expect(other.open).to.equal(false);
       expect(isPopoverOpen(other.panel)).to.equal(false);
-      expect(otherEvents).to.eql(['hidden']);
+      expect(otherEvents.types).to.eql(['awc-popover:hidden']);
     });
 
     it('emits the request events from `requestShow` and `requestHide`', async () => {
       const el = await popoverFixture();
-      const events = recordEvents(el);
+      const events = record(el);
 
       el.requestShow();
       await el.requestHide();
 
-      expect(events).to.eql(['show', 'shown', 'hide', 'hidden']);
+      expect(events.types).to.eql(['awc-popover:show', 'awc-popover:shown', 'awc-popover:hide', 'awc-popover:hidden']);
     });
 
     it('does not open when another open popover refuses to hide', async () => {
       const other = await popoverFixture();
       const el = await popoverFixture();
       other.show();
-      const otherEvents = recordEvents(other);
-      const events = recordEvents(el);
+      const otherEvents = record(other);
+      const events = record(el);
       preventNext(other, 'hide');
 
       el.button.click();
-      await settle();
+      await twoFrames(); // A later request from the same action would come by then.
 
       expect(other.open).to.equal(true);
       expect(el.open).to.equal(false);
-      expect(otherEvents).to.eql(['hide']);
-      expect(events).to.eql(['show']);
+      expect(otherEvents.types).to.eql(['awc-popover:hide']);
+      expect(events.types).to.eql(['awc-popover:show']);
     });
 
     it('hides the other open popovers when it opens', async () => {
       const other = await popoverFixture();
       const el = await popoverFixture();
       other.show();
-      const otherEvents = recordEvents(other);
+      const otherEvents = record(other);
 
       el.button.click();
-      await settle();
+      await otherEvents.waitFor('awc-popover:hidden');
 
       expect(other.open).to.equal(false);
       expect(el.open).to.equal(true);
-      expect(otherEvents).to.eql(['hide', 'hidden']);
+      expect(otherEvents.types).to.eql(['awc-popover:hide', 'awc-popover:hidden']);
     });
 
     it('asks another open popover to hide once when its trigger is pressed', async () => {
       const other = await popoverFixture();
       const el = await popoverFixture();
       other.show();
-      const otherEvents = recordEvents(other);
+      const otherEvents = record(other);
 
       press(el.button);
-      await settle();
+      await otherEvents.waitFor('awc-popover:hidden');
 
       expect(other.open).to.equal(false);
       expect(el.open).to.equal(true);
-      expect(otherEvents).to.eql(['hide', 'hidden']);
+      expect(otherEvents.types).to.eql(['awc-popover:hide', 'awc-popover:hidden']);
     });
 
     it('leaves another open popover alone when its trigger is pressed and `show` is prevented', async () => {
       const other = await popoverFixture();
       const el = await popoverFixture();
       other.show();
-      const otherEvents = recordEvents(other);
+      const otherEvents = record(other);
       preventNext(el, 'show');
 
       press(el.button);
-      await settle();
+      await twoFrames(); // A later request from the same action would come by then.
 
       expect(other.open).to.equal(true);
       expect(el.open).to.equal(false);
-      expect(otherEvents).to.eql([]);
+      expect(otherEvents.types).to.eql([]);
     });
 
     it('does not emit a stale `hidden` when shown again while hiding', async () => {
       const el = await popoverFixture();
       el.show();
-      const events = recordEvents(el);
+      const events = record(el);
 
-      el.hide();
+      const hiding = el.hide();
       el.show();
-      await settle();
+      await hiding;
 
       expect(el.open).to.equal(true);
       expect(isPopoverOpen(el.panel)).to.equal(true);
-      expect(events).to.eql(['shown']);
+      expect(events.types).to.eql(['awc-popover:shown']);
     });
 
     it('opens silently when it connects with `open` set', async () => {
-      const events: string[] = [];
-      for (const name of EVENTS) {
-        document.addEventListener(`awc-popover:${name}`, () => events.push(name), { once: true });
-      }
+      const events = recordEvents(document, EVENTS);
 
       const el = await popoverFixture({ attributes: 'open', content: '<button type="button" autofocus>Inside</button>' });
 
       expect(isPopoverOpen(el.panel)).to.equal(true);
       // Starting out open isn't a change, so it doesn't take focus either.
       expect(el.panel.contains(document.activeElement)).to.equal(false);
-      expect(events).to.eql([]);
+      expect(events.types).to.eql([]);
     });
 
     it('closes silently when removed, keeping `open`', async () => {
       const el = await popoverFixture();
       el.show();
       const { panel } = el;
-      const events = recordEvents(el);
+      const events = record(el);
 
       el.remove();
-      await settle();
+      await twoFrames(); // The close that removal starts, which nothing returns.
 
       expect(el.open).to.equal(true);
       expect(isPopoverOpen(panel)).to.equal(false);
-      expect(events).to.eql([]);
+      expect(events.types).to.eql([]);
     });
 
     it('opens again silently when reconnected', async () => {
@@ -402,15 +390,15 @@ describe('awc-popover', () => {
       const parent = el.parentElement!;
       el.show();
       el.remove();
-      await settle();
-      const events = recordEvents(el);
+      await twoFrames(); // The close that removal starts, which nothing returns.
+      const events = record(el);
 
       parent.append(el);
-      await whenInitialized(el);
+      await whenSettled();
 
       expect(isPopoverOpen(el.panel)).to.equal(true);
       expect(el.button.getAttribute('aria-expanded')).to.equal('true');
-      expect(events).to.eql([]);
+      expect(events.types).to.eql([]);
     });
 
     it('stays closed when hidden while removed', async () => {
@@ -418,54 +406,54 @@ describe('awc-popover', () => {
       const parent = el.parentElement!;
       el.show();
       el.remove();
-      await settle();
-      const events = recordEvents(el);
+      await twoFrames(); // The close that removal starts, which nothing returns.
+      const events = record(el);
 
       await el.hide();
       parent.append(el);
-      await whenInitialized(el);
+      await whenSettled();
 
       expect(el.open).to.equal(false);
       expect(isPopoverOpen(el.panel)).to.equal(false);
-      expect(events).to.eql([]);
+      expect(events.types).to.eql([]);
     });
 
     it('emits nothing when asked to hide while removed', async () => {
       const el = await popoverFixture();
       el.show();
       el.remove();
-      await settle();
-      const events = recordEvents(el);
+      await twoFrames(); // The close that removal starts, which nothing returns.
+      const events = record(el);
 
       await el.requestHide();
       await el.toggle();
 
-      expect(events).to.eql([]);
+      expect(events.types).to.eql([]);
     });
 
     it('opens silently once it connects when shown before', async () => {
       const container = await fixture<HTMLElement>('<div></div>');
       container.innerHTML = popoverHtml();
       const el = container.querySelector('awc-popover')!;
-      const events = recordEvents(el);
+      const events = record(el);
 
       el.show();
-      await whenInitialized(el);
+      await whenSettled();
 
       expect(isPopoverOpen(el.panel)).to.equal(true);
-      expect(events).to.eql([]);
+      expect(events.types).to.eql([]);
     });
 
     it('does nothing when `open` is set to the value it already has', async () => {
       const el = await popoverFixture();
       el.show();
-      const events = recordEvents(el);
+      const events = record(el);
 
       el.open = true;
       el.setAttribute('open', 'open');
 
       expect(isPopoverOpen(el.panel)).to.equal(true);
-      expect(events).to.eql([]);
+      expect(events.types).to.eql([]);
     });
   });
 
@@ -527,32 +515,31 @@ describe('awc-popover', () => {
       const outside = document.createElement('button');
       el.after(outside);
       el.show();
-      const events = recordEvents(el);
+      const events = record(el);
       preventNext(el, 'hide');
 
       outside.focus();
-      await settle();
       expect(el.open).to.equal(true);
 
       el.querySelector<HTMLButtonElement>('.panel button')!.focus();
       outside.focus();
-      await settle();
+      await events.waitFor('awc-popover:hidden');
 
       expect(el.open).to.equal(false);
-      expect(events).to.eql(['hide', 'hide', 'hidden']);
+      expect(events.types).to.eql(['awc-popover:hide', 'awc-popover:hide', 'awc-popover:hidden']);
     });
 
     it('stays open when focus moves within it or to its trigger', async () => {
       const el = await popoverFixture({ content: '<button type="button" class="a">A</button><button type="button" class="b">B</button>' });
       el.show();
-      const events = recordEvents(el);
+      const events = record(el);
 
       el.querySelector<HTMLButtonElement>('.b')!.focus();
       el.button.focus();
-      await settle();
+      await twoFrames(); // A hide the focus move started would have come by then.
 
       expect(el.open).to.equal(true);
-      expect(events).to.eql([]);
+      expect(events.types).to.eql([]);
     });
 
     it('requests to hide once when a press outside moves focus', async () => {
@@ -560,7 +547,7 @@ describe('awc-popover', () => {
       const outside = document.createElement('input');
       el.after(outside);
       el.show();
-      const events = recordEvents(el);
+      const events = record(el);
       preventNext(el, 'hide');
 
       // A press focuses what it lands on between `pointerdown` and `click`.
@@ -568,10 +555,10 @@ describe('awc-popover', () => {
       outside.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
       outside.focus();
       outside.click();
-      await settle();
+      await twoFrames(); // A later request from the same action would come by then.
 
       expect(el.open).to.equal(true);
-      expect(events).to.eql(['hide']);
+      expect(events.types).to.eql(['awc-popover:hide']);
     });
 
     it('requests to hide when a press outside with another button moves focus, as a right click does', async () => {
@@ -579,17 +566,17 @@ describe('awc-popover', () => {
       const outside = document.createElement('input');
       el.after(outside);
       el.show();
-      const events = recordEvents(el);
+      const events = record(el);
 
       // No click follows, so the outside click never hears of the press.
       outside.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 2 }));
       outside.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, button: 2 }));
       outside.focus();
       outside.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true }));
-      await settle();
+      await events.waitFor('awc-popover:hidden');
 
       expect(el.open).to.equal(false);
-      expect(events).to.eql(['hide', 'hidden']);
+      expect(events.types).to.eql(['awc-popover:hide', 'awc-popover:hidden']);
     });
 
     it('keeps focus where it is, and stays open, when it connects open', async () => {
@@ -599,14 +586,14 @@ describe('awc-popover', () => {
 
       container.insertAdjacentHTML('beforeend', popoverHtml({ attributes: 'open', content: '<button type="button" autofocus>Inside</button>' }));
       const el = container.querySelector('awc-popover')!;
-      const events = recordEvents(el);
-      await whenInitialized(el);
-      await settle();
+      const events = record(el);
+      await whenSettled();
+      await twoFrames(); // The browser may focus an `autofocus` element when it next renders.
 
       expect(el.open).to.equal(true);
       expect(isPopoverOpen(el.panel)).to.equal(true);
       expect(isFocused(input)).to.equal(true);
-      expect(events).to.eql([]);
+      expect(events.types).to.eql([]);
     });
 
     it('requests to hide when a press inside it moves focus out', async () => {
@@ -614,15 +601,15 @@ describe('awc-popover', () => {
       const outside = document.createElement('button');
       el.after(outside);
       el.show();
-      const events = recordEvents(el);
+      const events = record(el);
 
       // Such as a button inside that opens a dialog elsewhere on the page.
       el.querySelector('.inside')!.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
       outside.focus();
-      await settle();
+      await events.waitFor('awc-popover:hidden');
 
       expect(el.open).to.equal(false);
-      expect(events).to.eql(['hide', 'hidden']);
+      expect(events.types).to.eql(['awc-popover:hide', 'awc-popover:hidden']);
     });
 
     it('requests to hide when focus moves out after a press that ended without a click', async () => {
@@ -631,15 +618,15 @@ describe('awc-popover', () => {
       const outside = document.createElement('button');
       el.after(pressed, outside);
       el.show();
-      const events = recordEvents(el);
+      const events = record(el);
 
       // Such as a right-click, or a touch that turned into a scroll.
       pressed.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
       outside.focus();
-      await settle();
+      await events.waitFor('awc-popover:hidden');
 
       expect(el.open).to.equal(false);
-      expect(events).to.eql(['hide', 'hidden']);
+      expect(events.types).to.eql(['awc-popover:hide', 'awc-popover:hidden']);
     });
 
     it('moves focus to the panel when it has nothing focusable', async () => {
@@ -664,23 +651,29 @@ describe('awc-popover', () => {
         `,
       });
       const nested = parent.querySelector<AwcPopoverElement>('awc-popover')!;
-      await whenInitialized(nested);
       parent.show();
       nested.show();
       return { parent, nested };
     }
 
-    /** Records, in order, the open and close events of each popover in `popovers`, named after its key. */
-    function recordEventsOf(popovers: Record<string, AwcPopoverElement>) {
-      const events: string[] = [];
-      for (const [key, el] of Object.entries(popovers)) {
-        for (const name of EVENTS) {
-          el.addEventListener(`awc-popover:${name}`, (event) => {
-            if (event.target === el) events.push(`${key}:${name}`);
-          });
-        }
-      }
-      return events;
+    /**
+     * Records, in order, the open and close events of each popover in `popovers`, the first of which holds the others.
+     * `names` lists them named after the popover's key, such as `nested:hide`, and `waitFor` waits for one popover's.
+     */
+    function recordEventsOf<K extends string>(popovers: Record<K, AwcPopoverElement>) {
+      const entries = Object.entries(popovers) as [K, AwcPopoverElement][];
+      // On the outermost popover, which the others' events bubble to, so that their order across popovers is kept.
+      const all = recordEvents(entries[0][1], EVENTS);
+      const own = new Map(entries.map(([key, el]) => [key, record(el)]));
+      const keyOf = new Map<EventTarget | null, K>(entries.map(([key, el]) => [el, key]));
+      return {
+        get names() {
+          return all.events
+            .filter((event) => keyOf.has(event.target))
+            .map((event) => `${keyOf.get(event.target)}:${event.type.slice('awc-popover:'.length)}`);
+        },
+        waitFor: (key: K, type: (typeof EVENTS)[number]) => own.get(key)!.waitFor(type),
+      };
     }
 
     it('requests to hide with the popovers nested in it on one outside click, innermost first', async () => {
@@ -688,11 +681,11 @@ describe('awc-popover', () => {
       const events = recordEventsOf({ parent, nested });
 
       clickOutside();
-      await settle();
+      await events.waitFor('parent', 'awc-popover:hidden');
 
       expect(nested.open).to.equal(false);
       expect(parent.open).to.equal(false);
-      expect(events).to.eql(['nested:hide', 'nested:hidden', 'parent:hide', 'parent:hidden']);
+      expect(events.names).to.eql(['nested:hide', 'nested:hidden', 'parent:hide', 'parent:hidden']);
     });
 
     it('stays open, and asks nothing more, when a popover nested in it refuses to hide on an outside click', async () => {
@@ -701,11 +694,11 @@ describe('awc-popover', () => {
       preventNext(nested, 'hide');
 
       clickOutside();
-      await settle();
+      await twoFrames(); // A request of the parent's, made once the nested one answered, would come later.
 
       expect(nested.open).to.equal(true);
       expect(parent.open).to.equal(true);
-      expect(events).to.eql(['nested:hide']);
+      expect(events.names).to.eql(['nested:hide']);
     });
 
     it('hides the popovers nested in it when it refuses to hide itself', async () => {
@@ -714,11 +707,11 @@ describe('awc-popover', () => {
       preventNext(parent, 'hide');
 
       clickOutside();
-      await settle();
+      await events.waitFor('parent', 'awc-popover:hide');
 
       expect(nested.open).to.equal(false);
       expect(parent.open).to.equal(true);
-      expect(events).to.eql(['nested:hide', 'nested:hidden', 'parent:hide']);
+      expect(events.names).to.eql(['nested:hide', 'nested:hidden', 'parent:hide']);
     });
 
     it('asks a popover nested in it once when focus moves out of both', async () => {
@@ -729,17 +722,17 @@ describe('awc-popover', () => {
       preventNext(nested, 'hide');
 
       outside.focus();
-      await settle();
+      await twoFrames(); // A request of the parent's, made once the nested one answered, would come later.
       expect(parent.open).to.equal(true);
-      expect(events).to.eql(['nested:hide']);
+      expect(events.names).to.eql(['nested:hide']);
 
       nested.querySelector<HTMLButtonElement>('.nested-button')!.focus();
       outside.focus();
-      await settle();
+      await events.waitFor('parent', 'awc-popover:hidden');
 
       expect(nested.open).to.equal(false);
       expect(parent.open).to.equal(false);
-      expect(events).to.eql(['nested:hide', 'nested:hide', 'nested:hidden', 'parent:hide', 'parent:hidden']);
+      expect(events.names).to.eql(['nested:hide', 'nested:hide', 'nested:hidden', 'parent:hide', 'parent:hidden']);
     });
 
     it('asks a popover nested in it once when its close button is pressed', async () => {
@@ -748,11 +741,11 @@ describe('awc-popover', () => {
       preventNext(nested, 'hide');
 
       press(parent.querySelector<HTMLButtonElement>('.parent-close')!);
-      await settle();
+      await twoFrames(); // A request of the parent's, made once the nested one answered, would come later.
 
       expect(nested.open).to.equal(true);
       expect(parent.open).to.equal(true);
-      expect(events).to.eql(['nested:hide']);
+      expect(events.names).to.eql(['nested:hide']);
     });
 
     it('asks a popover nested in it once when its trigger is pressed', async () => {
@@ -761,11 +754,11 @@ describe('awc-popover', () => {
       preventNext(nested, 'hide');
 
       press(parent.button);
-      await settle();
+      await twoFrames(); // A request of the parent's, made once the nested one answered, would come later.
 
       expect(nested.open).to.equal(true);
       expect(parent.open).to.equal(true);
-      expect(events).to.eql(['nested:hide']);
+      expect(events.names).to.eql(['nested:hide']);
     });
 
     it('stays open on Escape and `requestHide` when a popover nested in it refuses to hide', async () => {
@@ -776,11 +769,11 @@ describe('awc-popover', () => {
 
       parent.panel.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
       await parent.requestHide();
-      await settle();
+      await twoFrames(); // A request of the parent's, made once the nested one answered, would come later.
 
       expect(nested.open).to.equal(true);
       expect(parent.open).to.equal(true);
-      expect(events).to.eql(['nested:hide', 'nested:hide']);
+      expect(events.names).to.eql(['nested:hide', 'nested:hide']);
     });
 
     it('hides only the innermost popover on Escape inside it', async () => {
@@ -788,11 +781,11 @@ describe('awc-popover', () => {
       const events = recordEventsOf({ parent, nested });
 
       nested.panel.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-      await settle();
+      await events.waitFor('nested', 'awc-popover:hidden');
 
       expect(nested.open).to.equal(false);
       expect(parent.open).to.equal(true);
-      expect(events).to.eql(['nested:hide', 'nested:hidden']);
+      expect(events.names).to.eql(['nested:hide', 'nested:hidden']);
     });
 
     it('stays open when a click inside it hides a popover nested in it', async () => {
@@ -800,11 +793,11 @@ describe('awc-popover', () => {
       const events = recordEventsOf({ parent, nested });
 
       press(parent.panel);
-      await settle();
+      await events.waitFor('nested', 'awc-popover:hidden');
 
       expect(nested.open).to.equal(false);
       expect(parent.open).to.equal(true);
-      expect(events).to.eql(['nested:hide', 'nested:hidden']);
+      expect(events.names).to.eql(['nested:hide', 'nested:hidden']);
     });
 
     /** Appends an element with an open shadow root to `panel`, and returns the span inside that root. */
@@ -816,10 +809,11 @@ describe('awc-popover', () => {
     it('stays open when a click inside a shadow root in it hides a popover nested in it', async () => {
       const { parent, nested } = await nestedFixture();
       const span = appendShadowSpan(parent.panel);
+      const nestedHidden = record(nested);
 
       span.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, composed: true }));
       span.click();
-      await settle();
+      await nestedHidden.waitFor('awc-popover:hidden');
 
       expect(nested.open).to.equal(false);
       expect(parent.open).to.equal(true);
@@ -833,11 +827,11 @@ describe('awc-popover', () => {
       span.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, composed: true }));
       // Released elsewhere, the click lands on what the press and the release have in common.
       document.body.click();
-      await settle();
+      await events.waitFor('nested', 'awc-popover:hidden');
 
       expect(nested.open).to.equal(false);
       expect(parent.open).to.equal(true);
-      expect(events).to.eql(['nested:hide', 'nested:hidden']);
+      expect(events.names).to.eql(['nested:hide', 'nested:hidden']);
     });
 
     it('waits for the popovers nested in it to close before asking itself when its close button is pressed', async () => {
@@ -845,17 +839,16 @@ describe('awc-popover', () => {
       const events = recordEventsOf({ parent, nested });
 
       press(parent.querySelector<HTMLButtonElement>('.parent-close')!);
-      await settle();
+      await events.waitFor('parent', 'awc-popover:hidden');
 
       expect(nested.open).to.equal(false);
       expect(parent.open).to.equal(false);
-      expect(events).to.eql(['nested:hide', 'nested:hidden', 'parent:hide', 'parent:hidden']);
+      expect(events.names).to.eql(['nested:hide', 'nested:hidden', 'parent:hide', 'parent:hidden']);
     });
 
     it('asks each popover once when its trigger is pressed with two levels nested in it', async () => {
       const parent = await popoverFixture({ content: popoverHtml({ content: popoverHtml() }) });
       const [nested, deepest] = Array.from(parent.querySelectorAll<AwcPopoverElement>('awc-popover'));
-      await whenInitialized(deepest);
       parent.show();
       nested.show();
       deepest.show();
@@ -865,12 +858,13 @@ describe('awc-popover', () => {
       });
 
       press(parent.button);
-      await settle();
+      await events.waitFor('nested', 'awc-popover:hide');
+      await twoFrames(); // A request of the parent's, made once the nested one answered, would come later.
 
       expect(deepest.open).to.equal(false);
       expect(nested.open).to.equal(true);
       expect(parent.open).to.equal(true);
-      expect(events).to.eql(['deepest:hide', 'deepest:hidden', 'nested:hide']);
+      expect(events.names).to.eql(['deepest:hide', 'deepest:hidden', 'nested:hide']);
     });
   });
 
@@ -879,8 +873,7 @@ describe('awc-popover', () => {
     // close popovers as fast as each path allows, so that a crash fails the run.
     const ROUNDS = 100;
 
-    it('survives rapid toggling through its trigger, `show` and `hide`, and `open`', async function () {
-      this.timeout(20000);
+    it('survives rapid toggling through its trigger, `show` and `hide`, and `open`', async () => {
       const el = await popoverFixture({ content: '<button type="button">Inside</button>' });
 
       for (let i = 0; i < ROUNDS; i++) {
@@ -891,22 +884,20 @@ describe('awc-popover', () => {
         el.open = true;
         el.open = false;
       }
-      await settle();
+      await twoFrames(); // The hides the loop starts, which nothing returns.
 
       expect(el.open).to.equal(false);
       expect(isPopoverOpen(el.panel)).to.equal(false);
       expect(el.button.getAttribute('aria-expanded')).to.equal('false');
     });
 
-    it('survives nested popovers and removal while open', async function () {
-      this.timeout(20000);
+    it('survives nested popovers and removal while open', async () => {
       const container = await fixture<HTMLElement>('<div></div>');
 
       for (let i = 0; i < ROUNDS; i++) {
         container.innerHTML = popoverHtml({ content: popoverHtml({ content: '<button type="button">Inside</button>' }) });
         const [outer, inner] = Array.from(container.querySelectorAll('awc-popover'));
-        await whenInitialized(outer);
-        await whenInitialized(inner);
+        await whenSettled();
         outer.show();
         inner.show();
         if (i % 2 === 0) {
@@ -915,23 +906,21 @@ describe('awc-popover', () => {
           await outer.hide();
         }
       }
-      await settle();
+      await twoFrames(); // The closes the loop starts, which nothing returns.
 
       expect(document.querySelectorAll(':popover-open').length).to.equal(0);
     });
 
-    it('survives toggling inside a modal dialog', async function () {
-      this.timeout(20000);
+    it('survives toggling inside a modal dialog', async () => {
       const dialog = await fixture<HTMLDialogElement>(`<dialog>${popoverHtml({ content: '<button type="button">Inside</button>' })}</dialog>`);
       const el = dialog.querySelector('awc-popover')!;
-      await whenInitialized(el);
       dialog.showModal();
 
       for (let i = 0; i < ROUNDS; i++) {
         el.button.click();
         el.button.click();
       }
-      await settle();
+      await twoFrames(); // The hides the loop starts, which nothing returns.
       dialog.close();
 
       expect(el.open).to.equal(false);
@@ -967,20 +956,19 @@ describe('awc-popover', () => {
 
     it('opens and closes through its trigger, moving focus and emitting the same events', async () => {
       const el = await fixtureWithoutPopoverSupport({ content: '<button type="button" class="inside">Inside</button>' });
-      const events = recordEvents(el);
+      const events = record(el);
 
       el.button.click();
-      await settle();
       expect(el.open).to.equal(true);
       expect(el.button.getAttribute('aria-expanded')).to.equal('true');
       expect(isFocused(el.querySelector('.inside'))).to.equal(true);
 
       el.button.click();
-      await settle();
+      await events.waitFor('awc-popover:hidden');
       expect(el.open).to.equal(false);
       expect(el.button.getAttribute('aria-expanded')).to.equal('false');
       expect(isFocused(el.button)).to.equal(true);
-      expect(events).to.eql(['show', 'shown', 'hide', 'hidden']);
+      expect(events.types).to.eql(['awc-popover:show', 'awc-popover:shown', 'awc-popover:hide', 'awc-popover:hidden']);
     });
 
     it('opens when it connects with `open` set', async () => {
@@ -994,9 +982,10 @@ describe('awc-popover', () => {
       const first = await fixtureWithoutPopoverSupport();
       const second = await fixtureWithoutPopoverSupport();
       first.show();
+      const firstEvents = record(first);
 
       second.show();
-      await settle();
+      await firstEvents.waitFor('awc-popover:hidden');
 
       expect(first.open).to.equal(false);
       expect(first.button.getAttribute('aria-expanded')).to.equal('false');
@@ -1011,11 +1000,12 @@ describe('awc-popover', () => {
     el.show();
 
     destination.append(el);
-    await whenInitialized(el);
+    await whenSettled();
     expect(isPopoverOpen(el.panel)).to.equal(true);
+    const events = record(el);
 
     el.button.click();
-    await settle();
+    await events.waitFor('awc-popover:hidden');
 
     expect(el.open).to.equal(false);
     expect(isPopoverOpen(el.panel)).to.equal(false);

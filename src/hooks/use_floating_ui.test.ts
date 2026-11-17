@@ -1,6 +1,7 @@
 import type { Middleware, Placement } from '@floating-ui/dom';
-import { ImpulseElement, registerElement, whenInitialized } from '@ambiki/impulse';
-import { expect, fixture, html, nextFrame, waitUntil } from '@open-wc/testing';
+import { ImpulseElement, registerElement } from '@ambiki/impulse';
+import { fixture } from '@ambiki/impulse/testing';
+import { nextFrames } from '../internal/test_waits';
 import useFloatingUI from './use_floating_ui';
 
 /**
@@ -17,7 +18,7 @@ class FloatingUIHost extends ImpulseElement {
  * owns its inline `width` and `height`.
  */
 async function floatingFixture() {
-  const host = await fixture<FloatingUIHost>(html`
+  const host = await fixture<FloatingUIHost>(`
     <floating-ui-host>
       <style>
         .anchor {
@@ -46,7 +47,6 @@ async function floatingFixture() {
       <div class="floating"><div class="arrow"></div></div>
     </floating-ui-host>
   `);
-  await whenInitialized(host);
   const anchor = host.querySelector<HTMLElement>('.anchor')!;
   const floating = host.querySelector<HTMLElement>('.floating')!;
   const arrow = host.querySelector<HTMLElement>('.arrow')!;
@@ -59,10 +59,12 @@ function moveAnchor(anchor: HTMLElement, position: { left?: string; top?: string
   window.dispatchEvent(new Event('resize'));
 }
 
-/** Waits long enough for any pending `autoUpdate` reposition to have landed. */
-async function settle() {
-  await nextFrame();
-  await nextFrame();
+/**
+ * Gives a reposition that a lingering `autoUpdate` would start, which nothing announces, two frames to land. Only for a
+ * test that expects none.
+ */
+function letAutoUpdateRun() {
+  return nextFrames(2);
 }
 
 /** Moves the floating element 7px along the x axis. */
@@ -250,16 +252,16 @@ describe('useFloatingUI', () => {
   it('positions the floating element once when created, even while closed', async () => {
     const { host, anchor, floating } = await floatingFixture();
     useFloatingUI(host, { anchorElement: anchor, floatingElement: floating });
-    await settle();
 
+    // The first reposition is not awaitable: wait for it to land.
+    await vi.waitFor(() => expect(floating.style.left).to.equal('85px'));
     expect(floating.style.position).to.equal('fixed');
-    expect(floating.style.left).to.equal('85px');
   });
 
   it('does not reposition on `update` while closed', async () => {
     const { host, anchor, floating } = await floatingFixture();
     const floatingUI = useFloatingUI(host, { anchorElement: anchor, floatingElement: floating });
-    await settle();
+    await vi.waitFor(() => expect(floating.style.left).to.equal('85px'));
 
     moveAnchor(anchor, { left: '200px' });
     await floatingUI.update();
@@ -274,11 +276,11 @@ describe('useFloatingUI', () => {
     host.open = true;
     floatingUI.start();
     moveAnchor(anchor, { left: '200px' });
-    await waitUntil(() => floating.style.left === '185px', 'did not follow the anchor');
+    await vi.waitFor(() => expect(floating.style.left, 'did not follow the anchor').to.equal('185px'));
 
     await floatingUI.stop();
     moveAnchor(anchor, { left: '300px' });
-    await settle();
+    await letAutoUpdateRun();
 
     expect(floating.style.left).to.equal('185px');
   });
@@ -288,13 +290,13 @@ describe('useFloatingUI', () => {
     const floatingUI = useFloatingUI(host, { anchorElement: anchor, floatingElement: floating });
     host.open = true;
     floatingUI.start();
-    await waitUntil(() => floating.style.left === '85px');
+    await vi.waitFor(() => expect(floating.style.left).to.equal('85px'));
 
     // Keep the anchor in the document so a lingering `autoUpdate` would still have something to follow.
     document.body.append(anchor);
     host.remove();
     moveAnchor(anchor, { left: '200px' });
-    await settle();
+    await letAutoUpdateRun();
 
     expect(floating.style.left).to.equal('85px');
     anchor.remove();

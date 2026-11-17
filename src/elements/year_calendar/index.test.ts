@@ -1,9 +1,7 @@
 import type AwcYearCalendarElement from './index';
-import type { AwcYearCalendarCommitEvent } from './index';
-import { whenInitialized } from '@ambiki/impulse';
-import { expect, fixture } from '@open-wc/testing';
-import { sendKeys } from '@web/test-runner-commands';
+import { fixture, recordEvents } from '@ambiki/impulse/testing';
 import { Idiomorph } from 'idiomorph';
+import { userEvent } from 'vitest/browser';
 import { CalendarDate, today } from '../../internal/calendar_date';
 import { canMoveView, gridRows, headingText } from '../../internal/calendar_grid';
 import { YEAR_ENGLISH, YEAR_LEVEL } from '../../internal/year_level';
@@ -67,10 +65,8 @@ function yearCalendarHtml(options: CalendarOptions = {}) {
   </awc-year-calendar>`;
 }
 
-async function yearCalendarFixture(options?: CalendarOptions) {
-  const el = await fixture<AwcYearCalendarElement>(yearCalendarHtml(options));
-  await whenInitialized(el);
-  return el;
+function yearCalendarFixture(options?: CalendarOptions) {
+  return fixture<AwcYearCalendarElement>(yearCalendarHtml(options));
 }
 
 /** The button of the year `value` names, in the grid shown. */
@@ -86,23 +82,17 @@ function focusedYear() {
   return (document.activeElement as HTMLElement | null)?.textContent ?? null;
 }
 
-let recording: AbortController | undefined;
-
-/** Records the details of the `commit` events, in the order they reach the document. */
+/** Records the `commit` events, in the order they reach the document. */
 function recordCommits() {
-  recording = new AbortController();
-  const details: AwcYearCalendarCommitEvent[] = [];
-  document.addEventListener(
-    'awc-year-calendar:commit',
-    (event) => details.push((event as CustomEvent<AwcYearCalendarCommitEvent>).detail),
-    { signal: recording.signal },
-  );
-  return details;
+  return recordEvents(document, ['awc-year-calendar:commit']);
+}
+
+/** The details of the recorded `commit` events. */
+function details(commits: ReturnType<typeof recordCommits>) {
+  return commits.events.map((event) => event.detail);
 }
 
 describe('awc-year-calendar', () => {
-  afterEach(() => recording?.abort());
-
   describe('committing a year', () => {
     it('makes it the value, and emits commit with it', async () => {
       const el = await yearCalendarFixture({ value: '2026' });
@@ -112,7 +102,7 @@ describe('awc-year-calendar', () => {
 
       expect(el.value).to.equal('2023');
       expect(selectedYear(el)).to.equal('2023');
-      expect(commits).to.eql([{ value: '2023' }]);
+      expect(details(commits)).to.eql([{ value: '2023' }]);
     });
 
     it('emits nothing for the year already selected', async () => {
@@ -121,7 +111,7 @@ describe('awc-year-calendar', () => {
 
       year(el, '2026').click();
 
-      expect(commits).to.eql([]);
+      expect(details(commits)).to.eql([]);
     });
   });
 
@@ -136,7 +126,7 @@ describe('awc-year-calendar', () => {
       expect(el.grid.getAttribute('aria-disabled')).to.equal('true');
       expect(el.querySelectorAll('button:enabled')).to.have.length(0);
       expect(el.value).to.equal('2026');
-      expect(commits).to.eql([]);
+      expect(details(commits)).to.eql([]);
     });
   });
 
@@ -146,20 +136,20 @@ describe('awc-year-calendar', () => {
       year(el, '2026').focus();
 
       // The 2020s grid runs 2019 to 2030, three to a row: 2025, 2026 and 2027 share a row.
-      await sendKeys({ press: 'Home' });
+      await userEvent.keyboard('{Home}');
       expect(focusedYear()).to.equal('2025');
-      await sendKeys({ press: 'End' });
+      await userEvent.keyboard('{End}');
       expect(focusedYear()).to.equal('2027');
-      await sendKeys({ press: 'ArrowUp' });
+      await userEvent.keyboard('{ArrowUp}');
       expect(focusedYear()).to.equal('2024');
-      await sendKeys({ press: 'ArrowLeft' });
+      await userEvent.keyboard('{ArrowLeft}');
       expect(focusedYear()).to.equal('2023');
-      await sendKeys({ press: 'ArrowDown' });
+      await userEvent.keyboard('{ArrowDown}');
       expect(focusedYear()).to.equal('2026');
-      await sendKeys({ press: 'PageDown' });
+      await userEvent.keyboard('{PageDown}');
       expect(focusedYear()).to.equal('2036');
       expect(el.heading.textContent).to.equal('2030 – 2039');
-      await sendKeys({ press: 'Shift+PageUp' });
+      await userEvent.keyboard('{Shift>}{PageUp}{/Shift}');
       expect(focusedYear()).to.equal('2026');
     });
 
@@ -167,7 +157,7 @@ describe('awc-year-calendar', () => {
       const el = await yearCalendarFixture({ value: '2029' });
 
       year(el, '2029').focus();
-      await sendKeys({ press: 'ArrowRight' });
+      await userEvent.keyboard('{ArrowRight}');
 
       expect(focusedYear()).to.equal('2030');
       expect(el.grid.dataset.decade).to.equal('2030');
@@ -178,11 +168,11 @@ describe('awc-year-calendar', () => {
       const commits = recordCommits();
 
       year(el, '2027').focus();
-      await sendKeys({ press: 'Enter' });
-      await sendKeys({ press: 'ArrowRight' });
-      await sendKeys({ press: ' ' });
+      await userEvent.keyboard('{Enter}');
+      await userEvent.keyboard('{ArrowRight}');
+      await userEvent.keyboard(' ');
 
-      expect(commits).to.eql([{ value: '2027' }, { value: '2028' }]);
+      expect(details(commits)).to.eql([{ value: '2027' }, { value: '2028' }]);
     });
   });
 
@@ -193,7 +183,7 @@ describe('awc-year-calendar', () => {
 
       year(el, '2019').click();
 
-      expect(commits).to.eql([{ value: '2019' }]);
+      expect(details(commits)).to.eql([{ value: '2019' }]);
       expect(el.grid.dataset.decade).to.equal('2010');
       expect(year(el, '2019').tabIndex).to.equal(0);
     });
@@ -219,7 +209,7 @@ describe('awc-year-calendar', () => {
       expect(year(el, '2022').hasAttribute('aria-disabled')).to.equal(false);
       expect(year(el, '2029').getAttribute('aria-disabled')).to.equal('true');
       year(el, '2021').click();
-      expect(commits).to.eql([]);
+      expect(details(commits)).to.eql([]);
 
       el.previousView();
       el.nextView();
@@ -269,7 +259,7 @@ describe('awc-year-calendar', () => {
       el.clear();
       Idiomorph.morph(el, yearCalendarHtml({ value: '2012' }));
 
-      expect(commits).to.eql([]);
+      expect(details(commits)).to.eql([]);
       expect(el.value).to.equal('2012');
       expect(el.grid.dataset.decade).to.equal('2010');
       expect(selectedYear(el)).to.equal('2012');
@@ -303,19 +293,19 @@ describe('awc-year-calendar', () => {
 
       // The first row is 2019, 2020 and 2021: Home from 2020 is 2019, in the 2010s.
       year(el, '2020').focus();
-      await sendKeys({ press: 'Home' });
+      await userEvent.keyboard('{Home}');
       expect(focusedYear()).to.equal('2019');
       expect(el.grid.dataset.decade).to.equal('2010');
 
       el.goToDate('2029');
       year(el, '2029').focus();
       // The last row is 2028, 2029 and 2030: End from 2029 is 2030, in the 2030s.
-      await sendKeys({ press: 'End' });
+      await userEvent.keyboard('{End}');
       expect(focusedYear()).to.equal('2030');
       expect(el.grid.dataset.decade).to.equal('2030');
 
       // Up from 2030 is 2027, back in the 2020s.
-      await sendKeys({ press: 'ArrowUp' });
+      await userEvent.keyboard('{ArrowUp}');
       expect(focusedYear()).to.equal('2027');
       expect(el.grid.dataset.decade).to.equal('2020');
     });
@@ -325,12 +315,12 @@ describe('awc-year-calendar', () => {
 
       // 2019 sits in the 2020s grid's first row, with 2020 and 2021.
       year(el, '2019').focus();
-      await sendKeys({ press: 'End' });
+      await userEvent.keyboard('{End}');
       expect(focusedYear()).to.equal('2021');
 
       // 2030 sits in its last row, with 2028 and 2029.
       year(el, '2030').focus();
-      await sendKeys({ press: 'Home' });
+      await userEvent.keyboard('{Home}');
       expect(focusedYear()).to.equal('2028');
     });
 
@@ -338,9 +328,9 @@ describe('awc-year-calendar', () => {
       const el = await yearCalendarFixture({ value: '2022', min: '2021', max: '2028' });
 
       year(el, '2022').focus();
-      await sendKeys({ press: 'PageUp' });
+      await userEvent.keyboard('{PageUp}');
       expect(el.grid.dataset.decade).to.equal('2020');
-      await sendKeys({ press: 'PageDown' });
+      await userEvent.keyboard('{PageDown}');
       expect(el.grid.dataset.decade).to.equal('2020');
     });
 
@@ -349,13 +339,13 @@ describe('awc-year-calendar', () => {
       const commits = recordCommits();
 
       year(el, '2026').focus();
-      await sendKeys({ press: 'ArrowRight' });
-      await sendKeys({ press: 'PageDown' });
+      await userEvent.keyboard('{ArrowRight}');
+      await userEvent.keyboard('{PageDown}');
       el.previousButton.click();
       el.min = '2000';
       el.max = '2040';
 
-      expect(commits).to.eql([]);
+      expect(details(commits)).to.eql([]);
       expect(el.value).to.equal('2026');
     });
   });

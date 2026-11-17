@@ -1,7 +1,7 @@
 import type AwcAnchorElement from './index';
-import { whenInitialized } from '@ambiki/impulse';
-import { expect, fixture, nextFrame, waitUntil } from '@open-wc/testing';
+import { fixture, whenSettled } from '@ambiki/impulse/testing';
 import { Idiomorph } from 'idiomorph';
+import { nextFrames } from '../../internal/test_waits';
 // Registers `awc-anchor`. Kept separate from the type import above, which the bundler elides.
 import './index';
 
@@ -30,7 +30,6 @@ async function anchorFixture(attributes = 'active') {
   const anchor = container.querySelector<HTMLElement>('#anchor')!;
   const floating = container.querySelector<AwcAnchorElement>('awc-anchor')!;
   const arrow = floating.querySelector<HTMLElement>('[data-arrow]')!;
-  await whenInitialized(floating);
   return { container, anchor, floating, arrow };
 }
 
@@ -54,7 +53,7 @@ async function reconnect(floating: AwcAnchorElement) {
   const parent = floating.parentElement!;
   floating.remove();
   parent.append(floating);
-  await whenInitialized(floating);
+  await whenSettled();
 }
 
 /** Counts the calls to `floating.reposition`, such as the ones `autoUpdate` makes while it watches the page. */
@@ -68,10 +67,12 @@ function countRepositions(floating: AwcAnchorElement) {
   return calls;
 }
 
-/** Waits long enough for any pending `autoUpdate` reposition to have landed. */
-async function settle() {
-  await nextFrame();
-  await nextFrame();
+/**
+ * Gives a stop, which resolves on a frame no test can await, and a reposition `autoUpdate` starts on its own, which
+ * nothing announces, two frames to land.
+ */
+function letAutoUpdateRun() {
+  return nextFrames(2);
 }
 
 describe('awc-anchor', () => {
@@ -99,14 +100,14 @@ describe('awc-anchor', () => {
     const { anchor, floating } = await anchorFixture('');
 
     floating.active = true;
-    await waitUntil(() => floating.style.left === '85px', 'did not position once activated');
+    await vi.waitFor(() => expect(floating.style.left, 'did not position once activated').to.equal('85px'));
     moveAnchor(anchor, { left: '200px' });
-    await waitUntil(() => floating.style.left === '185px', 'did not follow the anchor');
+    await vi.waitFor(() => expect(floating.style.left, 'did not follow the anchor').to.equal('185px'));
 
     floating.active = false;
-    await settle();
+    await letAutoUpdateRun();
     moveAnchor(anchor, { left: '300px' });
-    await settle();
+    await letAutoUpdateRun();
 
     expect(floating.style.left).to.equal('185px');
   });
@@ -117,9 +118,9 @@ describe('awc-anchor', () => {
     floating.start();
 
     expect(floating.active).to.equal(true);
-    await waitUntil(() => floating.style.left === '85px', 'did not position once started');
+    await vi.waitFor(() => expect(floating.style.left, 'did not position once started').to.equal('85px'));
     moveAnchor(anchor, { left: '200px' });
-    await waitUntil(() => floating.style.left === '185px', 'did not follow the anchor');
+    await vi.waitFor(() => expect(floating.style.left, 'did not follow the anchor').to.equal('185px'));
   });
 
   it('deactivates and stops following the anchor when stopped', async () => {
@@ -128,7 +129,7 @@ describe('awc-anchor', () => {
 
     await floating.stop();
     moveAnchor(anchor, { left: '200px' });
-    await settle();
+    await letAutoUpdateRun();
 
     expect(floating.active).to.equal(false);
     expect(floating.style.left).to.equal('85px');
@@ -142,7 +143,7 @@ describe('awc-anchor', () => {
     moveAnchor(anchor, { left: '200px' });
 
     expect(floating.active).to.equal(true);
-    await waitUntil(() => floating.style.left === '185px', 'did not resume following the anchor');
+    await vi.waitFor(() => expect(floating.style.left, 'did not resume following the anchor').to.equal('185px'));
   });
 
   it('stays where it was last placed when reconnected while stopped', async () => {
@@ -151,7 +152,7 @@ describe('awc-anchor', () => {
     await floating.stop();
 
     await reconnect(floating);
-    await settle();
+    await letAutoUpdateRun();
 
     expect(floating.style.left).to.equal('85px');
     expect(floating.style.top).to.equal('120px');
@@ -165,7 +166,7 @@ describe('awc-anchor', () => {
     const repositions = countRepositions(floating);
 
     window.dispatchEvent(new Event('resize'));
-    await settle();
+    await letAutoUpdateRun();
 
     expect(repositions.count).to.equal(0);
   });
@@ -288,7 +289,7 @@ describe('awc-anchor', () => {
 
       floating.classList.add('grown');
       await floating.reposition();
-      await settle();
+      await letAutoUpdateRun();
 
       expect(floating.getAttribute('x-placement')).to.equal('bottom');
       expect(floating.style.getPropertyValue('--awc-auto-size-height')).to.equal(
@@ -449,7 +450,7 @@ describe('awc-anchor', () => {
 
     floating.anchorId = 'other-anchor';
 
-    await waitUntil(() => floating.style.left === '285px', 'did not follow the new anchor');
+    await vi.waitFor(() => expect(floating.style.left, 'did not follow the new anchor').to.equal('285px'));
   });
 
   it('stays where it was last placed when `anchor-id` changes while stopped', async () => {
@@ -459,7 +460,7 @@ describe('awc-anchor', () => {
     addAnchor(container, 'other-anchor', '300px');
 
     floating.anchorId = 'other-anchor';
-    await settle();
+    await letAutoUpdateRun();
 
     expect(floating.style.left).to.equal('85px');
     expect(floating.style.top).to.equal('120px');
@@ -472,7 +473,7 @@ describe('awc-anchor', () => {
 
     floating.anchorId = 'other-anchor';
     await floating.stop();
-    await settle();
+    await letAutoUpdateRun();
 
     expect(floating.active).to.equal(false);
     expect(floating.style.left).to.equal('85px');
@@ -485,11 +486,11 @@ describe('awc-anchor', () => {
     await floating.stop();
     addAnchor(container, 'other-anchor', '300px');
     floating.anchorId = 'other-anchor';
-    await settle();
+    await letAutoUpdateRun();
     const repositions = countRepositions(floating);
 
     window.dispatchEvent(new Event('resize'));
-    await settle();
+    await letAutoUpdateRun();
 
     expect(repositions.count).to.equal(0);
   });
@@ -500,7 +501,7 @@ describe('awc-anchor', () => {
 
     floating.remove();
     moveAnchor(anchor, { left: '200px' });
-    await settle();
+    await letAutoUpdateRun();
 
     expect(floating.style.left).to.equal('85px');
   });

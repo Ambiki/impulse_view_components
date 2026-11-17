@@ -1,9 +1,7 @@
 import type AwcWeekCalendarElement from './index';
-import type { AwcWeekCalendarCommitEvent } from './index';
-import { whenInitialized } from '@ambiki/impulse';
-import { expect, fixture } from '@open-wc/testing';
-import { sendKeys } from '@web/test-runner-commands';
+import { fixture, recordEvents } from '@ambiki/impulse/testing';
 import { Idiomorph } from 'idiomorph';
+import { userEvent } from 'vitest/browser';
 import { CalendarDate, today } from '../../internal/calendar_date';
 import { canMoveView, gridRows, headingText } from '../../internal/calendar_grid';
 import { DAY_LEVEL, DAY_ENGLISH as ENGLISH, weekdayRow } from '../../internal/day_level';
@@ -77,10 +75,8 @@ function weekCalendarHtml(options: CalendarOptions = {}) {
   </awc-week-calendar>`;
 }
 
-async function weekCalendarFixture(options?: CalendarOptions) {
-  const el = await fixture<AwcWeekCalendarElement>(weekCalendarHtml(options));
-  await whenInitialized(el);
-  return el;
+function weekCalendarFixture(options?: CalendarOptions) {
+  return fixture<AwcWeekCalendarElement>(weekCalendarHtml(options));
 }
 
 /** The button of the day `date` names, in the grid shown. */
@@ -98,23 +94,17 @@ function selectedDays(el: Element) {
   return [...el.querySelectorAll<HTMLElement>('td[aria-selected="true"] button')].map((button) => button.dataset.date);
 }
 
-let recording: AbortController | undefined;
-
-/** Records the details of the `commit` events, in the order they reach the document. */
+/** Records the `commit` events, in the order they reach the document. */
 function recordCommits() {
-  recording = new AbortController();
-  const details: AwcWeekCalendarCommitEvent[] = [];
-  document.addEventListener(
-    'awc-week-calendar:commit',
-    (event) => details.push((event as CustomEvent<AwcWeekCalendarCommitEvent>).detail),
-    { signal: recording.signal },
-  );
-  return details;
+  return recordEvents(document, ['awc-week-calendar:commit']);
+}
+
+/** The details of the recorded `commit` events. */
+function details(commits: ReturnType<typeof recordCommits>) {
+  return commits.events.map((event) => event.detail);
 }
 
 describe('awc-week-calendar', () => {
-  afterEach(() => recording?.abort());
-
   describe('committing a day', () => {
     it('selects its week, makes its first day the value, and emits commit with the week', async () => {
       const el = await weekCalendarFixture({ value: '2026-11-01' });
@@ -132,7 +122,7 @@ describe('awc-week-calendar', () => {
         '2026-11-20',
         '2026-11-21',
       ]);
-      expect(commits).to.eql([{ value: '2026-11-15', start: '2026-11-15', end: '2026-11-21' }]);
+      expect(details(commits)).to.eql([{ value: '2026-11-15', start: '2026-11-15', end: '2026-11-21' }]);
     });
 
     it('happens on a click in the gap around the day, its cell', async () => {
@@ -141,7 +131,7 @@ describe('awc-week-calendar', () => {
 
       day(el, '2026-11-18').closest('td')!.click();
 
-      expect(commits).to.eql([{ value: '2026-11-15', start: '2026-11-15', end: '2026-11-21' }]);
+      expect(details(commits)).to.eql([{ value: '2026-11-15', start: '2026-11-15', end: '2026-11-21' }]);
     });
 
     it('emits nothing for another day of the selected week', async () => {
@@ -151,7 +141,7 @@ describe('awc-week-calendar', () => {
       day(el, '2026-11-19').click();
 
       expect(el.value).to.equal('2026-11-15');
-      expect(commits).to.eql([]);
+      expect(details(commits)).to.eql([]);
     });
   });
 
@@ -166,7 +156,7 @@ describe('awc-week-calendar', () => {
       expect(el.grid.getAttribute('aria-disabled')).to.equal('true');
       expect(el.querySelectorAll('button:enabled')).to.have.length(0);
       expect(el.value).to.equal('2026-11-15');
-      expect(commits).to.eql([]);
+      expect(details(commits)).to.eql([]);
     });
   });
 
@@ -180,12 +170,12 @@ describe('awc-week-calendar', () => {
       expect(el.value).to.equal('2026-12-02');
       expect(selectedDays(el)[0]).to.equal('2026-11-29');
       expect(selectedDays(el)).to.have.length(7);
-      expect(commits).to.eql([]);
+      expect(details(commits)).to.eql([]);
 
       // Another day of that week, committed, changes nothing.
       day(el, '2026-12-04').click();
       expect(el.value).to.equal('2026-12-02');
-      expect(commits).to.eql([]);
+      expect(details(commits)).to.eql([]);
     });
 
     it('reads the same day in the new weeks when the first day of the week changes', async () => {
@@ -211,7 +201,7 @@ describe('awc-week-calendar', () => {
       expect(day(el, '2026-11-08').hasAttribute('aria-disabled')).to.equal(false);
       day(el, '2026-11-08').click();
 
-      expect(commits).to.eql([{ value: '2026-11-08', start: '2026-11-08', end: '2026-11-14' }]);
+      expect(details(commits)).to.eql([{ value: '2026-11-08', start: '2026-11-08', end: '2026-11-14' }]);
     });
 
     it('disable the weeks with no day between them, which can\'t be committed', async () => {
@@ -223,7 +213,7 @@ describe('awc-week-calendar', () => {
       }
       day(el, '2026-11-25').click();
 
-      expect(commits).to.eql([]);
+      expect(details(commits)).to.eql([]);
       expect(el.value).to.equal('2026-11-15');
     });
 
@@ -246,7 +236,7 @@ describe('awc-week-calendar', () => {
       expect(day(el, '1000-01-05').hasAttribute('aria-disabled')).to.equal(false);
       day(el, '1000-01-01').click();
 
-      expect(commits).to.eql([]);
+      expect(details(commits)).to.eql([]);
       expect(el.value).to.equal('1000-01-15');
     });
   });
@@ -259,7 +249,7 @@ describe('awc-week-calendar', () => {
 
       day(el, '2026-10-26').click();
 
-      expect(commits).to.eql([{ value: '2026-10-26', start: '2026-10-26', end: '2026-11-01' }]);
+      expect(details(commits)).to.eql([{ value: '2026-10-26', start: '2026-10-26', end: '2026-11-01' }]);
       expect(el.grid.dataset.month).to.equal('2026-11');
       expect(day(el, '2026-11-01').tabIndex).to.equal(0);
       expect(el.querySelectorAll('tbody [tabindex="0"]')).to.have.length(1);
@@ -282,7 +272,7 @@ describe('awc-week-calendar', () => {
 
       day(el, '2026-12-08').click();
 
-      expect(commits).to.eql([{ value: '2026-12-06', start: '2026-12-06', end: '2026-12-12' }]);
+      expect(details(commits)).to.eql([{ value: '2026-12-06', start: '2026-12-06', end: '2026-12-12' }]);
       expect(el.grid.dataset.month).to.equal('2026-12');
       expect(day(el, '2026-12-08').tabIndex).to.equal(0);
     });
@@ -294,13 +284,13 @@ describe('awc-week-calendar', () => {
       const commits = recordCommits();
 
       day(el, '2026-11-01').focus();
-      await sendKeys({ press: 'ArrowDown' });
-      await sendKeys({ press: 'ArrowRight' });
-      expect(commits).to.eql([]);
+      await userEvent.keyboard('{ArrowDown}');
+      await userEvent.keyboard('{ArrowRight}');
+      expect(details(commits)).to.eql([]);
 
-      await sendKeys({ press: 'Enter' });
+      await userEvent.keyboard('{Enter}');
 
-      expect(commits).to.eql([{ value: '2026-11-08', start: '2026-11-08', end: '2026-11-14' }]);
+      expect(details(commits)).to.eql([{ value: '2026-11-08', start: '2026-11-08', end: '2026-11-14' }]);
       expect((document.activeElement as HTMLElement).dataset.date).to.equal('2026-11-09');
     });
 
@@ -309,9 +299,9 @@ describe('awc-week-calendar', () => {
       const commits = recordCommits();
 
       day(el, '2026-11-24').focus();
-      await sendKeys({ press: ' ' });
+      await userEvent.keyboard(' ');
 
-      expect(commits).to.eql([{ value: '2026-11-22', start: '2026-11-22', end: '2026-11-28' }]);
+      expect(details(commits)).to.eql([{ value: '2026-11-22', start: '2026-11-22', end: '2026-11-28' }]);
     });
   });
 
@@ -331,7 +321,7 @@ describe('awc-week-calendar', () => {
       el.clear();
       Idiomorph.morph(el, weekCalendarHtml({ value: '2026-12-06' }));
 
-      expect(commits).to.eql([]);
+      expect(details(commits)).to.eql([]);
       expect(el.value).to.equal('2026-12-06');
       expect(selectedDays(el)[0]).to.equal('2026-12-06');
     });
@@ -399,10 +389,10 @@ describe('awc-week-calendar', () => {
       drillUp(el);
       day(el, '2026-12-01').click();
       expect(el.grid.dataset.month).to.equal('2026-12');
-      expect(commits).to.eql([]);
+      expect(details(commits)).to.eql([]);
 
       day(el, '2026-12-16').click();
-      expect(commits).to.eql([{ value: '2026-12-13', start: '2026-12-13', end: '2026-12-19' }]);
+      expect(details(commits)).to.eql([{ value: '2026-12-13', start: '2026-12-13', end: '2026-12-19' }]);
     });
   });
 });

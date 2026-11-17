@@ -1,10 +1,11 @@
-import type { AutocompleteEventName } from './events';
+import type { Recording } from '@ambiki/impulse/testing';
+import type { AjaxEventName, AutocompleteEventMap } from './events';
 import type AwcAutocompleteElement from './index';
 import type { AjaxAutocompleteElement, LocalAutocompleteElement } from './index';
-import { whenInitialized } from '@ambiki/impulse';
-import { aTimeout, expect, fixture, nextFrame, oneEvent, waitUntil } from '@open-wc/testing';
+import { fixture, recordEvents, whenSettled } from '@ambiki/impulse/testing';
 import { Idiomorph } from 'idiomorph';
 import { componentMarkup, markupDifferences } from '../../internal/test_markup';
+import { nextFrame, nextFrames, sleep } from '../../internal/test_waits';
 // Registers `awc-autocomplete`. Kept separate from the type import above, which the bundler elides.
 import './index';
 
@@ -123,10 +124,8 @@ function autocompleteHtml({
   `;
 }
 
-async function autocompleteFixture(options: FixtureOptions = {}) {
-  const el = await fixture<AwcAutocompleteElement>(autocompleteHtml(options));
-  await whenInitialized(el);
-  return el;
+function autocompleteFixture(options: FixtureOptions = {}) {
+  return fixture<AwcAutocompleteElement>(autocompleteHtml(options));
 }
 
 interface FetchStub {
@@ -136,6 +135,8 @@ interface FetchStub {
   signal?: AbortSignal;
   /** Answers the most recent request with `body`, with the status `status`. */
   respond: (body: string, status?: number) => void;
+  /** The `loadstart` each request starts with, which the element emits just before it calls `fetch`. */
+  loadstarts: Recording<{ loadstart: Event }>;
 }
 
 /**
@@ -144,13 +145,14 @@ interface FetchStub {
  * which a response from an abandoned source is prevented from landing, so there is no state in which a stale response
  * can still arrive to assert against.
  */
-function stubFetch(): FetchStub {
+function stubFetch(el: AwcAutocompleteElement): FetchStub {
   let resolveLatest: ((response: Response) => void) | undefined;
   const stub: FetchStub = {
     urls: [],
     respond(body, status = 200) {
       resolveLatest?.(new Response(body, { status }));
     },
+    loadstarts: recordEvents(el, ['loadstart'], { self: true }),
   };
 
   window.fetch = ((url: string, init?: RequestInit) => {
@@ -170,14 +172,29 @@ function stubFetch(): FetchStub {
 
 /** Waits for request number `count` to go out, once the debounce has passed. */
 async function requested(stub: FetchStub, count = 1) {
-  await waitUntil(() => stub.urls.length === count, `request ${count} was never made`);
+  while (stub.urls.length < count) await stub.loadstarts.waitFor('loadstart');
+  expect(stub.urls).to.have.length(count);
 }
+
+/**
+ * The ajax events, which the element emits without its prefix, as a request does. No event map of the DOM declares
+ * `loadend` on an element, so a Recording of them names its own.
+ */
+type AjaxEvents = Record<AjaxEventName, Event>;
 
 /** Answers the latest request, and waits for the element to finish handling the response. */
 async function respondAndWait(el: AwcAutocompleteElement, stub: FetchStub, body: string, status?: number) {
-  const loadend = oneEvent(el, 'loadend');
+  const loadend = recordEvents<AjaxEvents>(el, ['loadend'], { self: true });
   stub.respond(body, status);
-  await loadend;
+  await loadend.waitFor('loadend');
+}
+
+/**
+ * Fakes the timers the 300ms debounce runs on, so a test can pass it at once. Animation frames, which closing waits
+ * for, stay real. `afterEach` restores the real timers.
+ */
+function fakeTimers() {
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
 }
 
 const AJAX_EVENTS = ['loadstart', 'load', 'error', 'loadend'] as const;
@@ -204,28 +221,36 @@ function selectionOf(el: AwcAutocompleteElement) {
  * Waits for the positioning observers' callbacks to have run, so that only the change under test can reposition.
  * Two frames are enough today; five leaves a margin.
  */
-async function drainObservers() {
-  for (let i = 0; i < 5; i++) await nextFrame();
+function drainObservers() {
+  return nextFrames(5);
 }
 
-const OPEN_CLOSE_EVENTS = ['show', 'shown', 'hide', 'hidden'] as const;
-const VALUE_EVENTS = ['commit', 'remove', 'clear', 'reset'] as const;
+const OPEN_CLOSE_EVENTS = [
+  'awc-autocomplete:show',
+  'awc-autocomplete:shown',
+  'awc-autocomplete:hide',
+  'awc-autocomplete:hidden',
+] as const;
+const VALUE_EVENTS = [
+  'awc-autocomplete:commit',
+  'awc-autocomplete:remove',
+  'awc-autocomplete:clear',
+  'awc-autocomplete:reset',
+] as const;
 
 /**
- * Records, in order, the `awc-autocomplete:<name>` events `el` dispatches, for each of `names`. By default, the open,
- * close, `clear` and `reset` events.
+ * Records, in order, the `types` of events `el` dispatches itself. By default, the open, close, `clear` and `reset`
+ * events.
  */
-function recordEvents(
+function record(
   el: AwcAutocompleteElement,
-  names: readonly AutocompleteEventName[] = [...OPEN_CLOSE_EVENTS, 'clear', 'reset'],
+  types: readonly (keyof AutocompleteEventMap)[] = [
+    ...OPEN_CLOSE_EVENTS,
+    'awc-autocomplete:clear',
+    'awc-autocomplete:reset',
+  ],
 ) {
-  const events: string[] = [];
-  for (const name of names) {
-    el.addEventListener(`awc-autocomplete:${name}`, (event) => {
-      if (event.target === el) events.push(name);
-    });
-  }
-  return events;
+  return recordEvents(el, types, { self: true });
 }
 
 /** Prevents the next `awc-autocomplete:<name>` event `el` dispatches. */
@@ -240,8 +265,9 @@ function pressInput(el: AwcAutocompleteElement) {
 
 /** Commits `option` the way a user does, by clicking it, and resolves with the `commit` event it emits. */
 function commit(el: AwcAutocompleteElement, option: HTMLElement) {
-  setTimeout(() => option.click());
-  return oneEvent(el, 'awc-autocomplete:commit');
+  const commits = recordEvents(el, ['awc-autocomplete:commit']);
+  option.click();
+  return commits.waitFor('awc-autocomplete:commit');
 }
 
 /** Presses `key` in the input, and returns the `keydown` event so that callers can tell whether it was prevented. */
@@ -293,40 +319,44 @@ describe('AwcAutocompleteElement', () => {
   describe('ajax source lifecycle', () => {
     it('should not issue a pending debounced request after `src` changes', async () => {
       const el = await autocompleteFixture({ src: '/a' });
-      const fetchStub = stubFetch();
+      const fetchStub = stubFetch(el);
+      fakeTimers();
 
       el.show();
       el.src = '/b';
       // Longer than the 300ms debounce, so a request that was not cancelled would have been issued by now.
-      await aTimeout(400);
+      await vi.advanceTimersByTimeAsync(400);
 
       expect(fetchStub.urls).to.eql([]);
     });
 
     it('should not issue a pending debounced request after the element is removed', async () => {
       const el = await autocompleteFixture({ src: '/a' });
-      const fetchStub = stubFetch();
+      const fetchStub = stubFetch(el);
+
+      fakeTimers();
 
       el.show();
       el.remove();
-      await aTimeout(400);
+      await vi.advanceTimersByTimeAsync(400);
 
       expect(fetchStub.urls).to.eql([]);
     });
 
     it('should abort the in-flight request when `src` changes', async () => {
       const el = await autocompleteFixture({ src: '/a' });
-      const fetchStub = stubFetch();
+      const fetchStub = stubFetch(el);
 
       el.show();
-      await waitUntil(() => fetchStub.urls.length === 1, 'the debounced request was never issued');
+      await requested(fetchStub);
       expect(fetchStub.urls[0]).to.contain('/a?q=');
 
       el.src = '/b';
       expect(fetchStub.signal?.aborted).to.equal(true);
 
-      // Abandoning a request is not a failure, and it must not leave the element stuck mid-flight.
-      await aTimeout(50);
+      // Abandoning a request is not a failure, and it must not leave the element stuck mid-flight. Nothing signals that
+      // the aborted request was handled, so give its rejection time to settle.
+      await sleep(50);
       expect(el.hasAttribute('error')).to.equal(false);
       expect(el.hasAttribute('loading')).to.equal(false);
     });
@@ -376,9 +406,11 @@ describe('AwcAutocompleteElement', () => {
       await drainObservers();
 
       el.autoSize = true;
-      await nextFrame();
 
-      expect(listbox.style.getPropertyValue('--awc-auto-size-height')).to.match(/^\d+(\.\d+)?px$/);
+      // The reposition `auto-size` starts signals nothing when it lands.
+      await vi.waitFor(() => {
+        expect(listbox.style.getPropertyValue('--awc-auto-size-height')).to.match(/^\d+(\.\d+)?px$/);
+      });
     });
 
     it('should apply `auto-size-padding` straight away while it is open', async () => {
@@ -390,9 +422,11 @@ describe('AwcAutocompleteElement', () => {
       const before = availableHeight();
 
       el.autoSizePadding = el.autoSizePadding + 16;
-      await nextFrame();
 
-      expect(availableHeight()).to.be.closeTo(before - 16, 0.5);
+      // The reposition `auto-size-padding` starts signals nothing when it lands.
+      await vi.waitFor(() => {
+        expect(availableHeight()).to.be.closeTo(before - 16, 0.5);
+      });
     });
 
     it('should clear `auto-size` when it is turned off while a reposition is still running', async () => {
@@ -458,7 +492,7 @@ describe('AwcAutocompleteElement', () => {
   describe('events', () => {
     it('should emit only the state events when shown and hidden from code', async () => {
       const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
-      const events = recordEvents(el);
+      const events = record(el);
       preventNext(el, 'show');
       preventNext(el, 'hide');
 
@@ -466,12 +500,12 @@ describe('AwcAutocompleteElement', () => {
       await el.hide();
 
       expect(el.open).to.equal(false);
-      expect(events).to.eql(['shown', 'hidden']);
+      expect(events.types).to.eql(['awc-autocomplete:shown', 'awc-autocomplete:hidden']);
     });
 
     it('should open and close when `open` changes, emitting only the state events', async () => {
       const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
-      const events = recordEvents(el);
+      const events = record(el);
       preventNext(el, 'show');
       preventNext(el, 'hide');
 
@@ -479,15 +513,15 @@ describe('AwcAutocompleteElement', () => {
       expect(el.input.getAttribute('aria-expanded')).to.equal('true');
 
       el.removeAttribute('open');
-      await nextFrame();
+      await events.waitFor('awc-autocomplete:hidden');
 
       expect(el.input.getAttribute('aria-expanded')).to.equal('false');
-      expect(events).to.eql(['shown', 'hidden']);
+      expect(events.types).to.eql(['awc-autocomplete:shown', 'awc-autocomplete:hidden']);
     });
 
     it('should stay closed when the user opens it and `show` is prevented', async () => {
       const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
-      const events = recordEvents(el);
+      const events = record(el);
       preventNext(el, 'show');
 
       pressInput(el);
@@ -495,92 +529,91 @@ describe('AwcAutocompleteElement', () => {
 
       pressInput(el);
       expect(el.open).to.equal(true);
-      expect(events).to.eql(['show', 'show', 'shown']);
+      expect(events.types).to.eql(['awc-autocomplete:show', 'awc-autocomplete:show', 'awc-autocomplete:shown']);
     });
 
     it('should stay open when the user closes it with Escape and `hide` is prevented', async () => {
       const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
       pressInput(el);
-      const events = recordEvents(el);
+      const events = record(el);
       preventNext(el, 'hide');
 
       pressKey(el, 'Escape');
       expect(el.open).to.equal(true);
 
       pressKey(el, 'Escape');
-      await nextFrame();
+      await events.waitFor('awc-autocomplete:hidden');
       expect(el.open).to.equal(false);
-      expect(events).to.eql(['hide', 'hide', 'hidden']);
+      expect(events.types).to.eql(['awc-autocomplete:hide', 'awc-autocomplete:hide', 'awc-autocomplete:hidden']);
     });
 
     it('should request to hide when the input loses focus', async () => {
       const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
       pressInput(el);
-      const events = recordEvents(el);
+      const events = record(el);
       preventNext(el, 'hide');
 
       el.input.dispatchEvent(new FocusEvent('blur'));
-      await nextFrame();
+      await nextFrame(); // A later request from the same action would come by then.
 
       expect(el.open).to.equal(true);
-      expect(events).to.eql(['hide']);
+      expect(events.types).to.eql(['awc-autocomplete:hide']);
     });
 
     it('should request to hide when an option is committed', async () => {
       const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
       pressInput(el);
-      await nextFrame();
-      const events = recordEvents(el);
+      const events = record(el);
       preventNext(el, 'hide');
 
       el.options[0].click();
-      await nextFrame();
+      await nextFrame(); // A later request from the same action would come by then.
 
       expect(el.value).to.equal('1');
       expect(el.open).to.equal(true);
-      expect(events).to.eql(['hide']);
+      expect(events.types).to.eql(['awc-autocomplete:hide']);
     });
 
     it('should request to hide when cleared', async () => {
       const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
       pressInput(el);
-      const events = recordEvents(el);
+      const events = record(el);
       preventNext(el, 'hide');
 
       el.clearButton!.click();
-      await nextFrame();
+      await nextFrame(); // A later request from the same action would come by then.
 
       expect(el.open).to.equal(true);
-      expect(events).to.eql(['hide', 'clear']);
+      expect(events.types).to.eql(['awc-autocomplete:hide', 'awc-autocomplete:clear']);
     });
 
     it('should hide without a request when its form resets', async () => {
       const form = await fixture<HTMLFormElement>(`<form>${autocompleteHtml({ options: [{ value: '1', text: 'One' }] })}</form>`);
       const el = form.querySelector('awc-autocomplete')!;
-      await whenInitialized(el);
       pressInput(el);
-      const events = recordEvents(el);
+      const events = record(el);
       preventNext(el, 'hide');
 
       form.reset();
-      await nextFrame();
+      await events.waitFor('awc-autocomplete:hidden');
 
       expect(el.open).to.equal(false);
-      expect(events).to.eql(['reset', 'hidden']);
+      expect(events.types).to.eql(['awc-autocomplete:reset', 'awc-autocomplete:hidden']);
     });
 
     it('should close silently when removed, keeping `open`', async () => {
       const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
       pressInput(el);
       const { input } = el;
-      const events = recordEvents(el);
+      const events = record(el);
 
       el.remove();
+      // Closing ends on the next frame, once the listbox's positioning has stopped. A `hidden` would come right then.
       await nextFrame();
 
       expect(el.open).to.equal(true);
       expect(input.getAttribute('aria-expanded')).to.equal('false');
-      expect(events).to.eql([]);
+      expect(events.types).to.eql([]);
     });
 
     it('should open again silently when reconnected', async () => {
@@ -588,14 +621,15 @@ describe('AwcAutocompleteElement', () => {
       const parent = el.parentElement!;
       pressInput(el);
       el.remove();
+      // Closing ends on the next frame, once the listbox's positioning has stopped.
       await nextFrame();
-      const events = recordEvents(el);
+      const events = record(el);
 
       parent.append(el);
-      await whenInitialized(el);
+      await whenSettled();
 
       expect(el.input.getAttribute('aria-expanded')).to.equal('true');
-      expect(events).to.eql([]);
+      expect(events.types).to.eql([]);
     });
 
     it('should stay closed when hidden while removed', async () => {
@@ -603,63 +637,60 @@ describe('AwcAutocompleteElement', () => {
       const parent = el.parentElement!;
       pressInput(el);
       el.remove();
+      // Closing ends on the next frame, once the listbox's positioning has stopped.
       await nextFrame();
-      const events = recordEvents(el);
+      const events = record(el);
 
       await el.hide();
       parent.append(el);
-      await whenInitialized(el);
+      await whenSettled();
 
       expect(el.open).to.equal(false);
       expect(el.input.getAttribute('aria-expanded')).to.equal('false');
-      expect(events).to.eql([]);
+      expect(events.types).to.eql([]);
     });
 
     it('should emit nothing when asked to hide while removed', async () => {
       const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
       pressInput(el);
       el.remove();
+      // Closing ends on the next frame, once the listbox's positioning has stopped.
       await nextFrame();
-      const events = recordEvents(el);
+      const events = record(el);
 
       await el.requestHide();
 
-      expect(events).to.eql([]);
+      expect(events.types).to.eql([]);
     });
 
     it('should open silently once it connects when shown before', async () => {
       const container = await fixture<HTMLElement>('<div></div>');
       container.innerHTML = autocompleteHtml({ options: [{ value: '1', text: 'One' }] });
       const el = container.querySelector('awc-autocomplete')!;
-      const events = recordEvents(el);
+      const events = record(el);
 
       el.show();
-      await whenInitialized(el);
+      await whenSettled();
 
       expect(el.input.getAttribute('aria-expanded')).to.equal('true');
-      expect(events).to.eql([]);
+      expect(events.types).to.eql([]);
     });
 
     it('should open silently when it connects with `open` set', async () => {
-      const events: string[] = [];
-      for (const name of OPEN_CLOSE_EVENTS) {
-        document.addEventListener(`awc-autocomplete:${name}`, () => events.push(name), { once: true });
-      }
+      const events = recordEvents(document, OPEN_CLOSE_EVENTS);
 
       const el = await autocompleteFixture({ open: true, options: [{ value: '1', text: 'One' }] });
 
       expect(el.input.getAttribute('aria-expanded')).to.equal('true');
-      expect(events).to.eql([]);
+      expect(events.types).to.eql([]);
     });
 
     it('should emit a commit event carrying the option, its value and its text', async () => {
       const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
 
       el.show();
-      await nextFrame();
       const option = el.options[0];
-      setTimeout(() => option.click());
-      const event = await oneEvent(el, 'awc-autocomplete:commit');
+      const event = await commit(el, option);
 
       expect(event.detail.target).to.equal(option);
       expect(event.detail.value).to.equal('1');
@@ -670,7 +701,6 @@ describe('AwcAutocompleteElement', () => {
       const el = await autocompleteFixture({ options: [{ value: '1', text: 'One' }] });
 
       el.show();
-      await nextFrame();
       const event = await commit(el, el.options[0]);
 
       expect(event.detail.selected).to.equal(true);
@@ -681,7 +711,6 @@ describe('AwcAutocompleteElement', () => {
       el.setValue('1');
 
       el.show();
-      await nextFrame();
       const event = await commit(el, el.options[0]);
 
       expect(el.value).to.equal('1');
@@ -692,7 +721,6 @@ describe('AwcAutocompleteElement', () => {
       const el = await autocompleteFixture({ multiple: true, options: [{ value: '1', text: 'One' }] });
 
       el.show();
-      await nextFrame();
       const selectEvent = await commit(el, el.options[0]);
       const deselectEvent = await commit(el, el.options[0]);
 
@@ -705,15 +733,15 @@ describe('AwcAutocompleteElement', () => {
       const el = await autocompleteFixture({ multiple: true, options: [{ value: '1', text: 'One' }] });
 
       el.show();
-      await nextFrame();
       el.options[0].click();
-      await nextFrame();
+      // The tag's dismiss button is wired up once Impulse has seen the tag.
+      await whenSettled();
 
       const [tag] = tagElementsOf(el);
       expect(tag).to.exist;
-      const dismissButton = tag.querySelector('button')!;
-      setTimeout(() => dismissButton.click());
-      const event = await oneEvent(el, 'awc-autocomplete:remove');
+      const removals = recordEvents(el, ['awc-autocomplete:remove']);
+      tag.querySelector('button')!.click();
+      const event = await removals.waitFor('awc-autocomplete:remove');
 
       expect(event.detail.target).to.equal(tag);
       expect(event.detail.value).to.equal('1');
@@ -823,14 +851,14 @@ describe('AwcAutocompleteElement', () => {
 
     it('should emit no value events when the value changes from code', async () => {
       const el = await autocompleteFixture({ options: FRUITS, selected: [FRUITS[0]] });
-      const events = recordEvents(el, VALUE_EVENTS);
+      const events = record(el, VALUE_EVENTS);
 
       el.setValue('2');
       el.removeValue();
       el.clear();
       el.reset();
 
-      expect(events).to.eql([]);
+      expect(events.types).to.eql([]);
     });
   });
 
@@ -965,14 +993,14 @@ describe('AwcAutocompleteElement', () => {
 
     it('should emit no value events when the value changes from code', async () => {
       const el = await autocompleteFixture({ multiple: true, options: FRUITS, selected: [FRUITS[0]] });
-      const events = recordEvents(el, VALUE_EVENTS);
+      const events = record(el, VALUE_EVENTS);
 
       el.setValue('2');
       el.removeValue('1');
       el.clear();
       el.reset();
 
-      expect(events).to.eql([]);
+      expect(events.types).to.eql([]);
     });
   });
 
@@ -1107,12 +1135,12 @@ describe('AwcAutocompleteElement', () => {
     it('should emit no events, even when it deselects a value', async () => {
       const el = await autocompleteFixture({ multiple: true, options: FRUITS, selected: [FRUITS[0]] });
       el.show();
-      const events = recordEvents(el, [...OPEN_CLOSE_EVENTS, ...VALUE_EVENTS]);
+      const events = record(el, [...OPEN_CLOSE_EVENTS, ...VALUE_EVENTS]);
 
       el.setOptions(VEGETABLES);
       el.addOption({ value: '4', text: 'Date' });
 
-      expect(events).to.eql([]);
+      expect(events.types).to.eql([]);
     });
 
     it('should filter the new options by what the user typed while open, and activate the first match', async () => {
@@ -1236,7 +1264,6 @@ describe('AwcAutocompleteElement', () => {
         `<form>${autocompleteHtml({ options: FRUITS, selected: [FRUITS[1]] })}</form>`,
       );
       const el = form.querySelector<LocalAutocompleteElement>('awc-autocomplete')!;
-      await whenInitialized(el);
       el.setOptions([{ value: 'h', text: 'hello' }]);
 
       form.reset();
@@ -1250,7 +1277,6 @@ describe('AwcAutocompleteElement', () => {
         `<form>${autocompleteHtml({ options: FRUITS, selected: [FRUITS[0]] })}</form>`,
       );
       const el = form.querySelector<LocalAutocompleteElement>('awc-autocomplete')!;
-      await whenInitialized(el);
       el.setOptions([{ value: '1', text: 'Red apple' }]);
       el.clear();
 
@@ -1288,11 +1314,11 @@ describe('AwcAutocompleteElement', () => {
         const el = await autocompleteFixture({ options: FRUITS });
         pressInput(el);
         el.activate(el.options[1]);
-        const committed = oneEvent(el, 'awc-autocomplete:commit');
+        const commits = recordEvents(el, ['awc-autocomplete:commit']);
 
         pressKey(el, key);
 
-        expect((await committed).detail.value).to.equal('2');
+        expect((await commits.waitFor('awc-autocomplete:commit')).detail.value).to.equal('2');
         expect(el.value).to.equal('2');
         expect(el.open).to.equal(false);
       });
@@ -1321,49 +1347,48 @@ describe('AwcAutocompleteElement', () => {
 
     it('should open with Alt+ArrowDown and close with Alt+ArrowUp', async () => {
       const el = await autocompleteFixture({ options: FRUITS });
-      const events = recordEvents(el);
+      const events = record(el);
 
       pressKey(el, 'ArrowDown', { altKey: true });
       expect(el.open).to.equal(true);
 
-      const hidden = oneEvent(el, 'awc-autocomplete:hidden');
       pressKey(el, 'ArrowUp', { altKey: true });
-      await hidden;
+      await events.waitFor('awc-autocomplete:hidden');
       expect(el.open).to.equal(false);
-      expect(events).to.eql(['show', 'shown', 'hide', 'hidden']);
+      expect(events.types).to.eql(['awc-autocomplete:show', 'awc-autocomplete:shown', 'awc-autocomplete:hide', 'awc-autocomplete:hidden']);
     });
 
     it('should remove the last tag with Backspace while the input is empty', async () => {
       const el = await autocompleteFixture({ multiple: true, options: FRUITS, selected: [FRUITS[0], FRUITS[1]] });
-      const removed = oneEvent(el, 'awc-autocomplete:remove');
+      const removals = recordEvents(el, ['awc-autocomplete:remove']);
 
       const event = pressKey(el, 'Backspace');
 
-      expect((await removed).detail.value).to.equal('2');
+      expect((await removals.waitFor('awc-autocomplete:remove')).detail.value).to.equal('2');
       expect(el.value).to.eql(['1']);
       expect(event.defaultPrevented).to.equal(true);
     });
 
     it('should leave the tags alone on Backspace while the input has text', async () => {
       const el = await autocompleteFixture({ multiple: true, options: FRUITS, selected: [FRUITS[0]] });
-      const events = recordEvents(el, VALUE_EVENTS);
+      const events = record(el, VALUE_EVENTS);
       el.input.value = 'Ch';
 
       const event = pressKey(el, 'Backspace');
 
       expect(el.value).to.eql(['1']);
       expect(event.defaultPrevented).to.equal(false);
-      expect(events).to.eql([]);
+      expect(events.types).to.eql([]);
     });
 
     it('should let Backspace through when there is no tag to remove', async () => {
       const el = await autocompleteFixture({ multiple: true, options: FRUITS });
-      const events = recordEvents(el, VALUE_EVENTS);
+      const events = record(el, VALUE_EVENTS);
 
       const event = pressKey(el, 'Backspace');
 
       expect(event.defaultPrevented).to.equal(false);
-      expect(events).to.eql([]);
+      expect(events.types).to.eql([]);
     });
   });
 
@@ -1371,14 +1396,13 @@ describe('AwcAutocompleteElement', () => {
     it('should request to hide when the user clicks outside it', async () => {
       const el = await autocompleteFixture({ options: FRUITS });
       el.show();
-      const events = recordEvents(el);
-      const hidden = oneEvent(el, 'awc-autocomplete:hidden');
+      const events = record(el);
 
       press(document.body);
-      await hidden;
+      await events.waitFor('awc-autocomplete:hidden');
 
       expect(el.open).to.equal(false);
-      expect(events).to.eql(['hide', 'hidden']);
+      expect(events.types).to.eql(['awc-autocomplete:hide', 'awc-autocomplete:hidden']);
     });
 
     it('should stay open when the user clicks inside its listbox', async () => {
@@ -1386,7 +1410,7 @@ describe('AwcAutocompleteElement', () => {
       el.show();
 
       press(el.listbox);
-      await nextFrame();
+      await nextFrame(); // A hide the press started would have come by then.
 
       expect(el.open).to.equal(true);
     });
@@ -1400,7 +1424,6 @@ describe('AwcAutocompleteElement', () => {
         </div>
       `);
       const el = container.querySelector('awc-autocomplete')!;
-      await whenInitialized(el);
 
       /** Clicks `target` while the listbox is open, blurring the input in between as a real click does. */
       function clickBlurring(target: HTMLElement) {
@@ -1450,7 +1473,6 @@ describe('AwcAutocompleteElement', () => {
         `<form>${autocompleteHtml({ multiple: true, options: FRUITS, selected: [FRUITS[0]], attributes: 'disabled' })}</form>`,
       );
       const el = form.querySelector('awc-autocomplete')!;
-      await whenInitialized(el);
 
       form.reset();
 
@@ -1486,12 +1508,12 @@ describe('AwcAutocompleteElement', () => {
     it('should keep a tag whose dismiss button is clicked while disabled', async () => {
       // Markup written by hand may leave the button enabled, as this fixture's server rendered tag does.
       const el = await autocompleteFixture({ multiple: true, options: FRUITS, selected: [FRUITS[0]], attributes: 'disabled' });
-      const events = recordEvents(el, VALUE_EVENTS);
+      const events = record(el, VALUE_EVENTS);
 
       dismissButtonsOf(el)[0].click();
 
       expect(el.value).to.eql(['1']);
-      expect(events).to.eql([]);
+      expect(events.types).to.eql([]);
     });
 
     it('should not open when pressed or clicked while disabled', async () => {
@@ -1528,7 +1550,7 @@ describe('AwcAutocompleteElement', () => {
       const el = await autocompleteFixture({ options: FRUITS });
       pressInput(el);
       expect(el.activeOption).to.equal(el.options[0]);
-      const events = recordEvents(el, VALUE_EVENTS);
+      const events = record(el, VALUE_EVENTS);
 
       // Typed without a keydown the combobox sees, as pasting does.
       type(el, 'Fig');
@@ -1536,18 +1558,14 @@ describe('AwcAutocompleteElement', () => {
 
       expect(el.activeOption).to.equal(null);
       expect(el.value).to.equal('');
-      expect(events).to.eql([]);
+      expect(events.types).to.eql([]);
     });
   });
 
   describe('ajax fetching', () => {
-    /** Records, in order, the ajax events dispatched on `target`. */
+    /** Records, in order, the ajax events that reach `target`. */
     function recordAjaxEvents(target: HTMLElement) {
-      const events: string[] = [];
-      for (const name of AJAX_EVENTS) {
-        target.addEventListener(name, () => events.push(name));
-      }
-      return events;
+      return recordEvents<AjaxEvents>(target, AJAX_EVENTS);
     }
 
     it('should report the selection with its text before it has fetched any options', async () => {
@@ -1561,7 +1579,7 @@ describe('AwcAutocompleteElement', () => {
 
     it('should request what is typed under `param`, keeping the query string of `src`', async () => {
       const el = await autocompleteFixture({ src: '/fruits?scope=all', attributes: 'param="term"' });
-      const stub = stubFetch();
+      const stub = stubFetch(el);
 
       pressInput(el);
       type(el, 'ap');
@@ -1573,7 +1591,7 @@ describe('AwcAutocompleteElement', () => {
 
     it('should show the options the server responds with, marking `loading` until they arrive', async () => {
       const el = await autocompleteFixture({ src: '/fruits' });
-      const stub = stubFetch();
+      const stub = stubFetch(el);
 
       pressInput(el);
       await requested(stub);
@@ -1588,7 +1606,7 @@ describe('AwcAutocompleteElement', () => {
 
     it('should emit loadstart, load and loadend, without bubbling, around a request that succeeds', async () => {
       const el = await autocompleteFixture({ src: '/fruits' });
-      const stub = stubFetch();
+      const stub = stubFetch(el);
       const events = recordAjaxEvents(el);
       const bubbled = recordAjaxEvents(el.parentElement!);
 
@@ -1596,13 +1614,13 @@ describe('AwcAutocompleteElement', () => {
       await requested(stub);
       await respondAndWait(el, stub, optionsHtml(FRUITS));
 
-      expect(events).to.eql(['loadstart', 'load', 'loadend']);
-      expect(bubbled).to.eql([]);
+      expect(events.types).to.eql(['loadstart', 'load', 'loadend']);
+      expect(bubbled.types).to.eql([]);
     });
 
     it('should mark `error` and emit error when the request fails, until it searches again', async () => {
       const el = await autocompleteFixture({ src: '/fruits' });
-      const stub = stubFetch();
+      const stub = stubFetch(el);
       const events = recordAjaxEvents(el);
 
       pressInput(el);
@@ -1611,7 +1629,7 @@ describe('AwcAutocompleteElement', () => {
 
       expect(el.hasAttribute('error')).to.equal(true);
       expect(el.hasAttribute('loading')).to.equal(false);
-      expect(events).to.eql(['loadstart', 'error', 'loadend']);
+      expect(events.types).to.eql(['loadstart', 'error', 'loadend']);
 
       type(el, 'ap');
       expect(el.hasAttribute('error')).to.equal(false);
@@ -1619,7 +1637,7 @@ describe('AwcAutocompleteElement', () => {
 
     it('should show the options for an empty query again when it reopens, without another request', async () => {
       const el = await autocompleteFixture({ src: '/fruits' });
-      const stub = stubFetch();
+      const stub = stubFetch(el);
       pressInput(el);
       await requested(stub);
       await respondAndWait(el, stub, optionsHtml(FRUITS));
@@ -1627,10 +1645,11 @@ describe('AwcAutocompleteElement', () => {
       await requested(stub, 2);
       await respondAndWait(el, stub, optionsHtml([FRUITS[0]]));
       await el.hide();
+      fakeTimers();
 
       pressInput(el);
       // Longer than the 300ms debounce, so a request would have been made by now.
-      await aTimeout(400);
+      await vi.advanceTimersByTimeAsync(400);
 
       expect(stub.urls).to.have.length(2);
       expect(valuesOf(el)).to.eql(['1', '2', '3']);
@@ -1638,7 +1657,7 @@ describe('AwcAutocompleteElement', () => {
 
     it('should leave no option active when the options it reopens with hold none', async () => {
       const el = await autocompleteFixture({ src: '/fruits' });
-      const stub = stubFetch();
+      const stub = stubFetch(el);
       pressInput(el);
       await requested(stub);
       await respondAndWait(el, stub, '<p>Type to search</p>');
@@ -1655,11 +1674,11 @@ describe('AwcAutocompleteElement', () => {
 
     it('should commit nothing on Enter after a paste, until the options for it arrive', async () => {
       const el = await autocompleteFixture({ src: '/fruits' });
-      const stub = stubFetch();
+      const stub = stubFetch(el);
       pressInput(el);
       await requested(stub);
       await respondAndWait(el, stub, optionsHtml(FRUITS));
-      const events = recordEvents(el, VALUE_EVENTS);
+      const events = record(el, VALUE_EVENTS);
 
       // Typed without a keydown the combobox sees, as pasting does.
       type(el, 'Cherry');
@@ -1671,30 +1690,31 @@ describe('AwcAutocompleteElement', () => {
       pressKey(el, 'Enter');
 
       expect(el.value).to.equal('');
-      expect(events).to.eql([]);
+      expect(events.types).to.eql([]);
     });
 
     it('should commit nothing on Enter when the options for the previous query arrive after a paste', async () => {
       const el = await autocompleteFixture({ src: '/fruits' });
-      const stub = stubFetch();
+      const stub = stubFetch(el);
       pressInput(el);
       await requested(stub);
-      const events = recordEvents(el, VALUE_EVENTS);
+      const events = record(el, VALUE_EVENTS);
 
       type(el, 'Cherry');
       // Answers the request for the empty query, as the one for "Cherry" waits out the debounce.
       stub.respond(optionsHtml(FRUITS));
+      // The answered request was aborted, so nothing signals what became of the response.
       await nextFrame();
       pressKey(el, 'Enter');
 
       expect(el.value).to.equal('');
-      expect(events).to.eql([]);
+      expect(events.types).to.eql([]);
       expect(el.hasAttribute('loading')).to.equal(true);
     });
 
     it('should leave no option active while it fetches the options for reopening', async () => {
       const el = await autocompleteFixture({ src: '/fruits' });
-      const stub = stubFetch();
+      const stub = stubFetch(el);
       pressInput(el);
       await requested(stub);
       // A failed request for the empty query leaves nothing to reuse on reopening.
@@ -1711,7 +1731,7 @@ describe('AwcAutocompleteElement', () => {
 
     it('should abort the request for an older query when a newer one goes out', async () => {
       const el = await autocompleteFixture({ src: '/fruits' });
-      const stub = stubFetch();
+      const stub = stubFetch(el);
       pressInput(el);
       await requested(stub);
       const olderSignal = stub.signal!;
@@ -1727,7 +1747,7 @@ describe('AwcAutocompleteElement', () => {
 
     it('should select and activate the selected values among the fetched options in a multiple select', async () => {
       const el = await autocompleteFixture({ src: '/fruits', multiple: true, selected: [FRUITS[1]] });
-      const stub = stubFetch();
+      const stub = stubFetch(el);
 
       pressInput(el);
       await requested(stub);
@@ -1739,7 +1759,7 @@ describe('AwcAutocompleteElement', () => {
 
     it('should activate the first option of a response once the user has typed, whatever is selected', async () => {
       const el = await autocompleteFixture({ src: '/fruits', selected: [FRUITS[1]] });
-      const stub = stubFetch();
+      const stub = stubFetch(el);
       pressInput(el);
       await requested(stub);
       await respondAndWait(el, stub, optionsHtml(FRUITS));
@@ -1755,7 +1775,7 @@ describe('AwcAutocompleteElement', () => {
 
     it('should go on activating the first option once the typed text is deleted', async () => {
       const el = await autocompleteFixture({ src: '/fruits', selected: [FRUITS[1]] });
-      const stub = stubFetch();
+      const stub = stubFetch(el);
       pressInput(el);
       await requested(stub);
       await respondAndWait(el, stub, optionsHtml(FRUITS));
@@ -1772,7 +1792,7 @@ describe('AwcAutocompleteElement', () => {
 
     it('should activate the selected option again when it reopens after the user has typed', async () => {
       const el = await autocompleteFixture({ src: '/fruits', selected: [FRUITS[1]] });
-      const stub = stubFetch();
+      const stub = stubFetch(el);
       pressInput(el);
       await requested(stub);
       await respondAndWait(el, stub, optionsHtml(FRUITS));
@@ -1788,7 +1808,7 @@ describe('AwcAutocompleteElement', () => {
 
     it('should drop the request for what the user typed when it closes, and show the options it opens with', async () => {
       const el = await autocompleteFixture({ src: '/fruits' });
-      const stub = stubFetch();
+      const stub = stubFetch(el);
       pressInput(el);
       await requested(stub);
       await respondAndWait(el, stub, optionsHtml(FRUITS));
@@ -1798,7 +1818,8 @@ describe('AwcAutocompleteElement', () => {
       await el.hide();
       pressInput(el);
       stub.respond(optionsHtml([FRUITS[2]]));
-      await aTimeout(0);
+      // The answered request was dropped, so nothing signals what became of the response.
+      await sleep(0);
 
       expect(stub.signal?.aborted).to.equal(true);
       expect(el.hasAttribute('loading')).to.equal(false);
@@ -1807,15 +1828,16 @@ describe('AwcAutocompleteElement', () => {
 
     it('should not request what the user typed once it has closed', async () => {
       const el = await autocompleteFixture({ src: '/fruits' });
-      const stub = stubFetch();
+      const stub = stubFetch(el);
       pressInput(el);
       await requested(stub);
       await respondAndWait(el, stub, optionsHtml(FRUITS));
 
+      fakeTimers();
       type(el, 'Ch');
       await el.hide();
       // Longer than the debounce.
-      await aTimeout(400);
+      await vi.advanceTimersByTimeAsync(400);
 
       expect(stub.urls).to.have.length(1);
       expect(el.hasAttribute('loading')).to.equal(false);
@@ -1823,7 +1845,7 @@ describe('AwcAutocompleteElement', () => {
 
     it('should emit loadend for the request it drops when it closes', async () => {
       const el = await autocompleteFixture({ src: '/fruits' });
-      const stub = stubFetch();
+      const stub = stubFetch(el);
       pressInput(el);
       await requested(stub);
       await respondAndWait(el, stub, optionsHtml(FRUITS));
@@ -1833,12 +1855,12 @@ describe('AwcAutocompleteElement', () => {
 
       await el.hide();
 
-      expect(events).to.eql(['loadend']);
+      expect(events.types).to.eql(['loadend']);
     });
 
     it('should emit load and loadend once each when it closes as the response puts its options in', async () => {
       const el = await autocompleteFixture({ src: '/fruits' });
-      const stub = stubFetch();
+      const stub = stubFetch(el);
       pressInput(el);
       await requested(stub);
       await respondAndWait(el, stub, optionsHtml(FRUITS));
@@ -1850,14 +1872,15 @@ describe('AwcAutocompleteElement', () => {
 
       await respondAndWait(el, stub, optionsHtml([FRUITS[2]]));
       observer.disconnect();
-      await aTimeout(0);
+      // A second `load` or `loadend` would come with no event to wait on after it.
+      await sleep(0);
 
-      expect(events).to.eql(['load', 'loadend']);
+      expect(events.types).to.eql(['load', 'loadend']);
     });
 
     it('should leave `no-options` off when an empty response lands after it closed', async () => {
       const el = await autocompleteFixture({ src: '/fruits' });
-      const stub = stubFetch();
+      const stub = stubFetch(el);
       pressInput(el);
       await requested(stub);
 
@@ -1869,7 +1892,7 @@ describe('AwcAutocompleteElement', () => {
 
     it('should leave `error` off when a request fails after it closed', async () => {
       const el = await autocompleteFixture({ src: '/fruits' });
-      const stub = stubFetch();
+      const stub = stubFetch(el);
       const events = recordAjaxEvents(el);
       pressInput(el);
       await requested(stub);
@@ -1878,12 +1901,12 @@ describe('AwcAutocompleteElement', () => {
       await respondAndWait(el, stub, 'Server error', 500);
 
       expect(el.hasAttribute('error')).to.equal(false);
-      expect(events).to.eql(['loadstart', 'error', 'loadend']);
+      expect(events.types).to.eql(['loadstart', 'error', 'loadend']);
     });
 
     it('should leave the options inactive and unselected when a response lands after it closed', async () => {
       const el = await autocompleteFixture({ src: '/fruits', selected: [FRUITS[1]] });
-      const stub = stubFetch();
+      const stub = stubFetch(el);
       pressInput(el);
       await requested(stub);
 
@@ -1897,7 +1920,7 @@ describe('AwcAutocompleteElement', () => {
 
     it('should leave no option active when a response replaces the option activated while it was closed', async () => {
       const el = await autocompleteFixture({ src: '/fruits' });
-      const stub = stubFetch();
+      const stub = stubFetch(el);
       pressInput(el);
       await requested(stub);
       await respondAndWait(el, stub, optionsHtml(FRUITS));
@@ -1931,8 +1954,8 @@ describe('AwcAutocompleteElement', () => {
 
       expect(el.value).to.eql(['1', '2']);
       expect(el.selection).to.eql([{ value: '1', text: 'Apple' }, { value: '2', text: 'Banana' }]);
-      // It is still initializing, which the fixture's teardown would otherwise interrupt.
-      await whenInitialized(el);
+      // It is still initializing, which the cleanup after the test would otherwise interrupt.
+      await whenSettled();
     });
 
     it('should report an empty value and no selection while it has no markup', () => {

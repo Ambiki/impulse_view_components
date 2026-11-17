@@ -1,8 +1,7 @@
 import type AwcDateCalendarElement from './index';
-import { whenInitialized } from '@ambiki/impulse';
-import { expect, fixture } from '@open-wc/testing';
-import { resetMouse, sendKeys, sendMouse } from '@web/test-runner-commands';
+import { fixture, recordEvents, whenSettled } from '@ambiki/impulse/testing';
 import { Idiomorph } from 'idiomorph';
+import { userEvent } from 'vitest/browser';
 import { CalendarDate, today } from '../../internal/calendar_date';
 import { canMoveView, gridRows, headingText } from '../../internal/calendar_grid';
 import { DAY_LEVEL, DAY_ENGLISH as ENGLISH, weekdayRow } from '../../internal/day_level';
@@ -77,10 +76,8 @@ function dateCalendarHtml(options: CalendarOptions = {}) {
   </awc-date-calendar>`;
 }
 
-async function dateCalendarFixture(options?: CalendarOptions) {
-  const el = await fixture<AwcDateCalendarElement>(dateCalendarHtml(options));
-  await whenInitialized(el);
-  return el;
+function dateCalendarFixture(options?: CalendarOptions) {
+  return fixture<AwcDateCalendarElement>(dateCalendarHtml(options));
 }
 
 /** The button of the day `date` names, in the grid shown. */
@@ -101,10 +98,17 @@ function focusedDay() {
   return (document.activeElement as HTMLElement | null)?.dataset.date ?? null;
 }
 
+/** The keys `userEvent.keyboard()` presses for `key`, a `KeyboardEvent.key` that `Shift+` may hold Shift for. */
+function keysOf(key: string) {
+  if (key === ' ') return key;
+  if (key.startsWith('Shift+')) return `{Shift>}{${key.slice('Shift+'.length)}}{/Shift}`;
+  return `{${key}}`;
+}
+
 /** Focuses the day `date` names, then presses `key` there, as the user would. */
 async function press(el: Element, key: string, date?: string) {
   if (date) day(el, date).focus();
-  await sendKeys({ press: key });
+  await userEvent.keyboard(keysOf(key));
 }
 
 /** Presses the heading, which drills up a level. */
@@ -117,23 +121,17 @@ function selectedDay(el: Element) {
   return el.querySelector<HTMLElement>('td[aria-selected="true"] button')?.dataset.date ?? null;
 }
 
-let recording: AbortController | undefined;
-
-/** Records the values of the `commit` events, in the order they reach the document. */
+/** Records the `commit` events, in the order they reach the document. */
 function recordCommits() {
-  recording = new AbortController();
-  const values: string[] = [];
-  document.addEventListener(
-    'awc-date-calendar:commit',
-    (event) => values.push((event as CustomEvent<{ value: string }>).detail.value),
-    { signal: recording.signal },
-  );
-  return values;
+  return recordEvents(document, ['awc-date-calendar:commit']);
+}
+
+/** The values of the recorded `commit` events. */
+function values(commits: ReturnType<typeof recordCommits>) {
+  return commits.events.map((event) => event.detail.value);
 }
 
 describe('awc-date-calendar', () => {
-  afterEach(() => recording?.abort());
-
   describe('committing a day', () => {
     it('makes it the value, and emits commit', async () => {
       const el = await dateCalendarFixture({ value: '2026-11-06' });
@@ -144,7 +142,7 @@ describe('awc-date-calendar', () => {
       expect(el.value).to.equal('2026-11-18');
       expect(el.getAttribute('value')).to.equal('2026-11-18');
       expect(selectedDay(el)).to.equal('2026-11-18');
-      expect(commits).to.eql(['2026-11-18']);
+      expect(values(commits)).to.eql(['2026-11-18']);
     });
 
     it('happens on a click in the gap around the day, its cell', async () => {
@@ -153,7 +151,7 @@ describe('awc-date-calendar', () => {
 
       day(el, '2026-11-18').closest('td')!.click();
 
-      expect(commits).to.eql(['2026-11-18']);
+      expect(values(commits)).to.eql(['2026-11-18']);
     });
 
     it('doesn\'t happen on a click outside the days, even inside an app\'s table cell', async () => {
@@ -161,14 +159,13 @@ describe('awc-date-calendar', () => {
         `<table><tbody><tr><td>${dateCalendarHtml({ value: '2026-11-06' })}</td></tr></tbody></table>`,
       );
       const el = table.querySelector('awc-date-calendar')!;
-      await whenInitialized(el);
       const commits = recordCommits();
 
       el.querySelector('th')!.click();
       el.querySelector<HTMLElement>('tbody[data-target] tr')!.click();
 
       expect(el.value).to.equal('2026-11-06');
-      expect(commits).to.eql([]);
+      expect(values(commits)).to.eql([]);
     });
 
     it('emits nothing for the day already selected', async () => {
@@ -178,7 +175,7 @@ describe('awc-date-calendar', () => {
       day(el, '2026-11-06').click();
 
       expect(el.value).to.equal('2026-11-06');
-      expect(commits).to.eql([]);
+      expect(values(commits)).to.eql([]);
     });
   });
 
@@ -193,7 +190,7 @@ describe('awc-date-calendar', () => {
       expect(el.heading.textContent).to.equal('March 2027');
       expect(selectedDay(el)).to.equal('2027-03-15');
       expect(day(el, '2027-03-15').tabIndex).to.equal(0);
-      expect(commits).to.eql([]);
+      expect(values(commits)).to.eql([]);
     });
 
     it('moves the view when set as the attribute', async () => {
@@ -262,7 +259,7 @@ describe('awc-date-calendar', () => {
       await press(el, 'ArrowRight', '2026-11-18');
       await press(el, 'PageDown');
 
-      expect(commits).to.eql([]);
+      expect(values(commits)).to.eql([]);
       expect(el.value).to.equal('2026-11-18');
     });
 
@@ -374,7 +371,7 @@ describe('awc-date-calendar', () => {
       await press(el, 'ArrowRight');
       await press(el, ' ');
 
-      expect(commits).to.eql(['2026-11-19', '2026-11-20']);
+      expect(values(commits)).to.eql(['2026-11-19', '2026-11-20']);
       expect(el.value).to.equal('2026-11-20');
       expect(focusedDay()).to.equal('2026-11-20');
     });
@@ -387,7 +384,7 @@ describe('awc-date-calendar', () => {
       expect(focusedDay()).to.equal('2026-11-09');
       await press(el, 'Enter');
 
-      expect(commits).to.eql([]);
+      expect(values(commits)).to.eql([]);
       expect(el.value).to.equal('2026-11-10');
     });
 
@@ -410,7 +407,7 @@ describe('awc-date-calendar', () => {
 
       day(el, '2026-12-03').click();
 
-      expect(commits).to.eql(['2026-12-03']);
+      expect(values(commits)).to.eql(['2026-12-03']);
       expect(el.grid.dataset.month).to.equal('2026-12');
       expect(day(el, '2026-12-03').tabIndex).to.equal(0);
       expect(day(el, '2026-12-03').classList.contains('awc-date-calendar-day--outside')).to.equal(false);
@@ -438,7 +435,7 @@ describe('awc-date-calendar', () => {
       day(el, '2026-11-21').focus();
       day(el, '2026-11-21').click();
 
-      expect(commits).to.eql([]);
+      expect(values(commits)).to.eql([]);
       expect(el.value).to.equal('2026-11-18');
       expect(day(el, '2026-11-21').tabIndex).to.equal(0);
       expect(el.querySelectorAll('tbody [tabindex="0"]')).to.have.length(1);
@@ -461,7 +458,7 @@ describe('awc-date-calendar', () => {
       expect(el.grid.hasAttribute('aria-disabled')).to.equal(false);
       expect(el.querySelectorAll('button:disabled')).to.have.length(0);
       expect(day(el, '2026-11-18').tabIndex).to.equal(0);
-      expect(commits).to.eql([]);
+      expect(values(commits)).to.eql([]);
     });
 
     it('starts disabled from the server\'s markup, and commits nothing', async () => {
@@ -472,7 +469,7 @@ describe('awc-date-calendar', () => {
 
       expect(el.disabled).to.equal(true);
       expect(el.querySelectorAll('button:enabled')).to.have.length(0);
-      expect(commits).to.eql([]);
+      expect(values(commits)).to.eql([]);
     });
 
     it('commits nothing, even on a click in the gap around a day, which the browser still fires', async () => {
@@ -485,7 +482,7 @@ describe('awc-date-calendar', () => {
 
       expect(el.value).to.equal('2026-11-18');
       expect(selectedDay(el)).to.equal('2026-11-18');
-      expect(commits).to.eql([]);
+      expect(values(commits)).to.eql([]);
     });
 
     it('turns no page and drills up nowhere when the user presses the buttons, or the icons inside them', async () => {
@@ -497,10 +494,11 @@ describe('awc-date-calendar', () => {
       el.disabled = true;
 
       for (const target of [previousButton(el).firstElementChild!, nextButton(el).firstElementChild!, el.heading.querySelector('button')!]) {
-        const box = target.getBoundingClientRect();
-        await sendMouse({ type: 'click', position: [Math.round(box.x + box.width / 2), Math.round(box.y + box.height / 2)] });
+        // A real click at its centre. `force` skips the checks that wait for a disabled button to be enabled.
+        await userEvent.click(target, { force: true });
       }
-      await resetMouse();
+      // The real pointer would stay over the heading for the tests after this one.
+      await userEvent.hover(document.documentElement, { position: { x: 0, y: 0 } });
 
       expect(el.grid.dataset.month).to.equal('2026-11');
       expect(el.heading.textContent).to.equal('November 2026');
@@ -518,7 +516,7 @@ describe('awc-date-calendar', () => {
       el.nextView();
       expect(el.grid.dataset.month).to.equal('2027-04');
       expect(el.querySelectorAll('button:enabled')).to.have.length(0);
-      expect(commits).to.eql([]);
+      expect(values(commits)).to.eql([]);
     });
 
     it('disables a level drilled up to, and the days code takes it back to', async () => {
@@ -566,7 +564,7 @@ describe('awc-date-calendar', () => {
       expect(el.grid.dataset.month).to.equal('2026-11');
       expect(day(el, '2026-11-18').tabIndex).to.equal(0);
       expect(el.value).to.equal('2026-11-18');
-      expect(commits).to.eql([]);
+      expect(values(commits)).to.eql([]);
     });
 
     it('goes back to today\'s month without a selected day', async () => {
@@ -676,7 +674,7 @@ describe('awc-date-calendar', () => {
 
       Idiomorph.morph(el, dateCalendarHtml({ value: '2027-02-03' }));
 
-      expect(commits).to.eql([]);
+      expect(values(commits)).to.eql([]);
 
       expect(el.value).to.equal('2027-02-03');
       expect(el.grid.dataset.month).to.equal('2027-02');
@@ -702,7 +700,7 @@ describe('awc-date-calendar', () => {
       expect(el.disabled).to.equal(false);
       expect(el.grid.hasAttribute('aria-disabled')).to.equal(false);
       expect(el.querySelectorAll('button:disabled')).to.have.length(0);
-      expect(commits).to.eql([]);
+      expect(values(commits)).to.eql([]);
     });
   });
 
@@ -719,7 +717,7 @@ describe('awc-date-calendar', () => {
       el.previousView();
       expect(el.grid.dataset.month).to.equal('2026-10');
       expect(el.value).to.equal('2026-11-18');
-      expect(commits).to.eql([]);
+      expect(values(commits)).to.eql([]);
     });
 
     it('stop at the months holding min and max', async () => {
@@ -746,7 +744,7 @@ describe('awc-date-calendar', () => {
       expect(day(el, '2027-03-09').tabIndex).to.equal(0);
       expect(el.value).to.equal('2026-11-18');
       expect(selectedDay(el)).to.equal(null);
-      expect(commits).to.eql([]);
+      expect(values(commits)).to.eql([]);
     });
 
     it('goes past min and max, as code decides', async () => {
@@ -793,10 +791,7 @@ describe('awc-date-calendar', () => {
     it('selects no day and shows today\'s month, without emitting, as setting an empty value does', async () => {
       const el = await dateCalendarFixture({ value: '2020-01-15', timeZone: 'Asia/Dubai' });
       const todayThere = today('Asia/Dubai').toString();
-      const events: string[] = [];
-      for (const type of ['awc-date-calendar:commit', 'awc-date-calendar:clear']) {
-        el.addEventListener(type, () => events.push(type));
-      }
+      const events = recordEvents(el, ['awc-date-calendar:commit']);
 
       el.clear();
 
@@ -804,14 +799,14 @@ describe('awc-date-calendar', () => {
       expect(el.hasAttribute('value')).to.equal(false);
       expect(selectedDay(el)).to.equal(null);
       expect(el.grid.dataset.month).to.equal(todayThere.slice(0, 7));
-      expect(events).to.eql([]);
+      expect(events.types).to.eql([]);
     });
 
     it('can be called from a data-action', async () => {
       const el = await dateCalendarFixture({ value: '2026-11-18' });
       el.insertAdjacentHTML('beforeend', '<button type="button" data-action="click->awc-date-calendar#clear">Clear</button>');
       const button = el.querySelector<HTMLButtonElement>('[data-action$="#clear"]')!;
-      await new Promise((resolve) => setTimeout(resolve));
+      await whenSettled();
 
       button.click();
 
@@ -831,7 +826,7 @@ describe('awc-date-calendar', () => {
       expect(el.grid.dataset.month).to.equal(todayThere.slice(0, 7));
       expect(day(el, todayThere).tabIndex).to.equal(0);
       expect(el.value).to.equal('2020-01-15');
-      expect(commits).to.eql([]);
+      expect(values(commits)).to.eql([]);
     });
   });
 
@@ -876,7 +871,7 @@ describe('awc-date-calendar', () => {
       expect(el.heading.querySelector('button')).to.equal(null);
       expect(focusedDay()).to.equal('2026-01-01');
       expect(el.previousButton.getAttribute('aria-label')).to.equal('Previous decade');
-      expect(commits).to.eql([]);
+      expect(values(commits)).to.eql([]);
     });
 
     it('names the page buttons in English above the days when the names and patterns given have none for them', async () => {
@@ -939,7 +934,7 @@ describe('awc-date-calendar', () => {
       expect(el.heading.querySelector('button')!.getAttribute('aria-describedby')).to.equal('heading-month');
       expect(el.previousButton.getAttribute('aria-label')).to.equal('Previous month');
       expect(el.value).to.equal('2027-01-31');
-      expect(commits).to.eql([]);
+      expect(values(commits)).to.eql([]);
     });
 
     it('goes back down through the years and the months to the same day', async () => {
@@ -957,7 +952,7 @@ describe('awc-date-calendar', () => {
       expect(focusedDay()).to.equal('2024-11-18');
 
       day(el, '2024-11-20').click();
-      expect(commits).to.eql(['2024-11-20']);
+      expect(values(commits)).to.eql(['2024-11-20']);
     });
 
     it('leaves the days as they were when the user chooses the month they drilled up from', async () => {
@@ -965,7 +960,7 @@ describe('awc-date-calendar', () => {
       el.goToDate('2026-11-25');
 
       drillUp(el);
-      await sendKeys({ press: 'Enter' });
+      await userEvent.keyboard('{Enter}');
 
       expect(el.grid.dataset.month).to.equal('2026-11');
       expect(focusedDay()).to.equal('2026-11-25');
@@ -1030,7 +1025,7 @@ describe('awc-date-calendar', () => {
       expect(el.grid.dataset.year).to.equal('2025');
       expect(day(el, '2025-05-01').getAttribute('aria-disabled')).to.equal('true');
       expect(day(el, '2025-06-01').hasAttribute('aria-disabled')).to.equal(false);
-      expect(commits).to.eql([]);
+      expect(values(commits)).to.eql([]);
     });
 
     it('go back to the days on goToToday, a new value and clear', async () => {

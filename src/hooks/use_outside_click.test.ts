@@ -1,6 +1,6 @@
 import type { Boundary } from './use_outside_click';
-import { ImpulseElement, registerElement, whenInitialized } from '@ambiki/impulse';
-import { expect, fixture, html } from '@open-wc/testing';
+import { ImpulseElement, registerElement } from '@ambiki/impulse';
+import { fixture } from '@ambiki/impulse/testing';
 import useOutsideClick from './use_outside_click';
 
 /** The smallest element the hook can be attached to: it only needs the impulse lifecycle. */
@@ -9,14 +9,13 @@ class OutsideClickHost extends ImpulseElement {}
 
 /** A host with a button in it, next to a button outside it. */
 async function outsideClickFixture() {
-  const container = await fixture<HTMLElement>(html`
+  const container = await fixture<HTMLElement>(`
     <div>
       <outside-click-host><button data-name="inside">Inside</button></outside-click-host>
       <button data-name="outside">Outside</button>
     </div>
   `);
   const host = container.querySelector<OutsideClickHost>('outside-click-host')!;
-  await whenInitialized(host);
   return {
     container,
     host,
@@ -33,8 +32,8 @@ function listen(host: OutsideClickHost, boundaries: Boundary[]) {
 }
 
 /**
- * Names what each call landed on by its `data-name`. A failed assertion on the elements themselves, or on the events,
- * stalls the test runner as it serializes them.
+ * Names what each call landed on by its `data-name`, which a failed assertion shows more plainly than the elements
+ * themselves.
  */
 function targets(calls: Array<{ target: HTMLElement }>) {
   return calls.map(({ target }) => target.dataset.name);

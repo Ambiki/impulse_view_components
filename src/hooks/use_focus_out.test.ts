@@ -1,6 +1,7 @@
 import type { Boundary } from './use_outside_click';
-import { ImpulseElement, registerElement, whenInitialized } from '@ambiki/impulse';
-import { aTimeout, expect, fixture, html } from '@open-wc/testing';
+import { ImpulseElement, registerElement } from '@ambiki/impulse';
+import { fixture, recordEvents } from '@ambiki/impulse/testing';
+import { sleep } from '../internal/test_waits';
 import useFocusOut from './use_focus_out';
 import useOutsideClick from './use_outside_click';
 
@@ -13,7 +14,7 @@ class FocusOutHost extends ImpulseElement {}
  * all can take focus.
  */
 async function focusOutFixture() {
-  const container = await fixture<HTMLElement>(html`
+  const container = await fixture<HTMLElement>(`
     <div data-name="container" tabindex="-1">
       <focus-out-host>
         <button data-name="inside">Inside</button>
@@ -25,7 +26,6 @@ async function focusOutFixture() {
     </div>
   `);
   const host = container.querySelector<FocusOutHost>('focus-out-host')!;
-  await whenInitialized(host);
   const named = (name: string) => container.querySelector<HTMLElement>(`[data-name="${name}"]`)!;
   return {
     container,
@@ -47,8 +47,8 @@ function listen(host: FocusOutHost, boundaries: Boundary[]) {
 }
 
 /**
- * Names what focus moved to in each call by its `data-name`. A failed assertion on the elements themselves, or on the
- * events, stalls the test runner as it serializes them.
+ * Names what focus moved to in each call by its `data-name`, which a failed assertion shows more plainly than the
+ * elements themselves.
  */
 function targets(calls: Array<{ target: HTMLElement }>) {
   return calls.map(({ target }) => target.dataset.name);
@@ -84,13 +84,12 @@ describe('useFocusOut', () => {
     const { host, inside, outside } = await focusOutFixture();
     const calls = listen(host, [host]);
     inside.focus();
-    let focusin: Event | undefined;
-    outside.addEventListener('focusin', (event) => (focusin = event), { once: true });
+    const focusins = recordEvents(outside, ['focusin'], { self: true });
 
     outside.focus();
 
     expect(targets(calls)).to.eql(['outside']);
-    expect(calls[0].event === focusin, 'calls back with the focusin event').to.equal(true);
+    expect(calls[0].event === focusins.events[0], 'calls back with the focusin event').to.equal(true);
   });
 
   it('calls back for a move outside when focus was not inside a boundary before', async () => {
@@ -270,8 +269,8 @@ describe('useFocusOut', () => {
     const calls = listen(host, [host]);
     pressDown(outside);
     click(outside);
-    // The hook forgets the press once the click's own handlers have run.
-    await aTimeout(0);
+    // The hook forgets the press in a timeout it sets during the click; this one, set after it, runs after it.
+    await sleep(0);
 
     outside.focus();
 

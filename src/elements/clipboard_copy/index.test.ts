@@ -1,5 +1,4 @@
-import { whenInitialized } from '@ambiki/impulse';
-import { expect, fixture } from '@open-wc/testing';
+import { fixture, recordEvents, whenSettled } from '@ambiki/impulse/testing';
 import { Idiomorph } from 'idiomorph';
 // Registers `awc-clipboard-copy`.
 import './index';
@@ -12,14 +11,15 @@ function clipboardCopyHtml(attributes = 'value="Hello"') {
 /** A clipboard copy with `attributes`, after `copySourceHtml`, which holds the copy sources it may name. */
 async function clipboardCopyFixture(attributes?: string, copySourceHtml = '') {
   const container = await fixture<HTMLElement>(`<div>${copySourceHtml}${clipboardCopyHtml(attributes)}</div>`);
-  const el = container.querySelector('awc-clipboard-copy')!;
-  await whenInitialized(el);
-  return el;
+  return container.querySelector('awc-clipboard-copy')!;
 }
 
 /**
  * Replaces the Clipboard API's `writeText`, the boundary the element writes through, so tests don't depend on the
  * browser granting clipboard access. Rejects with `error` when one is given.
+ *
+ * A press starts the write in its own handler, so `written` holds it as soon as the press returns: a test that expects
+ * no copy can check at once. Only the `copied` or `error` event that follows waits on the write.
  */
 function stubClipboard(error?: Error) {
   const written: string[] = [];
@@ -30,17 +30,16 @@ function stubClipboard(error?: Error) {
   return written;
 }
 
-let recording: AbortController | undefined;
+const EVENTS = ['awc-clipboard-copy:copied', 'awc-clipboard-copy:error'] as const;
 
-/** Records the `copied` and `error` events, with their detail, in the order they reach the document. */
-function recordEvents() {
-  recording = new AbortController();
-  const events: Array<{ type: string; detail: unknown }> = [];
-  const record = (event: Event) => events.push({ type: event.type, detail: (event as CustomEvent).detail });
-  for (const type of ['awc-clipboard-copy:copied', 'awc-clipboard-copy:error']) {
-    document.addEventListener(type, record, { signal: recording.signal });
-  }
-  return events;
+/** Records the `copied` and `error` events, in the order they reach `target`, the document by default. */
+function recordCopies(target: Node = document) {
+  return recordEvents(target, EVENTS);
+}
+
+/** The type and detail of each recorded event. */
+function summary(copies: ReturnType<typeof recordCopies>) {
+  return copies.events.map(({ type, detail }) => ({ type, detail }));
 }
 
 /** Dispatches a `type` event for `key` from `target`, as pressing or releasing it there would. */
@@ -48,11 +47,6 @@ function dispatchKey(target: Element, type: 'keydown' | 'keyup', key: string) {
   const event = new KeyboardEvent(type, { key, bubbles: true, cancelable: true, composed: true });
   target.dispatchEvent(event);
   return event;
-}
-
-/** Resolves once the element has finished the copy a press started: the clipboard write is asynchronous. */
-function settle(ms = 0) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /** The feedback state the element is in, if any. */
@@ -64,7 +58,6 @@ function feedback(el: Element) {
 
 describe('awc-clipboard-copy', () => {
   afterEach(() => {
-    recording?.abort();
     // Removing the own properties brings back the prototypes' `clipboard` and `writeText`.
     delete (navigator as { clipboard?: Clipboard }).clipboard;
     delete (navigator.clipboard as Partial<Clipboard>).writeText;
@@ -73,9 +66,10 @@ describe('awc-clipboard-copy', () => {
   it('copies its value when clicked', async () => {
     const written = stubClipboard();
     const el = await clipboardCopyFixture('value="Hello"');
+    const copies = recordCopies();
 
     el.click();
-    await settle();
+    await copies.waitFor('awc-clipboard-copy:copied');
 
     expect(written).to.eql(['Hello']);
   });
@@ -84,10 +78,11 @@ describe('awc-clipboard-copy', () => {
     const written = stubClipboard();
     const el = await clipboardCopyFixture('value="Hello"');
     expect(el.value).to.equal('Hello');
+    const copies = recordCopies();
 
     el.value = 'Changed';
     el.click();
-    await settle();
+    await copies.waitFor('awc-clipboard-copy:copied');
 
     expect(el.getAttribute('value')).to.equal('Changed');
     expect(written).to.eql(['Changed']);
@@ -96,37 +91,37 @@ describe('awc-clipboard-copy', () => {
   it('emits copied with the copied text once the clipboard has it', async () => {
     stubClipboard();
     const el = await clipboardCopyFixture('value="Hello"');
-    const events = recordEvents();
+    const copies = recordCopies();
 
     el.click();
-    expect(events).to.eql([]);
-    await settle();
+    expect(summary(copies)).to.eql([]);
+    await copies.waitFor('awc-clipboard-copy:copied');
 
-    expect(events).to.eql([{ type: 'awc-clipboard-copy:copied', detail: { text: 'Hello' } }]);
+    expect(summary(copies)).to.eql([{ type: 'awc-clipboard-copy:copied', detail: { text: 'Hello' } }]);
   });
 
   it('emits error with the reason when the browser refuses the write', async () => {
     const refusal = new DOMException('Write permission denied.', 'NotAllowedError');
     stubClipboard(refusal);
     const el = await clipboardCopyFixture('value="Hello"');
-    const events = recordEvents();
+    const copies = recordCopies();
 
     el.click();
-    await settle();
+    await copies.waitFor('awc-clipboard-copy:error');
 
-    expect(events).to.eql([{ type: 'awc-clipboard-copy:error', detail: { error: refusal } }]);
+    expect(summary(copies)).to.eql([{ type: 'awc-clipboard-copy:error', detail: { error: refusal } }]);
   });
 
   it('emits error when the page has no Clipboard API, as outside a secure context', async () => {
     Object.defineProperty(navigator, 'clipboard', { value: undefined, configurable: true });
     const el = await clipboardCopyFixture('value="Hello"');
-    const events = recordEvents();
+    const copies = recordCopies();
 
     el.click();
-    await settle();
+    const error = await copies.waitFor('awc-clipboard-copy:error');
 
-    expect(events.map(({ type }) => type)).to.eql(['awc-clipboard-copy:error']);
-    expect((events[0].detail as { error: DOMException }).error.name).to.equal('NotSupportedError');
+    expect(copies.types).to.eql(['awc-clipboard-copy:error']);
+    expect((error.detail.error as DOMException).name).to.equal('NotSupportedError');
   });
 
   describe('with a copy source', () => {
@@ -138,9 +133,10 @@ describe('awc-clipboard-copy', () => {
       it(`copies the value of the ${name} it names`, async () => {
         const written = stubClipboard();
         const el = await clipboardCopyFixture('for="source"', copySourceHtml);
+        const copies = recordCopies();
 
         el.click();
-        await settle();
+        await copies.waitFor('awc-clipboard-copy:copied');
 
         expect(written).to.eql([`From ${name}`]);
       });
@@ -152,9 +148,10 @@ describe('awc-clipboard-copy', () => {
         'for="source"',
         '<div id="source"><div>First line</div><div>Second <span hidden>hidden </span>line</div></div>',
       );
+      const copies = recordCopies();
 
       el.click();
-      await settle();
+      await copies.waitFor('awc-clipboard-copy:copied');
 
       expect(written).to.eql(['First line\nSecond line']);
     });
@@ -163,9 +160,11 @@ describe('awc-clipboard-copy', () => {
       const written = stubClipboard();
       const el = await clipboardCopyFixture('for="source"', '<input id="source" value="Before">');
 
+      const copies = recordCopies();
+
       el.ownerDocument.querySelector<HTMLInputElement>('#source')!.value = 'After';
       el.click();
-      await settle();
+      await copies.waitFor('awc-clipboard-copy:copied');
 
       expect(written).to.eql(['After']);
     });
@@ -173,9 +172,10 @@ describe('awc-clipboard-copy', () => {
     it('copies its own value instead, when it has one', async () => {
       const written = stubClipboard();
       const el = await clipboardCopyFixture('value="Own value" for="source"', '<input id="source" value="From input">');
+      const copies = recordCopies();
 
       el.click();
-      await settle();
+      await copies.waitFor('awc-clipboard-copy:copied');
 
       expect(written).to.eql(['Own value']);
     });
@@ -183,9 +183,10 @@ describe('awc-clipboard-copy', () => {
     it('copies the copy source when its value is empty', async () => {
       const written = stubClipboard();
       const el = await clipboardCopyFixture('value="" for="source"', '<input id="source" value="From input">');
+      const copies = recordCopies();
 
       el.click();
-      await settle();
+      await copies.waitFor('awc-clipboard-copy:copied');
 
       expect(written).to.eql(['From input']);
     });
@@ -194,10 +195,11 @@ describe('awc-clipboard-copy', () => {
       const written = stubClipboard();
       const el = await clipboardCopyFixture('for="source"', '<input id="source" value="First"><input id="other" value="Second">');
       expect(el.for).to.equal('source');
+      const copies = recordCopies();
 
       el.for = 'other';
       el.click();
-      await settle();
+      await copies.waitFor('awc-clipboard-copy:copied');
 
       expect(el.getAttribute('for')).to.equal('other');
       expect(written).to.eql(['Second']);
@@ -206,28 +208,28 @@ describe('awc-clipboard-copy', () => {
     it('emits error without writing when no element has the id it names', async () => {
       const written = stubClipboard();
       const el = await clipboardCopyFixture('for="missing"');
-      const events = recordEvents();
+      const copies = recordCopies();
 
       el.click();
-      await settle();
+      const error = await copies.waitFor('awc-clipboard-copy:error');
 
       expect(written).to.eql([]);
-      expect(events.map(({ type }) => type)).to.eql(['awc-clipboard-copy:error']);
-      expect((events[0].detail as { error: DOMException }).error.name).to.equal('NotFoundError');
+      expect(copies.types).to.eql(['awc-clipboard-copy:error']);
+      expect((error.detail.error as DOMException).name).to.equal('NotFoundError');
     });
   });
 
   it('emits error without writing when it has neither a value nor a copy source', async () => {
     const written = stubClipboard();
     const el = await clipboardCopyFixture('');
-    const events = recordEvents();
+    const copies = recordCopies();
 
     el.click();
-    await settle();
+    const error = await copies.waitFor('awc-clipboard-copy:error');
 
     expect(written).to.eql([]);
-    expect(events.map(({ type }) => type)).to.eql(['awc-clipboard-copy:error']);
-    expect((events[0].detail as { error: DOMException }).error.name).to.equal('NotFoundError');
+    expect(copies.types).to.eql(['awc-clipboard-copy:error']);
+    expect((error.detail.error as DOMException).name).to.equal('NotFoundError');
   });
 
   it('copies only for the one pressed when the page has several', async () => {
@@ -236,11 +238,12 @@ describe('awc-clipboard-copy', () => {
       `<div>${clipboardCopyHtml('value="First"')}${clipboardCopyHtml('value="Second"')}</div>`,
     );
     const [first, second] = container.querySelectorAll('awc-clipboard-copy');
-    await Promise.all([whenInitialized(first), whenInitialized(second)]);
+    const copies = recordCopies();
 
     first.click();
     second.click();
-    await settle();
+    await copies.waitFor('awc-clipboard-copy:copied');
+    await copies.waitFor('awc-clipboard-copy:copied');
 
     expect(written).to.eql(['First', 'Second']);
   });
@@ -250,9 +253,10 @@ describe('awc-clipboard-copy', () => {
       const written = stubClipboard();
       const el = await clipboardCopyFixture('value="Hello"');
       el.parentElement!.addEventListener('keydown', (event) => event.stopPropagation(), { capture: true });
+      const copies = recordCopies();
 
       dispatchKey(el, 'keydown', 'Enter');
-      await settle();
+      await copies.waitFor('awc-clipboard-copy:copied');
 
       expect(written).to.eql(['Hello']);
     });
@@ -260,9 +264,10 @@ describe('awc-clipboard-copy', () => {
     it('copies when Enter is pressed', async () => {
       const written = stubClipboard();
       const el = await clipboardCopyFixture('value="Hello"');
+      const copies = recordCopies();
 
       dispatchKey(el, 'keydown', 'Enter');
-      await settle();
+      await copies.waitFor('awc-clipboard-copy:copied');
 
       expect(written).to.eql(['Hello']);
     });
@@ -270,14 +275,14 @@ describe('awc-clipboard-copy', () => {
     it('copies when Space is released, not when it is pressed, and keeps the page from scrolling', async () => {
       const written = stubClipboard();
       const el = await clipboardCopyFixture('value="Hello"');
+      const copies = recordCopies();
 
       const press = dispatchKey(el, 'keydown', ' ');
-      await settle();
       expect(press.defaultPrevented).to.equal(true);
       expect(written).to.eql([]);
 
       dispatchKey(el, 'keyup', ' ');
-      await settle();
+      await copies.waitFor('awc-clipboard-copy:copied');
       expect(written).to.eql(['Hello']);
     });
 
@@ -290,7 +295,6 @@ describe('awc-clipboard-copy', () => {
       el.blur();
       el.focus();
       dispatchKey(el, 'keyup', ' ');
-      await settle();
 
       expect(written).to.eql([]);
     });
@@ -301,12 +305,14 @@ describe('awc-clipboard-copy', () => {
       const root = host.attachShadow({ mode: 'open' });
       root.innerHTML = clipboardCopyHtml('value="Hello"');
       const el = root.querySelector('awc-clipboard-copy')!;
-      await whenInitialized(el);
+      await whenSettled();
+      const copies = recordCopies();
 
       dispatchKey(el, 'keydown', 'Enter');
       dispatchKey(el, 'keydown', ' ');
       dispatchKey(el, 'keyup', ' ');
-      await settle();
+      await copies.waitFor('awc-clipboard-copy:copied');
+      await copies.waitFor('awc-clipboard-copy:copied');
 
       expect(written).to.eql(['Hello', 'Hello']);
     });
@@ -320,7 +326,6 @@ describe('awc-clipboard-copy', () => {
       dispatchKey(content, 'keydown', 'Enter');
       dispatchKey(content, 'keydown', ' ');
       dispatchKey(content, 'keyup', ' ');
-      await settle();
 
       expect(written).to.eql([]);
     });
@@ -330,16 +335,15 @@ describe('awc-clipboard-copy', () => {
     it('ignores clicks and keys', async () => {
       const written = stubClipboard();
       const el = await clipboardCopyFixture('value="Hello" disabled');
-      const events = recordEvents();
+      const copies = recordCopies();
 
       el.click();
       dispatchKey(el, 'keydown', 'Enter');
       dispatchKey(el, 'keydown', ' ');
       dispatchKey(el, 'keyup', ' ');
-      await settle();
 
       expect(written).to.eql([]);
-      expect(events).to.eql([]);
+      expect(copies.types).to.eql([]);
     });
 
     it('stops taking focus when disabled after it renders, and takes it again once enabled', async () => {
@@ -363,13 +367,13 @@ describe('awc-clipboard-copy', () => {
       el.remove();
       el.disabled = true;
       parent.append(el);
-      await whenInitialized(el);
+      await whenSettled();
       expect(el.hasAttribute('tabindex')).to.equal(false);
 
       el.remove();
       el.disabled = false;
       parent.append(el);
-      await whenInitialized(el);
+      await whenSettled();
       expect(el.tabIndex).to.equal(0);
     });
 
@@ -380,7 +384,7 @@ describe('awc-clipboard-copy', () => {
       const [disabledEarly, enabledEarly] = container.querySelectorAll('awc-clipboard-copy');
       disabledEarly.setAttribute('disabled', '');
       enabledEarly.removeAttribute('disabled');
-      await Promise.all([whenInitialized(disabledEarly), whenInitialized(enabledEarly)]);
+      await whenSettled();
 
       expect(disabledEarly.hasAttribute('tabindex')).to.equal(false);
       expect(enabledEarly.tabIndex).to.equal(0);
@@ -400,10 +404,11 @@ describe('awc-clipboard-copy', () => {
     it('copies again once enabled', async () => {
       const written = stubClipboard();
       const el = await clipboardCopyFixture('value="Hello" disabled');
+      const copies = recordCopies();
 
       el.removeAttribute('disabled');
       el.click();
-      await settle();
+      await copies.waitFor('awc-clipboard-copy:copied');
 
       expect(written).to.eql(['Hello']);
     });
@@ -412,17 +417,17 @@ describe('awc-clipboard-copy', () => {
   it('follows a morph to the server HTML as it is disabled and enabled again', async () => {
     const written = stubClipboard();
     const el = await clipboardCopyFixture('value="Hello"');
+    const copies = recordCopies();
 
     Idiomorph.morph(el, `<awc-clipboard-copy disabled value="Hello">Copy</awc-clipboard-copy>`);
     el.click();
-    await settle();
     expect(el.disabled).to.equal(true);
     expect(el.hasAttribute('tabindex')).to.equal(false);
     expect(written).to.eql([]);
 
     Idiomorph.morph(el, clipboardCopyHtml('value="Changed"'));
     el.click();
-    await settle();
+    await copies.waitFor('awc-clipboard-copy:copied');
     expect(el.tabIndex).to.equal(0);
     expect(written).to.eql(['Changed']);
   });
@@ -433,53 +438,61 @@ describe('awc-clipboard-copy', () => {
       const el = await clipboardCopyFixture('value="Hello"');
       expect(el.feedbackDuration).to.equal(2000);
       expect(feedback(el)).to.equal(null);
+      const copies = recordCopies();
 
       el.click();
-      await settle();
+      await copies.waitFor('awc-clipboard-copy:copied');
 
       expect(feedback(el)).to.equal('copied');
     });
 
     it('ends once the feedback duration has passed', async () => {
+      vi.useFakeTimers();
       stubClipboard();
       const el = await clipboardCopyFixture('value="Hello" feedback-duration="50"');
+      const copies = recordCopies();
 
       el.click();
-      await settle();
+      await copies.waitFor('awc-clipboard-copy:copied');
       expect(feedback(el)).to.equal('copied');
 
-      await settle(100);
+      vi.advanceTimersByTime(50);
       expect(feedback(el)).to.equal(null);
     });
 
     it('is error when nothing was copied, in place of copied', async () => {
       const written = stubClipboard();
       const el = await clipboardCopyFixture('value="Hello"');
+      const copies = recordCopies();
 
       el.click();
-      await settle();
+      await copies.waitFor('awc-clipboard-copy:copied');
       expect(feedback(el)).to.equal('copied');
 
       el.removeAttribute('value');
       el.click();
-      await settle();
+      await copies.waitFor('awc-clipboard-copy:error');
 
       expect(written).to.eql(['Hello']);
       expect(feedback(el)).to.equal('error');
     });
 
     it('starts over on every press', async () => {
+      vi.useFakeTimers();
       stubClipboard();
       const el = await clipboardCopyFixture('value="Hello" feedback-duration="200"');
+      const copies = recordCopies();
 
       el.click();
-      await settle(120);
+      await copies.waitFor('awc-clipboard-copy:copied');
+      vi.advanceTimersByTime(120);
       el.click();
-      await settle(120);
+      await copies.waitFor('awc-clipboard-copy:copied');
+      vi.advanceTimersByTime(120);
       // 240ms after the first press, but 120ms after the second.
       expect(feedback(el)).to.equal('copied');
 
-      await settle(150);
+      vi.advanceTimersByTime(80);
       expect(feedback(el)).to.equal(null);
     });
 
@@ -487,12 +500,13 @@ describe('awc-clipboard-copy', () => {
       stubClipboard();
       const el = await clipboardCopyFixture('value="Hello"');
       const parent = el.parentElement!;
+      const copies = recordCopies();
 
       el.click();
-      await settle();
+      await copies.waitFor('awc-clipboard-copy:copied');
       el.remove();
       parent.append(el);
-      await whenInitialized(el);
+      await whenSettled();
 
       expect(feedback(el)).to.equal(null);
     });
@@ -501,12 +515,14 @@ describe('awc-clipboard-copy', () => {
       stubClipboard();
       const el = await clipboardCopyFixture('value="Hello"');
       const parent = el.parentElement!;
+      // On the element: a removed one's events don't reach the document.
+      const copies = recordCopies(el);
 
       el.click();
       el.remove();
-      await settle();
+      await copies.waitFor('awc-clipboard-copy:copied');
       parent.append(el);
-      await whenInitialized(el);
+      await whenSettled();
 
       expect(feedback(el)).to.equal(null);
     });
@@ -514,9 +530,10 @@ describe('awc-clipboard-copy', () => {
     it('survives a morph, since no attribute holds it', async () => {
       stubClipboard();
       const el = await clipboardCopyFixture('value="Hello"');
+      const copies = recordCopies();
 
       el.click();
-      await settle();
+      await copies.waitFor('awc-clipboard-copy:copied');
       Idiomorph.morph(el, clipboardCopyHtml('value="Hello"'));
 
       expect(feedback(el)).to.equal('copied');
@@ -527,12 +544,12 @@ describe('awc-clipboard-copy', () => {
     it('copies as a press does: emits copied and enters the feedback state, once it resolves', async () => {
       const written = stubClipboard();
       const el = await clipboardCopyFixture('value="Hello"');
-      const events = recordEvents();
+      const copies = recordCopies();
 
       await el.copy();
 
       expect(written).to.eql(['Hello']);
-      expect(events).to.eql([{ type: 'awc-clipboard-copy:copied', detail: { text: 'Hello' } }]);
+      expect(summary(copies)).to.eql([{ type: 'awc-clipboard-copy:copied', detail: { text: 'Hello' } }]);
       expect(feedback(el)).to.equal('copied');
     });
 
@@ -548,25 +565,24 @@ describe('awc-clipboard-copy', () => {
     it('resolves rather than rejects when nothing was copied, and emits error', async () => {
       stubClipboard(new DOMException('Write permission denied.', 'NotAllowedError'));
       const el = await clipboardCopyFixture('value="Hello"');
-      const events = recordEvents();
+      const copies = recordCopies();
 
       await el.copy();
 
-      expect(events.map(({ type }) => type)).to.eql(['awc-clipboard-copy:error']);
+      expect(copies.types).to.eql(['awc-clipboard-copy:error']);
       expect(feedback(el)).to.equal('error');
     });
 
     it('finds no copy source while the element is removed from the page', async () => {
       const written = stubClipboard();
       const el = await clipboardCopyFixture('for="source"', '<input id="source" value="From input">');
-      const errors: string[] = [];
-      el.addEventListener('awc-clipboard-copy:error', (event) => errors.push((event.detail.error as DOMException).name));
+      const errors = recordEvents(el, ['awc-clipboard-copy:error']);
 
       el.remove();
       await el.copy();
 
       expect(written).to.eql([]);
-      expect(errors).to.eql(['NotFoundError']);
+      expect(errors.events.map((event) => (event.detail.error as DOMException).name)).to.eql(['NotFoundError']);
     });
   });
 });

@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "lib": ["ES2017", "dom", "dom.iterable"],
+    "lib": ["ES2019", "dom", "dom.iterable"],
     "useDefineForClassFields": false,
     "experimentalDecorators": true,
     "rootDir": "./src",
@@ -10,7 +10,7 @@
     "paths": {
       "src/*": ["./src/*"]
     },
-    "types": ["mocha"],
+    "types": ["vitest/globals"],
     "strict": true,
     "strictPropertyInitialization": false,
     "declaration": true,
@@ -18,7 +18,8 @@
     "noEmit": true,
     "outDir": "./dist",
     "sourceMap": false,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "skipLibCheck": true
   },
   "include": ["src"]
 }

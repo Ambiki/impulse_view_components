@@ -1,5 +1,5 @@
-import { property, registerElement, whenInitialized } from '@ambiki/impulse';
-import { expect, fixture, html } from '@open-wc/testing';
+import { property, registerElement } from '@ambiki/impulse';
+import { fixture, recordEvents, whenSettled } from '@ambiki/impulse/testing';
 import OpenableElement from './openable_element';
 
 /** The smallest openable element: it records what the base class calls, in order, along with the events it emits. */
@@ -32,11 +32,16 @@ class OpenableHost extends OpenableElement {
 
 const EVENTS = ['show', 'shown', 'hide', 'hidden'] as const;
 
-/** An initialized host, whose log also takes the open and close events it emits from here on. */
+/** The open and close events of the test's own element, which no event map declares. */
+type OpenableHostEvents = Record<`openable-host:${typeof EVENTS[number]}`, CustomEvent>;
+
+/**
+ * An initialized host, whose log also takes the open and close events it emits from here on. The log, rather than a
+ * Recording, so that it puts the events in order with the calls the base class makes.
+ */
 async function openableFixture(attributes = '') {
   const container = await fixture<HTMLElement>(`<div><openable-host ${attributes}></openable-host></div>`);
   const el = container.querySelector<OpenableHost>('openable-host')!;
-  await whenInitialized(el);
   for (const name of EVENTS) {
     el.addEventListener(`openable-host:${name}`, () => el.log.push(name));
   }
@@ -125,15 +130,13 @@ describe('OpenableElement', () => {
   });
 
   it('opens its parts silently when it connects open', async () => {
-    const container = await fixture<HTMLElement>(html`<div><openable-host open></openable-host></div>`);
-    const el = container.querySelector<OpenableHost>('openable-host')!;
-    const events: string[] = [];
-    for (const name of EVENTS) el.addEventListener(`openable-host:${name}`, () => events.push(name));
+    const events = recordEvents<OpenableHostEvents>(document, EVENTS.map((name) => `openable-host:${name}` as const));
 
-    await whenInitialized(el);
+    const container = await fixture<HTMLElement>(`<div><openable-host open></openable-host></div>`);
+    const el = container.querySelector<OpenableHost>('openable-host')!;
 
     expect(el.log).to.eql(['openParts(initial)']);
-    expect(events).to.eql([]);
+    expect(events.types).to.eql([]);
   });
 
   it('closes its parts silently when removed, keeps `open`, and opens again when reconnected', async () => {
@@ -146,7 +149,7 @@ describe('OpenableElement', () => {
     expect(el.log).to.eql(['closeParts']);
 
     container.append(el);
-    await whenInitialized(el);
+    await whenSettled();
     expect(el.log).to.eql(['closeParts', 'openParts(initial)']);
   });
 

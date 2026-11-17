@@ -1,7 +1,6 @@
 import type { CalendarView } from './calendar_grid';
 import type { MonthLevelI18n } from './month_level';
 import type { YearLevelI18n } from './year_level';
-import { expect } from '@open-wc/testing';
 import { CalendarDate } from './calendar_date';
 import {
   canMoveView,

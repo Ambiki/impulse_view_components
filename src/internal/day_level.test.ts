@@ -1,4 +1,3 @@
-import { expect } from '@open-wc/testing';
 import { CalendarDate } from './calendar_date';
 import { DAY_ENGLISH, DAY_LEVEL, weekdayRow } from './day_level';
 

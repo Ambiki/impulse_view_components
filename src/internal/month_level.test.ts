@@ -1,4 +1,3 @@
-import { expect } from '@open-wc/testing';
 import { CalendarDate } from './calendar_date';
 import { MONTH_ENGLISH, MONTH_LEVEL } from './month_level';
 

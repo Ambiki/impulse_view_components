@@ -1,4 +1,3 @@
-import { expect } from '@open-wc/testing';
 import { CalendarDate, formatDate, today } from './calendar_date';
 
 describe('CalendarDate', () => {
