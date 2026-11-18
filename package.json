@@ -130,7 +130,7 @@
     "@ambiki/impulse": "^2.0.0"
   },
   "dependencies": {
-    "@floating-ui/dom": "^1.7.4",
+    "@floating-ui/dom": "^1.8.0",
     "tabbable": "^6.5.2"
   },
   "devDependencies": {
