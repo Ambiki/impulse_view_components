@@ -131,7 +131,7 @@
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.4",
-    "tabbable": "^6.4.0"
+    "tabbable": "^6.5.2"
   },
   "devDependencies": {
     "@ambiki/impulse": "^2.2.0-rc.1",
