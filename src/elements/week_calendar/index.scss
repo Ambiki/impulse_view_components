@@ -9,15 +9,20 @@
 // row's ends are rounded. `$cell` and `$day` pick which cells and days the band covers. Today keeps its ring in
 // `$today-ring`, or, without one, is underlined, where a ring would box one day off from the rest of the band.
 @mixin week-band($cell, $day, $color, $today-ring: null) {
+  // A pixel wider than the gap, as at a fractional device pixel ratio the days and their shadows round separately, and
+  // a shadow just as wide can leave a hairline open. It reaches right, under the next day, which paints over it: one
+  // reaching left would paint over the day before, and cover today's ring.
+  $gap-fill: (2 * $calendar-grid-cell-padding + 1px) 0 0 $color;
+
   #{$cell} > #{$day} {
     border-radius: 0;
     background-color: $color;
-    box-shadow: -2px 0 0 $color;
+    box-shadow: $gap-fill;
 
     &[aria-current='date'] {
       @if $today-ring {
         box-shadow:
-          -2px 0 0 $color,
+          $gap-fill,
           inset 0 0 0 1px $today-ring;
       } @else {
         text-decoration: underline;
@@ -30,6 +35,11 @@
   #{$cell}:first-child > #{$day} {
     border-top-left-radius: var(--awc-week-calendar-cell-border-radius);
     border-bottom-left-radius: var(--awc-week-calendar-cell-border-radius);
+  }
+
+  #{$cell}:last-child > #{$day} {
+    border-top-right-radius: var(--awc-week-calendar-cell-border-radius);
+    border-bottom-right-radius: var(--awc-week-calendar-cell-border-radius);
     box-shadow: none;
 
     @if $today-ring {
@@ -37,11 +47,6 @@
         box-shadow: inset 0 0 0 1px $today-ring;
       }
     }
-  }
-
-  #{$cell}:last-child > #{$day} {
-    border-top-right-radius: var(--awc-week-calendar-cell-border-radius);
-    border-bottom-right-radius: var(--awc-week-calendar-cell-border-radius);
   }
 }
 
