@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Fixed white lines between days in `<awc-week-calendar>`'s week band when the page is scaled or zoomed ([#474](https://github.com/Ambiki/impulse_view_components/pull/474))
 - Fixed `<awc-dialog>`'s title sitting 2px below its close button, which made the header 4px taller ([#469](https://github.com/Ambiki/impulse_view_components/pull/469))
 
 ## [0.11.1] - 2026-11-16
